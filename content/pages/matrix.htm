@@ -1,7 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta charset="utf-8">
   <meta name="generator" content="Context">
   <meta name="Author" content="Cearn">
   <meta name="Created" content="20030329">
@@ -208,7 +208,7 @@ note that subtraction can also be written as
 <p>
 The second vector-multiplication is the dot-product, which has two
 vectors as input, but a <i>scalar</i> as its output. The notation 
-for this is <i>c</i> = <b>u&nbsp;·&nbsp;v</b>, where <b>u</b> and 
+for this is <i>c</i> = <b>u&nbsp;Â·&nbsp;v</b>, where <b>u</b> and 
 <b>v</b> are vectors and <i>c</i> is the resultant scalar. Note the 
 operator is in the form of a dot, which gives this type of 
 multiplication its name. To do the dot-product, multiply the elements 
@@ -219,10 +219,10 @@ of both vectors piecewise and add them all together. In other words:
 <tr><td class="eqnrcell">(C.4)
   <td class="eqcell">
   <i>c</i> = 
-  <b>u · v</b> = <big>&Sigma;</big> 
-    <i>u</i><sub>i</sub>·<i>v</i><sub>i</sub>
-  = <i>u</i><sub>1</sub>·<i>v</i><sub>1</sub> + &hellip; + 
-    <i>u</i><sub>m</sub>·<i>v</i><sub>m</sub>
+  <b>u Â· v</b> = <big>&Sigma;</big> 
+    <i>u</i><sub>i</sub>Â·<i>v</i><sub>i</sub>
+  = <i>u</i><sub>1</sub>Â·<i>v</i><sub>1</sub> + &hellip; + 
+    <i>u</i><sub>m</sub>Â·<i>v</i><sub>m</sub>
 </table>
 
 <p>
@@ -267,7 +267,7 @@ the square of the length of a vector is given by the dot-product with
 itself. This means that 
 |<b>v&minus;u</b>|<sup>2</sup> =
   |<b>v</b>|<sup>2</sup> + |<b>u</b>|<sup>2</sup> &minus;
-  2&middot;<b>u·v</b>.
+  2&middot;<b>uÂ·v</b>.
 From the cosine rule for the triangle in 
 fig&nbsp;C.3, we also have 
 |<b>v&minus;u</b>|<sup>2</sup> =
@@ -291,10 +291,10 @@ is the very definition of the cosine. And people say math is hard.
 By the way, not only can you find the angle with this, but it also 
 provides a very simply way to see if something's behind you
 or not. If <b>u</b> is the looking-direction and <b>v</b>
-the vector to an object, <b>u · v</b> is negative if the angle 
+the vector to an object, <b>u Â· v</b> is negative if the angle 
 is more than 90&deg;. It's also useful for field-of-view checking, and
 to see if vectors are perpendicular, as 
-<b>u&nbsp;·&nbsp;v</b>&nbsp;=&nbsp;0. You also 
+<b>u&nbsp;Â·&nbsp;v</b>&nbsp;=&nbsp;0. You also 
 find the dot-product by the truck-load in physics when yo do things
 like force decomposition, and path-integrals over force to find the 
 potential energy. Basically, every time you find a cosine in an 
@@ -311,7 +311,7 @@ as a result. The length of <b>w</b> is the area spanned by the
 two operand vectors. The notation for it is this: <b>w</b> = 
 <b>u</b> &times; <b>v</b>, which is why it's called the 
 cross-product. The elements of <b>w</b> are <i>w</i><sub>i</sub>=
- <i>&epsilon;</i><sub>ijk</sub>·<i>u</i><sub>j</sub>·
+ <i>&epsilon;</i><sub>ijk</sub>Â·<i>u</i><sub>j</sub>Â·
 <i>v</i><sub>k</sub>, where <i>&epsilon;</i><sub>ijk</sub> is the
 Levi-Cevita symbol ( +1 for even permutations of <i>i,j,k</i>, 
 &minus;1 for odd permutations, and 0 if any of the indices are equal).
@@ -356,7 +356,7 @@ what the cross-product does; it's a 3D picture, so you have to use
 your imagination a bit. Vectors <b>u</b> and <b>v</b> define a 
 parallelogram (in yellow). The cross-product vector <b>w</b> 
 is perpendicular to both of these, a fact that follows from 
-<b>u·w</b> and <b>v·w</b>. The length of <b>w</b> is the 
+<b>uÂ·w</b> and <b>vÂ·w</b>. The length of <b>w</b> is the 
 area of this parallelogram, <i>A</i> and if you remember 
 your area-calculations, you'll realize that
 </p>
@@ -365,7 +365,7 @@ your area-calculations, you'll realize that
 <tr>
   <td class="eqnrcell">(C.7)
   <td class="eqcell">
-    <i>A</i> = |<b>u &times; v</b>| = |<b>u</b>|·|<b>v</b>|·sin &alpha; ,
+    <i>A</i> = |<b>u &times; v</b>| = |<b>u</b>|Â·|<b>v</b>|Â·sin &alpha; ,
 </table>
 
 <p>
@@ -456,10 +456,10 @@ M-dimensional vectors and <i>c</i> and <i>d</i> scalars, then:
 <tr><td><b>u + 0 = 0 + u = u</b>
 <tr><td><b>u + (&minus;u) = &minus;u + u = 0</b> 
   <td><td>where &minus;<b>u</b> denotes (&minus;1)<b>u</b>
-<tr><td>c·(<b>u + v</b>) = c·<b>u</b> + c·<b>v</b> <td><td>Distributivity
-<tr><td>(c + d)·<b>u</b> = c·<b>u</b> d·<b>u</b>	<td><td>Distributivity
-<tr><td>c·(d·<b>u</b>) = (c·d)·<b>u</b>				<td><td>Associativity
-<tr><td>1·<b>u</b> = <b>u</b>
+<tr><td>cÂ·(<b>u + v</b>) = cÂ·<b>u</b> + cÂ·<b>v</b> <td><td>Distributivity
+<tr><td>(c + d)Â·<b>u</b> = cÂ·<b>u</b> dÂ·<b>u</b>	<td><td>Distributivity
+<tr><td>cÂ·(dÂ·<b>u</b>) = (cÂ·d)Â·<b>u</b>				<td><td>Associativity
+<tr><td>1Â·<b>u</b> = <b>u</b>
 </table>
 </div>
 
@@ -469,22 +469,22 @@ M-dimensional vectors and <i>c</i> and <i>d</i> scalars, then:
 
 <div class="lblock">
 <table>
-<tr><td><b>u · (v + w) = (u + v) · w</b> <td width=16><td>
-<tr><td><b>u ·</b> (c·<b>v</b>) = (c·<b>u</b>)<b> · v</b> = c·(<b>u · v</b>)
+<tr><td><b>u Â· (v + w) = (u + v) Â· w</b> <td width=16><td>
+<tr><td><b>u Â·</b> (cÂ·<b>v</b>) = (cÂ·<b>u</b>)<b> Â· v</b> = cÂ·(<b>u Â· v</b>)
 <tr><td>&nbsp;
 <tr><td><b>u &times; v</b> = &minus;(<b>u &times; v</b>)
   <td><td>Anti-commutativity
 <tr><td><b>u</b> &times; (<b>v + w</b>) = <b>u &times; v + u &times; w</b>
 <tr><td>(<b>u + v</b>) &times; <b>w</b> = <b>u &times; w + v &times; w</b>
-<tr><td><b>u</b> &times; (c·<b>v</b>) = c·<b>u &times; v</b> = 
-   (c·<b>u</b>) &times; <b>v</b>
+<tr><td><b>u</b> &times; (cÂ·<b>v</b>) = cÂ·<b>u &times; v</b> = 
+   (cÂ·<b>u</b>) &times; <b>v</b>
 <tr><td>&nbsp;
-<tr><td><b>u ·</b> (<b>u &times; v</b>) = 0
-<tr><td><b>u ·</b> (<b>v &times; w</b>) = (<b>u &times; v</b>) <b>· w</b>
+<tr><td><b>u Â·</b> (<b>u &times; v</b>) = 0
+<tr><td><b>u Â·</b> (<b>v &times; w</b>) = (<b>u &times; v</b>) <b>Â· w</b>
   <td><td>Triple scalar product, gives the volume of parallelepiped
   defined by <b>u, v, w</b>.
 <tr><td><b>u</b> &times; (<b>v &times; w</b>) = 
-  <b>u</b>(<b>v · w</b>) &minus; <b>w</b>(<b>u · v</b>) <td><td>Triple
+  <b>u</b>(<b>v Â· w</b>) &minus; <b>w</b>(<b>u Â· v</b>) <td><td>Triple
   vector product
 </table>
 </div>
@@ -645,10 +645,10 @@ coefficient matrix, we can rewrite eq&nbsp;C.9a to
 <tr>
   <td class="eqnrcell">(C.9d)
   <td class="eqcell">
-    <b>a</b><sub>1</sub>·x +
-    <b>a</b><sub>2</sub>·y +
-    <b>a</b><sub>3</sub>·z &nbsp;=&nbsp; <b>b</b> &nbsp;=&nbsp;
-    <b>A · x</b>
+    <b>a</b><sub>1</sub>Â·x +
+    <b>a</b><sub>2</sub>Â·y +
+    <b>a</b><sub>3</sub>Â·z &nbsp;=&nbsp; <b>b</b> &nbsp;=&nbsp;
+    <b>A Â· x</b>
 </table>
 
 <p>
@@ -703,7 +703,7 @@ Subtraction is no different, of course.
 <p>
 Aahhh, and now things are getting interesting. There are a number of 
 rules to matrix multiplication, which makes it quite tricky. For our 
-multiplication, we will use <b>C = A · B</b>. The thing is that the 
+multiplication, we will use <b>C = A Â· B</b>. The thing is that the 
 number of columns of the first operand (<b>A</b>) <i>must</i> equal 
 the number of rows of the second (<b>B</b>). So if <b>A</b> is a 
 <i>p&times;q</i> matrix, <b>B</b> should be a <i>q&times;r</i> 
@@ -717,7 +717,7 @@ the elements of <b>C</b> are given by
   <td class="eqcell">
     <i>c</i><sub>ij</sub> &nbsp;&equiv;&nbsp;
     <big>&Sigma;<sub>k</sub></big> 
-	<i>a</i><sub>ik</sub>·<i>b</i><sub>kj</sub>
+	<i>a</i><sub>ik</sub>Â·<i>b</i><sub>kj</sub>
 </table>
 
 <p>
@@ -738,13 +738,13 @@ processed by the linear system, gives the columns of <b>C</b>:
 <tr>
   <td class="eqnrcell">(C.12)
   <td class="eqcell">
-    <b>C</b> = <b>A · B</b>
+    <b>C</b> = <b>A Â· B</b>
     &equiv; <b>A</b> <big>[</big>
 	  <b>b</b><sub>1</sub> &hellip; <b>b</b><sub>r</sub> 
 	  <big>]</big>
     &equiv; 
 	  <big>[</big>
-	    <b>A·b</b><sub>1</sub> &hellip; <b>A·b</b><sub>r</sub> 
+	    <b>AÂ·b</b><sub>1</sub> &hellip; <b>AÂ·b</b><sub>r</sub> 
 	  <big>]</big>
 </table>
 
@@ -761,21 +761,21 @@ the transposed of the first vector:
 <tr>
   <td class="eqnrcell">(C.13)
   <td class="eqcell">
-    <i>c</i> = <b>u · v</b> = [<b>u</b>]<sup>T</sup> · [<b>v</b>].
+    <i>c</i> = <b>u Â· v</b> = [<b>u</b>]<sup>T</sup> Â· [<b>v</b>].
 </table>
 
 <p>
 There's a wealth of other things you can do with matrix-multiplication, 
 but I'll leave it with the following two notes. First, the operation 
 is <i>not commutative</i>! What that means is that
-<nobr><b>A · B</b></nobr> &ne; <nobr><b>B · A</b></nobr>. you may 
+<nobr><b>A Â· B</b></nobr> &ne; <nobr><b>B Â· A</b></nobr>. you may 
 have guessed that from the row-column requirement, but even if those 
 do match up it is still not commutative. My 
 <a href="affobj.htm#sec-demo">affine sprite demo</a> kind of shows this:
 a rotation-then-scale does not give the same results as 
 scale-then-rotate (which is probably what you wanted). Only in very
-special cases is <nobr><b>A · B</b></nobr> equal to 
-<nobr><b>B · A</b></nobr>.
+special cases is <nobr><b>A Â· B</b></nobr> equal to 
+<nobr><b>B Â· A</b></nobr>.
 <p>
 The other note is that matrix multiplication is expensive. You have 
 to do a dot-product (<i>q</i> multiplications) for each element of 
@@ -813,11 +813,11 @@ in doing that. I'll just give the formulae for the 2x2 and 3x3 case.
 Actually, I've already done so: in the cross product. If you have 
 matrix <b>A</b> = <nobr>[<b>a</b><sub>1</sub> <b>a</b><sub>2</sub> 
 <b>a</b><sub>3</sub>]</nobr>, then |<b>A</b>| = 
-  <b>a</b><sub>1</sub> · (<b>a</b><sub>2</sub> &times; 
+  <b>a</b><sub>1</sub> Â· (<b>a</b><sub>2</sub> &times; 
   <b>a</b><sub>3</sub>). For a 2&times;2 matrix, <b>B</b> = 
 <nobr>[<b>b</b><sub>1</sub> <b>b</b><sub>2</sub>]</nobr> it's 
-  <i>b</i><sub>11</sub>·<i>b</i><sub>22</sub> &minus;
-  <i>b</i><sub>12</sub>·<i>b</i><sub>21</sub>, which in fact also uses
+  <i>b</i><sub>11</sub>Â·<i>b</i><sub>22</sub> &minus;
+  <i>b</i><sub>12</sub>Â·<i>b</i><sub>21</sub>, which in fact also uses
 the cross product. This is not a mere coincidence. Part of what the 
 determinant is used for is determining whether a matrix can 
 be inverted. Basically, if |<b>A</b>|&nbsp;=&nbsp;0, then there is 
@@ -837,14 +837,14 @@ so I guess it makes sense then.
 Going back to eq&nbsp;C.9 (yet again), we have a 
 system of equations with variables <b>x</b>= (<i>x, y, z</i>) and 
 matrix <b>A</b> such that 
-<b>A · x</b> = <b>b</b>. We'll that's nice and all, but most of the 
+<b>A Â· x</b> = <b>b</b>. We'll that's nice and all, but most of the 
 times it's <b>x</b> that's unknown, not <b>b</b>. What we need isn't
 the way from <b>x</b> to <b>b</b> (which is <b>A</b>), but its
 <dfn>inverse</dfn>. What we need is
-<b>x</b> = <b>A</b><sup>&minus;1</sup> <b>· b</b>. 
+<b>x</b> = <b>A</b><sup>&minus;1</sup> <b>Â· b</b>. 
 <b>A</b><sup>&minus;1</sup> is the notation for the inverse of a 
 matrix. The basic definition of it is 
-<b>A&nbsp;·&nbsp;A</b><sup>&minus;1</sup> = <b>I</b>, where <b>I</b>
+<b>A&nbsp;Â·&nbsp;A</b><sup>&minus;1</sup> = <b>I</b>, where <b>I</b>
 is the <dfn>identity matrix</dfn>, which has 1s on its diagonal and 0s 
 everywhere else. There are a number of ways of calculating an inverse. 
 There's trial-and-error, of course (don't even think about it!), but 
@@ -925,27 +925,27 @@ column vectors of <b>E</b>. <i>c</i> is a scalar.
 <tr>
   <td><b>A + B</b> = <b>B + A</b>
 <tr>
-  <td>c·(<b>A + B</b>) = c<b>B</b> + c<b>A</b>
+  <td>cÂ·(<b>A + B</b>) = c<b>B</b> + c<b>A</b>
 <tr>
-  <td><b>A·I</b> = <b>I·A</b> = <b>A</b>
+  <td><b>AÂ·I</b> = <b>IÂ·A</b> = <b>A</b>
 <tr>
-  <td><b>A·C</b> = <b>C·A</b> 
+  <td><b>AÂ·C</b> = <b>CÂ·A</b> 
     <i>only</i> if M=P, and then <i>only</i> under very special 
 	conditions
 <tr>
-  <td>If <b>E·F</b> = <b>I</b>, 
+  <td>If <b>EÂ·F</b> = <b>I</b>, 
     then <b>E</b><sup>&minus;1</sup> = <b>F</b>
     and <b>F</b><sup>&minus;1</sup> = <b>E</b>
 <tr>
   <td>(<b>A</b><sup>T</sup>)<sup>T</sup> = <b>A</b>
 <tr>
-  <td>(<b>A·C</b>)<sup>T</sup> =
-    <b>C</b><sup>T</sup> · <b>A</b><sup>T</sup>
+  <td>(<b>AÂ·C</b>)<sup>T</sup> =
+    <b>C</b><sup>T</sup> Â· <b>A</b><sup>T</sup>
 <tr>
-  <td>(<b>A·C</b>)<sup>&minus;1</sup> =
-    <b>C</b><sup>&minus;1</sup> · <b>A</b><sup>&minus;1</sup>
+  <td>(<b>AÂ·C</b>)<sup>&minus;1</sup> =
+    <b>C</b><sup>&minus;1</sup> Â· <b>A</b><sup>&minus;1</sup>
 <tr>
-  <td>If <b>a</b><sub>i</sub> · <b>a</b><sub>j</sub> =
+  <td>If <b>a</b><sub>i</sub> Â· <b>a</b><sub>j</sub> =
     &delta;<sub>ij</sub>, then <b>A</b><sup>&minus;1</sup> =
 	<b>A</b><sup>T</sup> (in other words, if the vectors are unit 
 	vectors and mutually perpendicular, the inverse is the 
@@ -1064,11 +1064,11 @@ procedure in both systems after all. Basically, what we do is:
 <tr>
   <td class="eqnrcell">(C.16a)
   <td class="eqcell">
-    <i>P</i> = <b>i</b>·x + <b>j</b>·y
+    <i>P</i> = <b>i</b>Â·x + <b>j</b>Â·y
 <tr>
   <td class="eqnrcell">(C.16b)
   <td class="eqcell">
-    <i>P</i> = <b>u</b>·x' + <b>v</b>·y'
+    <i>P</i> = <b>u</b>Â·x' + <b>v</b>Â·y'
 </table>
 
 <p>
@@ -1149,7 +1149,7 @@ we get
 <tr>
   <td class="eqnrcell">(C.16c)
   <td class="eqcell">
-  <i>P</i> = <b>M · x</b> = <b>M&prime;</b> &middot; <b>x&prime;</b>
+  <i>P</i> = <b>M Â· x</b> = <b>M&prime;</b> &middot; <b>x&prime;</b>
 </table>
 
 <p>
@@ -1179,7 +1179,7 @@ each of these is completely arbitrary; the <b>M</b> and
 <tr>
   <td class="eqnrcell">(C.17)
   <td class="eqcell">
-  <i>P</i> = <i>O</i> + <b>M · x</b>
+  <i>P</i> = <i>O</i> + <b>M Â· x</b>
 </table>
 
 <h3 id="ssec-space-notes">C.5.3.
@@ -1202,7 +1202,7 @@ Be very careful that you understand what does what when dealing
 with coordinate system changes. When transforming between two systems,
 it is very easy to write down the exact inverse of what you
 meant to do. For example, given the systems S and S' of the
-previous paragraph, we see that <b>x = M · x'</b>, that is 
+previous paragraph, we see that <b>x = M Â· x'</b>, that is 
 <b>M</b> transforms from S' to S. But the base vectors of <b>M</b> 
 are <i>inside</i> system S, so you may be tempted to think 
 it transforms from S to S'. Which it doesn't. A similar thing 

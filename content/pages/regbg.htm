@@ -1,7 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta charset="utf-8">
   <meta name="generator" content="Context">
   <meta name="Author" content="Cearn">
   <meta name="Created" content="20040302">
@@ -316,9 +316,9 @@ pairs. These start at <code>0400:0010</code>
 </caption>
 <col span=2 align="right">
   <tr><th>Register      <th>length  <th>address
-  <tr><th>REG_BGxCNT    <td>2       <td>0400:0008h + 2·<i>x</i>
-  <tr><th>REG_BGxHOFS   <td>2       <td>0400:0010h + 4·<i>x</i>
-  <tr><th>REG_BGxVOFS   <td>2       <td>0400:0012h + 4·<i>x</i>
+  <tr><th>REG_BGxCNT    <td>2       <td>0400:0008h + 2Â·<i>x</i>
+  <tr><th>REG_BGxHOFS   <td>2       <td>0400:0010h + 4Â·<i>x</i>
+  <tr><th>REG_BGxVOFS   <td>2       <td>0400:0012h + 4Â·<i>x</i>
 </table>
 </div>
 
@@ -659,7 +659,7 @@ the tilemap.
 <p>Now, suppose you have a tilemap that's <i>tw</i>&times;<i>th</i> 
 tiles/SEs in size. You might expect that the screen entry 
 at tile-coordinates (<i>tx</i>,&nbsp;<i>ty</i>) could be found 
-at SE-number <i>n</i>&nbsp;=&nbsp;<i>tx</i>+<i>ty</i>·<i>tw</i>, 
+at SE-number <i>n</i>&nbsp;=&nbsp;<i>tx</i>+<i>ty</i>Â·<i>tw</i>, 
 because that's how matrices always work, right? Well, you'd be wrong.
 At least, you'd be <i>partially</i> wrong.
 </p>
@@ -789,8 +789,8 @@ numbering went according to 4bit tiles (s-tiles); for 8bit tiles
 always multiples of 2 in memory). In tile-maps, however, d-tiles are 
 numbered by the d-tile. To put it in other words, for sprites, using
 index <i>id</i> indicates the same tile for both 4 and 8bit tiles, 
-namely the one that starts at <i>id</i>·20h. For tile-maps, however, 
-it starts at <i>id</i>·20h for 4bit tiles, but at <i>id</i>·40h for 
+namely the one that starts at <i>id</i>Â·20h. For tile-maps, however, 
+it starts at <i>id</i>Â·20h for 4bit tiles, but at <i>id</i>Â·40h for 
 8bit tiles.
 </p>
 

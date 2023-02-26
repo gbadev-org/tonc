@@ -1,7 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta charset="utf-8">
   <meta name="generator" content="Context">
   <meta name="Author" content="Cearn">
   <meta name="Created" content="20040217">
@@ -554,7 +554,7 @@ texture mapping I see the original map (in texture space) and then
 visualize the transformation. I look at the original map and look at 
 where the map's pixels end up on screen. The transformation matrix for 
 this is <b>A</b>, which ties texel <b>p</b> to screen pixel <b>q</b> 
-via <b>q</b>= <b>A · p</b>. The columns of <b>A</b> are simply the
+via <b>q</b>= <b>A Â· p</b>. The columns of <b>A</b> are simply the
 transformed unit matrices. Easy as &pi;.&rdquo;
 </p>
 
@@ -578,7 +578,7 @@ do cool stuff like rotation and scaling as well. What I do is fill
 pixels, all I need to know is for you to tell me where I should get 
 the pixel's color from. In other words, to fill screen pixel <b>q</b>, 
 I need a matrix <b>B</b> that gives me the proper texel <b>p</b> via
-<b>p = B · q</b>. I'll happily use any matrix you give me; I have 
+<b>p = B Â· q</b>. I'll happily use any matrix you give me; I have 
 complete confidence in your ability to supply me with the matrix for 
 the transformation you require.&rdquo;
 </p>
@@ -622,7 +622,7 @@ counter-clockwise rotation by &alpha; is:
   <tr>
     <td> <b>A</b>
     <td> =
-    <td> <b>R</b>(&minus;&alpha;)·<b>S</b>(<i>s</i><sub>x</sub> ,
+    <td> <b>R</b>(&minus;&alpha;)Â·<b>S</b>(<i>s</i><sub>x</sub> ,
     <i>s</i><sub>y</sub>)
   <tr>
     <td> <b>P</b> 
@@ -631,7 +631,7 @@ counter-clockwise rotation by &alpha; is:
   <tr>
     <td>&nbsp;
 	<td> =
-	<td> ( <b>R</b>(&minus;&alpha;)·<b>S</b>(<i>s</i><sub>x</sub> ,
+	<td> ( <b>R</b>(&minus;&alpha;)Â·<b>S</b>(<i>s</i><sub>x</sub> ,
       <i>s</i><sub>y</sub>) )<sup>&minus;1</sup>
   <tr>
     <td>&nbsp;

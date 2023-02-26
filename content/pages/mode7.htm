@@ -1,7 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta charset="utf-8">
   <meta name="generator" content="Context">
   <meta name="Author" content="Cearn">
   <meta name="Created" content="20031127">
@@ -215,7 +215,7 @@ plane and the line passing through the viewer and the original point:
 <tr>
   <td class="eqnrcell">(20.1)
   <td class="eqcell">
-    <i>y</i><sub>p</sub> = <i>y</i>·D/z
+    <i>y</i><sub>p</sub> = <i>y</i>Â·D/z
 </table>
 
 <p>
@@ -254,7 +254,7 @@ be enlarged, and everything behind it (&lambda;&gt;1) is shrunk.
   <b>Fig 20.4</b>: 
   Side view; point (<i>y, z</i>) is projected onto the 
   (<i>z</i> = &minus;<i>D</i> plane. The projected point is 
-  <i>y</i><sub>p</sub> =  <i>y·D/z</i>
+  <i>y</i><sub>p</sub> =  <i>yÂ·D/z</i>
   </div>
 </table>
 </div>
@@ -473,7 +473,7 @@ is:
 So for each scanline you do the calculations for the zoom, put the
 <b>P</b> matrix of eq&nbsp;20.4 into 
 <code>REG_BGxPA-REG_BGxPD</code>, and
-<b>a&minus;P·x</b><sub>s</sub> into <code>REG_BGxX</code> and
+<b>a&minus;PÂ·x</b><sub>s</sub> into <code>REG_BGxX</code> and
 <code>REG_BGxY</code> and presto! Instant Mode 7.
 </p>
 <p>
@@ -785,7 +785,7 @@ The problem, or at least part of it, is the basic algorithm used in
 types A and B. If you look back to the theory, you'll see that the 
 affine matrix is calculated first, then the offsets. In other words, 
 first combine the scale and rotation, then calculate the 
-offset-correction, <b>P</b>·<b>x</b><sub>s</sub>. This is how the 
+offset-correction, <b>P</b>Â·<b>x</b><sub>s</sub>. This is how the 
 affine parameters in the GBA work anyway.
 However, this is actually only the first step. If you follow that 
 procedure, you'd still get the jagged result. The <i>real</i> reason 
@@ -803,7 +803,7 @@ class="num">4</span>);
 </pre>
 
 <p>
-Getting <code>lxr</code>&nbsp;=&nbsp;<i>p</i><sub>a/c</sub>·<i>x</i><sub>s</sub> 
+Getting <code>lxr</code>&nbsp;=&nbsp;<i>p</i><sub>a/c</sub>Â·<i>x</i><sub>s</sub> 
 requires two parts: multiplication with <b>P</b> elements and the
 shift down to .8 fixeds. You might expect doing the shift last would 
 be better because it has a higher precision. The funny thing is that 
