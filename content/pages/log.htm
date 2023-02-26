@@ -1,0 +1,1005 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Log</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+</head>
+<body>
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="refs.htm">References</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="toc.htm">Contents</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">G.
+  Change Log</h1>
+
+<h3>Mar 2013 (1.4.1)</h3>
+<p>
+Maintaince update. also includes things from the 
+<a href="http://www.coranac.com/documents/tonc-errata/" target="_blank">errata page</a>
+</p>
+<ul>
+  <li class="fix">Changed from <tt>arm-eabi</tt> to <tt>arm-none-eabi</tt>.
+  <li class="upgr">Little html fixes here and there. Thank Glod for directory search-and-replace tools.</li>
+  <li class="fix">
+    <tt>all code</tt>: since GCC 4.7 broke my assembly functions, I've recompiled all code 
+    with the latest devkitArm (currently 40) for asm compatilibity. The examples and 
+    tonclib should all work again. I still have to adjust the text to match though.
+  </li>
+  <li> <tt>asm.htm</tt>: fixed non-matching variable names in <a href="asm.htm#ssec-gas-dsec">data sections</a>'s code snippet. Thanks, Gdogg</li>
+  <li> <tt>gfx.htm</tt>: removed a lost semicolon in the <a href="gfx.htm#ssec-bld-demo">blending demo</a>.
+  <li><tt>hardware.htm</tt>: IO-ram upper limit was given as <code>0401:03FF</code>, which should be <code>0400:03FF</code>. Thanks, G M.
+  </li>
+  <li>code: Fixed links to grit for <tt>m7_demo</tt>, <tt>m7_ex</tt>, <tt>tte_demo</tt>.</li>
+  <li><a href="objaff.htm#sec-combo">objaff.htm 11.5</a>: fixed spurious <code>sina</code> and <code>cosa</code> calculations in <code>obj_rotscale_ex()</code> and <code>oac_rotscale()</code>. Thanks, dasi.
+  </li>
+  <li>GNU assembler manual has moved to <a href="http://sourceware.org/binutils/docs/as/index.html">http://sourceware.org/binutils/docs/as/index.html</a> (thanks, Joseph).
+  </li>
+  <li>
+  Code snippet at &sect;23.2.1:Basic operations. &ldquo;x68 asm&rdquo; should, of course, be &ldquo;x86 asm&rdquo;
+  (thanks, Wladimir).
+  </li>
+  <li>
+  Some of the memory map entries in &sect;1.3 were &hellip; imprecise (thanks Pius).
+  </li>
+</ul>
+
+
+<h3>Oct 2008 (1.4)</h3>
+<p>
+&hellip; Or maybe not. Silly little errors.
+</p>
+
+<ul>
+  <li class="fix">text: the <code>se_index_fast()</code> function in 
+    <a href="regbg.htm#ssec-map-layout">regbg:map-layout</a> was wrong; 
+	the second condition should have used 
+    `<code>(bgcnt&amp;BG_REG_64x64) == BG_REG_64x64</code>'. Fixed.
+  </li>
+  <li class="fix">text: the <code>ldm</code> example in 
+    <a href="asm.htm#ssec-arm-mem">asm:memory</a> did not list the right 
+    values for <code>ldmda</code> and <code>ldmdb</code>. Fixed.
+  </li>
+  <li class="fix">code: removed <code>void*</code> arithmetic in 
+    <tt>tonc_surface.h</tt> (hopefully) and fixed <code>berk.c</code> from 
+	the timer demo so that it compiles now. Thanks for noticing, elwing and Ealdor.
+  </li>
+  <li>Fixed a few random typos here and there</li>  
+</ul>
+
+<h3>May 2008 (1.4)</h3>
+<ul>
+  <li class="fix">
+    text: Last batch of spelling/grammar fixes. Thanks guys. Especially Jake.
+  </li>
+  <li>
+    text: changed the stuff on #include for less hyperbole and more 
+	explanations.
+  </li>
+</ul>
+<p>
+I think that'll be all then.
+</p>
+
+<h3>May 2008 (1.3)</h3>
+<ul>
+  <li class="upgr">
+    code: All demos that use text now use TTE to do it. Variable 
+	width text just looks prettier than fixed width.
+  </li>
+  <li class="upgr">
+    code: Some of the advanced demos use grit to convert the graphics.
+  </li>
+  <li class="new">
+    text: added TTE chapter with information about creating (fast) 
+	text renderers for every occasion.
+  </li>
+  <li class="upgr">
+    text: I've revamped the <a href="setup.htm">setup chapter</a>. It 
+	now covers template makefiles and some potential problems with 
+	the installation.
+  </li>
+  <li class="swap">
+    text/code: the <a href="interrupts.htm">irq chapter</a> and its demo 
+	uses the new master ISR.
+  </li>
+  <li class="fix">
+    text: Fixed the brown text in the pdf. For anyone who has the same 
+	problem with CutePDF, go to 
+	<tt>CutePDF printer-&gt;Properties-&gt;Paper/Quality-&gt;<!--
+    -->Advanced-&gt;Graphic-&gt;Image Color Management</tt> and 
+	make sure <tt>ICM Method</tt> is not set to <tt>Host system</tt>. 
+	How silly of me not to look there first.
+  </li>
+  <li>
+    text: Finally removed the obsolete section for IRQ-handling with 
+	older devkits.
+  </li>
+  <li class="new">
+    tonclib: There is a new system for text called TTE. It's pretty 
+	cool. Read more about it in <a href="tte.htm">tte.htm</a>.
+  </li>
+  <li class="new">
+    tonclib: New rendering functions. There are now 
+	&lsquo;TSurface&rsquo; structs defining a rendering surface and 
+	basic primitive renderers for different surface types. Functionality 
+	includes: pixel, line rectangle renderers, a blitter and floodfill. 
+	Key surface types: 16bpp bitmap, 8bpp bitmap and 4bpp tiles.
+  </li>
+  <li class="new">
+    tonclib: Color adjustment functions. Fading, blending, 
+	brightness and more.
+  </li>
+  <li class="new">
+    tonclib: Added <a href="http://www.coranac.com/2008/01/25/tonccpy/" target="_blank">
+	tonccpy and toncset</a>, memcpy and memset replacements that 
+	actually work for VRAM as well.
+  </li>
+  <li class="new">
+    tonclib: Put tonclib documentation online: 
+	<a href="http://www.coranac.com/man/tonclib/index.htm" target="_blank">
+	http://www.coranac.com/man/tonclib/index.htm</a>.
+  </li>
+  <li class="new">
+    tonclib: Added <tt>tonc_libgba.h</tt>, a header with most of the 
+	libgba constants and functions names mapped to tonc equivalents. 
+  </li>
+  <li class="swap">
+    tonclib: Changed the master ISR to one that doesn't automatically 
+	enable interrupt nesting. It's a bit of a downgrade, but it's 
+	probably more appropriate. This shouldn't affect anyone that 
+	didn't use nested interrupts. The old version is still available, 
+	it's just not the default.
+  </li>
+</ul>
+
+
+<h3>Dec 2007 (1.3b)</h3>
+<ul>
+<li class="new">
+  Upgraded the <a href="first.htm#sec-notes">recommendations</a> 
+  section with a longer list and examples. If you've read other 
+  tutorials then <b>please read this</b>!
+</li>
+<li class="fix">
+  More spelling and grammar fixes (thanks 
+  <a href="http://patatersoft.info/" target="_blank">Patater</a>)
+</li>
+<li class="fix">
+  Fix in the template makefile for c++. It's <tt>-fno-exceptions</tt>, 
+  not <tt>-fno-expections</tt>, you silly boy. (Thanks muff).
+</li>
+<li class="swap">
+  All projects now default to cart-boot, not multiboot. This is 
+  partially because multiboot doesn't work in devkitPro r21 (at 
+  least, not directly), but also because that's how it's normally 
+  done anyway.
+</li>
+<li>
+  Changed <tt>git</tt> to <tt>grit</tt> where appropriate. Also fixed 
+  the download links of everything to point to the new site.
+</li>
+</ul>
+
+<h3>Feb 2007 (v1.3b)</h3>
+<p>
+As every programmer knows, you're supposed to write down the changes 
+you make while making them. As every programmer also knows, this has a 
+tendency to be forgotten <kbd>^_^;;</kbd>. I probably missed a few
+things here.
+</p><br>
+
+<p>Text:</p>
+<ul>
+<li class="new">There's now a PDF version too, made by CutePDF.
+  It's a nice tool, but apparently sometimes messes up pictures a 
+  little. Page-breaks also occur in unfortunate places, but this is a
+  browser problem. It's <i>supposed</i> to be countered by 
+  CSS's <code>page-break-inside</code>, but I guess that's not widely 
+  supported yet. If anyone knows of a potential fix, let me know.
+  Additionally, if anyone knows of a html&rarr;PDF converter that keeps 
+  headers for the table of contents, I'd be very interested in that. 
+  Mind you, it needs to be able to print a 1.4 MB file, and print it
+  <b>correctly</b>! Some PHP html2pdf tools don't render correctly. 
+  Word/OpenOffice are probably no good either, as they have a problem
+  with floating divs and <code>pre</code> tags. Also, Word nearly
+  crashes on reading the file. Hehehehe.
+</li>
+<li class="new">hardware: GBA pictures and capabillity description. 
+  Anyone have a GBA Micro pic I can borrow?
+</li>
+<li class="new">first: hardware pictures.
+</li>
+<li class="new">bitmaps: new demo discussion for drawing primitives in
+  modes 3/5. The page flipping demo has been moved forward in the
+  chapter, and the mode 3/4/5 demo moved back to after the data 
+  discussion.
+</li>
+<li class="new">objbg: note and pic on reading tiles as bitmaps, as this
+  this still happens to some occasionally.
+</li>
+<li class="new">regbg: pic to show what the offset registers really do.
+</li>
+<li class="new">affine: added inverse 2x2 matrix equation.
+</li>
+<li class="new">affbg: new structs for affine backgrounds, plus new 
+  typedefs and a very nifty method of initializing the affine parameters.
+</li>
+<li class="new">mode7ex: across the board upgrades and new stuff. It now
+  uses proper graphics, making everything look a lot nicer. New 
+  background, new fade, sprite rotation-animation and sorting and 
+  different methods of motion.
+</li>
+<li class="new">asm: the proper form of the chapter is materializing. 
+  New structure of sections, beginning with a one on general ASM. More
+  examples and more ways of doing the same thing for comparative 
+  purposes. Has a section on common constructs now too.
+</li>
+<li class="new">New subsection on linear interpolation of luts.
+</li>
+
+<li class="upgr">Chapter indexing. All references are how of the
+  form &lsquo;ch.foo&rsquo;.
+</li>
+<li class="upgr">Some chapters have been renamed. <i>tonctonc</i> is now
+  <i>intro</i>, <i>toncmake</i> is now <i>makefile</i>. Also, 
+  <i>luts</i> has been merged into <i>fixed</i>, and the parts on
+  makefiles and editors in <i>setup</i> has been moved to a separate
+  file called <i>edmake</i>. Might move that into <i>makefile</i> too.
+</li>
+<li class="upgr">All register and register-like tables now use alternating 
+  background colors for easier reading.
+</li>
+<li class="upgr">regobj: Different structure for <tt>obj_demo</tt> discussion.
+</li>
+<li class="upgr">regbg: deleted <code>BGINFO</code> stuff, as it was 
+  never used much and impractical to boot.
+</li>
+<li class="upgr">regbg: New graphics besed on Super Metriod's Brinstar 
+  instead of the original Norfair. 's prettier now. Also rearranged 
+  stuff.
+</li>
+<li class="upgr">affine: updated &lsquo;finishing up&rsquo; for new routines.
+</li>
+<li class="upgr">dma: discussion of upgraded DMA demo
+</li>
+<li class="upgr">interrupts: discussions of the new and (much) improved 
+  interrupt handler and its demo.
+</li>
+<li class="upgr">Inline functions for fixed-point functionality.
+</li>
+
+<li class="fix">Every chapter has been checked for spelling and grammar.
+  Again. Sigh.
+</li>
+</ul><br>
+
+<p>Code:</p>
+<ul>
+<li class="new">tonclib: All new tonclib, with new file structure. All 
+  files are prefixed with <tt>tonc</tt> so the don't interfere with
+  outside files. The types, memory map and register #defines are 
+  centralized in <i>types</i>, <i>memmap</i> and <i>memdef</i>. The 
+  main file to include is now <tt>tonc.h</tt>.
+</li>
+<li class="new">tonclib: Doxygen comments all around. The resulting 
+  documentation can be found in <tt>tonclib.chm</tt>.
+<li class="new">tonclib: a few of the new items. A brand new interrupt
+  handler for nested, prioritized interrupts. Mode 3/5 line drawers. 
+  A new .12f sine LUT with support functions as well as lerping
+  functions. All fixed-point macros are now inlines.
+</li>
+<li class="new">tonclib: The <code>BGINFO</code> struct and functions 
+  are gone. Wasn't worth much anyway. Also removed are internal 
+  OAM shadows; it's better that you can define them when needed and 
+  can save IWRAM by potentially storing them in EWRAM. All OAM 
+  functions now use general object pointers, rather than buffers.
+</li>
+<li class="new">tonclib: yet another Great Renaming. Among other things:
+  The leading underscore for zero-#defines are gone. I thought it was a 
+  good way if guarding against potential unsafe operations, but they
+  just look too weird to use. And there was much rejoicing. Some macros 
+  have lots their <code>_ON</code> prefix when it's obvious that that's 
+  what they do. OAM structs are now <code>OBJ_ATTR</code> and 
+  <code>OBJ_AFFINE</code> and supporting functions are now prefixed 
+  <code>obj_</code> and <code>obj_aff_</code>. <code>BGAFF_EX</code> is 
+  now <code>BG_AFFINE</code> and used in most affine BG functions. A
+  complete list can be found in <tt>tonc_legacy.h</tt>, which you can 
+  #include to keep compatibility with older code.
+</li>
+<li class="new">
+  <p>projects: the structure of the projects hierarchy has
+  been altered. The demos have been categorized as  basic, extended or 
+  advanced, which correspond with the tonc-text parts. Basic demos 
+  are simpler, with simple makefiles. They are completely
+  self-sufficient, which should help learning the ropes. The extended 
+  demos have more complete makefiles and make use of tonclib. The 
+  advanced demos have devkitPro-like makefiles. As much as I'd like 
+  to, the actual DKP templates don't quite suit my purposes 
+  (sorry, Dave <kbd>:P</kbd>) so I rolled my own. The advanced demos
+  also make use of assembly files for data.
+  </p>
+  <p>
+  The project folders also contain <tt>.pnproj</tt> files, which can 
+  be opened and run from Programmer's Notepad.
+  </p>
+</li>
+<li class="new">projects: New projects. <tt>m3_demo</tt>, for drawing
+  in mode 3. There are also a couple of new ones in the <tt>lab</tt> 
+  folder. They don't have discussions yet, but they're worth checking 
+  out. <tt>bigmap</tt> should be of particular interest.
+</li>
+<li class="upgr">projects: Update projects. All projects have been 
+  updated to the new tonclib. The DMA, irq and mode 7 demos have had 
+  drastic changes in content. <tt>dma_demo</tt> is now about using HDMA 
+  effects, in this case making a circular window. <tt>irq_demo</tt> 
+  uses the new irq handler to uts fullests with nested interrupts and 
+  changing irq priorities. As for <tt>mode7ex</tt>, well, you'd better
+  just see for yourself.
+</li>
+</ul>
+
+<h3>Jul 23, 2006 (v1.2.4)</h3>
+<ul>
+<li class="new">Added a rather long chapter on 
+  <a href="asm.htm">ARM/THUMB assembly</a>. This is still a draft 
+  version, though. Most of the content is there, but I still need 
+  to reshuffle sections and spell/grammer check the whole thing.
+</li>
+<li>
+  And yet more spell fixes <kbd>&gt;_&lt;</kbd>.
+</li>
+</ul>
+
+<h3>Jun 3, 2006 (v1.2.3)</h3>
+<ul>
+<li class="upgr">Changed makefiles and build instructions to use
+   devkitARM r19.
+<li class="upgr">All sections and subsections are now numbered, w00t!
+<li class="fix">Added alignment attributes to most structs, as
+  those are now pretty much <i>required</i> if you want struct-copies 
+  to work properly. For more, see
+  <a href="bitmaps.htm#ssec-data-align">here</a>
+</ul>
+
+<h3>Apr 28, 2006 (v1.2.2)</h3>
+<ul>
+<li class="new">Finally realized what caused the 1 pixel offset I've 
+  been seeing in affine objects sometimes (thanks NEiM0D). Updated
+  <a href="affobj.htm">affobj.htm</a> and <tt>obj_aff</tt> for it.
+<li class="swap">Moved the new off-center affine object stuff to its
+  <a href="affobj.htm">proper place</a>.
+<li class="upgr">Some small sed usage to convert from GCC error-reports 
+  to Visual C++ format, based on 
+  <a href="http://www.devkitpro.org/devstudio.shtml" target="_blank">this</a>.
+<li class="upgr">Now that my html auto-numbering system works (at least 
+  a first trial), text.htm is now de-reffed. Yay.
+<li>Small changes to interrupts and gfx.
+<li>Added Javascript to make the id attributes visible. Will probably 
+  add more later.
+</ul>
+
+<h3>Apr 28, 2006 (v1.2.1)</h3>
+<ul>
+<li class="fix">Apparently no$gba doesn't like it if you use section 
+  mirroring, like I did for REG_INTMAIN and REG_IFBIOS. These now 
+  use the proper addresses.
+<li class="fix">Spelling fixes in intro.htm. Thanks again, Mick.
+<li class="upgr">New makefiles for extended and advanced projects. It 
+  does mean that makefile.htm is now pretty much behind the times.
+<li class="upgr">Updated <a href="setup.htm">setup.htm</a> for 
+  devkitARM changes. Changed the figures a little too.
+<li class="new">
+  New chapter called <a href="lab.htm">the lab</a>, where I'll 
+  place new stuff that's almost, but not quite, ready. Currently 
+  contains text for priorities and sprite sorting, and a discussion 
+  on affine transformations around a non-center reference point. 
+  Both come with new demos called <tt>prio_demo</tt> and 
+  <tt>oacombo</tt>.
+<li class="new">
+  Added instructions on how to run makefiles via context or PN in
+  <a href="setup.htm">setup.htm</a>.
+<li class="new">
+  Added gfx2gba and grit conversion instructions in a few places.
+<li>More notes in bitmaps.htm's 
+  <a href="bitmaps.htm#sec-data">data section</a>. 
+</ul>
+<br>
+
+<div class="nh">Probable upcoming changes</div>
+<p>
+I intend to make a few changes in tonc's code. First, I'll try to 
+decouple the code in the basic demos from tonclib, which should make 
+them easier to understand as you won't have to browse through all the
+other stuff. Second, this will allow me to rework and optimize tonclib, 
+which is now hampered in some areas by me having to keep a number of 
+things simpler than I'd like to. Now, this is what I'd <i>like</i> to 
+do; I can't really tell when (if) I will get round to it.
+</p>
+<p>
+Also, I have half a mind of changing the current DMA demo to 
+<a href="http://forum.gbadev.org/viewtopic.php?t=9023" target="_blank">this one</a>, 
+which simply looks a lot cooler, even though there's is a lot more 
+magic going on. Meh, we'll see.
+</p>
+
+<h3>Mar 21, 2006 (v1.2)</h3>
+<p>
+More non-final updates. Quite a lot actually.
+</p>
+<ul>
+<li class="fix">More typos fixed.
+<li class="fix"><code>bg_init()</code> never initialized the
+  <code>BGINFO</code> position. Oops.   
+<li class="swap">Tossed chapter order around a bit. I've moved 
+  <a href="keys.htm">keys</a> up to right after 
+  <a href="bitmaps.htm">bitmaps</a>, which is a much better place for 
+  it anyway.
+<li class="upgr">Updated <a href="first.htm">First Demo</a>, 
+  <a href="bitmaps.htm">Bitmap Modes</a>, 
+  <a href="regobj.htm">Regular sprites</a>, 
+  <a href="regbg.htm">Regular Backgrounds</a>,
+  <a href="affobj.htm">Affine Sprites</a>,
+  <a href="affbg.htm">Affine Backgrounds</a>,
+  <a href="gfx.htm">Graphic effects</a>, and
+  <a href="timers.htm">Timers</a> with full or nearly full code of 
+  their demos.
+<li class="upgr"><a href="first.htm">First Demo</a> now has two demos,
+  one purely with hardcode numbers (muwahaha!), and one according to 
+  more sound programming principles. Also described these in much 
+  more detail.
+<li class="upgr">Added two demos to <a href="regbg.htm">Regular 
+  Backgrounds</a>, one of which introduces tonclib and its text 
+  functions, which will come back a lot lateron. Speaking of which 
+  &hellip;
+<li class="upgr">Recoded <tt>bld_demo</tt>, <tt>m7_demo</tt>,
+  <tt>mos_demo</tt>, <tt>obj_aff</tt>, and <tt>tmr_demo</tt> to use 
+  tonclib's text so that it's clearer what you're changing.
+<li class="upgr">Replaced copiers/fillers with tonclib's 
+  <code>memcpy16/32</code> and <code>memset16/32</code> in most demos 
+  after <a href="regbg.htm#ssec-demo-hello">its introduction</a>.
+<li class="upgr">Added
+  <a href="intro.htm#ssec-note-reg">field defines</a> 
+  to a lot of register tables.
+<li class="upgr">Restructed part of <a href="keys.htm">keys.htm</a> 
+  for better explanations of the various functions I use.
+<li class="new">Added a nasty piece on
+  <a href="fixed.htm#sec-rmdiv">division by reciprocal multiplication</a>.
+  Not for the squeemish.
+<li>Added a simple template makefile and discussion
+  for the <a href="first.htm#ssec-2nd-make">second demo</a>.
+<li class="new">Added a subsection on 
+  <a href="keys.htm#ssec-adv-tri">tribool keystates</a>. In fact, 
+  nearly all of the demos that might benefit from these have been 
+  altered to use them. One line of code instead of four lines, 
+  and faster to boot. Seems like a win to me.
+<li class="new">Added a subsection on the
+  <a href="bitmaps.htm#ssec-data-proc">proper build procedure</a>, 
+  which was still missing from that whole section. This is pretty 
+  much <b>required reading</b> for anyone how has been following
+  non-tonc tutorials and adopted their coding standards.
+<li>Merged the fixed-point and LUT chapters, and rewrote most of both.
+<li>jake2431 has been gathering a lot of useful links in this thread:
+  <a href="http://forum.gbadev.org/viewtopic.php?t=8353" target="_blank">forum:8353</a>. 
+  If you're new to C and/or GBA/NDS programming, I recommend you check 
+  it out.
+</ul>
+
+<h3>Jan 27, 2006 (v1.1)</h3>
+<p>
+Heh, so that wasn't not the final update after all <kbd>:P</kbd>. 
+</p>
+<ul>
+<li>Added a little note to <a href="setup.htm">setup</a> 
+  on how to get rid of them useless directories that MSVC 6.0 insists 
+  on creating all the time.
+<li class="fix">Fixed devkitARM URL and revision. (don't know why I 
+  bother with that, though, as there will be a new version the second 
+  I post this. Gawddammit, Dave, quit it! <kbd>&gt;_&lt;</kbd>)
+<li class="upgr">More code in the text. At least for the earlier 
+  pages.
+<li>Two new chapters: one on <a href="text.htm">Text system 
+  fundamentals</a> and <a href="sndsqr.htm">producing beeps</a>. 
+  The latter isn't quite finished yet, but should be enough to get 
+  you going. There are 5 new demos that go with these: 4 for text, 
+  one for sound.
+<li class="swap">More name changes. This time in demo-names only, 
+  though, so don't worry there.
+<li>Added/moved a section on <a href="bitmaps.htm#sec-data">How
+  to deal with data</a>. This explains some of the nastiness you 
+  may or may not encounter. But if you do, it's nice to know 
+  why they happen and how to fix it, no?
+</ul>
+
+<h3>Jun 28, 2005 (v1.0)</h3>
+<p>
+Final update. Probably. Not because I'm done with this thing, but
+because there is so much to change and to add that it's easier to 
+start from scratch again. When I started tonc I still knew very little 
+about GBA programming and tried to do the best I could as I went along. 
+Now I'm a little older and wiser (well, older at any rate), know a lot 
+more about proper procedure, what's useful to have and what isn't and 
+also where people can get stuck on (thank you newbie forum dwellers 
+for all your questions!) From the ideas I'm having, tonc 2 will be a 
+<i>lot</i> bigger, better, and have more explosions! Errr, demos. 
+Tonclib will get a major overhaul with new names and new, optimised 
+functions including text for all modes, memory routines and more. 
+But it'll take a while to get there, so I thought I'd update the 
+original one last time.
+</p>
+<ul>
+<li class="fix">Many, many spelling and grammar fixes. Too many in fact. 
+  C'mon people, tell me about these things!
+<li class="fix"><code>DMA_SRC_RESET</code> is <code>0x01800000</code>, 
+  not <code>0x00600000</code>. This is what made the outcome of
+  <tt>dma_demo</tt> so weird. Also fixed <code>sbb_aff</code>'s 
+  black cross-hairs, which had its <i>x</i> and <i>y</i> values 
+  swapped in OAM. Stupid attribute x,y order.
+<li class="swap">Name changes. Lots of them. This partially falls under 
+  keeping to GBA community standards (<code>OBJ_ATTR</code>, charblock, 
+  screenblock, swi naming) and other classification issues 
+  (<code>DCNT_x</code> for <code>REG_DISPCNT</code> and such; prefix
+  underscore for bit-defines that are zero, trust me this is a good 
+  thing). I've taken the liberty of creating a <tt>legacy.h</tt> that 
+  redefines all those old names into the newer ones so that you won't 
+  have to do all the renaming yourself if you don't want to. The older 
+  names are depreciated, though. This renaming is only part of the full 
+  tonc2 renaming, but I can't do functions yet because that <i>would</i>
+  break old code.
+<li class="upgr">Some small functionality changes. Most notably, 
+  <code>key_poll()</code> now <i>already inverts</i> 
+  <code>REG_KEYINPUT</code> (formerly <code>REG_P1</code>). This is a good 
+  thing, because now the synchronous functions will actually make more 
+  sense. Also, <code>m4_plot()</code> (formerly 
+  <code>_vid_plot8</code>) really does plot per pixel, not per two.
+<li class="upgr">The memory routines <code>memcpy16/32</code> and 
+  <code>memset16/32</code> are optimised in assembly, and probably the 
+  fastest you'll come across. Rivals the speed of
+  <code>CpuFastSet</code>, but none of the alignment / size 
+  requirements.
+<li class="upgr"><tt>swi.s</tt> has calls for all BIOS routines. Some 
+  extras have been relocated to <tt>swi_ex.s</tt>
+<li>Added <code>x_BUILD</code> macros for setting bit-flags in 
+  clusters. May be useful, maybe not.
+<li>Added rectangle drawers for the bitmap modes. Fairly optimised.
+<li class="fix">Fixed list-margins for Firefox. Or rather, fixed 
+  list-margins to what the standard requires, but which MSIE doesn't
+  follow. (Now if I can only figure out what to do about that 
+  &lt;col&gt; tag)
+<li class="upgr">Restyled the register tables.
+<li class="upgr">I finally realised how I could do matrices in pure 
+  html instead of images so pretty much <i>all</i> equations are now 
+  html. I expect it's quite close to MathML, but since MSIE doesn't
+  support it natively and I don't want to worry you with an extra 
+  download (which may not even work on older versions), this'll 
+  do for now. (Now if you'll excuse me, I going to lie down to get the 
+  feeling in my brain back)
+<li class="upgr">All sections, equations, tables etc now have id's 
+  for linking too and (maybe) automatic numbering if I figure out how.
+<li class="upgr"><tt>int_demo</tt> now uses a separate file for the
+  direct isr and makes proper use of sections and ARM/THUMB code. See 
+  the <a href="interrupts.htm#sec-demo">demo description</a> for more.
+</ul>
+
+<p>
+That's about it I think, but it should be enough. I hve bits and pieces 
+of the tonc2 text, examples and lib, though maybe not in their final 
+forms. They are available, but only on request. If anyone has 
+suggestions or requests I'll see what I can do. This also goes for
+mistakes (the ones that the compiler/linker can't catch) 
+you've made that you think others might make too. I know a
+good number of them already from the forum (like that you should 
+<span class="ack">NOT</span> use bytes or halfwords for local
+variables, since it can really kill performance, <code>int</code> 
+or <code>u32</code> only, <i><b>please!</b></i>. Pretty please. With 
+sugar on top. And frosting and whipped-cream.) Don't need to know 
+every little thing though, especially if it's already covered by the 
+well-done <a href="http://forum.gbadev.org/viewtopic.php?t=418" target="_blank">gbadev
+forum FAQ</a> or already covered in here somewhere.
+<p>
+If anyone knows how I can keep track of all the header/equation/figure 
+numbering automatically (without CSS2, which isn't properly supported
+by MSIE <kbd>:(</kbd> ) that would be <i>very</i> helpful. Actually, 
+the numbering itself isn't the problem, <i>referencing</i> them is. 
+</p>
+<p>
+Also, I could use more real-life examples of tile-map/sprite collision 
+detection <i>and</i> response. I know the bounding box stuff and the 
+basics of detection (even pixel-perfect), but no matter what I do I 
+seem to be getting stuck on some of the particulars of diagonal 
+movement and when things move at more than one pixel/frame. I'd very 
+much like to see how it's done in real platform games for complex 
+scenes that have multiple sprite-sprite and sprite-background 
+collisions, not just single sprite-bg.
+</p>
+
+<h3>Dec 5, 2004 (v0.99.6)</h3>
+<p>
+Added the <a href="numbers.htm">numbers</a> page about number systems,
+bits and bit operations. I should warn you that it's rather large. It's
+been a while since I added something and I think I got a little carried
+away <kbd>:\</kbd>. I may break it up into smaller pieces later. Maybe.
+</p>
+<p>
+DragonBASIC is in the process of being transferred to a new domain, 
+so the old URL is invalid now. At the moment you can still find the 
+forums <a href="http://forums.zhilaware.starfusion.orgb/" target="_blank">here</a>, but 
+the compiler itself is still in limbo for the time being.
+</p>
+<br>
+
+<h3>Aug 3, 2004 (v0.99.5)</h3>
+<ul>
+<li class="fix">Made some minor corrections all round. The first mode7 
+demo and page now use a different name for the camera position, so it 
+won't clash with <b>v</b> from mode7d.
+<li>Added a rudimentary text demo in the form of <tt>txt_demo</tt>.
+</ul>
+<p>
+I think this will be the last update for a while, for a number of 
+reasons. Firstly, I think I have to actually use some of this stuff, 
+to see what's wrong with it. Secondly, I think I may have to put in
+some more work into a converter and how to add pure binary files to 
+the demos in a friendly way. Thirdly, PERN's back with a vengeance. 
+As such, there seems little point in developing Tonc any further 
+right now, as it seems that the new PERN is going to be very, very 
+complete.
+</p>
+
+<h3>Jul 16, 2004 (v0.99.5)</h3>
+<ul>
+<li class="fix">Fixed <code>aff_rotscale2</code>, which should <i>not</i> 
+  have shrunk the source-angle, but rather a copy of it. Defined 
+  <code>MAPBLOCK</code> to contain 1024 (=32*32) tegels, not 512. 
+  Was confused with tile-blocks.
+<li class="upgr">Made a <i>lot</i> of small changes to tiles/map 
+  functionality. All map/tile structures are now simple typedefs so 
+  you can access their internals via a simple array-access rather 
+  than (inline) functions. The inline functions themselves have been 
+  removed.
+<li>Changed then <code>BGINFO</code> struct a bit, and added some map 
+  functions.
+</ul>
+<p>
+I'm sorry if any of these changes causes you any inconvenience, 
+but I think it's better in the long run. 
+</p>
+
+<h3>Jul 11, 2004 (v0.99.4)</h3>
+<ul>
+<li>Deprioritized MSVC makefile projects in 
+  <a href="setup.htm">setup</a>.
+<li>Mopped up several minor and not so minor errors in 
+  <a href="mode7ex.htm">mode7ex</a>. Well, I did say there'd be 
+  some I hadn't discovered yet.
+<li class="swap">Renamed the interrupt requests for registers 
+  <code>REG_DISPSTAT</code> from <code>X_INT</code> to 
+  <code>X_IRQ</code>, which is more proper.
+<li class="upgr">Modified <a href="swi.htm">swi.htm</a> to show how to 
+  use pure assembly for this purpose and added a small section on 
+  the aapcs. Also renamed some of the affine structs and functions; 
+  you have been warned.
+<li>And yet more typo fixes, where the h311 do they keep coming from? 
+  I swear if I find one more &quot;it's&quot;/&quot;its&quot; mixup 
+  I'm going to scream. [Later that day] Right, that's it: 
+  <i>AAAAAAAARRRRHRHRHRRGGGHHHH!!!</i>
+<li class="fix">Fixed a number of rot-scale equations that had the 
+  rotation and scaling ops wrong in the intermediate steps. Oops.
+<li class="fix">Fixed a window control macros (forgot some shifts). 
+  Should work properly now. Should.
+<li>Added <tt>geom.h|.c</tt> to the library, as I intend to use
+  points and rectangles more often. Also added <code>ABS</code>, 
+  <code>SGN</code> and <code>SWAP</code> macros.
+<li>All multiboot demos (i.e., all of them) now have the extension
+  <tt>mb.gba</tt> to indicate them as such.
+<li>Renamed <code>key_pressed()</code> to <code>key_hit()</code>, 
+  which should cause less confusion about what the function actually 
+  does (thank's^H^Hs for the name Dark Angel (see? The apostrophe
+  occurs almost automatically <kbd>:(</kbd> ).
+</ul>
+
+<p>
+I'm working on a nice text system right now. If anyone has any requests 
+I'll see what I can do.
+</p>
+
+<h3>June 27, 2004 (v0.99.3)</h3>
+<p>
+Ahhh, home at last, where I have a proper computer and Kink-FM 
+blasting through my stereo, excccellent! <kbd>=)</kbd>
+</p>
+
+<ul>
+<li class="upgr">Added <tt>-Map</tt> and <tt>-Wl</tt> command-line 
+  options to the <a href="makefile.htm#sec-flags">flags list</a>.
+<li class="swap">Moved the graphics data that is only used once into 
+  the demo-folder where they are used; the gfx directory now only 
+  has shared graphics in it. 
+<li class="swap">Had to write <tt>swi.s</tt> again because the 
+  `utils clean' command destroys all .s files if there is 
+  a .c with the same title. Make sure that there is no 
+  <tt>swi.c</tt> in your <tt>utils</tt> directory when copying the 
+  the new stuff.
+<li class="upgr">The <a href="mode7ex.htm">mode7ex.htm</a> page is 
+  finally complete. Yes I know it's long and full of nasty linear 
+  algebra; if you have trouble getting through it and/or have 
+  suggestions on making it more readable, plz, do tell.
+<li class="upgr">The accompanying <tt>mode7d</tt> demo is just about 
+  where I wanted it.Sure there are still some minor problems, 
+  but it should be enough to get you started.
+</ul>
+
+<h3>June 21, 2004 (v0.99.2)</h3>
+<ul>
+<li class="upgr">I made a lot of changes to <tt>mode7d</tt>; all the 
+  real mode 7 code is now in separate files so using it in other 
+  projects is easier now. Though mode7ex.htm still needs a lot of 
+  work, you can find most of the text in draft-form in 
+  <a href="../files/m7theory.zip">m7theory.zip</a>. Yes, it's a Word 
+  document; yes, I know that sucks; yes, I will convert it to
+  html when I the text is stable and understandable (please tell me 
+  what I need to change in this respect); and yes, I will do this 
+  conversion manually, since Word should be allowed to approach HTML 
+  to within 500 yards. Perhaps more.
+<li class="fix">Made some minor fixes to the 
+  <a href="matrix.htm">matrix</a> page. Silly me, I got the 
+  cross-product definition all wrong.
+<li class="upgr">Added info on <code>REG_P1CNT</code> to the 
+  <a href="keys.htm">keypad</a> page. Yet another thing which only this 
+  site covers <kbd>:)</kbd>.
+</ul>
+<p>
+Devving on a P2-300 with 24MB RAM: VBA runs at 50% (and 23% for mode7d) 
+and minimizing a window takes a few seconds. Man, this sucks.
+</p>
+
+<h3>June 11, 2004 (v0.99.1)</h3>
+<ul>
+<li class="fix">Fixed the style sheets so that the background image,
+  colors and borders, etc, etc, appear as I had intented on Mozilla.
+  Sorry about that, didn't know the the wrong comments would screw 
+  it up so much. Made a vallidation run and got rid of all 
+  nonvalidities ... except one: the &lt;nobr&gt; tags that I need to 
+  keep certain things together.
+</li>
+<li class="swap">All BIOS calls are now inside <tt>swi.s</tt>, in
+  assembly. Which is where they belongs, really.
+</li>
+</ul>
+
+<h3>June 3, 2004 (v0.99)</h3>
+<ul>
+<li class="fix">Found out about the <a href="affobj.htm#sec-wrap">wrapping
+  artifact</a>, and changed the sprite pages accordingly. 
+  <tt>obj_aff</tt> now allows moving the sprite so you can see
+  this artifact for yourself.
+<li class="swap">Finally got over my dislike of near-empty directories 
+  (the files get so lonely that way) and put all the demo-code in 
+  separate directories. Now, if only I could get over my ifphobia as 
+  well...
+<li>Added a section on vsyncing with interrupts in 
+  <a href="swi.htm#sec-vsync2">swi.htm</a> and an accompanying demo, 
+  <tt>swi_vsync</tt>. You need to see these.
+<li>Added <code>int_enable_ex</code> and <code>int_disable_ex</code>, 
+  which should make working with interrupts easier. However, I am not 
+  100% sure if I got all the registers and flags right.
+<li class="fix">C++ doesn't like it when you try to use a struct-copy on 
+  a volatile variable, like <code>bga_update_ex</code> does. Or did, 
+  I should say.
+<li>Learned some new CSS tricks and am busy updating and structuring 
+  the layout of <i>all</i> pages. It's mostly subtle stuff though, 
+  like standardizing the equation layout and giving code and register 
+  listings a subtle border that makes it stand out in printing. 
+  Non-subtle is that ever image should have a caption now.
+<li class="upgr">Resumed work on <a href="mode7ex.htm">mode7ex.htm</a> 
+  and its accompanying demo, <tt>mode7d</tt>. Adding variable pitch 
+  turned out to be easier than I thought, w00t! It's still a little 
+  buggy, though.
+</ul>
+<p>
+With all these changes, it is adviced to save or remove older Tonc stuff 
+when upgrading to avoid double files and other inconsistencies.
+</p>
+
+<h3>May 24, 2004 (v0.98.5)</h3>
+<ul>
+<li class="upgr">devkitARM is now the primary devkit for Tonc. Makefiles 
+  and text are updated to match the change.
+<li class="upgr">Using a separate interrupt file now instead of a 
+  custom crt0.S and got The Point&reg; of the critter in the process. 
+  The text is modified to reflect newer insights, as is 
+  <code>int_demo.c</code>
+<li>Started work on a <a href="glossary.htm">glossary</a>.
+<li>Added instructions on how to run makefiles without Visual C++ 
+  in the the Tonc-code readme. Silly that I never thought of that 
+  before.
+<li class="fix"><code>REG_IF</code> is at <code>0400:0202</code>, not
+  <code>0400:0200</code>, doh!
+<li>As you can see, I'm trying to use context-specific bullets for 
+  log entries. I still need to figure out what images to use for what 
+  purpose, though.
+<li>Rewritten the <code>build_all</code> and <code>clean_all</code> 
+  targets in <tt>tonc.mak</tt>.They're quite nasty now, but act more 
+  correctly and allow me to switch to a &quot;one demo, one dir&quot; 
+  structure if people finds having everything in the <tt>examples</tt> 
+  folder a bit messy.
+</ul>
+<p>
+I am soooo tired right now so I wouldn't be surprised if I messed up
+somewhere. I'll get it fixed when I've had a chance to 
+sssslssszzzzzzz....
+</p>
+
+<h3>May 16, 2004 (v0.98)</h3>
+<ul>
+<li class="fix">Lot's of changes. First of all, I finally have a means 
+  to test
+  on hardware, Wheeeee!! However, it did point out that you can't
+  use the object tileblocks for backgrounds after all <tt>:(</tt>.
+  Added my early experiences with hardware tests on a number of the
+  pages.
+<li class="fix">Including in the <a href="gfx.htm#sec-win">windowing</a> 
+  section. It
+  seems that you need to be really careful with the vertical
+  settings of windowing. Updated the windowing demo to not use 
+  u16 arithmetic for the window size (which is given in bytes), and
+  more precise movement.
+<li class="swap">Threw the DMA code around. I'm now using 
+  <code>dma_memcpy()</code>
+  for general copies, and renamed the old <code>DMA_CPY()</code>
+  macro to <code>DMA_TRANSFER</code>, and rearranged the order of
+  arguments to match <code>memcpy</code>. Makes more sense that
+  way.
+<li class="swap">Also changed <code>oi_set</code> to 
+  <code>oi_set_attr</code>
+  and <code>oi_pos</code> to <code>oi_set_pos</code>.
+<li>The <code>Tonc Utils</code> configuration now compiles
+  the utility code into a library. Required for <code>mode7d</code>.
+<li>Created a <code>build_all</code> rule in <code>tonc.mak</code>.
+  Rebuilding everything by hand was really getting on my nerves.
+<li>
+  More random clean-ups. The images on the entrance page are now links
+  as well. Important notes are now in red boxes, for extra visibility.
+  Added the demo-code of <code>bm_mode.c</code>, to show the basic steps
+  of loading a picture and using keys. I should still post full code
+  that earlier in the tutorials. Added an example of a fixed point
+  identity matrix on <a href="affine.htm#sec-finish">affine.htm</a> to
+  make sure people don't try to use floats.
+<li class="fix">Fixed <a href="swi.htm">swi.htm</a>. <i>Again!</i> I swear, if 
+  I find one more error here some somebody is gonna get hurt. And it
+  won't be me. This time the range of arctan2 was wrong (should be 
+  full circle). What makes this error even worse is that I should
+  (and did) know it's supposed to be the full-circle all along; it 
+  is the raison d'&ecirc;tre of arctan2 after all.
+<li><a href="matrix.htm">Matrix page</a> is done.
+<li>Practically fell out of my chair laughing at
+  <a href="http://www.villainsupply.com" target="_blank">villainsupply.com</a>. Ouch.
+<li>Nearly drowned in my own drool after watching the Nintendo stuff
+  at E3. Gargle.
+<li>
+  The picture used in <tt>key_demo</tt> had the palette-indices of
+  <code>KEY_START</code> and <code>KEY_SELECT</code> switched. I
+  never really noticed because emulators don't have real start and
+  select buttons. So once again, hardware testing saves the day.
+</ul>
+
+<h3>Apr 29, 2004 (v0.97)</h3>
+<ul>
+<li>Added links to devkitARM as well as instructions on how to get it 
+  working. There is a very real possibility that I'll switch to this 
+  toolchain in the future.
+<li>Converted most of the macros to inline functions. Safer, easier to 
+  read and just as fast. Yes, plz.
+<li>Some more diagrams about tile-counting and the affine 
+  transformations. 
+<li>Still to do: finishing the matrix page (and perhaps the mode7ex page). 
+  And now that I have my <a href="http://www.coranac.com/projects/#mirach" target="_blank">tile-map editor 
+  Mirach</a>, I may be able to do something with that as well. And I 
+  really, really need to get working on a text-system.
+</ul>
+
+<h3>Apr 9, 2004 (v0.97)</h3>
+<p>
+  The object affine functions have a background counterpart now, 
+  and <tt>mode7d</tt> is coming along nicely. 
+</p>
+
+<h3>Apr 4, 2004 (v0.96)</h3>
+<p>
+  Renamed OAM structs and related items. <i>Again</i>. When is this 
+  gonna be final?!? Also, thanks to Lupin's problems with 
+  sprite-placement in 3D I finally got my matrix-transform sense back. 
+  Now that I get it again, I hope to expand the mode7 section in the 
+  near future. I already got a working example for 3d-sprite placement 
+  already in the form of <tt>mode7d</tt>.
+</p>
+
+<h3>Mar 31, 2004 (v0.96)</h3>
+<p>
+  Working on a vector/matrix page, some reshuffling of page-order and 
+  yet more random little cleanups.
+</p>
+
+<h3>Mar 24, 2004 (v0.96)</h3>
+<p>
+  Replaced the assembly listing in <a href="swi_htm">swi.htm</a> 
+  with the proper THUMB listing. I'd forgotten I wasn't using ARM code 
+  anymore.
+</p>
+
+<h3>Mar 20, 2004 (v0.96)</h3>
+<p>
+  And just when you think you're finished you find another 2 things 
+  you can improve upon. Argh. Anyway, I've changed the way sine 
+  and cosine are retrieved. They're both macros now, using one 
+  512-entry long <code>s16</code> sine-LUT. Also, I finally 
+  realized how to XOR the <code>vid_page</code> directly for 
+  page-flipping. And, oh yeah, the compiler flag for compile, but not 
+  assemble should be <tt>-S</tt>, not <tt>-s</tt>. Oops.<br>
+  I think I finally know how I can modify my affine functions to 
+  apply to backgrounds without having to use the <code>OBJ_AFFINE</code> 
+  structure, but it may be a while before I actually do that.
+</p>
+
+<h3>Mar 17, 2004 (v0.95)</h3>
+<p>
+  Added ArcTan2 function to <tt>swi_demo</tt> and fixed the errors that 
+  <tt>swi.htm</tt> still contained. Argh, and I thought I'd been thorough 
+  in weeding out all inconsistencies after the recent name and code 
+  modifications.
+</p>
+
+<h3>Mar 14, 2004 (v0.95)</h3>
+<p>
+  First entry in the log. I've rewritten the parts about sprites and 
+  backgrounds, changed glyphs to tiles and tiles to tegels (hope I got 
+  them all <tt>:]</tt>), updated all the code one last time and written 
+  sections on how to set up DKA, MSVC and makefiles. I think Tonc's 
+  ready for use now, wheee!
+</p><br>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Mar 24, 2013</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="refs.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="toc.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">References</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Contents</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+

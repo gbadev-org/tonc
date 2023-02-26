@@ -1,0 +1,531 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20050519">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: make via editors</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+</head>
+<body>
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="makefile.htm">Makefiles</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="refs.htm">References</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">E.
+  Make via editors</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a> </li>
+  <li><a href="#sec-context">Make via Context</a> </li>
+  <li><a href="#sec-pn2">Make via Programmer's Notepad 2</a> </li>
+  <li><a href="#sec-msvc6">Make via MS Visual C++ 6</a> </li>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">E.1.
+  Introduction</h2>
+
+<p>
+As good as makefiles are, they're still command-line driven 
+processes, with all the problems attached to it. If you're in a 
+Unix/Linux environment those problems are usually fairly small, but on
+a pure Windows system we have to work in a DOS-box, which has a number 
+of very ghastly flaws that can make your life miserable: not only 
+is wringing through the directory structure not much fun, the 
+non-intuitive way to copy/paste text and the inability to arrow through 
+your commands to fix a typo are somewhat annoying too. Another thing 
+that will wear your patience very quickly is not being able to scroll 
+through the list of compilation errors that speeds across your 
+itty-bitty and non-scrollable DOS-box like a thundering herd of rabid 
+elephants in a China shop. And you <i>know</i> it'd all be okay if you 
+could just find the one at the start of the list and fix that. Now, 
+you can get around the gross inadequacies  of a DOS-box by using an 
+MSYS-box instead. You'd still need to learn how to use the bash-shell 
+to make the most of it, though. And you'd still have the extra window 
+for the commandline-box.
+</p>
+<p>
+Fortunately, there are ways to avoid any kind of commandline box 
+altogether. Unless you're using something as dreadful as the 
+standard Windows Notepad, there is a good chance you can run make 
+or any other tool directly from your code editor. In this case, I'd 
+like to take a look at three of them
+</p>
+
+<ul>
+<li><a href="http://www.fixedsys.com/context" target="_blank">Context</a>
+<li><a href="http://www.pnotepad.org/" target="_blank">Programmer's Notepad</a>. 
+  Yes, the one that comes with devkitARM.
+<li>Microsoft Visual C++
+</ul>
+
+<p>
+Context and PN are basically advanced forms of text editors, of which 
+there are quite a few. Most of these will allow tabbed files, 
+search&amp;replace, customizable syntax highlighting, macros and 
+shell commands. If you're still using notepad for, well, 
+<i>anything</i> really, you owe it to yourself to download one of the 
+more advanced text editors and use that as a replacement. The 
+glorified edit-box known as Notepad should not be allowed anywhere 
+near any kind of plain text file unless there is no way around it. 
+Every one of the programmers' editors you can google up is likely 
+to be superior to Windows Notepad in every single way, and some of 
+them even allow you to replace the actual <tt>notepad.exe</tt>. 
+While this has become harder with winXP SP2 because it keeps being 
+resurrected, in my opinion it's well worth the effort to shoot it 
+down permanently.
+</p>
+<p>
+Ahem, sorry about that. Sometimes I get a little carried away when 
+I remember how much the standard Windows tools suck at times. Anyway, 
+onto the show. In the remaining part of this chapter, I'll show how 
+you can get Context and PN to run make for the currently open 
+makefile. The last section of this chapter will cover setting up 
+MSVC for the job. If you're not interested in any of this, feel free 
+to skip to the <a href="first.htm">next chapter</a> at any time. 
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-context">E.2.
+  Make via Context</h2>
+<p>
+<a href="http://www.fixedsys.com/context" target="_blank">Context</a>
+is a lightweight free text editor that I use for most of 
+plain text editing. It can do all the things that programmer's 
+editors are supposed to do, it has a Notepad replacer and a tool that 
+allows me to export code to an html format, which has been very 
+useful indeed for writing tonc. It does have one or two minor flaws, 
+but none that I particularly mind.
+</p>
+<p>
+The shell commands manager can be found under 
+<tt>Options-&gt;Environment Options...-&gt;Execute Keys</tt> 
+(fig&nbsp;E.1), 
+and works on an extension basis. In my case, that means <tt>.mak</tt>.
+Context allows 4 commands per extension, and I'm using F9 to 
+make the &lsquo;build&rsquo; target and F10 for a clean operation.
+</p>
+
+<dl>
+<dt>F9 : make build 
+<dd>
+  <ul>
+    <li><b>Execute:</b> &ldquo;<tt>make.exe</tt>&rdquo;
+	  (add full path if necessary)
+	<li><b>Parameters:</b> &ldquo;-f %f build&rdquo;
+	<li><b>Capture output:</b> yes
+  </ul>
+<dt>F10 : make clean 
+<dd>
+  <ul>
+    <li><b>Execute:</b> &ldquo;<tt>make.exe</tt>&rdquo;
+	<li><b>Parameters:</b> &ldquo;-f %f clean&rdquo;
+	<li><b>Capture output:</b> yes
+  </ul> 
+</dl>
+
+<p>
+Be sure that the devkitARM and msys bin directories are in the 
+system path, or context won't be able to find <tt>make.exe</tt> or 
+the compiler tools.
+</p>
+
+<div class="cpt" style="width:464px">
+<img src="../img/setup/ctxt_make.png" 
+  alt="context commands" id="img-ctxt-make"><br>
+<b>Fig E.1</b>: Context shell commands.
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-pn2">E.3.
+  Make via Programmer's Notepad 2</h2>
+<p>
+I never really knew about PN until it started coming with devkitARM, 
+but it looks really good. I haven't used it that much myself, but
+only because I am still content with context. That said, PN is 
+probably the better editor, and as it may come with the toolchain, 
+chances are you'll have it already.
+</p>
+<p>
+For all its benefits, I should say this though: by default, it seems 
+to ignore the desktop color scheme. This may not sound like a big 
+deal, but because the background color defaulted to a hard white, I
+literally couldn't even look at the thing for more than a minute. 
+When I first tried to fix this in the options, it seemed that you 
+could only change this on a type-by-type basis instead of globally. 
+Took me a while to figure out I'd been looking in the wrong place 
+<kbd>:P</kbd> all along. Look under 
+<tt>Tools-&gt;Options-&gt;Styles</tt>, 
+not under <tt>Tools-&gt;Options-&gt;Schemes</tt>.
+</p>
+<p>
+To add commands for makefiles, go to 
+<tt>Tools-&gt;Options-&gt;Tools</tt> 
+(fig&nbsp;E.2), and select the
+&lsquo;Make&rsquo;. Then add 2 commands for &lsquo;make build&rsquo; 
+and &lsquo;make clean&rsquo;
+</p>
+
+<dl>
+<dt>F9 : make build 
+<dd>
+  <ul>
+    <li><b>Name:</b> mk build
+    <li><b>Command:</b> 
+	  &ldquo;<tt>E:\dev\devkitPro\msys\bin\make.exe</tt>&rdquo;
+	<li><b>Folder: </b> &lsquo;%d&rsquo; (the makefile's directory)
+	<li><b>Parameters:</b> &ldquo;-f %f build&rdquo;
+	<li><b>Shortcut:</b> F9
+  </ul>
+<dt>F10 : make clean 
+<dd>
+  <ul>
+    <li><b>Name:</b> mk clean
+    <li><b>Command:</b> 
+	  &ldquo;<tt>E:\dev\devkitPro\msys\bin\make.exe</tt>&rdquo;
+	<li><b>Folder: </b> &lsquo;%d&rsquo; (the makefile's directory)
+	<li><b>Parameters:</b> &ldquo;-f %f clean&rdquo;
+	<li><b>Shortcut:</b> F10
+  </ul>
+</dl>
+
+<p>
+The name and shortcut can be different, of course; the rest should be 
+as above. It is possible that you have to make sure the .mak 
+extension is tied to the &lsquo;Make&rsquo; scheme.
+</p>
+
+<div class="cpt" style="width:392px">
+<img src="../img/setup/pn_make.png" 
+  alt="PN commands" id="img-pn-make"><br>
+<b>Fig E.2</b>: Programmer's Notepad shell 
+commands.
+</div>
+
+<p>
+By adding make commands to your editor, you should be able to run 
+the makefile of every tonc demo. If you encounter problems, you 
+probably forgot to set a path somewhere. 
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-msvc6">E.4.
+  Make via MS Visual C++ 6</h2>
+<p>
+I'm sure a lot of you will have gotten your hands on some version of 
+Visual Studio one way or the other, officially, via school or 
+&hellip; other methods. MSVC actually works with its own kind of 
+makefiles and maketool called <tt>NMAKE</tt>, but we're going to 
+ignore that one and use GNU's make instead. The instructions in this 
+section work for versions 5 and 6, but I'm not sure about later 
+versions. From what I hear, they changed a lot in those so if you 
+have one of those you might have to do some digging of your own. I 
+know that there are also add-ons that can create GBA projects via 
+wizards, but again you'll have to find them yourself.
+</p>
+
+<!--
+<p>
+You can avoid all those problems if you could only force something
+like Visual C to use the DKA or dkARM toolchains instead of the
+standard compiler and related programs. Well, you can. There are
+actually several ways of doing this. For MS-VC version 6 there is
+a tool called <tt>GBA_AW_r2-6</tt>, which you can find in GBADev.org's
+<a href="http://www.gbadev.org/tools.php?section=misc" target="_blank">
+tool</a> section. Unfortunately it's for version 6 only. But doing
+it manually isn't that much harder, really.
+</p><br>
+-->
+
+<h3 id="ssec-msvc-make">E.4.1.
+  VC and makefile projects</h3>
+<h4>Phase 1: setting the path</h4>
+<p>
+The first thing you need to do, if you haven't done so already, 
+is setting the path so that Visual C can find the tools. Open the 
+<tt>[Tools/Options]</tt> dialog and go to the <tt>[Directories]</tt> 
+tab, then select the <tt>[Executable files]</tt> list from the 
+<tt>[Show Directories for]</tt> box (see 
+fig&nbsp;E.3 below). Now you
+need to add the bin directories of MSYS and dkARM. You can also 
+set these directories to <tt>autoexec.bat</tt> as well.
+
+The devkitARM directory can also be set inside the makefiles themselves,
+but since I use 4 different computers to write Tonc, I prefer not to 
+do this.
+</p>
+
+<div class="cpt" style="width:424px">
+<img src="../img/setup/msvc_dirs.png" id="img-msvc-dirs"
+  alt="Adding the the DKA paths to the executable list"><br>
+<b>Fig E.3</b>: adding the the dkARM paths 
+to the executable list.
+</div>
+
+
+<h4>Phase 2: Creating a makefile project</h4>
+<p>
+The second step is creating a project/workspace that uses custom 
+makefiles. This is called, what else, a <dfn>makefile project</dfn>. Go 
+to the <tt>[Projects]</tt> tab of the <tt>[File/New]</tt> dialog
+(shown in fig&nbsp;E.4 below), select 
+<tt>Makefile</tt>, give it a name and press OK. Mind you, this does 
+<i>not</i> create the makefile, only the project! Also, the project's 
+name I use here is &lsquo;tonc&rsquo;, change this to the name of your 
+own project.
+</p>
+
+<div class="cpt" style="width:568px">
+<img src="../img/setup/msvc_new_proj.png" id="img-msvc-new"
+  alt="creating a makefile project"><br>
+<b>Fig E.4</b>: creating a makefile project.
+</div>
+
+
+<h4>Phase 3: Profit!^H^H^H^Hject settings!</h4>
+<p>
+After you click OK, you will be asked to go to the <tt>Project
+Settings</tt>. Do so and you'll see the dialog from fig&nbsp;6. The 
+first thing you will find is the <tt>[Build command line]</tt> 
+edit box. Right now, this reads something like 
+</p>
+
+<blockquote>
+NMAKE /f tonc.mak 
+</blockquote>
+
+Change it to
+
+<blockquote>
+make -f tonc.mak build
+</blockquote>
+
+<p>
+Why? Because we won't be using the standard VC make
+(<tt>NMAKE</tt>), but the GNU make (<tt>make</tt>). Why? 
+Because it's free, platform-independent and usually comes with 
+the devkit, making your project more portable, is more powerful and
+better documented as well. Why? Because ...
+just because, OK? This is the command that is executed when you 
+press <tt>Rebuild</tt> (F7). The <tt>-f</tt> flag says which
+makefile to use. Inside a makefile you can have multiple sub-projects; 
+in this case the one called <tt>build</tt> is the active one.
+</p>
+<p>
+The other settings aren't important for our purposes so leave them
+as they are. Yes, the output filename too; the makefile will take
+care of that. By the way, note that the workspace in 
+fig&nbsp;E.5 shows
+three projects: tonc and tonclib for actual tonc stuff, and a vault
+project. A standard practice of mine to have one vault project where 
+I can store source-files I don't want compiled but do want to have 
+available for reference (such as templates and examples). All my 
+workspaces have one and I can highly recommend them.
+</p>
+
+<div class="cpt" style="width:584px">
+<img src="../img/setup/msvc_make_cfg.png" id="img-msvc-make-cfg"
+  alt="Project Settings."><br>
+<b>Fig E.5</b>: project settings.
+</div>
+
+
+<div class="note">
+<div class="nhgood">Converting GCC reports to MSVC reports</div>
+<p>
+When you build a normal MSVC project, it will report and errors 
+and warnings and double-clicking on these will bring to to the 
+line that spawned it. This does not work for devkitARM because GCC
+has a slightly different reporting format.
+</p>
+
+<pre class="proglist">
+<span class="cmt"># GCC error: {filename}:{line}: error: ...</span>
+foo.c:42: error: 'bar' undeclared (first use in this function)
+<span class="cmt"># MVSC error: {dir}\{filename}(line): error ...</span>
+dir\foo.c(42) : error C2065: 'bar' : undeclared identifier
+</pre>
+
+<p>
+Because of the difference in line-number formatting, MSVC gets 
+confused and can't find the line, or even the file. Fortunately, 
+we can change this by piping the output of make through 
+<tt>sed</tt>, the bash-shell string editor that comes with msys. 
+To do this, change the build invocation to:
+</p>
+
+<pre class="proglist">
+make -f tonc.mak build <!--
+--><b>2&gt;&amp;1 | sed -e 's|\(\w\+\):\([0-9]\+\):|\1(\2):|'</b>
+</pre>
+
+<p>
+The &lsquo;2&gt;&amp;1 | &rsquo; feeds the standard output of 
+<tt>make</tt> to the standard input of the <tt>sed</tt>. The rest 
+is a <tt>sed</tt> command that finds the parts before the first two 
+colons, and converts them to the parenthesized format the MVSC 
+expects. Note that tonc's build line is slightly more complicated
+because of its directory structure but the line above is what really 
+matters.
+</p>
+</div>
+
+<h4>Phase 3b: Build configurations</h4>
+<p>
+This one isn't strictly necessary, but may be useful. In 
+Visual C++ you can have multiple <dfn>build configurations</dfn>, 
+each with its own project settings. You're probably familiar with 
+the Debug and Release Builds, but you can add your own as well 
+with the <tt>[Build/Configurations]</tt> dialog (shown in 
+fig&nbsp;E.6).
+The tonc project has five configurations, which all drive different
+targets in <tt>tonc.mak</tt>. &lsquo;Build&rsquo; builds the current 
+demo; &lsquo;Clean&rsquo; removes all intermediary and output files
+(.O, .ELF and.GBA). In order to build/clean a specific demo you'd have
+to change the project settings or, preferably, set the 
+&lsquo;<code>DEMO</code>&rsquo; variable inside <tt>tonc.mak</tt> to 
+the name of that demo. &lsquo;Build All&rsquo; and 
+&lsquo;Clean All&rsquo; run &lsquo;Build&rsquo; and
+&lsquo;Clean&rsquo; for all demos, respectively. The 
+&lsquo;Utils&rsquo; configuration creates the tonc library required for 
+some of the later examples.
+</p>
+
+<div class="cpt" style="width:344px">
+<img src="../img/setup/msvc_bld_cfg.png" id="img-msvc-bld-cfg"
+  alt="Build Configurations.">
+<b>Fig E.6</b>: Build Configurations.
+</div>
+
+<p>
+And that's about it as far as Visual C++ is concerned. You still
+have to actually create the referenced makefile (<tt>tonc.mak</tt>
+in this case). You know how to create a textfile, don't you? Another 
+thing to remember about makefile projects is that all build commands 
+are inside the makefile; the files mentioned in the File Viewer are 
+just for show and are not compiled by themselves like 
+&lsquo;normal&rsquo; VC projects.
+</p>
+
+<div class="note">
+<div class="nh">Easy switching between devkits in tonc.mak</div>
+<p>
+Tonc's makefiles are of such nature that each can stand on its own, 
+but can also be called from a central makefile <tt>tonc.mak</tt>, 
+with the <code>DEMO</code> variable. I've also put a 
+<code>CROSS</code> (which houses the prefix) variable in there which 
+overrides <code>CROSS</code> of the individual makefiles. Changing 
+it in <tt>tonc.mak</tt> effectively changes it everywhere.
+</p>
+</div>
+
+<div class="note">
+<div class="nhgood">Getting rid of MSVC 6.0's useless directories</div>
+<p>
+It appears that Visual Studio 6 (and higher too?) has a very annoying
+habit of creating all kinds of extra directories for each 
+project added to a workspace and for each project configuration. 
+Directories that you probably never intend to use, and 
+<i>certainly</i> never asked for, and which clutter up your project. 
+Removing them from disk doesn't solve the problem, because they'll 
+just reappear merely by selecting the project/configuration.
+</p>
+<p>*grumble*</p>
+<p>
+Well, the good news is that for normal projects you can just remove 
+them from the project settings, then remove them from disk and 
+everything will be clean again. The bad news is that we're not 
+using normal projects but makefile projects, which don't have the 
+settings-tab in question. So what you have to do is go to the .DSP 
+in a text editor, and remove everything resembling the following 
+lines
+</p>
+
+<ul>
+  <li># PROP BASE Output_Dir [DIR]
+  <li># PROP BASE Intermediate_Dir [DIR]
+  <li># PROP Output_Dir [DIR]
+  <li># PROP Intermediate_Dir [DIR]
+</ul>
+
+<p>
+No, I don't exactly know what I'm doing, but yes when you remove the 
+directories now they <i>stay</i> gone. In fact, I'm pretty sure a lot 
+of lines can be removed from the DSP, but as there is no manual for 
+the commands in a project file, I'm not taking any chances there. 
+</p><br>
+
+<p>Now, if anyone does have a reference guide for DSP files, or can 
+tell me whether this obnoxious behaviour is still present in later 
+MSVC iterations, I'm all ears.
+</p>
+</div>
+
+<!--
+<p>
+To run this makefile using Visual C, change the value of the
+<code>CURR</code> variable in tonc.mak to &quot;first&quot;, and
+hit <tt>Rebuild All</tt>. In a command-line environment, set the
+paths if you haven't already, and go to the Tonc-code directory.
+From there, you can either use &quot;<tt>make -f tonc.mak</tt>&quot;
+(after setting the <code>CURR</code> variable mentioned above),
+or move on to the examples directly and invoke <tt>first.mak</tt>
+directly using &quot;<tt>make -f first.mak</tt>&quot;.
+</p>
+-->
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="makefile.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="refs.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Makefiles</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">References</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+

@@ -1,0 +1,572 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20040313">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: make &amp; compiler options</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="matrix.htm">Matrices</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="edmake.htm">Invoking make</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">D.
+  More on makefiles and compiler options.</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>.
+  <li><a href="#sec-make">My standard makefile</a>.
+  <li><a href="#sec-flags">Common compiler flags</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">D.1.
+  Introduction</h2>
+<p>
+Although I gave a quick introduction to makefiles and compiler 
+flags in the <a href="setup.htm">setup</a> section, a more complex 
+look into these items may prove useful as well. So I'll present and 
+explain the makefiles that Tonc uses in more detail, as well as some 
+other little things about makefiles and compiler/linker options. I 
+hope that this will give you enough ammo to understand the makefiles 
+that are out there and allow you to figure out the more complicated 
+aspects of the make process yourself. This page is hardly a substitute 
+for the full documentation on the maketool <tt>make</tt>, the assembler 
+<tt>as</tt>, compiler <tt>gcc</tt> and the linker <tt>ld</tt>, but 
+it'll have to do for now. You can get the full documentation on these 
+tools at 
+<a href="http://www.gnu.org/manual/manual.html" target="_blank">
+www.gnu.org/manual/manual.html</a> or 
+<a href="http://htmlhelp.berlios.de/books/chm.php" target="_blank">
+http://htmlhelp.berlios.de/books/chm.php</a>. You may also be 
+interested in MrMrIce's make tutorial, which can be found in
+<a href="http://www.gbadev.org" target="_blank">gbadev.org</a>'s documentation section.
+<p>By the way, I'm no expert at this stuff. I know a few tricks about 
+makefiles and compiler options but that's it. If you have suggestions 
+on improving my makefiles, do tell.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-make">D.2.
+  My standard makefile</h2>
+
+<div class="note">
+<div class="nhcare">Update note</div>
+<p>
+As of 20060428, I'm using a different style of makefiles, which 
+means that this section is now largely out-of-date. I'll update 
+when it reaches the top of my priority stack (which may be a while).
+</p>
+</div>
+
+<p>
+What follows is the makefile for my <tt>int_demo</tt> demo. This is
+a moderately complex makefile, using the assembler, implicit rules and  
+pattern substitution. The things you'll see here should be sufficient 
+for most everyday makefiles. Two notes before we begin: this is a 
+makefile for devkitARM. Instructions for getting it to work on DKA 
+are indicated by comments. 
+</p>
+
+<pre class="proglist" id="cd-make-full">
+<span class="cmt">#
+# int_demo.mak
+#
+# makefile for a simple interrupt demo</span>
+
+
+<span class="cmt"># --- Project details ---
+</span>PROJ    := int_demo
+EXT     := gba
+UDIR    := ../toncllib
+
+SFILES  := $(UDIR)/single_ints.s
+CFILES  := int_demo.c gba_pic.c \
+	$(UDIR)/core.c $(UDIR)/interrupt.c $(UDIR)/keypad.c $(UDIR)/vid.c
+
+SOBJS   := $(SFILES:.s=.o)
+COBJS   := $(CFILES:.c=.o)
+OBJS    := $(SOBJS) $(COBJS)
+
+<span class="cmt">#--- Tool settings ---</span>
+CROSS   := arm-none-eabi-                    <span 
+class="cmt"># use arm-agb-elf- for DKA</span>
+AS      := $(CROSS)as
+CC      := $(CROSS)gcc
+LD      := $(CROSS)gcc
+OBJCOPY := $(CROSS)objcopy
+
+
+MODEL   := -mthumb-interwork -mthumb
+SPECS   := -specs=gba.specs
+
+ASFLAGS := -mthumb-interwork
+CFLAGS  := -I./ -I$(UDIR) $(MODEL) -O2 -Wall
+LDFLAGS := $(SPECS) $(MODEL)
+
+<span class="cmt">#--- Build steps ---</span>
+build : $(PROJ).$(EXT)
+
+$(PROJ).$(EXT) : $(PROJ).elf
+	@$(OBJCOPY) -v -O binary $&lt; $@
+	-@gbafix $@
+
+$(PROJ).elf : $(OBJS)
+	@$(LD) $^ $(LDFLAGS) -o $@
+
+<span class="cmt">#COBJS compiled automatically via implicit rules
+#$(COBJS) : %.o : %.c
+#	$(CC) -c $&lt; $(CFLAGS) -o $@</span>
+
+$(SOBJS) : %.o : %.s
+	$(AS) $(ASFLAGS) $&lt; -o $@
+
+
+<span class="cmt"># --- Clean ---
+</span>.PHONY : clean
+clean : 
+	@rm -fv $(COBJS) $(SOBJS)
+	@rm -fv $(PROJ).$(EXT) 
+	@rm -fv $(PROJ).elf	
+</pre>
+
+<p>
+As you can see, I've divided the file into four sections: project details, 
+tool settings, building and clean. I'll go through these in order 
+of appearance.
+</p>
+
+<h3 id="ssec-make-proj">D.2.1.
+  1: Project details</h3>
+
+<pre class="proglist">
+PROJ    := int_demo
+EXT     := gba
+UDIR    := ../tonclibs
+
+SFILES  := $(UDIR)/single_ints.s
+CFILES  := int_demo.c gba_pic.c \
+	$(UDIR)/core.c $(UDIR)/interrupt.c $(UDIR)/keypad.c $(UDIR)/vid.c
+
+SOBJS   := $(SFILES:.s=.o)
+COBJS   := $(CFILES:.c=.o)
+OBJS    := $(SOBJS) $(COBJS)
+</pre>
+
+<p>
+These are all just variable definitions. Variables can be defined
+in two ways (see make manual, 7.2: "The Two Flavors of Variables"):
+</p>
+
+<pre class="proglist">
+XX  = yy
+AA := bb
+</pre>
+
+<p>
+The first flavour (&quot;=&quot;) is a <dfn>recursively expanded</dfn> 
+variable; the second (&quot;:=&quot;) is a <dfn>simply expanded</dfn> 
+variable. In either case, whenever you now write <code>$(XX)</code> 
+the make tool will substitute it by <code>yy</code>. And yes, the 
+parentheses are mandatory. The difference between the two can be made 
+clear by looking what happens if you do this.
+</p>
+
+<pre class="proglist">
+XX = $(XX) -c
+AA := $(AA) -c
+</pre>
+<p>
+You would like this to behave as the C operator &quot;+=&quot;, but in 
+the first case the expansion is done recursively, meaning that you get
+an endless loop. The second version does what you expect to happen. 
+Simply expanded variables make things more predictable, which is a 
+good thing. See the make manual for more details on this. Oh, in 
+case you were wondering, the assignment operator is available for
+makefiles as well.
+</p>
+<p>
+In this case I've defined variables for the project's name (int_demo),
+the extension (gba) and the directory where I keep all my utility 
+routines (../tonclib). It's a good practice to do this, because you 
+can modify and use it to suit another project without too much 
+trouble. 
+</p><br>
+
+<p>
+The second part defines the source files (not the object files, 
+but the actual C and assembly files) of the project. Note the use of 
+<code>$(UDIR)</code> in many of the names. Note also that the 
+definition of <code>CFILES</code> is split over two lines using a 
+backslash ('\'). When you do this, though, make <i>absolutely</i> 
+sure it's the last character on the line. If you put, say, a space 
+behind it, you'll regret it. Some editors have an option with which 
+you can show non-printable characters; try it if you suspect these 
+kinds of errors (will work for the tab requirement as well)
+</p>
+<p>
+And the third part is where it gets interesting. The form
+</p>
+
+<pre class="proglist">
+$(var:a=b)
+</pre>
+
+<p>
+is called <dfn>substitution reference</dfn>, one of the many forms of
+pattern substitution.  In this case it looks at variable <i>var</i> 
+and if it finds the string <i>a</i> at the end of a word, it'll be 
+replaced by string <i>b</i>. I've used this to turn the lists of .s
+and .c files into lists of object files. GNUmake is full string-
+transformation commands such as this. Look at <tt>tonclib.mak</tt> 
+for some others.
+</p>
+
+<h3 id="ssec-make-tool">D.2.2.
+  2: Tools settings</h3>
+
+<pre class="proglist">
+CROSS := arm-none-eabi-                      <span 
+class="cmt"># use arm-agb-elf- for DKA</span>
+AS      := $(CROSS)as
+CC      := $(CROSS)gcc
+LD      := $(CROSS)gcc
+OBJCOPY := $(CROSS)objcopy
+
+
+MODEL   := -mthumb-interwork -mthumb
+SPECS   := -specs=gba.specs
+
+ASFLAGS := -mthumb-interwork
+CFLAGS  := -I./ -I$(UDIR) $(MODEL) -O2 -Wall
+LDFLAGS := $(SPECS) $(MODEL)
+</pre>
+
+<p>
+More variables. First, I list the tools I use for assembling 
+(<nobr><tt>arm-none-eabi-as</tt></nobr>), compiling 
+(<nobr><tt>arm-none-eabi-gcc</tt></nobr>) and linking
+(<nobr><tt>arm-none-eabi-gcc</tt></nobr>). Note that I'm using the same 
+program for compiling and linking. You can also use the command that 
+does the actual linking (<nobr><tt>arm-none-eabi-ld</tt></nobr>), but 
+if you do that you have to tell it what standard libraries to use and 
+where to find them. <tt>gcc</tt> does that for us, which saves us a 
+lot of hassle. To indicate it really is a different step conceptually, 
+I'm using a different variable name for the link-step. Now, in 
+principle the variable names are yours to choose, you can call them 
+HUEY, LOUIS and DEWEY for all I care, but AS, CC and LD are conventional, 
+so you'd do the world a favour by sticking to that. And there's actually 
+a second reason why using these names are preferred, which I'll go into 
+later. Additionally, using a separate variable for the command prefix 
+(the <code>CROSS</code> variable) makes switching to another devkit 
+easier. Abstraction is your friend.
+</p>
+<p>
+The rest are lists of assembler, compiler and linker flags. I want to 
+tell you what these do later, since it has nothing to do with the 
+make-process in itself. It's standard practice to do something like 
+this, though. Again, by using variables for this stuff (especially 
+with these precise names) rather than adding them to the actual build 
+commands, makes it easier to switch to something that requires other 
+flags. Abstraction is a very good friend.
+</p>
+
+<h3 id="ssec-make-cmd">D.2.3.
+  3: The build commands</h3>
+
+<pre class="proglist">
+build : $(PROJ).$(EXT)
+
+$(PROJ).$(EXT) : $(PROJ).elf
+	@$(OBJCOPY) -v -O binary $&lt; $@
+	-@gbafix $@
+
+$(PROJ).elf : $(OBJS)
+	@$(LD) $^ $(LDFLAGS) -o $@
+
+<span class="cmt">#COBJS compiled automatically via implicit rules
+#$(COBJS) : %.o : %.c
+#	$(CC) $(CFLAGS) -c $&lt; -o $@</span>
+
+$(SOBJS) : %.o : %.s
+	$(AS) $(ASFLAGS) $&lt; -o $@
+</pre>
+
+<p>
+And now for the real work. The actual build process is composed of 
+a number of rules. If you've forgotten what a rule looks like, here 
+it is again:
+</p>
+
+<pre class="proglist">
+target : prerequisite
+	command
+</pre>
+
+<p>
+One thing to remember here is that the command <i>must</i> 
+be preceded by a TAB, <i>not</i> spaces! Anyway, the commands will run 
+only when the target is out of date. This is true when the target 
+doesn't exist or is older than the prerequisites. By default, the first 
+rule in the makefile starts the build-chain, but you can start at 
+another rule in the command line (or the Project Settings). Let's 
+trace through the rules one by one.
+</p>
+
+<p>It starts at the <code>build</code> rule, which has one prerequisite, 
+<code>int_demo.gba</code>. This has a rule too, and one that requires 
+<code>int_demo.elf</code>, which in turn requires <code>the object 
+list</code>. The objects list is composed of two parts, 
+<code>COBJS</code> and <code>SOBJS</code>. The percentage signs ('%') 
+in their rules make them <dfn>pattern rules</dfn>. Taking 
+<code>SOBJS</code> as an example, the rule says that for every file 
+in the list that ends in &lsquo;.o&rsquo;, the prerequisite is 
+its &lsquo;.s&rsquo; counterpart. Here ends the <code>build</code> 
+chain, as the sources have prerequisites. Now the commands come 
+into play, in an stack-unwind manner.
+</p><br>
+
+<p>
+In almost all the commands, you'll see unknown things with dollar 
+signs: <code>$^</code>, <code>$&lt;</code> and  <code>$@</code>. 
+These are <dfn>automatic variables</dfn>. These refer to the full 
+prerequisite, a single item in the prerequisite and the target, 
+respectively. Other things to not about some commands are the 
+hyphen ('-') and the at sign ('@') in front of them. The '@' 
+suppresses echoing that line. The hyphen lets make ignore errors. 
+I'm using it in the <tt>gbafix</tt> command to keep the makefile 
+running, even if you don't have the tool.
+</p><br>
+
+<p>
+An observant reader may have noticed that the lines for compiling 
+the C files have been commented out. So how can the files be compiled 
+without a rule? Via <dfn>implicit rules</dfn>. For a good number of 
+suffices GNUmake knows how to build them. For example, if you 
+need an object file <tt>foo.o</tt> and <tt>foo.c</tt> is nearby, 
+it'll use the rule
+</p>
+
+<pre class="proglist">
+$(CC) $(CPPFLAGS) $(CFLAGS) -c $&lt; -o $@
+</pre>
+
+<p>
+There's an implicit rule for assembly files too, only it uses 
+<code>AS</code> and <code>ASFLAGS</code>, which is why I used those 
+names. You can find a full list of implicit rules and the variables 
+they use in the make manual.
+</p>
+
+<h3 id="ssec-make-clean">D.2.4.
+  4: cleaning up</h3>
+<pre class="proglist">
+<span class="cmt"># --- Clean ---</span>
+.PHONY : clean
+clean : 
+	@rm -fv $(COBJS)
+	@rm -fv $(PROJ).$(EXT)
+	@rm -fv $(PROJ).elf
+</pre>
+
+<p>
+This rule is separate from the others and is used to remove the 
+output and intermediaries of the project (but not the utility 
+objects, because they may be used in another project as well). It's 
+really simple: <tt>rm</tt> is the command for removing stuff, the 
+flags tells it to keep going even if the file doesn't exist (-f) 
+and to display what it's doing (-v). And that's it. Well, almost. 
+There's one more thing, namely the <code>.PHONY</code> directive. 
+Remember that I said that the commands are only run when the target 
+doesn't exist or is older that its prerequisites. Since the target 
+(<tt>clean</tt>) doesn't exist, it's always out of date and the 
+commands always run. But what happens if there <i>is</i> a file called 
+<tt>clean</tt>? Because there are no prerequisites the commands will 
+never run. The <code>.PHONY</code> directive is used to indicate that 
+the target is a target in name only and that the commands should 
+always be executed.
+</p><br>
+
+<p>
+There's a lot more fun to be had with makefiles. You can use makefiles 
+that run other makefiles (which is actually how <tt>tonc.mak</tt> is 
+set up) or include them in other makefiles. This last one can make 
+your life a lot easier. For example, by proper use of variables, 
+steps 3 and 4 will rarely change between projects. This means that  
+you could put them into a master makefile and include 
+them in all your project-makefiles, in which you will only have to 
+write down the things that are really specific to the current project 
+(for an example of this, see <a href="http://www.ngine.de" target="_blank">HAM</a>).
+Abstraction wants to have your babies.
+</p>
+<p>
+With the pattern substitution and wildcard rules you can practically 
+make makefiles that write themselves! (see the 
+<a href="http://www.devkitpro.org" target="_blank">devkitARM</a> sample code). The full 
+extent of makefile capabilities it beyond the scope of this tutorial, 
+but trust me, there's a lot more cool stuff here.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-flags">D.3.
+  Common compiler flags</h2>
+<p>
+Knowing how to write a working makefile is only part of the 
+problem of getting the GNU tools to work. What's even more important 
+is knowing what options you can use with the assembler, compiler and 
+linker. In an IDE, you can enable these by selecting them in check-
+and list-boxes and such. No such luck for command line tools, though, 
+here you have to set all the options by including certain flags. The 
+key is knowing which flags to use. I'm not going to list each and every 
+one of these since there are literally hundreds of flags. But I am 
+going to list the ones you're most likely to see in GBA programming.
+</p>
+
+<dl>
+<dt>-c
+<dd>(<tt>gcc</tt>) Compile to object file, but do not link.
+
+<dt>-E
+<dd>(<tt>gcc</tt>) Stop after the preprocessor stage.
+
+<dt>-g
+<dd>(<tt>as, gcc</tt>) Generates debug-information for the gdb 
+debugger. Haven't used myself this yet.
+
+<dt>-I<tt>dir</tt>
+<dd>(<tt>gcc</tt>) Add the directory <tt>dir</tt> to the list of 
+directories to be searched for header files. (That's a capital 'i', 
+by the way)
+
+<dt>-l<tt>library</tt>
+<dd>(<tt>gcc, ld</tt>) Search the library named <tt>library</tt> or 
+lib<tt>library</tt> when linking. Important libraries are 
+<tt>libm</tt> (math library), <tt>libgcc</tt>, <tt>libc</tt> and 
+<tt>libstdc++</tt>; the last three are linked automatically when 
+you use <tt>gcc</tt> as a linker, rather than calling <tt>ld</tt> 
+directly. And that's a lowercase 'L', by the way. &ldquo;lI1&rdquo;, 
+&ldquo;oO0&rdquo;, I do so hate the Latin alphabet sometimes.
+
+<dt>-L<tt>dir</tt>
+<dd>(<tt>gcc, ld</tt>) Add directory <tt>dir</tt> to the list of 
+directories to be searched for.
+
+<dt>-M
+<dd>(<tt>gcc</tt>) The family of <tt>-M</tt> flags generate dependency 
+information for header files. Normally when you create rules, you only 
+mention the source files, which are recompiled when they've been 
+modified. But when you modify the headers that that file includes, 
+the file itself is still considered up-to-date. You can either create 
+a rule for the headers yourself or let <tt>make</tt> do it for you 
+with these flags. Unfortunately, I haven't been able to make them 
+work for me yet.
+
+<dt>-Map <tt>mapfile</tt>
+<dd>(<tt>ld</tt>) Creates a <dfn>map-file</dfn>, which indicates 
+where the linker puts your functions and global variables. Since it 
+is a pure linker option, you need to use <tt>-Wl,-Map,filename</tt> 
+when linking with <tt>gcc</tt>.
+
+<dt>-marm, -mthumb, -mthumb-interwork
+<dd>(<tt>as, gcc, ld</tt>) Indicates the CPU model to write object 
+files for (ARM or THUMB). The default is ARM. With 
+<code>-mthumb-interwork</code> you allow mixing between 
+ARM and THUMB code, which you'll want to allow for even when you're 
+not actually using it. This flags it actually <i>required</i> under 
+devkitARM.
+
+<dt>-nostartfiles
+<dd>(<tt>gcc, ld</tt>) Do not use the standard system start-up files 
+when linking.  If you want to link a custom <tt>crt0.o</tt> you want 
+this <i>so</i> bad. (Whether you want a custom <tt>crt0.o</tt> is 
+another matter, though.)
+
+<dt>-o <tt>file</tt>
+<dd>(<tt>as, gcc, ld</tt>) Place output in file <tt>file</tt>. 
+
+<dt>-O<tt>num</tt>
+<dd>(<tt>gcc</tt>) Enables optimisation level <tt>num</tt>. If you 
+want to use inline functions, you need at least one level of 
+optimisation. See the <tt>gcc</tt> manual for details.
+
+<dt>-S
+<dd>(<tt>gcc</tt>) compile, but not assemble. This gives you an 
+assembly file of the C file you just compiled. Very useful for 
+finding out how ARM assembly works, you should do this at least once.
+
+<dt>-specs=specfile
+<dd>(<tt>gcc</tt>) use <tt>specfile</tt> to determine what switches 
+need to be passed to <tt>gcc</tt>'s subprojects (<tt>as, cc1, cc1plus, 
+ld</tt>) instead of the default specs. (<tt>gcc.info</tt>, line 5556. 
+Fer IPU's sake, people, don't you guys read manuals? It's only 26k 
+lines you know).
+
+<dt>-T scriptfile
+<dd>(<tt>ld</tt>) Use <tt>scriptfile</tt> as the linker script. 
+(Like Jeff Frohwein's <tt>lnkscript</tt>.)
+
+<dt>-Wall
+<dd>(<tt>as, gcc</tt>) Enable all warnings. <tt>-Wfoo</tt> is used 
+for all kinds of warnings actually. 
+
+<dt>-Wl,opts
+<dd>(<tt>gcc</tt>) passes options to the linker; <tt>opts</tt> is 
+a comma-separated list.
+
+</dl>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="matrix.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="edmake.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Matrices</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Invoking make</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

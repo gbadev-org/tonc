@@ -1,0 +1,1396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031013">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Graphic effects</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="affbg.htm">Affine bg</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="dma.htm">DMA</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">13.
+  Graphic Effects</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-mos">Mosaic</a>.
+  <li><a href="#sec-blend">Blending</a>.
+  <li><a href="#sec-win">Windowing</a>.
+  <li><a href="#sec-conc">Conclusions</a>.
+</ul>
+<!-- [[/toc]] -->
+
+<br>
+<p>
+So you know how to put sprites and backgrounds on screen, do ya? Now,  
+how about some extra effects to liven up the place? When discussing
+sprites and backgrounds, we left some flags untouched, namely the 
+<a href="#sec-mos">mosaic</a> and <a href="#sec-blend">blending</a> 
+flags. There will be covered here. We'll also be looking into 
+<a href="#sec-win">windowing</a>, with which you can create regions to
+mask out backgrounds or sprites.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-mos">13.1.
+  Mosaic</h2>
+<p>
+The best description of mosaic is that it makes sprites or tiles 
+look blocky. A mosaic works in two dimensions with parameters 
+<i>w<sub>m</sub></i> and <i>h<sub>m</sub></i>. These numbers divide
+your sprite or background into blocks of <i>w<sub>m</sub></i> &times;
+<i>h<sub>m</sub></i> pixels. The top-left pixel of each block is 
+used to fill the rest of that block, which makes it blocky. 
+Fig 13.1 
+shows a 1x4 mosaic for a metroid sprite. The blue lines indicate the 
+vertical block-boundaries. The first line of each block is copied to 
+the rest of the block, just like I said. Other examples of the mosaic
+effect are Zelda:LTTP when you hit an electric baddie, or Metroid 
+Fusion when an X changes shape.
+</p>
+
+<div class="lblock">
+<div class="cpt" style="width:400px;">
+<img src="../img/metr/mos.png" id="img-metr-mos" 
+  alt="a 1x4 mosaiced metroid">
+<b>Fig 13.1</b>: a 1&times;4 mosaiced metroid.
+</div>
+</div>
+
+<h3 id="ssec-mos-use">13.1.1.
+  Using mosaic: sprite/bg flags and REG_MOSAIC</h3>
+<p>
+To use mosaic you must do two things. First, you need to
+enable mosaic. For individual sprites, set 
+<code>OBJ_ATTR.attr0</code>{C}. For backgrounds, set 
+<code>REG_BGxCNT</code>{7}. The set the mosaic levels through 
+<code>REG_MOSAIC</code>, which looks like this:
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-mosaic"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_MOSAIC @ <code>0400:004Ch</code>
+</caption>
+<tr class="bits">
+	<td>F E D C<td>B A 9 8 <td>7 6 5 4<td>3 2 1 0
+<tr class="bf">
+	<td class="rclr3">Ov
+	<td class="rclr2">Oh
+	<td class="rclr1">Bv
+	<td class="rclr0">Bh
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-3<td class="rclr0">Bh
+  <td><i>MOS_BH#</i>
+  <td>Horizontal BG stretch.
+<tr class="bg1">	
+  <td>4-7<td class="rclr1">Bv
+  <td><i>MOS_BV#</i>
+  <td>Vertical BG stretch.
+<tr class="bg0">	
+  <td>8-B<td class="rclr2">Oh
+  <td><i>MOS_OH#</i>
+  <td>Horizontal object stretch.
+<tr class="bg1">	
+  <td>C-F<td class="rclr3">Ov
+  <td><i>MOS_OV#</i>
+  <td>Vertical object stretch.
+</tbody>
+</table>
+</div>
+
+<p>
+The <dfn>stretch</dfn> is across how many pixels the base-pixel is
+stretched. This corresponds to <i>w<sub>m</sub></i>&minus;1 or 
+<i>h<sub>m</sub></i>&minus;1. With a nybble for each effect, you 
+have stretches between 0 and 15, giving mosaic widths and heights 
+between 1 and 16.
+</p>
+
+<div class="note">
+<div class="nhgood">Enabling mosaic</div>
+<p>For backgrounds, set bit 7 of REG_BGxCNT. For sprites, set bit 12 
+in attribute 0. Then set the mosaic levels in REG_MOSAIC.
+</p>
+</div>
+
+<h3 id="ssec-mos-demo">13.1.2.
+  A small mosaic demo</h3>
+<p>
+There is a demo called <tt>mos_demo</tt> that illustrates the use of 
+mosaic for both objects and backgrounds. 
+</p>
+
+<pre class="proglist" id="cd-mos-demo">
+<span class="cmt">// mos_demo.c
+//   bg 0, cbb  0, sbb 31, pb 0: text
+//   bg 1, cbb  1, sbb 30, pb 1: bg metroid
+//   oam 0: tile 0-63: obj metroid</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;metr.h&quot;</span>
+
+<span class="keyw">void</span> test_mosaic()
+{
+    tte_printf(<span class="str">"#{P:48,8}obj#{P:168,8}bg"</span>);
+    tte_set_margins(<span class="num">4</span>, <span 
+class="num">130</span>, <span class="num">128</span>, <span class="num">156</span>);
+
+    POINT pt_obj={<span class="num">0</span>,<span 
+class="num">0</span>}, pt_bg={<span class="num">0</span>,<span 
+class="num">0</span>};
+    POINT *ppt= &amp;pt_obj;
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+
+        <span class="cmt">// control the mosaic</span>
+        key_poll();
+
+        <span class="cmt">// switch between bg or obj mosaic</span>
+        ppt= key_is_down(KEY_A) ? &amp;pt_bg : &amp;pt_obj;
+        ppt-&gt;x += key_tri_horz();       <span 
+class="cmt">// inc/dec h-mosaic</span>
+        ppt-&gt;y -= key_tri_vert();       <span 
+class="cmt">// inc/dec v-mosaic</span>
+
+        ppt-&gt;x= clamp(ppt-&gt;x, <span class="num">0</span>, <span 
+class="num">0x80</span>);
+        ppt-&gt;y= clamp(ppt-&gt;y, <span class="num">0</span>, <span 
+class="num">0x80</span>);
+
+        <b>REG_MOSAIC= MOS_BUILD(pt_bg.x&gt;&gt;<span 
+class="num">3</span>, pt_bg.y&gt;&gt;<span 
+class="num">3</span>, pt_obj.x&gt;&gt;<span 
+class="num">3</span>, pt_obj.y&gt;&gt;<span class="num">3</span>);</b>
+
+        tte_printf(<span 
+class="str">&quot;#{es;P}obj h,v: %2d,%2d\n bg h,v: %2d,%2d&quot;</span>, 
+            pt_obj.x&gt;&gt;<span 
+class="num">3</span>, pt_obj.y&gt;&gt;<span 
+class="num">3</span>, pt_bg.x&gt;&gt;<span 
+class="num">3</span>, pt_bg.y&gt;&gt;<span class="num">3</span>);
+    }
+}
+
+<span class="keyw">void</span> load_metr()
+{
+    <span class="keyw">int</span> ix, iy;
+
+    memcpy32(&amp;tile_mem[<span class="num">1</span>][<span 
+class="num">0</span>], metrTiles, metrTilesLen/<span 
+class="num">4</span>);
+    memcpy32(&amp;tile_mem[<span class="num">4</span>][<span 
+class="num">0</span>], metrTiles, metrTilesLen/<span 
+class="num">4</span>);
+    memcpy32(pal_obj_mem, metrPal, metrPalLen/<span 
+class="num">4</span>);
+
+    <span class="cmt">// create object: oe0</span>
+    OBJ_ATTR *metr= &amp;oam_mem[<span class="num">0</span>];
+    obj_set_attr(metr, ATTR0_SQUARE | <!--
+--><b>ATTR0_MOSAIC</b>, ATTR1_SIZE_64, <span class="num">0</span>);        
+    obj_set_pos(metr, <span class="num">32</span>, <span 
+class="num">24</span>);              <span 
+class="cmt">// left-center</span>
+
+    <span class="cmt">// create bg map: bg1, cbb1, sbb 31</span>
+
+    <span class="keyw">for</span>(ix=<span 
+class="num">1</span>; ix&lt;<span class="num">16</span>; ix++)
+        pal_bg_mem[ix+<span 
+class="num">16</span>]= pal_obj_mem[ix] ^ CLR_WHITE;
+
+    SCR_ENTRY *pse= &amp;se_mem[<span class="num">30</span>][<span 
+class="num">3</span>*<span class="num">32</span>+<span 
+class="num">18</span>];    <span class="cmt">// right-center</span>
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;<span class="num">8</span>; iy++)
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;<span class="num">8</span>; ix++)
+            pse[iy*<span class="num">32</span>+ix]= (iy*<span 
+class="num">8</span>+ix) | SE_PALBANK(<span class="num">1</span>);
+
+    REG_BG1CNT= BG_CBB(<span class="num">1</span>) | BG_SBB(<span 
+class="num">30</span>) | <b>BG_MOSAIC</b>;
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="cmt">// setup sprite</span>
+    oam_init(oam_mem, <span class="num">128</span>);
+    load_metr();
+    REG_DISPCNT= DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+
+    <span class="cmt">// set-up text: bg0, cbb0, sbb31</span>
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">31</span>));
+    tte_init_con();
+
+    test_mosaic();
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/mos_demo.png" alt="" id="img-mos-demo"><br>
+<b>Fig 13.2</b>: <tt>mos_demo</tt>.
+</div>
+
+<p>
+I use two metroids in this demo. The sprite metroid is on the left, 
+and the background metroid with inverted colors is on the right. 
+I've shown how to set-up sprites and backgrounds before, so you 
+should be able to follow the steps here because it's nothing new. 
+Well, except setting the mosaic flags in 
+<code>OBJ_ATTR.attr0</code> and REG_BG0CNT, which I've put in bold 
+here.
+</p>
+<p>
+The mosaic effect is regulated inside the <code>test_mosaic()</code>. 
+I use two 2d points to keep track of the current level of mosaic. 
+The D-pad is used to increase or decrease the mosaic levels; just the 
+D-pad sets the object's mosaic and holding down A sets that of the 
+background. 
+</p>
+<p>
+On a code design note, I could have used two if-blocks 
+here, one for objects and one for the background, but I can also 
+switch the mosaic context via a pointer, which saves me some code. 
+Hurray for pointers. Also, the coordinates are in .3 fixed point 
+format, which is how I slow down the changes in the mosaic levels. 
+Again, I could have used timer variables and more checks to see if 
+they had reached their thresholds, but fixed-point timers are much 
+easier and in my view cleaner too. 
+</p>
+<p>
+You should really see the demo on hardware, by the way. Somehow both 
+VBA and no$gba are both flawed when it comes to mosaic. After 
+VBA 1.7.2, it has a problem with horizontal sprite mosaic. I do 
+believe I've seen inconsistencies between hardware and scrolling 
+mosaiced backgrounds, but can't remember where I saw it. As for 
+no$gba, vertical mosaic appears to be disabled for both sprites and 
+backgrounds.
+</p>
+
+<div class="note">
+<div class="nhcare">Emulators and mosaic</div>
+<p>
+VBA and no$gba, the most popular GBA emulators both have problems with 
+mosaic. Watch your step.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-blend">13.2.
+  Blending</h2>
+<p>
+If you're not completely new to gaming or graphics, you may have 
+heard of <dfn>alpha blending</dfn>. It allows you to combine the color
+values two overlapping layers, thus creating transparency (also known 
+as semi-transparency, because something that's <i>completely</i> 
+transparent is invisible). Some bitmap types also come with an alpha 
+channel, which indicates either the transparency or opacity of the pixel 
+in question.
+</p>
+<p>
+The basic idea behind blending is this. You have two layers, A and B, 
+that overlap each other. Consider A to be on top of B. The color-value 
+of the a pixel in this region is defined as
+</p>
+
+<table id="eq-blend">
+<tr>
+  <td class="eqnrcell">(13.1)
+  <td class="eqcell">
+    C = w<sub>A</sub>·A + w<sub>B</sub>·B,
+</table>
+
+<p>
+where <i>w<sub>A</sub></i> and <i>w<sub>B</sub></i> are the 
+<dfn>weights</dfn> of the layers. The weights are generally normalised 
+(between 0 and 1), with 0 being fully transparent and 1 being fully 
+visible. It is also convenient to think of color-components in this 
+way. Here's a few things you can do with them:
+</p>
+
+<div class="lblock">
+<table>
+<col span=3 align="left">
+<tr><th width="8%">w<sub>A</sub> <th width="10%">w<sub>B</sub> <th>effect
+<tr><td>1<td>0<td>layer A fully visible (hides B; standard)
+<tr><td>0<td>1<td>layer B fully visible (or A is invisible)
+<tr><td>&alpha;<td>1&minus;&alpha;<td>Alpha blending. &alpha; is 
+  opacity in this case.
+</table>
+</div>
+
+<p>
+Note that in these examples the sum of the weights is 1, so that the 
+final color <i>C</i> is between 0 (black) and 1 (white) as well. As 
+we'll see, there are instances where you can drop out of these ranges; 
+if this happens the values will be clipped to the standard range.
+</p>
+
+<h3 id="ssec-bld-gba">13.2.1.
+  GBA Blending</h3>
+<p>
+Backgrounds are always enabled for blending. To enable sprite-blending, 
+ set <code>OBJ_ATTR.attr0</code>{a}. There are three registers 
+that control blending, which unfortunately go by many different names.
+The ones I use are <code>REG_BLDCNT</code>, <code>REG_BLDALPHA</code> 
+and <code>REG_BLDY</code>. Other names are <code>REG_BLDMOD</code>, 
+<code>REG_COLEV</code> and <code>REG_COLEY</code>, and sometimes the 
+&lsquo;E&rsquo; in the last two is removed. Be warned. Anyway, the 
+first says how and on which layers the blend should be performed, the 
+last two contain the weights. Oh, since the GBA doesn't do floating 
+point, the weights are
+<a href="fixed.htm">fixed-point</a> numbers in 1.4 
+format. Still limited  by 0 and 1, of course, so there are 17 blend 
+levels.
+</p><br>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-bldcnt"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_BLDCNT (REG_BLDMOD) @ <code>0400:0050h</code>
+</caption>
+<tr class="bits">
+  <td>F E<td>D<td>C<td>B<td>A<td>9<td>8
+  <td>7 6<td>5<td>4<td>3<td>2<td>1<td>0
+<tr class="bf">
+  <td>-
+  <td class="rclr1">bBD
+  <td class="rclr1">bOBJ
+  <td class="rclr1">bBG3
+  <td class="rclr1">bBG2
+  <td class="rclr1">bBG1
+  <td class="rclr1">bBG0
+  <td class="rclr2">BM
+  <td class="rclr0">aBD
+  <td class="rclr0">aObj
+  <td class="rclr0">aBG3
+  <td class="rclr0">aBG2
+  <td class="rclr0">aBG1
+  <td class="rclr0">aBG0
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-5<td class="rclr0">aBG0-aBD
+  <td><i>BLD_TOP#</i>
+  <td>The A (top) layers. <b>BD</b>, by the way, is the <dfn>back
+    drop</dfn>, a solid plane of color 0. Set the bits to make that 
+    layer use the A-weights. Note that these layers must actually be 
+    in front of the B-layers, or the blend will fail.
+<tr class="bg1">
+  <td>6-7<td class="rclr2">BM
+  <td>BLD_OFF, BLD_STD, BLD_WHITE, BLD_BLACK, <i>BLD_MODE#</i>
+  <td><b>Blending mode</b>.
+    <ul>
+      <li><b>00</b>: blending is off.
+      <li><b>01</b>: normal blend using the weights from 
+        <code>REG_ALPHA</code>. 
+      <li><b>10</b>: blend A with white (fade to white) using the 
+        weight from <code>REG_BLDY</code>
+      <li><b>11</b>: blend A with black (fade to black) using the 
+        weight from <code>REG_BLDY</code>
+    </ul>
+<tr class="bg0">
+  <td>8-D<td class="rclr1">bBG0-bBD
+  <td><i>BLD_BOT#</i>
+  <td>The B (bottom) layers. Use the B-weights. Note that these 
+    layers must actually lie behind the A-layers, or the blend will
+    not work.
+</tbody>
+</table>
+</div>
+
+<p>
+The <code>REG_BLDALPHA</code> and <code>REG_BLDY</code> registers 
+hold the blending weights in the form of
+<span class="rclr0"><B>eva</B></span>, 
+<span class="rclr1"><b>evb</b></span> and 
+<span class="rclr2"><B>ey</B></span>,
+all in 1.4 fixed-point format. And no, I do not know why they are 
+called that; they just are.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-bldalpha"
+  border=1 frame=void cellPadding=4 cellSpacing=0>
+<caption class="reg">
+  REG_BLDALPHA (REG_COLEV) @ <code>0400:0052h</code>
+</caption>
+<tr class="bits">
+  <td>F E D<td>C B A 9 8 <td>7 6 5<td>4 3 2 1 0
+<tr class="bf">
+  <td>-
+  <td class="rclr1">evb
+  <td>-
+  <td class="rclr0">eva
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-4<td class="rclr0">eva
+  <td><i>BLD_EVA#</i>
+  <td><b>Top blend weight</b>. Only used for normal blending
+<tr class="bg1">
+  <td>8-C<td class="rclr1">evb
+  <td><i>BLD_EVB#</i>
+  <td><b>Bottom blend weight</b>. Only used for normal blending
+</tbody>
+</table>
+</div>
+
+<br>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-bldy"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_BLDY (REG_COLEY) @ <code>0400:0054h</code>
+</caption>
+<tr class="bits">
+	<td>F E D C B A 9 8 7 6 5<td>4 3 2 1 0
+<tr class="bf">
+  <td>-
+  <td class="rclr2">ey
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-4<td class="rclr2">ey
+  <td><i>BLDY#</i>
+  <td><b>Top blend fade</b>. Used for white and black fades.
+</tbody>
+</table>
+</div>
+
+<h3 id="ssec-bld-cav">13.2.2.
+  Blending caveats</h3>
+<p>
+Blending is a nice feature to have, but keep these points in mind.
+</p>
+
+<ul>
+<li>
+  The A layers <i>must</i> be in front of the B layers. Only then 
+  will the blend actually occur. So watch your priorities.
+<li>
+  In the alpha-blend mode (mode 1) the blend will only take place 
+  on the <b>overlapping, non-transparent</b> pixels of layer A 
+  and layer B. Non-overlapping pixels will still have their 
+  normal colors.
+<li>
+  Sprites are affected differently than backgrounds. In particular, 
+  the blend mode specified by <code>REG_BLDCNT</code>{6,7} is 
+  applied only to the <i>non</i>-overlapping sections (so that
+  effectively only fading works). For the overlapping pixels, the 
+  standard blend is <i>always</i> in effect, regardless of the 
+  current blend-mode.
+<li>
+  If you are using <a href="#sec-win">windows</a>, you need to set 
+  the bits 5 and/or 13 in REG_WININ or REG_WINOUT for the blending 
+  to work.
+</ul>
+
+<h3 id="ssec-bld-demo">13.2.3.
+  The obligatory demo</h3>
+
+<pre class="proglist" id="cd-bld-demo">
+<span class="cmt">// bld_demo.c
+
+//   bg 0, cbb  0, sbb 31, pb 15: text
+//   bg 1, cbb  2, sbb 30, pb 1: metroid
+//   bg 2, cbb  2, sbb 29, pb 0: fence
+//   oam 0: tile 0-63: obj metroid</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;../gfx/metr.h&quot;</span>
+
+<span class="keyw">void</span> test_blend()
+{
+    tte_printf(<span class="str">"#{P:48,8}obj#{P:168,8}bg"</span>);
+    tte_set_margins(<span class="num">16</span>, SCR_H-<span 
+class="num">4</span>-<span class="num">4</span>*<span 
+class="num">12</span>, SCR_W-<span class="num">4</span>, SCR_H-<span class="num">4</span>);
+
+    u32 mode=<span class="num">0</span>;
+    <span class="cmt">// eva, evb and ey are .4 fixeds</span>
+    <span class="cmt">// eva is full, evb and ey are empty</span>
+    u32 eva=<span class="num">0x80</span>, evb= <span 
+class="num">0</span>, ey=<span class="num">0</span>;
+
+    <b>REG_BLDCNT= BLD_BUILD(</b>
+        <b>BLD_OBJ | BLD_BG0,</b>  <span class="cmt">// Top layers</span>
+        <b>BLD_BG1,</b>            <span class="cmt">// Bottom layers</span>
+        <b>mode);</b>              <span class="cmt">// Mode</span>
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        key_poll();
+
+        <span class="cmt">// Interactive blend weights</span>
+        eva += key_tri_horz();
+        evb -= key_tri_vert();
+        ey  += key_tri_fire();
+
+        mode += bit_tribool(key_hit(-<span 
+class="num">1</span>), KI_R, KI_L);
+
+        <span class="cmt">// Clamp to allowable ranges</span>
+        eva = clamp(eva, <span class="num">0</span>, <span 
+class="num">0x81</span>);
+        evb = clamp(evb, <span class="num">0</span>, <span 
+class="num">0x81</span>);
+        ey  = clamp(ey, <span class="num">0</span>, <span 
+class="num">0x81</span>);
+        mode= clamp(mode, <span class="num">0</span>, <span 
+class="num">4</span>);
+
+        tte_printf(<span 
+class="str">"#{es;P}mode :\t%2d\neva :\t%2d\nevb :\t%2d\ney :\t%2d"</span>,
+            mode, eva/<span class="num">8</span>, evb/<span 
+class="num">8</span>, ey/<span class="num">8</span>);
+
+        <span class="cmt">// Update blend mode</span>
+        <b>BFN_SET(REG_BLDCNT, mode, BLD_MODE);</b>
+
+        <span class="cmt">// Update blend weights</span>
+        <b>REG_BLDALPHA= BLDA_BUILD(eva/<span 
+class="num">8</span>, evb/<span class="num">8</span>);</b>
+        <b>REG_BLDY= BLDY_BUILD(ey/<span class="num">8</span>);</b>
+    }   
+}
+
+<span class="keyw">void</span> load_metr()
+{
+    <span 
+class="cmt">// copy sprite and bg tiles, and the sprite palette</span>
+    memcpy32(&amp;tile_mem[<span class="num">2</span>][<span 
+class="num">0</span>], metrTiles, metrTilesLen/<span 
+class="num">4</span>);
+    memcpy32(&amp;tile_mem[<span class="num">4</span>][<span 
+class="num">0</span>], metrTiles, metrTilesLen/<span 
+class="num">4</span>);
+    memcpy32(pal_obj_mem, metrPal, metrPalLen/<span 
+class="num">4</span>);
+
+    <span class="cmt">// set the metroid sprite</span>
+    OBJ_ATTR *metr= &amp;oam_mem[<span class="num">0</span>]; <span 
+class="cmt">// use the first sprite</span>
+    obj_set_attr(metr, ATTR0_SQUARE | <b>ATTR0_BLEND</b>, <!--
+-->ATTR1_SIZE_64, <span class="num">0</span>);
+    obj_set_pos(metr, <span class="num">32</span>, <span 
+class="num">24</span>);       <span class="cmt">// mid-center</span>
+
+    <span class="cmt">// create the metroid bg</span>
+    <span class="cmt">// using inverted palette for bg-metroid</span>
+    <span class="keyw">int</span> ix, iy;
+    <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;<span class="num">16</span>; ix++)
+        pal_bg_mem[ix+<span 
+class="num">16</span>]= pal_obj_mem[ix] ^ CLR_WHITE;
+
+    SCR_ENTRY *pse= &amp;se_mem[<span 
+class="num">30</span>][<span class="num">3</span>*<span 
+class="num">32</span>+<span class="num">18</span>]; <span 
+class="cmt">// right-center</span>
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;<span class="num">8</span>; iy++)
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;<span class="num">8</span>; ix++)
+            pse[iy*<span class="num">32</span>+ix]= iy*<span 
+class="num">8</span>+ix + SE_PALBANK(<span class="num">1</span>);
+
+    REG_BG0CNT= BG_CBB(<span class="num">0</span>) | BG_SBB(<span 
+class="num">30</span>);
+}
+
+<span class="cmt">// set-up the fence background</span>
+<span class="keyw">void</span> load_fence()
+{
+
+    <span class="cmt">// tile 0 / ' ' will be a fence tile</span>
+    <span class="keyw">const</span> TILE fence= 
+    {{ 
+        <span 
+class="num">0x00012000</span>, <span class="num">0x00012000</span>, <span 
+class="num">0x00022200</span>, <span class="num">0x22220222</span>,
+        <span 
+class="num">0x11122211</span>, <span class="num">0x00112000</span>, <span 
+class="num">0x00012000</span>, <span class="num">0x00012000</span>,
+    }};
+    tile_mem[<span class="num">2</span>][<span class="num">64</span>]= fence;
+    se_fill(se_mem[<span class="num">29</span>], <span class="num">64</span>);
+
+    pal_bg_mem[<span class="num">0</span>]= RGB15(<span 
+class="num">16</span>, <span class="num">10</span>, <span class="num">20</span>);
+    pal_bg_mem[<span class="num">1</span>]= RGB15( <span 
+class="num">0</span>,  <span class="num">0</span>, <span class="num">31</span>);
+    pal_bg_mem[<span class="num">2</span>]= RGB15(<span 
+class="num">16</span>, <span class="num">16</span>, <span class="num">16</span>);
+
+    REG_BG2CNT= BG_CBB(<span class="num">2</span>) | BG_SBB(<span class="num">29</span>);
+}
+
+<span class="keyw">int</span> main()
+{
+    oam_init(oam_mem, <span class="num">128</span>);
+    load_metr();
+    load_fence();
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>)|BG_SBB(<span class="num">31</span>));
+    tte_init_con();
+
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | 
+        DCNT_OBJ | DCNT_OBJ_1D;
+
+    test_blend();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px;">
+  <img src="../img/demo/bld_demo.png" id="img-bld-demo"
+    alt="bld_demo"><br>
+  <b>Fig 13.3</b>: blend demo; 
+  mode=2, eva=0, evb=0, ey=10.
+</div>
+
+<p>
+As always, there's a demo that goes with all this stuff. 
+<tt>bld_demo</tt> features 2 metroids (the left one is a sprite, 
+the right one (palette inverted) is on background 0) on a fence-like 
+background (bg 1 to be precise) and lets you modify the mode, and 
+the 3 weights independently. The mode, by the way, is given in the 
+top left corner. The controls are:
+</p>
+
+<div class="lblock">
+<table>
+<col valign="top">
+<tr><th>left, right<td> changes <code>eva</code>. Note that 
+	<code>eva</code> is at maximum initially.
+<tr><th>down,up<td> changes <code>evb</code>.
+<tr><th>B,A<td>Changes <code>ey</code>
+<tr><th>L,R<td>Changes mode.
+</table>
+</div>
+
+<p>
+The function of interest is <code>test_blend()</code>. This is 
+where the key handling takes place and where the blend settings 
+are altered. Similar to <tt>mos_demo</tt>, .3 fixeds are used for the 
+blend weight variables to slow the rate of change to more comfortable  
+levels. To set the blend registers themselves I'm using 
+<code>BUILD()</code> macros and <code>BF_SET()</code>, which work well 
+enough for these purposes. It would be trivially easy to write 
+wrapper functions here of course. Most of the code is pretty standard; 
+just play around with the blend modes and weights and see what happens.
+</p>
+<p>
+Do take note of how, like I said earlier, the sprite metroid is affected 
+differently than the bg-metroid. The background-background blend behaves 
+exactly as the mode says it should; the sprite, on the other hand, 
+always has a blend if they overlap with the fence's pixels, and the 
+rest obeys the mode, which is what I told you in the caveats.
+</p>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-win">13.3.
+  Windowing</h2>
+<p>
+Windowing allows you to divide the screen into rectangular areas 
+known as, well, windows. There are two basic windows: <dfn>win0</dfn> 
+and <dfn>win1</dfn>. There's also a third type of window, the 
+<dfn>object</dfn> window. This creates a window out of the visible 
+pixels of the sprites. You can enable the windows by setting 
+<code>REG_DISPCNT</code>{d,e,f}, respectively.
+</p>
+<p>
+A rectangular window is defined by its <dfn>left</dfn>,
+<dfn>right</dfn>, <dfn>top</dfn> and <dfn>bottom</dfn> sides. Unless 
+you're one of <i>those</i> people, who think it's funny to say that a 
+rectangle has only two sides: an inside and an outside. In fact, this 
+is truer than you think. The union of win0 and win1 is the 
+<dfn>inside</dfn> window. There's also the <dfn>outside</dfn> window, 
+which is everything else. In other words:
+</p>
+
+<div class="lblock">
+<table>
+<tr><td class="fill"><td class="eqcell">
+winIn = win0 | win1 <br>
+winOut = ~(winIn)
+</table>
+
+<table id="img-win-dgrm">
+<tbody valign="top">
+<tr>
+<td>
+  <div class="cpt" style="width:240px;">
+  <img src="../img/demo/win_demo.png" alt="Showing win0, 
+    win1 and win_out windows">  
+  <b>Fig 13.4a</b>: 
+  showing win0, win1 and win_out windows.
+  </div>
+<td>
+  <div class="cpt" style="width:180px;">
+  <img src="../img/demo/win_demo_x.png" alt="diagram.">
+  <b>Fig 13.4b</b>: 
+    win0 in red, win1 in green, winIn is win0 | win1 (blue edge), 
+	winOut in grey.
+  </div>
+</tbody>
+</table>
+</div>
+
+<h3 id="ssec-win-bound">13.3.1.
+  Window boundaries</h3>
+<p>
+Both win0 and win1 have 2 registers that define their boundaries. 
+In order these are <code>REG_WIN0H</code> (<code>0400:0040h</code>), 
+<code>REG_WIN1H</code> (<code>0400:0042h</code>),
+<code>REG_WIN0V</code> (<code>0400:0044h</code>) and 
+<code>REG_WIN1V</code> (<code>0400:0046h</code>), which have the 
+following layout:
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-winxy"
+  border=1 frame=void cellPadding=4 cellSpacing=0>
+<caption class="reg">
+  REG_WINxH and REG_WINxV @ <code>0400:0040-0400:0047h</code>
+</caption>
+<tr class="bits">
+  <th>reg
+  <td>F E D C B A 9 8 <td>7 6 5 4 3 2 1 0
+<tr class="bf">
+  <td><code>REG_WINxH</code>
+  <td class="rclr0">left
+  <td class="rclr1">right
+<tr class="bf">
+  <td><code>REG_WINxV</code>
+  <td class="rclr2">top
+  <td class="rclr3">bottom
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width=40>
+  <col class="def">
+<tr align="left"><th>bits<th>name<th><th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-7<td class="rclr1">right
+  <td>
+  <td>Right side of window (exclusive)
+<tr class="bg1">
+  <td>8-F<td class="rclr0">left
+  <td>
+  <td>Left side of window (inclusive)
+<tr><td colspan=4>-
+<tr class="bg0">
+  <td>0-7<td class="rclr3">bottom
+  <td>
+  <td>Bottom side of window (exclusive)
+<tr class="bg1">
+  <td>8-F<td class="rclr2">top
+  <td>
+  <td>Top side of window (inclusive)
+</tbody>
+</table>
+</div>
+
+<p>
+So you have one byte for each value. That's bytes as in <i>unsigned</i>
+chars. The contents of a window are drawn from starting at the top-left
+up to, but not including, the bottom-right. What you have to realize is
+that this is also true when, say, the right value is lower than the 
+left value. In such a case, there's a wrap-around and everything on that
+line is inside the window, except the pixels between R and L. If both 
+<i>R</i> &lt; <i>L</i> and <i>B</i> &lt; <i>T</i> then you get a 
+window in the shape of a cross.
+</p>
+
+<h3 id="ssec-win-content">13.3.2.
+  Window content</h3>
+<p>
+The possible content for the windows are backgrounds 0-3 and objects. 
+No suprise there, right? In total, we have regions: win0, win1, winOut 
+and winObj. <code>REG_WININ</code> (<code>0400:0048h</code>) controls 
+win0 and win1, <code>REG_WINOUT</code> (<code>0400:004ah</code>) 
+takes care of winOut and winObj. There's one bit for each 
+content-type, plus one for blending, which you will need if 
+you intend to use blending on the contents of that particular window. 
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-winio"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<tr class="bits">
+    <th>register
+	<td>F E<td>D<td>C<td>B<td>A<td>9<td>8
+	<td>7 6<td>5<td>4<td>3<td>2<td>1<td>0
+<tr class="bf">
+    <th>bits
+	<td>-
+	<td class="rclr1">Bld
+	<td class="rclr1">Obj
+	<td class="rclr1">BG3
+	<td class="rclr1">BG2
+	<td class="rclr1">BG1
+	<td class="rclr1">BG0
+	<td>-
+	<td class="rclr0">Bld
+	<td class="rclr0">Obj
+	<td class="rclr0">BG3
+	<td class="rclr0">BG2
+	<td class="rclr0">BG1
+	<td class="rclr0">BG0
+<tr align="center">
+  <th><code>REG_WININ</code>
+  <td>-<td colspan=6>win1
+  <td>-<td colspan=6>win0
+<tr align="center">
+  <th><code>REG_WINOUT</code>
+  <td>-<td colspan=6>winObj
+  <td>-<td colspan=6>winOut
+</table><br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-5<td class="rclr0">BGx, Obj, Bld
+  <td>WIN_BGx, WIN_OBJ, WIN_BLD, <i>WIN_LAYER#</i>
+  <td><b>Windowing flags</b>. To be used with all bytes in 
+    REG_WININ and REG_WINOUT.
+</tbody>
+</table>
+</div>
+
+<p>
+There is little in the way of macros or bit-defines here because 
+they're not really necessary. Do have these in <tt>tonc_memdef.h</tt> 
+though:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> WIN_BUILD(low, high)    \
+    ( ((high)&lt;&lt;<span class="num">8</span>) | (low) )
+
+<span class="keyw">#define</span> WININ_BUILD(win0, win1)     <!--
+-->WIN_BUILD(win0, win1)
+
+<span class="keyw">#define</span> WINOUT_BUILD(out, obj)      <!--
+-->WIN_BUILD(out, obj)
+</pre>
+
+<p>
+There are still a few things you should know about windows. First of 
+all, when you turn on windowing in <code>REG_DISPCNT</code>, nothing 
+will show up. There are two reasons for this. Firstly, the boundary 
+registers are all 0, so the whole screen is basically winOut. Secondly, 
+and this is really important: a background or object will only 
+show up in the windows in which it is enabled! This 
+means that unless at least <i>some</i> bits have been set in 
+<code>REG_WININ</code> or <code>REG_WINOUT</code> nothing will show. 
+This presents you with an effective way of hiding stuff, as we'll see in 
+the demo. There is a third thing that you must remember, namely that win0 
+takes precedence over win1, which in turn takes precedence over winOut. 
+I'm not sure how winObj fits into this yet.
+</p>
+
+<div class="note">
+<div class="nhgood">Windowing necessities</div>
+<p>
+To make windowing work for you, you need to do the following things:
+</p>
+<ul>
+<li>Enable windows in <code>REG_DISPCNT</code></li>
+<li>
+  Indicate in which window you want things to show up by setting the 
+  appropriate bits in <code>REG_WININ</code> and 
+  <code>REG_WINOUT</code>. You <b>must</b> set at least some bits here 
+  if you have windowing enabled, or nothing will show up at all!
+</li>
+<li>
+  Set the desired window sizes in <code>REG_WINxH/V</code>. If you don't, 
+  everything will be considered in the Out-window.
+</li>
+</ul>
+</div>
+
+<h3 id="ssec-win-caveat">13.3.3.
+  Caveats</h3>
+<p>
+There's something really weird going on when either the top or bottom 
+is outside of the screen. Multiple somethings in fact, see the 
+demo <i>on hardware!</i> for details. 
+</p>
+
+<ul>
+<li>
+  If the top is in the [-29, 0&rang; range (i.e., [227, 255]), the
+  window will <i>not</i> be rendered at all. Likewise, if the bottom
+  is inside this range, the window covers the height of the screen. I
+  cannot say exactly what the cause is, but since the VCount also stops at
+  227, that might have something to do with it.
+<li>
+  Also, if you move the bottom from, 161 to 160, the window will also
+  cover the whole length, but only for a frame or so.
+<li>The points mentioned above assume <i>T</i>&lt;<i>B</i>. If the 
+  top is bigger, then the effect is reversed.
+</ul>
+
+
+<div class="note">
+<div class="nhcare">Windowing weirdness not on emulators</div>
+This behaviour does <i>not</i> appear on the emulators I've tested on.
+<p>
+VBA clips the windows, like common sense would lead you to believe. (Of 
+course, common sense also tells you that the Sun orbits the Earth or 
+that the stars are pinpricks on a large black canvas. Common sense is
+hardly common).
+<p>MappyVM and BoycottAdvance simply remove the window if any of the
+boundaries goes off the screen.</p>
+</div>
+
+<h3 id="ssec-win-demo">13.3.4.
+  Demo: there's a rocket in my pocket</h3>
+<p>
+In case you hadn't noticed yet, I like the Metroid series. I really
+like the Metroid series. If you have ever played Super Metroid chances
+are that you've used the X-ray scope, which let's you see through
+the layers and find items and secret passages with much more ease. 
+Guess how that was done? Yup, windowing. The windowing demo 
+<tt>win_demo</tt> essentially does the same thing. There's a 
+rocket-item hidden behind the background layers and you have an 
+X-ray rectangle which you can move around the screen so you can
+find it.
+</p>
+<p>
+The controls are simple: use the D-pad to move the window 
+around; START repositions the rocket. I've also added finer movement 
+(A + D-pad) so you can see the strange behaviour the windows seem to 
+exhibit at certain positions. 
+</p>
+
+<div class="lblock">
+<table>
+<tr><th width="10%">dir<td>Moves the rectangle.
+<tr><th>A + dir<td>Move rectangle by tapping for finer control.
+<tr><th>start<td>Randomly change the position of the rocket.
+</table>
+</div>
+
+<p>
+What follows below is the majority of the demo's code. I have removed 
+the functions that set up the backgrounds and sprite because there's 
+nothing in them that you haven't seen before already. The earlier 
+fig&nbsp;13.4a is a screenshot of the demo in 
+action.
+</p>
+
+
+<pre class="proglist" id="cd-win-demo">
+<span class="cmt">// win_demo.c
+
+//   bg 0, cbb  0, sbb  2, pb 0: numbered forground
+//   bg 1, cbb  0, sbb  3, pb 0: fenced background
+//   oam 0: tile 0-3: rocket
+
+//   win 0: objects
+//   win 1: bg 0
+//   win out : bg 1</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;nums.h&quot;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;rocket.h&quot;</span>
+
+<span class="keyw">typedef struct</span> tagRECT_U8 <!--
+-->{ u8 ll, tt, rr, bb; } ALIGN4 RECT_U8;
+
+<span class="cmt">// window rectangle regs are write only, <!--
+-->so buffers are necessary
+// Objects in win0, BG 0 in win1</span>
+RECT_U8 win[<span class="num">2</span>]= 
+{
+    { <span class="num">36</span>, <span class="num">20</span>,  <span 
+class="num">76</span>,  <span class="num">60</span> },   <span 
+class="cmt">// win0: 40x40 rect</span>
+    { <span class="num">12</span>, <span class="num">12</span> ,<span 
+class="num">228</span>, <span class="num">148</span> }    <span 
+class="cmt">// win1: screen minus 12 margin.</span>
+};
+
+<span class="cmt">// gfx loaders omitted for clarity</span>
+<span class="keyw">void</span> init_front_map();  <span 
+class="cmt">// numbers tiles</span>
+<span class="keyw">void</span> init_back_map();   <span 
+class="cmt">// fence</span>
+<span class="keyw">void</span> init_rocket();     <span 
+class="cmt">// rocket
+</span>
+<span class="keyw">void</span> win_copy()
+{
+    REG_WIN0H= win[<span class="num">0</span>].ll&lt;&lt;<span 
+class="num">8</span> | win[<span class="num">0</span>].rr;
+    REG_WIN1H= win[<span class="num">1</span>].ll&lt;&lt;<span 
+class="num">8</span> | win[<span class="num">1</span>].rr;
+    REG_WIN0V= win[<span class="num">0</span>].tt&lt;&lt;<span 
+class="num">8</span> | win[<span class="num">0</span>].bb;
+    REG_WIN1V= win[<span class="num">1</span>].tt&lt;&lt;<span 
+class="num">8</span> | win[<span class="num">1</span>].bb;
+}
+
+<span class="keyw">void</span> test_win()
+{
+    win_copy();
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        key_poll();
+        vid_vsync();
+
+        <span class="cmt">// key_hit() or key_is_down() 'switch'</span>
+        <span 
+class="cmt">// A depressed: move on direction press (std movement)</span>
+        <span 
+class="cmt">// A pressed  : moves on direction hit (fine movement)</span>
+        <span class="keyw">int</span> keys= key_curr_state();
+        <span class="keyw">if</span>(key_is_down(KEY_A))
+            keys &amp;= ~key_prev_state();
+
+        <span class="keyw">if</span>(keys &amp; KEY_RIGHT)
+        {   win[<span class="num">0</span>].ll++;        win[<span 
+class="num">0</span>].rr++;    }
+        <span class="keyw">else</span> <span 
+class="keyw">if</span>(keys &amp; KEY_LEFT )
+        {   win[<span class="num">0</span>].ll--;        win[<span 
+class="num">0</span>].rr--;    }
+        <span class="keyw">if</span>(keys &amp; KEY_DOWN)
+        {   win[<span class="num">0</span>].tt++;        win[<span 
+class="num">0</span>].bb++;    }
+        <span class="keyw">else</span> <span 
+class="keyw">if</span>(keys &amp; KEY_UP )
+        {   win[<span class="num">0</span>].tt--;        win[<span 
+class="num">0</span>].bb--;    }
+
+        <span class="cmt">// <b>(1)</b> randomize rocket position</span>
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            obj_set_pos(&amp;oam_mem[<span class="num">0</span>], 
+                qran_range(<span class="num">0, </span><span 
+class="num">232</span>), qran_range(<span class="num">0</span>, <span 
+class="num">152</span>));
+
+        win_copy();
+    }
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="cmt">// obvious inits</span>
+    oam_init();
+    init_front_map();
+    init_back_map();
+    init_rocket();
+
+    <span class="cmt">// <b>(2)</b> windowing inits</span>
+    REG_DISPCNT= DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D | 
+        DCNT_WIN0 |     <span class="cmt">// Enable win 0</span>
+        DCNT_WIN1;      <span class="cmt">// Enable win 1</span>
+
+    REG_WININ= WININ_BUILD(WIN_OBJ, (WIN_BG0);
+    REG_WINOUT= WINOUT_BUILD(WIN_BG1, <span class="num">0</span>);
+
+    win_copy();     <span class="cmt">// Initialize window rects</span>
+
+    test_win();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+
+</pre>
+
+<p>
+Initializing the windows is done at point 2: both win0 and win1 in 
+<code>REG_DISPCNT</code>, objects in win 0, bg 0 in win 1 and 
+bg1 in winOut. The windows' sizes are 
+set using <code>win_copy()</code> in each frame. I am using two 
+rectangle variables to keep track of where the windows are, because 
+the window-rectangle registers themselves are write only. See 
+fig&nbsp;13.4 again for the result.
+</p>
+<p>
+Usually, objects are shown in front of backgrounds. However, because 
+objects are now only set to appear inside win 0, they are effectively 
+hidden everywhere else: you will only see the rocket or parts of it 
+if the rocket and win 0's rectangle overlap. Furthermore, you will 
+notice that because <i>only</i> objects are set for win 0, the window 
+itself is completely black.
+</p>
+<p>
+The rest of the demo is rather uneventful. I could explain that 
+the way mask the variable <code>keys</code> with the previous keystate 
+when <b>A</b> is held down lets me switch between the 
+<code>key_hit()</code> and <code>key_is_down()</code> functions, 
+giving me the functionality I require to switch between direct and 
+fine motion for the X-ray window, but it's not all that interesting 
+and quite besides the point of the demo. What's also beside the point 
+of the demo, but <i>is</i> interesting to mention, is the 
+randomization of the rocket's position.
+</p>
+
+<h4>Random numbers</h4>
+<p>
+Random numbers on a computer is a somewhat quaint notion. The whole 
+point of a computer is to have a reliable calculator, and random 
+numbers are pretty much the antithesis of that. Computer generated 
+random numbers are also called <dfn>pseudo-random</dfn>, because they 
+aren't intrinsically random, just deterministically generated to 
+<i>seem</i> that way. 
+There are statistical tests to see if a given routine is sufficiently 
+random. However, this isn't nuclear physics we're talking about, this is 
+game programming. We mostly need something that can, say, make an 
+enemy zig or zag without any discernable pattern; that it can kill 
+a Monte Carlo simulation is totally irrelevant.
+</p>
+
+<p>
+One class of generators are <dfn>linear congruential generators</dfn>, 
+which follow the pattern <i>N</i><sub>i+1</sub> = 
+(<i>a&middot;N</i><sub>i</sub> + <i>c</i>)%<i>m</i>, with 
+<i>N</i><sub>i</sub>&isin;[0, <i>m</i>&rang;. With properly picked 
+parameters <i>a</i>, <i>c</i> and <i>m</i>, the routine can be quite 
+adequate. If you ever encounter a <code>rand()</code> function in any 
+kind of standard library, chances are it's one of these. Not only are 
+these easy to implement, they are likely to be fast as well.
+</p>
+<p>
+The following routine <code>qran()</code> is taken from my numerical 
+methods book, 
+<a href="http://www.amazon.com/gp/product/0521431085/103-4874440-3995059" target="_blank">Numerical Recipes</a>, 
+pp 275, where it is labelled a quick and dirty generator, but an adequate one. 
+Consisting of one addition and one multiply (<i>m</i>=2<sup>32</sup>, 
+so done automatically), it is <i>very</i> fast. The actual number 
+returned are the top 15 bits from <i>N</i>, because the upper bits 
+are apparently more random than the lower, and also because 15 gives 
+a [0,32767] range, which is something of an unofficial standard, 
+AFAIK. Note that there is a second function, <code>sqran()</code> 
+used to <dfn>seed</dfn> the generator. Since the process itself is 
+still deterministic, you need a seed to ensure that you don't get the 
+same sequence every time. Unless, that is, you actually <i>want</i> 
+that to happen. This isn't such a strange idea if you think about it: 
+you could use it to generate maps, for example. Instead of storing 
+the whole map so that it looks the same every time you load it, you 
+just store the seed and you're done. This is how the planetary 
+terrains in <a href="http://sc2.sourceforge.net/" target="_blank">Star Control 2</a> 
+are made; I very much doubt it would have been possible to store 
+bitmaps of all the 1000+ planets it had. This is why 
+<code>sqran()</code> also returns the current <i>N</i>, so you can 
+reset it later if necessary.
+</p>
+
+<pre class="proglist" id="cd-qran">
+<span class="cmt">// from tonc_core.h/.c
+// A Quick (and dirty) random number generator and its seeder</span>
+
+<span class="keyw">int</span> __qran_seed= <span class="num">42</span>;<!--
+-->     <span class="cmt">// Seed / rnd holder</span>
+
+<span class="cmt">// Seed routine</span>
+<span class="keyw">int</span> sqran(<span class="keyw">int</span> seed)
+{	
+    <span class="keyw">int</span> old= __qran_seed;
+    __qran_seed= seed; 
+    <span class="keyw">return</span> old;	
+}
+
+<span class="cmt">//! Quick (and very dirty) pseudo-random number generator 
+/*! \return random in range [0,8000h&gt;
+*/</span>
+INLINE <span class="keyw">int</span> qran()
+{	
+    __qran_seed= <span class="num">1664525</span>*__qran_seed+<span 
+class="num">1013904223</span>;
+    <span class="keyw">return</span> (__qran_seed&gt;&gt;<span 
+class="num">16</span>) &amp; <span class="num">0x7FFF</span>;
+}
+</pre>
+
+<p>
+I'll say again, this is not a very advanced random generator, but 
+it'll be enough for what I need. If you want a better (but slower) 
+one, try the 
+<a href="http://en.wikipedia.org/wiki/Mersenne_twister" target="_blank">Mersenne 
+Twister</a>. You can find a nice implementation on it on PERN's 
+<a href="http://www.drunkencoders.com/tutorials/GBA/day_3.html" target="_blank">
+new sprite page</a>.
+</p>
+
+<h4>Ranged random numbers</h4>
+<p>
+Getting a random number is one thing; getting a random number in a
+particular range is another. It seems simple enough, of course: 
+for a number between, say, 0 and 240 you'd use modulo 240. However, 
+as the GBA doesn't have a hardware divide, it'll cost quite a number 
+of cycles. Fortunately, there is a simple way out of it.
+</p>
+<p>
+I said that <code>qran()</code>, like stdlib's <code>rand()</code> 
+has a range between 0 and 0x8000. You can also see this as a range 
+between 0 and 1, if you interpret them as .15 fixed point numbers. 
+By multiplying with 240, you'll have the desired ranged random 
+number, and it only costs a multiplication and a shift. This 
+technique works for every random number generator, as long as you 
+pay attention to its maximum range and integer overflow (which 
+you should pay attention to anyway). Tonclib's version of this 
+is called <code>qran_range()</code>.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Ranged random number
+/*! \return random in range [\a min, \a max&gt;
+*   \note (max-min) must be lower than 8000h
+*/</span>
+INLINE <span class="keyw">int</span> qran_range(<span 
+class="keyw">int</span> min, <span class="keyw">int</span> max)	
+{    <span class="keyw">return</span> (qran()*(max-min)&gt;&gt;<span 
+class="num">15</span>)+min;     }
+</pre>
+
+<p>
+In the demo, I'm using <code>qran_range()</code> twice to keep the sprite 
+position inside the screen at all times. While the position itself 
+could be predicted beforehand with some investigation, I don't 
+think it'll be that easy. And if you really put that kind of effort 
+in it, I'd say you would deserve something for your troubles. If you 
+reload the demo a few times, you will notice that the sequence of 
+positions is always the same. This is why they're called 
+<i>pseudo</i>-random. To get a different sequence, the seed value 
+should be different. I haven't even seeded it once here because it's 
+not really important for this, but the usual trick to seed it with 
+something involving time: for example, the number of frames or 
+cycles before one actually starts a game, counted from the various 
+intro screens that may precede it. Even a small difference in the 
+seed can produce wildly varying sequences.
+</p>
+
+
+<h2 id="sec-conc">13.4.
+  Conclusions</h2>
+<p>
+Technically speaking you probably won't really need mosaic, blending 
+or windowing in games, but they're great for subtle effects, like 
+a &lsquo;shock-hit&rsquo; or spotlights. They're also of great use for 
+various types of scene transitions; a fade to black can be easily 
+implemented using the blend registers. Also fun are various HBlank 
+effects using windows, changing the rectangles every HBlank to give 
+beams, side-way wipes or circlular windows. However, to be able to do 
+that you need to know how to work with interrupts. Or a special case 
+of DMA known as HDMA, which just happens to be up next.
+</p><br>
+
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="affbg.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="dma.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Affine bg</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">DMA</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

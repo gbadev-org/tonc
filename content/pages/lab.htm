@@ -1,0 +1,933 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20060421">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: The Lab</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="asm.htm">Assembly</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="numbers.htm">Numbers, bits, bit-ops</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">24.
+  The Lab</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Lab introduction</a>.</li>
+  <li><a href="#sec-prio">Priority and drawing order</a>.</li>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">24.1.
+  Lab introduction</h2>
+<p>
+The Lab stands for &ldquo;laboratory&rdquo;, a place for me to 
+toy with new stuff. If I have something new that may be useful, 
+but isn't quite ready to be up anywhere else yet, I'll put it here 
+for a while. It does mean it may get messy at times, but that's 
+alright because that's what laboratories are for anyway. As a 
+by-product, &ldquo;lab&rdquo; may double for 
+&ldquo;labyrinth&rdquo;, but that's just a little bonus 
+<kbd>:)</kbd>.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-prio">24.2.
+  Priority and drawing order</h2>
+<p>
+This section covers the last of the bits in the background and object 
+control that I haven't discussed yet: <dfn>priority</dfn>. 
+There are four priority levels, 0-3, and you can set the priority for 
+backgrounds in 
+<a href="regbg.htm#tbl-reg-bgxcnt">REG_BGxCNT</a> bits 0 and 1, 
+and for objects in 
+<a href="regobj.htm#tbl-oe-attr2">attribute 2</a>, bits 10 and 11. 
+The concept of priority 
+is simple: higher priorities are rendered first, so they appear behind
+things with a lower priority. This will allow you to 
+have objects behind backgrounds, for example.
+</p>
+<p>
+This all sounds very simple, and it is, but there is a little more to 
+the order of the rendering process than this. On the one hand you have
+the priority settings, on the other you have the obj and bg 
+<dfn>numbers</dfn>. 
+Objects are numbered 0 to 127, backgrounds from 0 to 3. Again, higher
+numbers appear behind lower numbers: in a stack of objects, obj 0 is 
+on top; bg 0 covers the others, and objects are drawn in front of 
+backgrounds. This is <i>not</i> due to the priority settings; in fact 
+the whole point of priorities is so that the default order can be 
+altered.
+</p>
+<p>
+The above is true for objects and backgrounds of <i>the same</i> 
+priority. You could argue that the final obj/bg order is composed of
+both the priority and the obj/bg number, where priority is the most 
+significant part. So if, for example you have obj 1 and bg 2 at
+priority 0, and obj 0 and bg 1 at priority 1, the order would be
+obj1 (prio0), bg2 (prio0), obj0 (prio1), bg1 (prio1).
+</p>
+<p>
+Well, <i>mostly</i> &hellip;
+</p>
+
+<h3 id="ssec-prio-objsort">24.2.1.
+  The object-priority bug and object sorting</h3>
+<p>
+For the most part, the order is as mentioned above, except for the 
+parts where obj 0 and obj 1 overlap. Due to a, well I guess you can 
+call it a design flaw, the notion of order = priority.number isn't 
+quite true: if you have two objects in which the priorities and 
+numbers are asymmetrical and there is a background in between, the 
+object that's supposed to be below the background will shine through 
+the background in the region where the two objects overlap. This 
+sounds very complicated, but that's just because words can't really 
+capture what happens. Basically, something like
+obj1+prio0, bg0+prio0, obj0+prio1 will cause a pretty nasty graphical
+artifact if the rectangles of these objects overlap. However, 
+obj0+prio0, bg0+prio0, obj1+prio1 will work fine, because the object 
+numbers are now in line with the priorities.
+</p><br>
+
+<p>
+Which brings us to <dfn>object sorting</dfn>: the process of making 
+sure the object that should be first will actually <i>be</i> first, 
+i.e., have a lower obj number. This is actually a separate issue 
+from priorities, but it's nice to do them both in one go. In principle,
+an object sort is a sort like any other: you have an array or list of 
+things, in this case OBJ_ATTR's, and you have to put them into order 
+via some sort of <dfn>key</dfn>, a value that indicates what the sorted 
+order should be.
+</p>
+<p>
+Now, the key can basically be anything. A lot of top-down or isometric 
+games use Y-sorting, as higher Y-values means the object is more in the
+foreground. 3D and mode 7 games can use Z-sorting, of which Y-sorting 
+is technically a special case.</p>
+<p>
+You'll also need a sorting algorithm. There are plenty of them to 
+choose from the  
+<a href="http://en.wikipedia.org/wiki/Sorting_algorithm" target="_blank">wiki on 
+sorting algorithms</a>. When picking an algorithm, remember that 
+the number of items to sort here is maybe about a hundred tops, and 
+that it's likely that the items don't change order all that often. 
+Finally, you need a way to put the whole thing together; make it 
+work with the sprite and OBJ_ATTR structs that you have.
+</p><br>
+
+<p>
+For the moment, I've chosen primarily for <i>simplicity</i>, not 
+speed. The sorter, <code>id_sort_shell()</code>, uses a slightly 
+modified version of the 
+<a href="http://en.wikipedia.org/wiki/Shell_sort" target="_blank">shell-sort</a> 
+algorithm found in Numerical Recipes (ch 8, pp 321). Its parameters 
+are an array of key values and the number of elements. However, it 
+does not sort these directly (which would be fairly pointless as 
+they're not tied to objects here), but keeps track of the 
+sorting results in an index table, <code>ids[]</code>.
+</p>
+<p>
+An <dfn>index table</dfn> is, well, a table of indices, obviously; 
+it will provide the sorted order of the keys after the routine has 
+finished. This strategy allows me to keep the object double buffer 
+intact, which I like because it makes sprite management 
+simpler. Also, I don't have to swap whole structs (although that's 
+usually done by pointers anyway), and it makes the routine 
+usable as a general sorter, not just for objects. The choice of bytes 
+as the type for the index table does limit this, but that's just one 
+of those space trade-offs one has to make sometimes. Changing it to 
+use full integers isn't exactly hard, of course.
+</p>
+
+<pre class="proglist" id="cd-oe-sort1">
+<span class="cmt">// sort routine (in IWRAM!) </span>
+
+<span class="cmt">//! Sort indices via shell sort
+/*! \param keys Array of sort keys
+    \param ids Array of indices. After completion keys[ids[ii]]
+      will be sorted in ascending order.
+    \param number of entries.
+*/</span>
+IWRAM_CODE <span class="keyw">void</span> <!--
+-->id_sort_shell(<span class="keyw">int</span> keys[], u8 ids[], <span 
+class="keyw">int</span> count)
+{
+    u32 ii, inc;
+    <span class="cmt">// find initial 'inc' in sequence x[i+1]= <!--
+-->3*x[i]+1 ; x[1]=1</span>
+    <span class="keyw">for</span>(inc=<span 
+class="num">1</span>; inc&lt;=count; inc++)
+        inc *= <span class="num">3</span>;
+    <span class="cmt">// actual sort</span>
+    <span class="keyw">do</span>
+    {
+        <span class="cmt">// division is done by reciprocal <!--
+-->multiplication. So no worries.</span>
+        inc /= <span class="num">3</span>;                   <span 
+class="cmt">// for ARM compile</span>
+        <span class="cmt">// inc = (inc*0x5556)&gt;&gt;16); <!--
+-->// for THUMB compile</span>
+        <span class="keyw">for</span>(ii=inc; ii&lt;count; ii++)
+        {
+            u32 jj, id0= ids[ii]; 
+            <span class="keyw">int</span> key0= keys[id0]
+            <span class="keyw">for</span>(jj=ii; jj&gt;=inc <!--
+-->&amp;&amp; keys[ids[jj-inc]]&gt;key0; jj -= inc)
+                ids[jj]= ids[jj-inc];
+            ids[jj]= id0;
+        }
+    } <span class="keyw">while</span>(inc &gt; <span class="num">1</span>);
+}
+</pre>
+<pre class="proglist" id="cd-oe-sort2">
+<span class="cmt">// example of use</span>
+IWRAM_CODE <span class="keyw">void</span> <!--
+-->id_sort_shell(<span class="keyw">int</span> keys[], u8 ids[], <span 
+class="keyw">int</span> count);
+
+<span class="keyw">int</span> sort_keys[SPR_COUNT];      <span 
+class="cmt">// sort keys</span>
+u8 sort_ids[SPR_COUNT];        <span 
+class="cmt">// sorted OAM indices</span>
+
+<span class="keyw">void</span> foo()
+{
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+    {
+        <span 
+class="cmt">// setup sort keys  ... somehow</span>
+        sort_keys[ii]= ... ;
+    }
+    
+    <span class="cmt">// sort the indices</span>
+    id_sort_shell(sort_keys, sort_ids, SPR_COUNT);
+
+    <span class="cmt">// custom object update</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+        oam_mem[ii]= obj_buffer[sort_ids[ii]];
+}
+</pre>
+
+<p>
+Note that I intend the routine to be in IWRAM (and compiled as 
+ARM code) because it's so <b>very f%#$@*g slow</b>! Or perhaps I 
+shouldn't say slow, just costly.
+</p>
+<p>
+Think of how a basic sort works. You have <i>N</i> elements to sort. 
+In principle, each of these has to be checked with every other element, 
+so that the routine's speed is proportional to <i>N</i><sup>2</sup>, 
+usually expressed as <i>O</i>(<i>N</i><sup>2</sup>), where the 
+<i>O</i> stands for order of magnitude. For sorting, 
+<i>O</i>(<i>N</i><sup>2</sup>) is bad. For example, when <i>N</i>=128, 
+you would be looking at 16k checks. Times the number of cycles that 
+the actual checks and updates would take. Not pleasant.
+</p>
+<p>
+Fortunately, there are faster methods, you'd want at least an 
+<i>O</i>(<i>N</i>&middot;log<sub>2</sub>(<i>N</i>)) for sorting 
+algorithms, and as you can see from the aforementioned wiki, there 
+are plenty of those and shellsort is one of them. Unfortunately, even 
+this can be quite expensive. Again, with <i>N</i>=128 this is still 
+about 900, and you can be sure the multiplier can be high, as in 80+. 
+With ARM+IWRAM, I can manage to bring that down to 20-30, and a simple 
+exercise in assembly gives me an acceptable
+13 to 22 &times; <i>N</i>&middot;log<sub>2</sub>(<i>N</i>). 
+</p>
+
+<div class="note">
+<div class="nh">The Big O Notation</div>
+<p>
+The &lsquo;Big O&rsquo; or order notation is a useful
+expression for comparing algorithms. The notation is 
+<i>O</i>( f(<i>N</i>) ), where <i>N</i> is the number of 
+elements to work on and f(<i>N</i>) a function, usually a combination 
+of powers and logarithms. It shows how the runtime of an algorithm 
+rises with increasing <i>N</i>. As lower order functions will 
+eventually be overtaken by higher order ones, the former is generally 
+preferable.
+</p>
+<p>
+The keyword here, though, is &lsquo;eventually&rsquo;. It does not 
+mention the scale of the algorithm, which varies from case to case.
+In some cases if <i>N</i> is low enough and the scales are different 
+enough, a higher-order routine may actually outperform a lower-order 
+one.
+</p> 
+</div><br>
+
+<p>
+Now, I'll be the first to admit that the current design isn't exactly 
+optimal anyway. Using linked lists instead of an index table may work 
+faster, and there are other things too (the division isn't a problem, 
+as <a href="fixed.htm#sec-rmdiv">it can be faked</a>). 
+However, then it wouldn't be quite as simple anymore, which is what 
+I was going for here. 
+</p>
+<p>
+Once <code>id_sort_shell()</code> is finished, we have an table of 
+indices arranged in such a way that <code>obj_buffer[sort_ids[ii]]</code> 
+gives the sorted OAM entries, which is used to update to the real OAM.
+</p>
+
+<h3 id="ssec-prio-demo">24.2.2.
+  Caged DNA</h3>
+
+<p>
+The demo for this section is probably the coolest and most 
+complicated one yet. It features a double helix of objects, revolving 
+around the center of a toroidal cage (see 
+24.1). All four backgrounds are used here, 
+one for text (little as there is of that), and three parts of the 
+cage: one front end, which obscures the objects, one back end that 
+lies behind everything else and the middle of the toroid around which 
+the the object rotate, i.e., they pass both in front and behind it at 
+different times. And then there are the objects that form the helix. 
+The two strands each consist of 48 spherical 16x16 objects. 
+The strands are distinguishable by their colors:  one is red and the 
+other cyan. These will turn to dark red and cyan as they pass behind 
+the central plane. Priority settings are used to allow the objects to 
+pass behind nearer backgrounds, and priorities <i>and</i> sorting 
+make the object order smooth and avoid the previously mentioned 
+obj-bg-obj bug. To summarize:
+</p>
+<ul>
+  <li>4 backgrounds with varying priority settings
+  <li>96 objects revolving (in 3D) around a central pillar.
+  <li>Object priorities and number sorting to ensure proper order.
+  <li>Palette swapping to distinguish near from far objects.
+</ul>
+<p>
+You can see a schematic representation of the whole thing in 
+fig&nbsp;24.1b; table 
+24.1 is explains the colors.
+</p>
+
+<div class="cblock">
+<table id="img-prio-demo"
+  border=0 cellpadding=2 cellspacing=0>
+<tbody valign="top">
+<tr>
+<td>
+  <div class="cpt_fr" style="width:240px;">
+  <img src="../img/demo/prio_demo.png"
+    alt="Priority demo"><br>
+  <b>Fig 24.1a</b> (left): 
+    Priority and sprite order demo.  
+  </div>
+<td>
+  <div class="cpt_fr" style="width:240px;">
+  <img src="../img/demo/prio_demo_x.png"
+    alt="Priority demo schematic"><br>
+  <b>Fig 24.1b</b>: 
+    schematic of 24.1a.
+  </div>
+</tbody>
+</table>
+
+<table id="tbl-prio-demo-x"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 24.1</b>: legend for 
+  24.1b.
+</caption>
+<tr>
+  <th>color	<th>description		<th>obj/bg	<th>prio
+<tr>
+  <th>yellow <td>cage near	<td>bg1	<td>prio0
+<tr>
+  <th>green	<td>cage center	<td>bg2	<td>prio1
+<tr>
+  <th>blue	<td>cage far	<td>bg3	<td>prio2
+<tr>
+  <th>red	<td>strand 1	<td>obj_buffer[00..47]	<td>var
+<tr>
+  <th>cyan	<td>strand 2	<td>obj_buffer[48..95]	<td>var
+<tr>
+  <th>lt red/cyan	<td>near orbs	<td>OAM[0..47]	<td>prio 1
+<tr>
+  <th>dark red/cyan	<td>far orbs	<td>OAM[48..95]	<td>prio 2
+</table>
+</div>
+
+<h4>Sprites and the helix pattern</h4>
+<p>
+As you can imagine, the sprite part is the trickiest thing about 
+this demo. The helix is inherently a three dimensional path, so 
+we need a 3D vector for each orb's position, with the coordinates 
+being fixed-point numbers, of course. It also needs an index to the 
+OAM shadow, linking a sprite (the orb) to the right OBJ_ATTR (the 
+object on screen).
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef</span> <span 
+class="keyw">struct</span> tagSPR_BASE
+{
+    VECTOR pos; <span class="cmt">// position (x, y, z)</span>
+    <span class="keyw">int</span> id;     <span 
+class="cmt">// oe-id in OAM buffer</span>
+} SPR_BASE;
+
+<span class="keyw">#define</span> SPR_COUNT <span class="num">96</span>
+
+SPR_BASE sprites[SPR_COUNT];    <span class="cmt">// Sprite list</span>
+</pre>
+
+<div class="cpt_fr" style="width:144px;">
+<img src="../img/math/helix.png" id="img-helix" 
+  alt="3 periods of a helix" width=144><br>
+<b>Fig 24.2</b>: 3 periods of a helix.
+</div>
+
+<p>
+A helix is simply a circle parameterization extruded in the direction 
+of its normal axis (see fig&nbsp;24.2). Note the 
+directions of the three principle axes: it is a right-handed system, 
+with <i>x</i> and <i>y</i> following the directions of the screens 
+axes, and <i>z</i> pointing into the screen. A helix rotating around 
+the <i>y</i>-axis can be described by the following relation:
+</p>
+
+<table id="eq-helix">
+<tr>
+  <td class="eqnrcell">(24.1)
+  <td class="eqcell"> <b>x</b>(t) &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td><i>A</i>·cos(<i>k</i>·<i>y</i>+&omega;<i>t</i>)
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> <i>y</i>
+  <tr>
+    <td><i>A</i>sin(<i>k</i>·<i>y</i>+&omega;<i>t</i>)
+  </tbody>
+  </table>
+</table>
+
+<p>
+<i>A</i> is the radius of the helix, <i>k</i> is the wave number 
+(<i>k</i>=2&pi;/&lambda;) and &omega; the angular velocity 
+(&omega;=2&pi;/<i>T</i>). The wave number defines the spacing 
+between the layers of the helix (i.e., the pitch), the angular 
+velocity gives the speed of rotation. Note that to create the 
+helix in fig&nbsp;24.2 I actually need a negative 
+wave number, but that's not really important right now.
+</p>
+<p>
+In the actual code I'm going to make a slight change to the formula 
+above to make &omega; variable without upsetting the whole helix. 
+Instead of simply &omega;<i>t</i>, I'll use the integration of it 
+for the initial phase angle: 
+&phi;<sub>0</sub>=&int;&omega;(<i>t</i>)d<i>t</i>. &phi;<sub>0</sub> 
+will be a parameter to the function that creates the helix, and 
+managed elsewhere. Another parameter for the pattern is 
+<b>p</b><sub>0</sub>, the reference point of the helix. You gotta 
+have one of those.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// some constants</span>
+<span class="keyw">const</span> VECTOR P_ORG= { <span 
+class="num">112</span>&lt;&lt;<span class="num">8</span>, <span 
+class="num">0</span>&lt;&lt;<span class="num">8</span>, <span 
+class="num">0</span>&lt;&lt;<span class="num">8</span> };
+<span class="keyw">#define</span> AMP     <span 
+class="num">0x3800</span>  <span class="cmt">// amplitude (.8)</span>
+<span class="keyw">#define</span> WAVEN  -<span 
+class="num">0x002C</span>  <span class="cmt">// wave number (.12)</span>
+<span class="keyw">#define</span> OMEGA0  <span 
+class="num">0x0200</span>  <span class="cmt">// angular velocity (.8)</span>
+
+<span class="cmt">//   phi0(t) = INT(w(t'), t', 0, t)
+//   (x,y,z) = ( x0+A*cos(k*y+ft), y0+y, z0+A*sin(k*y+phi0) )</span>
+<span class="keyw">void</span> spr_helix(<span 
+class="keyw">const</span> VECTOR *p0, <span class="keyw">int</span> phi0)
+{
+    <span class="keyw">int</span> ii, phi;
+    VECTOR dp= {<span class="num">0</span>, <span 
+class="num">0</span>, <span class="num">0</span>};
+    SPR_BASE *sprL= sprites, *sprR= &amp;sprites[SPR_COUNT/<span 
+class="num">2</span>];
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT/<span class="num">2</span>; ii++)
+    {
+        <span 
+class="cmt">// phi: 0.9f ; dp: 0.8f ; WAVEN:0.12f ; phi0: 0.8f</span>
+        phi= (WAVEN*dp.y&gt;&gt;<span 
+class="num">11</span>) + (phi0&gt;&gt;<span class="num">7</span>);
+
+        <span class="cmt">// red helix</span>
+        dp.x=  AMP*lut_cos(phi)&gt;&gt;<span class="num">8</span>;
+        dp.z=  AMP*lut_sin(phi)&gt;&gt;<span class="num">8</span>;
+        vec_add(&amp;sprL[ii].pos, p0, &amp;dp);
+
+        <span class="cmt">// cyan helix</span>
+        dp.x= -dp.x;
+        dp.z= -dp.z;
+        vec_add(&amp;sprR[ii].pos, p0, &amp;dp);
+
+        dp.y += <span class="num">144</span>*<span 
+class="num">256</span>/(SPR_COUNT/<span class="num">2</span>);
+    }
+}
+</pre>
+<p>
+The routine is fairly straightforward. A running counter for the 
+<i>y</i> is kept in the form of <code>dp.y</code>, which is used to 
+calculate the full phase, from which we get our sines and cosines. 
+Since the red and cyan helices are in counter-phase, I can simply 
+get the <i>x</i> and <i>z</i> offsets for one by switching the signs 
+of the other. The only really tricky part is managing the different 
+fixed point scales for the phase; when dealing with fixed point math, 
+always indicate the number of fractional bits, it's so very easy to 
+get lost there.
+</p><br>
+
+<p>
+Now that we have the double helix pattern, we need a way to link it 
+to the objects, complete with sorting and all.
+</p>
+
+<pre class="proglist">
+<span class="keyw">void</span> spr_update()
+{
+    <span class="keyw">int</span> ii, prio, zz, *key;
+    u32 attr2;
+	<span class="keyw">int</span> *key= sort_keys;
+    SPR_BASE *spr= sprites;
+    OBJ_ATTR *oe;
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+    {
+        oe= &amp;obj_buffer[spr-&gt;id];
+        <span class="cmt">// set x/y pos</span>
+        obj_set_pos(oe, spr-&gt;pos.x&gt;&gt;<span 
+class="num">8</span>, spr-&gt;pos.y&gt;&gt;<span class="num">8</span>);
+
+        <span class="cmt">// set priority based on depth.
+        // HAX 1: palette swapping</span>
+        attr2= oe-&gt;attr2 &amp; ~(ATTR2_PRIO_MASK | (<span 
+class="num">1</span>&lt;&lt;ATTR2_PALBANK_SHIFT));
+        zz= spr-&gt;pos.z;
+        <span class="keyw">if</span>(zz&gt;<span class="num">0</span>)
+        {
+            prio= <span class="num">2</span>;
+            attr2 |= <span class="num">1</span>&lt;&lt;ATTR2_PALBANK_SHIFT;
+        }
+        <span class="keyw">else</span>
+            prio= <span class="num">1</span>;
+        oe-&gt;attr2= attr2 | (prio&lt;&lt;ATTR2_PRIO_SHIFT);
+        
+        <span class="cmt">// HAX 2: sort-key contruction</span>
+        *key++= (prio&lt;&lt;<span class="num">30</span>) + <!--
+-->(zz&gt;&gt;<span class="num">2</span>) - <span 
+class="num">6</span>&lt;&lt;<span class="num">28</span>;
+        spr++;
+    }
+
+    <span class="keyw">if</span>(g_state &amp; S_SORT) <span 
+class="cmt">// sort and update</span>
+    {
+        id_sort_shell(sort_keys, sort_ids, SPR_COUNT);
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+            oam_mem[ii]= obj_buffer[sort_ids[ii]];
+    }
+    <span class="keyw">else</span>                 <span 
+class="cmt">// regular update</span>
+        oam_update(<span class="num">0</span>, SPR_COUNT);
+}
+</pre>
+<p>
+The big loop here updates the OAM shadow, <i>not the real OAM</i>! 
+It updates the object's position using the sprites <i>x</i> and 
+<i>y</i> (corrected for fixed point, of course), and uses <i>z</i> 
+to set the priority: 1 if it's on the near side (before the central 
+pillar), and 2 if it's on the far side (behind the pillar). It 
+<i>also</i> does something funky with the palette, which is the first 
+hack in the function, shortly followed by the second one.
+</p>
+
+<div class="cpt_fr"  style="width:120px;">
+<table id="tbl-prio-hack1"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 24.2</b>: object palette banks.
+</caption>
+<tr><th>bank	<th>color
+<tr><td>4		<td>light red
+<tr><td>5		<td> dark red
+<tr><td>6		<td>light cyan
+<tr><td>7		<td> dark cyan
+</table>
+</div>
+
+<p>
+<b>Hack 1</b>. I've arranged the object palette in such a way 
+that the reds are in palette banks 4 and 5, and the cyans in banks 
+6 and 7 (table 24.2). This means that 
+I can switch between the light and dark versions by toggling the 
+first pal-bank bit, (attr2{C}).
+</p>
+<p>
+Immediately after this is the second hack, creating the sort key.
+</p>
+<p>
+<b>Hack 2</b>. The sort key is a combination of the priority (2 bits) 
+and the depth <i>z</i> (the rest). The lower 30 bits of <code>zz</code> 
+work as a <b>signed</b> offset for the priority levels, so that each 
+priority has its own depth range of [-2&lt;&lt;30,2&lt;&lt;30&rang; 
+if one is necessary. The problem is that the keys is also 
+signed, which would mean that priorities 2 and 3 would count as 
+negative and therefore be sorted in front of prio 0 and 1, which 
+would be bad. To remedy this, I subtract 0x60000000, which shifts the 
+range of priority 0 to the most negative range where it should be.
+</p>
+<p>
+The last part of the function updates the OAM shadow to OAM, either 
+with or without sorting.
+</p>
+
+<div class="note">
+<div class="nh">Sorting disabled objects</div>
+<p>
+Incidentally, you could easily modify the sort-key creation to account 
+for disabled/hidden objects. All you'd have to do is assign the 
+highest (signed) value to the sort-key, in this case 0x7FFFFFFF.
+</p>
+
+<pre class="proglist">
+<span class="keyw">if</span>( <!--
+-->(oe-&gt;attr0&amp;ATTR0_MODE_MASK) != ATTR0_HIDE )
+    *key++= (prio&lt;&lt;<span class="num">30</span>) + <!--
+-->(zz&gt;&gt;<span class="num">2</span>) - <span 
+class="num">6</span>&lt;&lt;<span class="num">28</span>; 
+<span class="keyw">else</span>
+    *key++= <span class="num">0x7FFFFFFF</span>;
+</pre>
+</div>
+
+<h4>Rest of code</h4>
+<p>
+The rest of the code is just <code>main()</code> and the 
+initializer code. Most of the initializer code is pretty standard 
+stuff: loading graphics, register inits and so on. The only 
+interesting part is the object initialization, 
+which sets the pal-banks to 0x4000 and 0x6000 for the red and cyan 
+orbs. And because the sorting uses an index table instead of 
+changing the object buffer itself, this is all I'll ever have to 
+keep the primary colors correct.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> S_AUTO  <span class="num">0x0001</span>
+<span class="keyw">#define</span> S_SORT  <span class="num">0x0002</span>
+
+<span class="keyw">const</span> VECTOR P_ORG= { <span 
+class="num">112</span>&lt;&lt;<span class="num">8</span>, <span 
+class="num">0</span>&lt;&lt;<span class="num">8</span>, <span 
+class="num">0</span>&lt;&lt;<span class="num">8</span> };
+
+<span class="keyw">int</span> g_phi= <span class="num">0</span>;<!--
+-->                   <span 
+class="cmt">// phase, integration of omega over time</span>
+<span class="keyw">int</span> g_omega= OMEGA0;            <span 
+class="cmt">// rotation velocity (.8)</span>
+u32 g_state= S_AUTO | S_SORT;   <span class="cmt">// state switches</span>
+
+
+<span class="keyw">void</span> main_init()
+{
+    <span class="keyw">int</span> ii;
+    <span class="cmt">// --- init gfx ---</span>
+    <span class="cmt">// bgs</span>
+    memcpy32(pal_bg_mem, cagePal, cagePalLen/<span class="num">4</span>);
+    pal_bg_mem[<span class="num">0</span>]= CLR_BLACK;
+    memcpy32(tile_mem[<span 
+class="num">1</span>], cageTiles, cageTilesLen/<span class="num">4</span>);
+    <span class="cmt">// Hacx 3: there are 3 maps in cageMap, <!--
+-->which have to be extracted manually</span>
+    <span class="cmt">// front part, priority 0</span>
+    memcpy32(se_mem[<span class="num">5</span>], &amp;cageMap[ <span 
+class="num">1</span>*<span class="num">32</span>], <span 
+class="num">20</span>*<span class="num">32</span>/<span class="num">2</span>);
+    REG_BG1CNT= BG_CBB(<span class="num">1</span>) | BG_SBB(<span 
+class="num">5</span>) | BG_8BPP | BG_PRIO(<span class="num">0</span>);
+    <span class="cmt">// center, priority 1</span>
+    memcpy32(se_mem[<span class="num">6</span>], &amp;cageMap[<span 
+class="num">22</span>*<span class="num">32</span>], <span 
+class="num">20</span>*<span class="num">32</span>/<span class="num">2</span>);
+    REG_BG2CNT= BG_CBB(<span class="num">1</span>) | BG_SBB(<span 
+class="num">6</span>) | BG_8BPP | BG_PRIO(<span class="num">1</span>);
+    <span class="cmt">// back, priority 2</span>
+    memcpy32(se_mem[<span class="num">7</span>], &amp;cageMap[<span 
+class="num">43</span>*<span class="num">32</span>], <span 
+class="num">20</span>*<span class="num">32</span>/<span class="num">2</span>);
+    REG_BG3CNT= BG_CBB(<span class="num">1</span>) | BG_SBB(<span 
+class="num">7</span>) | BG_8BPP | BG_PRIO(<span class="num">2</span>);
+
+    <span class="cmt">// object</span>
+    memcpy32(&amp;tile_mem[<span class="num">4</span>][<span 
+class="num">1</span>], ballTiles, ballTilesLen/<span class="num">4</span>);
+    memcpy32(pal_obj_mem, ballPal, ballPalLen/<span class="num">4</span>);
+
+    <span class="cmt">// -- init vars ---</span>
+    <span class="cmt">// init sort list</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+        sprites[ii].id= sort_ids[ii]= ii;
+
+    <span class="cmt">// --- init sprites and objects ---</span>
+    oam_init();
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT/<span class="num">2</span>; ii++)
+    {
+        obj_set_attr(&amp;obj_buffer[ii], <span 
+class="num">0</span>, ATTR1_SIZE_16, <b><span class="num">0x4001</span></b>);
+        obj_set_attr(&amp;obj_buffer[ii+SPR_COUNT/<span 
+class="num">2</span>], <span class="num">0</span>, 
+            ATTR1_SIZE_16, <b><span class="num">0x6001</span></b>);
+    }
+
+    spr_helix(&amp;P_ORG, <span class="num">0</span>);
+    spr_update();
+
+    REG_DISPCNT= DCNT_BG_MASK | DCNT_OBJ | DCNT_OBJ_1D;
+    int_init();
+    int_enable_ex(II_VBLANK, NULL);
+    txt_init_std();
+    txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">3</span>)|BG_SBB(<span class="num">31</span>), <span 
+class="num">0</span>, <span class="num">0xEC00021F</span>, <span 
+class="num">0xEE</span>);
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">char</span> str[<span class="num">32</span>];
+
+    main_init();
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        <span class="cmt">// kery handling</span>
+        key_poll();
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            g_state ^= S_AUTO;
+        <span class="keyw">if</span>(key_hit(KEY_SELECT))
+            g_state ^= S_SORT;
+
+        <span class="cmt">// movement</span>
+        <span class="keyw">if</span>(g_state &amp; S_AUTO)
+        {
+            g_omega += key_tri_shoulder()&lt;&lt;<span 
+class="num">4</span>;
+            g_phi += g_omega;
+        }
+        <span class="keyw">else</span>
+            g_phi += g_omega*key_tri_shoulder();
+
+        <span class="cmt">// sprite/obj update</span>
+        spr_helix(&amp;P_ORG, g_phi);
+        spr_update();
+
+        <span class="cmt">// print omega</span>
+        siprintf(str, <span class="str">&quot;%6d&quot;</span>, g_omega);
+        se_puts(<span class="num">8</span>, <span 
+class="num">136</span>, str, <span class="num">0</span>);
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/prio_demo2.png" id="img-prio-demo2" 
+  alt=""><br>
+<b>Fig 24.3</b>: Sorting switched off.
+</div>
+
+<p>
+The main loop checks for state changes, advances and updates the 
+sprites and objects and prints the current angular velocity.
+</p>
+<p>
+There are two state switches in <code>g_state</code>, one that 
+toggles the sorting procedure (<code>S_SORT</code>, with 
+<b>select</b>), and one that sets the rotation to automatic or 
+not (<code>S_AUTO</code>, with <b>start</b>). Toggling the 
+sorting is interesting because you can see what happens if you 
+just set the priorities. This has two effects 
+(see fig&nbsp;24.3: first, the 
+orb-order in each strand would be fixed and every object would 
+partially obscure the one on its left, which is incorrect for
+the receding parts of the strands. This is most visible at the 
+right-most side, where the strands seem broken. The second 
+effect is the object priority/number order bug where the deeper 
+object can show through the background that's supposed to be 
+occluding it.
+</p>
+<p>
+The start button toggles between automatic and manual rotation. 
+During automatic mode you can change &omega; with <b>L</b> and 
+<b>R</b>. In manual mode L and R update the phase with the 
+current angular speed. By setting the speed really low, you can 
+examine what happens in more detail. For example, you can 
+clearly see that the objects in the vertical centerline are 
+in front of both their left and right neighbors, exactly what 
+one would expect. Unless the sorting is off, that is.
+</p><br>
+
+<p>
+And that concludes the topic of priorities and object sorting. 
+Remember that the priorities of objects and backgrounds aren't 
+the only thing that determine the rendering order, the obj or bg 
+number is also important for each priority level. Once you start 
+mixing objects and background priorities, make sure that the 
+object numbers follow the same order as their priorities, and that 
+often means object sorting.
+</p>
+<p>
+I've discussed a simple and flexible sorting method, but I warn you 
+that it does take its time. If it's good enough, by all means use it. 
+If it's not, faster methods can certainly be created. Linked lists, 
+range checks, handcrafted assembly (see <tt>id_sort_shell2.s</tt> in 
+the <tt>prio_demo</tt> directory for example) can all help make it 
+faster. but the final implementation will be up to you.
+</p>
+
+<!-- std reg table
+<div class="reg">
+<table class="reg" 
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_<em>XXX</em> @ <code>0400:<em>[[0000]]</em>h</code>
+</caption>
+<tr class="bits">
+  <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
+  <td>7<td>6<td>5<td>4<td>3<td>2<td>1<td>0
+<tr class="bf">
+  <td class="rclr0">
+  <td class="rclr1">
+  <td class="rclr2">
+  <td class="rclr3">
+  <td class="rclr4">
+  <td class="rclr5">
+  <td class="rclr6">
+  <td class="rclr7">
+  <td class="rclr8">
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr>
+  <td>0 <td class="rclr0">
+  <td>
+  <td>
+</tbody>
+</table>
+</div>
+-->
+
+<!-- standard eq&nbsp;table
+<table id="eq-">
+<tr>
+  <td class="eqnrcell">()
+  <td class="eqcell">
+
+</table>
+-->
+
+<!-- multiline eq&nbsp;table
+<table>
+<tr>
+  <td class="eqnrcell">()
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td>
+    <td>=
+    <td>
+  </table>
+</table>
+-->
+
+<!-- standard picture
+<div class="cpt" style="width:240px;">
+<img src="../img/" id="img-" alt=""><br>
+<b>Fig xx</b>:
+</div>
+-->
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="asm.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="numbers.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Assembly</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Numbers, bits, bit-ops</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

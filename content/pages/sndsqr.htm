@@ -1,0 +1,1547 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20050519">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Square sound waves</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="swi.htm">BIOS calls</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="text.htm">Text systems</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">18.
+  Beep! GBA sound introduction</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction to GBA sound</a>
+  <li><a href="#sec-sndwav">Sound and Waves</a>
+  <li><a href="#sec-gbasnd">GBA sound</a>
+  <li><a href="#sec-demo">Demo time</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">18.1.
+  Introduction to GBA sound</h2>
+<p>
+Apart from graphics and interaction, there is one other sense 
+important to games: audio. While graphics may set the scene, sound 
+sets the mood, which can be even more important that the graphics. 
+Try playing Resident Evil with, say, Weird Al Yankovic playing: it 
+simply doesn't work, the atmosphere is lost.
+</p>
+<p>
+The GBA has six sound channels. The first four are roughly the same 
+as the original GameBoy had: two square wave generators (channels 1 
+and 2), a sample player (channel 3) and a noise generator (channel 4). 
+Those are also referred to as the DMG channels.
+New are two Direct Sound channels A and B (not to be confused with 
+Microsoft's Direct Sound, the DirectX component). These are 8bit 
+digital channels.
+</p><br>
+
+<p>
+I should point out that I really know very little about sound 
+programming, mostly because I'm not able to actually put together 
+a piece of music (it's kinda hard to do that when you already have 
+music playing). If you want to really learn about sound programming,
+you should look at <a href="http://www.belogic.com" target="_blank">Belogic.com</a>, 
+where almost everybody got their information from, and 
+<a href="http://deku.gbadev.org" target="_blank">deku.gbadev.org</a>, which shows you 
+how to build a sound mixer. Both of these sites are excellent. 
+</p>
+<p>
+I may not know much about sound creation/programming, but at its core 
+sound is a wave in matter; waves are mathematical critters, and I 
+<i>do</i> know a thing or two about math, and that's kind of what 
+I'll do here for the square wave generators.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-sndwav">18.2.
+  Sound and Waves</h2>
+<p>
+Consider if you will, a massive sea of particles, all connected to 
+their neighbours with little springs. Now give one of them a little 
+push. In the direction of the push, the spring compresses and relaxes, 
+pushing the original particle back to its normal position and passing 
+on the push to the neighbour; this compresses the next spring 
+and relays the push to <i>its</i> neighbour, and so on and so on. 
+</p>
+<p>
+This is a prime example of wave behaviour. Giving a precise definition 
+of a wave that covers all cases is tricky, but in essence, a 
+<dfn>wave </dfn> is a <dfn>transferred disturbance</dfn>. There are
+many kinds of waves; two major classes are <dfn>longitudinal</dfn> 
+waves, which oscillate in the direction of travel, and 
+<dfn>transverse</dfn> waves, which are perpendicular to it. Some waves 
+are periodic (repeating patterns over time or space), some aren't. 
+Some travel, some don't.
+</p>
+
+<h3 id="ssec-harmonic">18.2.1.
+  Waves</h3>
+<p>
+The canonical wave is the <dfn>harmonic wave</dfn>. This is any function 
+&psi;(<i>x</i>) that's a solution to eq&nbsp;18.1. 
+The name of the variable doesn't really matter, but usually it's either 
+spatial (<i>x</i>,&nbsp;<i>y</i>,&nbsp;<i>z</i>) or temporal 
+(<i>t</i>), or all of these at the same time. The general solution can 
+be found in eq&nbsp;18.2. Or perhaps I should 
+say solution<b>s</b>, as there are many ways of writing them 
+down. They're all equivalent though, and you can go from one to the 
+other with some trickery that does not concern us at this moment.
+</p>
+
+<table id="eq-wave">
+<tbody valign="middle">
+<tr>
+  <td class="eqnrcell">(18.1)
+  <td class="eqcell">
+  <table cellpadding=0 cellspacing=0>
+  <tr>
+    <td class="bdrB"> d&sup2; 
+  <tr>
+    <td>dx&sup2;
+  </table>
+  <td class="eqcell">
+    &psi;(<i>x</i>) + k&sup2; &psi;(<i>x</i>) = 0
+</tbody>
+</table>
+
+
+<p>
+General solution(s):
+</p>
+
+<table id="eq-wave-sols">
+<tr>
+  <td class="eqnrcell">(18.2)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td>&psi;(<i>x</i>)
+    <td>=
+    <td> A&middot;cos(k<i>x</i>) + B&middot;sin(k<i>x</i>) 
+  <tr>
+    <td>&nbsp;
+    <td>=
+    <td> C&middot;e<sup>i k<i>x</i></sup> + D&middot;e<sup>-i k<i>x</i></sup>
+  <tr>
+    <td>&nbsp;
+    <td>=
+    <td> E&middot;sin(k<i>x</i> + &phi;<sub>0</sub>)
+  </table>
+</table>
+
+<div class="cpt_fr" style="width:212px;">
+<img src="../img/wave.png" alt="" id="img-wave"><br>
+<b>Fig 18.1</b>: a harmonic wave
+</div>
+
+<p>
+A full wave can be described by three things. First, there's the 
+<dfn>amplitude</dfn> <i>A</i>, which gives half-distance between 
+the minimum and maximum. Second, the <dfn>wavelength</dfn> &lambda;, 
+which is the length after which the wave repeats itself (this is
+tied to wave-number <i>k</i>= 2&pi;/&lambda;). Then there's 
+<dfn>phase constant</dfn> &phi;<sub>0</sub>, which defines the stating 
+point. If the wave is in time, instead of a wavelength you have 
+<dfn>period</dfn> <i>T</i>, 
+<dfn>frequency</dfn> <i>f</i>=1/<i>T</i> (and angular frequency 
+&omega;= 2&pi;<i>f</i>= 2&pi;/<i>T</i>). You can see what each 
+of these parameters is in fig&nbsp;18.1.
+</p>
+<p>
+One of the interesting things about the wave equation is that it 
+is a linear operation on &psi;. What that means is that any 
+combination of solutions is also a solution; this is the 
+<dfn>superposition principle</dfn>. For example, if you 
+have two waves &psi;<sub>1</sub> and &psi;<sub>2</sub>, then 
+&Psi; = <i>a</i>&psi;<sub>1</sub> + <i>b</i>&psi;<sub>2</sub> is 
+also a wave.
+This may sound like a trivial thing but I assure you it's not. The 
+fact that non-linear equations (and they exist too) tend to make 
+scientists cringe a little should tell you something about the value 
+of linear equations.
+</p>
+
+<h3 id="ssec-wave-sound">18.2.2.
+  Sound waves</h3>
+<p>
+Sound is also a wave. In fact, it is a longitudinal pressure wave
+in matter and pretty much works as the system of particles on springs 
+mentioned earlier with whole sets of molecules moving back and forth. 
+In principle, it has both spatial and temporal structure 
+and you can things can get hideously complex if you want to deal with 
+everything. But I'll keep it easy and only consider two parts: 
+amplitude <i>A</i> and period and frequency <i>T</i> and <i>f</i>. 
+As you probably know, the tone of a sound is related to the frequency. 
+Human hearing has a range between 20 Hz and 20 kHz, and the higher the 
+frequency (i.e., the more compressed the wave), the higher the tone. 
+Most sounds are actually a conglomeration of different waves, with 
+different amplitudes and frequencies &ndash; the superposition principle 
+at work. The funny thing about this is that if you added all those 
+components up to one single function and plot it, it wouldn't look 
+like a sine wave at all anymore. What's even funnier is that you can 
+also reverse the process and take a function 
+&ndash;<i>any</i> function&ndash; and break it up into a superposition 
+of sine and cosine waves, and so see what kind of frequencies your 
+sound has. This is called Fourier Transformation, and we'll get to 
+that in a minute.
+</p>
+
+<h3 id="ssec-notes">18.2.3.
+  Musical scale</h3>
+<p>
+While the full range between 20 Hz and 20 kHz is audible, only a 
+discrete set of frequencies are used for music, which brings us to
+the notion of the <dfn>musical scale</dfn>. Central to these are 
+<dfn>octaves</dfn>, representing a frequency doubling. Each octave 
+is divided into a number of different notes; 12 in Western systems, 
+ranging from A to G, although octave numbering starts at C for some 
+reason. Octave 0 starts at the <dfn>central C</dfn>, which has a 
+frequency of about 262 Hz (see also table 18.1. 
+And yes, I know there are only 7 letters between A and G, the other 
+notes are flats and sharps that lie between these notes. The 
+&lsquo;12&rsquo; refers to the number of half-notes in an octave. 
+The musical scale is <b>logarithmic</b>; each half-note being 
+2<sup>1/12</sup> apart. Well, almost anyway: for some reason, some 
+notes don't <i>quite</i> fit in exactly.
+</p>
+
+<div class="cblock">
+<table id="tbl-oct0"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 18.1</b>: notes &amp; frequencies of 
+  octave 0
+</caption>
+<tbody align="center">
+<tr>
+  <th> half-note
+  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5
+  <th> 6 <th> 7 <th> 8 <th> 9 <th>10 <th>11 
+  <th> (12) 
+<tr>
+  <th> name
+  <td> C <td> C# <td> D <td> D# <td> E <td> F 
+  <td> F# <td> G <td> G# <td> A <td> A# <td> B 
+  <td> (C)
+<tr>
+  <th> freq (Hz)
+  <td> 261.7 <td> 277.2 <td> 293.7 <td> 311.2 <td> 329.7 <td> 349.3 
+  <td> 370.0 <td> 392.0 <td> 415.3 <td> 440.0 <td> 466.2 <td> 493.9
+  <td> (523.3)
+</tbody>
+</table>
+</div>
+
+<h3 id="ssec-fourier">18.2.4.
+  Fourier transforms and the square wave</h3>
+<p>
+Fourier transformations are a way of going describing a function in 
+the time domain as a distribution of frequencies called a 
+<dfn>spectrum</dfn>. They're also one of the many ways that professors 
+can scare the bejebus out of young, natural-science students. Don't 
+worry, I'm sure you'll get through this section unscathed 
+<kbd>&gt;:)</kbd>. For well- to reasonably-behaved functions, you can 
+rewrite them as series of <i>very</i> well-behaved functions such as 
+polynomials, exponentials and also waves. For example, as a Fourier 
+series, a function may look like eq&nbsp;18.3. 
+</p>
+
+<table id="eq-fser">
+<tr>
+  <td class="eqnrcell">(18.3)
+  <td class="eqcell">f(<i>t</i>) = &frac12;A<sub>0</sub> + 
+    <big>&Sigma;</big><sub>n&gt;0</sub>
+    <i>A</i><sub>m</sub>cos(m&omega;<i>t</i>) + 
+    <big>&Sigma;</big><sub>n&gt;0</sub>
+    <i>B</i><sub>m</sub>sin(m&omega;<i>t</i>)
+</table>
+
+<p>
+Of course, the whole thing relies on being able to find the 
+coefficients <i>A</i><sub>m</sub> and <i>B</i><sub>m</sub>. While it 
+is fairly straightforward to derive the equations for them, I'll leave 
+that as an exercise for the reader and just present the results in the 
+form of eq&nbsp;18.4. I should mention that there 
+are actually a few ways of defining Fourier transforms. For example, 
+there are versions that don't integrate over [0,<i>T</i>], but 
+over [&minus;&frac12;<i>T</i>, &frac12;<i>T</i>]; or use the 
+complex exponential instead of sines and cosines, but in the end 
+they're all doing the same thing.
+</p>
+
+<table id="eq-ftrans">
+<tr>
+  <td class="eqnrcell">(18.4)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody valign="middle">
+  <tr>
+    <td><i>A</i><sub>m</sub>
+    <td> =
+    <td>
+      <table cellpadding=2 cellspacing=0>
+      <tr><td class="bdrB"> 2
+      <tr><td> T
+      </table>
+    <td><big>&int;</big><sub>0,T</sub> 
+      f(<i>t</i>) cos(m&omega;<i>t</i>) dt
+  <tr>
+    <td><i>B</i><sub>m</sub>
+    <td> =
+    <td>
+      <table cellpadding=2 cellspacing=0>
+      <tr><td class="bdrB"> 2
+      <tr><td> T
+      </table>
+    <td><big>&int;</big><sub>0,T</sub> 
+      f(<i>t</i>) sin(m&omega;<i>t</i>) dt
+  </tbody>
+  </table>
+</table>
+
+
+
+<div class="cpt_fr" style="width:212px;">
+<img src="../img/sqrwave.png" alt="" id="img-sqrwave"><br>
+<b>Fig 18.2</b>: a square wave
+</div>
+
+<p>
+As an example, let's take a look at a square wave see 
+fig&nbsp;18.2. A square wave is on (1) for a 
+certain time (parameter <i>h</i>), then off (0) for the rest of the 
+cycle.It's still a periodic wave, so it doesn't really matter where 
+we place the thing along the <i>t</i>-axis. I centered it on the 
+peak for convenience: doing so makes it a symmetrical wave which 
+has the nice properly of removing <i>all</i> the anti-symmetrical 
+sine waves. <i>A</i><sub>0</sub>=<i>h</i>/<i>T</i> because it's the 
+average of the function and the rest of the <i>A</i><sub>m</sub>'s 
+follow from eq&nbsp;18.4.
+</p>
+
+
+<table id="eq-fsqr">
+<tr>
+  <td class="eqnrcell">(18.5)
+  <td class="eqcell">
+    <i>A</i><sub>m</sub> = 
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB">2
+    <td rowspan=2>&middot;
+    <td class="bdrB">sin(&pi;m <i>h/T</i>)
+  <tr>
+    <td>&pi;
+    <td>m
+  </tbody>
+  </table>
+  <td> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB">2<i>T</i>
+    <td rowspan=2>&middot;
+    <td class="bdrB">sin(&pi;<i>h/T</i> m)
+  <tr>
+    <td><i>h</i>
+    <td>&pi;<i>h/T</i> m
+  </tbody>
+  </table>
+</table>
+
+
+<p>
+<i>A</i><sub>m</sub> is a <dfn>sinc</dfn> function: 
+sin(<i>x</i>)/<i>x</i>. For high <i>m</i> it approaches zero (as it 
+should, since higher terms should be relatively less important), 
+but also interesting is that of the higher terms some will also 
+<i>vanish</i> because of the sine. This will happen whenever <i>m</i> 
+is a multiple of <i>T/h</i>.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-gbasnd">18.3.
+  GBA sound</h2>
+
+<h3 id="ssec-snd-regs">18.3.1.
+  Sound registers</h3>
+<p>
+For graphics, you only had to deal with one register to get a result; 
+for sound, you have to cover a lot of registers before you get 
+<i>anything</i>. The DMG channels each have 2 or 3 registers 
+&ndash; some with similar functionality, some not. Apart from that, 
+there are four overall control registers. 
+</p>
+<p>
+The register nomenclature seems particularly vexed when it comes to 
+sound. There are basically two sets of names that you can find: 
+one consisting of <code>REG_SOUNDxCNT</code> followed by 
+<code>_L</code>, <code>_H</code> and <code>_X</code> in a rather 
+haphazard manner; the other one uses a <code>REG_SGxy</code> and 
+<code>REG_SGCNTy</code> structure (<i>x</i>=1, 2, 3 or 4 and 
+<i>y</i>=0 or 1). I think the former is the newer version, which 
+is funny because the older is more consistent. Oh well. In any 
+case, I find neither of them very descriptive and keep forgetting 
+which of the L/H/X or 0/1 versions does what, so I use a <i>third</i> 
+set of names based on the ones found in 
+<a href="http://www.pineight.com" target="_blank">tepples'</a> <tt>pin8gba.h</tt>, 
+which IMHO makes more sense than the other two. 
+</p>
+
+<div class="cblock">
+<table id="tbl-snd-names"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 18.2</b>: Sound register nomenclature.
+</caption>
+<tr align="center">
+  <th> offset	<th> function 
+  <th> old		<th> new			<th> tonc
+<tr>
+  <th> 60h	<td> channel 1 (sqr) sweep
+  <td rowspan=2> REG_SG10	<td> SOUND1CNT_L	<td> REG_SND1SWEEP	
+<tr>
+  <th> 62h	<td> channel 1 (sqr) len, duty, env	
+  <!-- -->		<td> SOUND1CNT_H	<td> REG_SND1CNT
+<tr>
+  <th> 64h	<td> channel 1 (sqr) freq, on	
+  <td> REG_SG11	<td> SOUND1CNT_X	<td> REG_SND1FREQ
+<tr>
+  <th> 68h		<td> channel 2 (sqr) len, duty, env
+  <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT	
+<tr>
+  <th> 6Ch		<td> channel 2 (sqr) freq, on
+  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND1FREQ	
+<tr>
+  <th> 70h		<td> channel 3 (wave) mode
+  <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL	
+<tr>
+  <th> 72h		<td> channel 3 (wave) len, vol
+  <!-- -->		<td> SOUND3CNT_H	<td> REG_SND3CNT	
+<tr>
+  <th> 74h		<td> channel 3 (wave) freq, on
+  <td> REG_SG31	<td> SOUND3CNT_X	<td> REG_SND3FREQ	
+<tr>
+  <th> 78h		<td> channel 4 (noise) len, vol, env
+  <td> REG_SG40	<td> SOUND4CNT_L	<td> REG_SND4CNT	
+<tr>
+  <th> 7Ch		<td> channel 4 (noise) freq, on
+  <td> REG_SG41	<td> SOUND4CNT_H	<td> REG_SND4FREQ	
+<tr>
+  <th> 80h	<td> DMG master control
+  <td rowspan=2> REG_SGCNT0	<td> SOUNDCNT_L	<td> REG_SNDDMGCNT
+<tr>
+  <th> 82h	<td> DSound master control	
+  <!-- -->		<td> SOUNDCNT_H	<td> REG_SNDDSCNT
+<tr>
+  <th> 84h	<td> sound status	
+  <td> REG_SGCNT1	<td> SOUNDCNT_X	<td> REG_SNDSTAT		
+<tr>
+  <th> 88h	<td> bias control
+  <td> REG_SGBIAS	<td> SOUNDBIAS	<td> REG_SNDBIAS		
+</table>
+</div>
+
+<p>
+&ldquo;Oh great. This is going to be one of &lsquo;tegel&rsquo; things 
+isn't it? Where <i>you</i> think you've got something nice but 
+different going, then later you revert to the standard terminology to 
+conform with the rest of the world. Right?&rdquo; 
+</p>
+<p>
+No, I'll stick to these names. Probably. Hopefully. &hellip; To be 
+honest, I really don't know <kbd>:P</kbd>. This is not really a 
+big deal, though: you can easily switch between names with a few 
+defines or search &amp; replaces.
+Anyway, <code>REG_SNDxFREQ</code> contains frequency information and 
+<code>REG_SNDxCNT</code> things like volume and envelope 
+settings; in some cases, the bit layouts are even exactly the same. 
+Apart from the sweep function of channel 1, it is exactly the same as 
+channel 2. 
+</p>
+
+<h3 id="ssec-snd-mstr">18.3.2.
+  Master sound registers</h3>
+<p>
+<code>REG_SNDDMGCNT</code>, <code>REG_SNDDSCNT</code> and 
+<code>REG_SNDSTAT</code> are the master sound controls; you have to 
+set at least some bits on each of these to get anything to work.
+</p>
+
+<div class="reg">
+<table class="reg" 
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_SNDDMGCNT (SOUNDCNT_L / SGCNT0_L ) @ <code>0400:0080h</code>
+</caption>
+<tr class="bits">
+  <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
+  <td>7<td>6 5 4<td>3<td>2 1 0
+<tr class="bf">
+  <td class="rclr1">R4
+  <td class="rclr1">R3
+  <td class="rclr1">R2
+  <td class="rclr1">R1
+  <td class="rclr0">L4
+  <td class="rclr0">L3
+  <td class="rclr0">L2
+  <td class="rclr0">L1
+  <td> -
+  <td class="rclr3">RV
+  <td> -
+  <td class="rclr2">LV
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width=128>
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-2<td class="rclr2">LV
+  <td> &nbsp;
+  <td> Left volume
+<tr class="bg1">	
+  <td>4-6<td class="rclr3">RV
+  <td> &nbsp;
+  <td> Right volume
+<tr class="bg0">	
+  <td>8-B<td class="rclr0">L1-L4
+  <td>SDMG_LSQR1, SDMG_LSQR2, SDMG_LWAVE, SDMG_LNOISE
+  <td>Channels 1-4 on left
+<tr class="bg1">	
+  <td>C-F<td class="rclr1">R1-R4
+  <td>SDMG_RSQR1, SDMG_RSQR2, SDMG_RWAVE, SDMG_RNOISE
+  <td>Channels 1-4 on right
+</tbody>
+</table>
+</div>
+
+<p>
+<code>REG_SNDDMGCNT</code> controls the main volume of the DMG 
+channels and which ones are enabled. These controls are separate for 
+the left and right speakers. Below are two macros that make 
+manipulating the register easier. Note that they <i>don't</i> actually 
+set the register, just combine the flags. 
+</p>
+
+<pre class="proglist">
+<span 
+class="keyw">#define</span> SDMG_SQR1    <span class="num">0x01</span>
+<span 
+class="keyw">#define</span> SDMG_SQR2    <span class="num">0x02</span>
+<span 
+class="keyw">#define</span> SDMG_WAVE    <span class="num">0x04</span>
+<span 
+class="keyw">#define</span> SDMG_NOISE   <span class="num">0x08</span>
+
+<span class="keyw">#define</span> SDMG_BUILD(<!--
+-->_lmode, _rmode, _lvol, _rvol)    \
+    ( ((_lvol)&amp;<span 
+class="num">7</span>) | (((_rvol)&amp;<span 
+class="num">7</span>)&lt;&lt;<span 
+class="num">4</span>) | ((_lmode)&lt;&lt;<span 
+class="num">8</span>) | ((_rmode)&lt;&lt;<span class="num">12</span>) )
+
+<span class="keyw">#define</span> SDMG_BUILD_LR(<!--
+-->_mode, _vol) SDMG_BUILD(_mode, _mode, _vol, _vol)
+</pre><br>
+
+<div class="reg">
+<table class="reg" 
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_SNDDSCNT (SOUNDCNT_H / SGCNT0_H) @ <code>0400:0082h</code>
+</caption>
+<tr class="bits">
+  <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
+  <td>7 6 5 4<td>3<td>2<td> 1 0
+<tr class="bf">
+  <td class="rclr4">BF
+  <td class="rclr3">BT
+  <td class="rclr2">BL
+  <td class="rclr2">BR
+  <td class="rclr4">AF
+  <td class="rclr3">AT
+  <td class="rclr2">AL
+  <td class="rclr2">AR
+  <td> - 
+  <td class="rclr1">BV
+  <td class="rclr1">AV
+  <td class="rclr0">DMGV
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width=128>
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-1<td class="rclr0">DMGV
+  <td>SDS_DMG25, SDS_DMG50, SDS_DMG100
+  <td>DMG Volume ratio. 
+    <ul>
+      <li><b>00</b>: 25%
+      <li><b>01</b>: 50%
+      <li><b>10</b>: 100%
+      <li><b>11</b>: forbidden
+    </ul>
+<tr class="bg1">	
+  <td> 2 <td class="rclr1">AV
+  <td>SDS_A50, SDS_A100
+  <td>DSound A volume ratio. 50% if clear; 100% of set
+<tr class="bg0">	
+  <td> 3 <td class="rclr1">BV
+  <td>SDS_B50, SDS_B100
+  <td>DSound B volume ratio. 50% if clear; 100% of set
+<tr class="bg1">	
+  <td>8-9<td class="rclr2">AR, AL
+  <td>SDS_AR, SDS_AL
+  <td><B>DSound A enable</b> Enable DS A on right and left speakers
+<tr class="bg0">	
+  <td> A <td class="rclr3">AT
+  <td>SDS_ATMR0, SDS_ATMR1
+  <td><b>Dsound A timer</B>. Use timer 0 (if clear)  or 1 (if set) 
+    for DS A
+<tr class="bg1">	
+  <td> B <td class="rclr4">AF
+  <td>SDS_ARESET
+  <td><b>FIFO reset for Dsound A</b>. When using DMA for Direct sound, 
+    this will cause DMA to reset the FIFO buffer after it's used.
+<tr class="bg0">	
+  <td>C-F
+  <td>
+    <span class="rclr2">BR, BL</span>, 
+    <span class="rclr3">BT</span>, 
+    <span class="rclr4">BF</span>
+  <td>SDS_BR, SDS_BL, SDS_BTMR0, SDS_BTMR1, SDS_BRESET
+  <td>As bits 8-B, but for DSound B
+</tbody>
+</table>
+</div>
+
+<p>
+Don't know too much about <code>REG_SNDDSCNT</code>, apart from that 
+it governs DirectSound, but also has some DMG sound bits for some 
+reason. <code>REG_SNDSTAT</code> shows the status of the DMG channels 
+<i>and</i> enables all sound. If you want to have any sound at all, 
+you need to set bit 7 there.
+</p>
+
+<div class="reg">
+<table class="reg" 
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_SNDSTAT (SOUNDCNT_X / SGCNT1) @ <code>0400:0084h</code>
+</caption>
+<tr class="bits">
+  <td>F E D C B A 9 8
+  <td>7<td>6 5 4
+  <td class="rof">3<td class="rof">2<td class="rof">1<td class="rof">0
+<tr class="bf">
+  <td> -
+  <td class="rclr0">MSE
+  <td> -
+  <td class="rclr1">4A
+  <td class="rclr1">3A
+  <td class="rclr1">2A
+  <td class="rclr1">1A
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width=128>
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td class="rof">0-3<td class="rclr1">1A-4A
+  <td>SSTAT_SQR1, SSTAT_SQR2, SSTAT_WAVE, SSTAT_NOISE
+  <td><b>Active channels</b>. Indicates which DMA channels are 
+    currently playing. They do <i>not</i> enable the channels; 
+    that's what <code>REG_SNDDMGCNT</code> is for.
+<tr class="bg1">	
+  <td> 7 <td class="rclr0">MSE
+  <td>SSTAT_DISABLE, SSTAT_ENABLE
+  <td><b>Master Sound Enable</b>. Must be set if any sound is to 
+    be heard at all. Set this <b>before</b> you do anything else: 
+    the other registers can't be accessed otherwise, see GBATek 
+    for details. 
+</tbody>
+</table>
+</div>
+
+<div class="note">
+<div class="nhcare">Sound register access</div>
+<p>
+Emulators may allow access to sound registers even if sound is 
+disabled (<code>REG_SNDSTAT</code>{7} is clear), but hardware 
+doesn't. Always enable sound before use.
+</p>
+</div>
+
+
+<h3 id="ssec-snd-sqr">18.3.3.
+  GBA Square wave generators </h3>
+<p>
+The GBA has two square sound generators, channels 1 and 2. The only 
+difference between them is channel 1's <dfn>frequency sweep</dfn>, 
+which can make the frequency rise or drop exponentially as it's 
+played. That's all done with <code>REG_SND1SWEEP</code>. 
+<code>REG_SNDxCNT</code> controls the wave's length, envelope and 
+duty cycle. Length should be obvious. The <dfn>envelope</dfn> 
+is basically the amplitude as function of time: you can make it 
+fade in (<dfn>attack</dfn>), remain at the same level 
+(<dfn>sustain</dfn>) and fade out again (<dfn>decay</dfn>). The 
+envelope has 16 volume levels and you can control the starting 
+volume, direction of the envelope and the time till the next change. 
+The <dfn>duty</dfn> refers to the ratio of the &lsquo;on&rsquo; time 
+and the period, in other words <i>D</i> = <i>h/T</i>.
+</p>
+<p>
+Of course, you can control the frequency as well, namely with 
+<code>REG_SNDxFREQ</code>. However, it isn't the frequency that you 
+enter in this field. It's not exactly the period either; it's
+something I'll refer to as the <dfn>rate</dfn> <i>R</i>. The three 
+quantities are related, but different in subtle ways and chaos ensues 
+when they're confused &ndash; and they often <i>are</i> in 
+documentation, so be careful. The relation between frequency <i>f</i> 
+and rate <i>R</i> is described by eq&nbsp;18.6; if 
+the rate goes up, so does the frequency. Since 
+<i>R</i>&nbsp;&isin;&nbsp;[0,&nbsp;2047], the range of frequencies is 
+[64 Hz,&nbsp;131 kHz]. While this spans ten octaves, the highest ones 
+aren't of much use because the frequency steps become too large (the 
+denominator in eq&nbsp;18.6 approaches 0). 
+</p>
+
+<table id="eq-fvsr">
+<tr>
+  <td class="eqnrcell">(18.6a)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center" valign="middle">
+  <tr>
+    <td rowspan=2> <i>f</i>(<i>R</i>) &nbsp;=&nbsp;
+    <td class="bdrB"> 2<sup>17</sup>
+  <tr>
+    <td> 2048 &minus; <i>R</i>
+  </tbody>
+  </table>
+<tr>
+  <td class="eqnrcell">(18.6b)
+  <td class="eqcell">
+    <i>R</i>(<i>f</i>) &nbsp;=&nbsp; 2048 
+    &minus; 2<sup>17</sup> <big>/</big> <i>f</i>
+</table>
+
+<h3 id="ssec-snd-sqrreg">18.3.4.
+  Square sound registers</h3>
+<p>
+Both square-wave generators have registers <code>REG_SNDxCNT</code> 
+for evelope/length/duty control and <code>REG_SNDxFREQ</code> for 
+frequency control. Sound 1 also has sweep control in the form of 
+<code>REG_SND1SWEEP</code>.Look in table 
+18.2 for the traditional names; note 
+that in traditional nomenclature the suffixes for control and 
+frequency are <i>different</i> for channels 1 and 2, even though 
+they have exactly the same function.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-snd1cnt"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+<span class="nobr">
+  REG_SND1CNT (SOUND1CNT_H / SG10_H) @ <code>0400:0062h</code></span>
+  <br> and <br>
+<span class="nobr">
+  REG_SND2CNT (SOUND2CNT_L / SG20_L) @ <code>0400:0068h</code></span>
+</caption>
+<tr class="bits">
+  <td>F E D C<td>B<td>A 9 8<td>7 6<td class="wof">5 4 3 2 1 0
+<tr class="bf">
+  <td class="rclr0">EIV
+  <td class="rclr1">ED
+  <td class="rclr2">EST
+  <td class="rclr3">D
+  <td class="rclr4">L
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td class="wof">0-5<td class="rclr4">L
+  <td>SSQR_LEN#
+  <td>Sound <b>Length</b>. This is a <i>write-only</i> field and only 
+    works if the channel is timed (<code>REG_SNDxFREQ{E}</code>). The 
+    length itself is actually (64&minus;<i>L</i>)/256 seconds for a 
+    [3.9, 250] ms range.
+<tr class="bg1">	
+  <td>6-7<td class="rclr3">D
+  <td>SSQR_DUTY1_8, SSQR_DUTY1_4, SSQR_DUTY1_2, SSQR_DUTY3_4, 
+    SSQR_DUTY#
+  <td>Wave <b>duty cycle</b>. Ratio between on and of times of the 
+    square wave. Looking back at eq&nbsp;18.2, 
+	this comes down to <i>D=h/T</i>. The available cycles are 
+	12.5%, 25%, 50%, and 75% (one eighth, quarter, half and three 
+	quarters).
+<tr class="bg0">	
+  <td>8-A<td class="rclr2">EST
+  <td>SSQR_TIME#
+  <td>Envelope <b>step-time</b>. Time between envelope changes: 
+    &Delta;t = <i>EST</i>/64 s.
+<tr class="bg1">	
+  <td> B <td class="rclr1">ED
+  <td>SSQR_DEC, SSQR_INC
+  <td>Envelope <b>direction</b>. Indicates if the envelope 
+    decreases (default) or increases with each step. 
+<tr class="bg0">	
+  <td>C-F<td class="rclr0">EIV
+  <td>SSQR_IVOL#
+  <td>Envelope <b>initial value</b>. Can be considered a <b>volume</b> 
+    setting of sorts: 0 is silent and 15 is full volume. Combined 
+    with the direction, you can have fade-in and fade-outs; to have a 
+    sustaining sound, set initial volume to 15 and an increasing 
+    direction. To vary the <i>real</i> volume, remember 
+    <code>REG_SNDDMGCNT</code>.
+</tbody>
+</table>
+</div>
+
+<div class="cpt_fr" style="width:312px;">
+<img src="../img/sqrfour.png" alt="FT of square wave." id="img-sqrf"><br>
+<b>Fig 18.3</b>: Square wave spectrum. 
+  (integer <i>m</i> only)
+</div>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    <i>A</i><sub>m</sub> = 
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB">2
+    <td rowspan=2>&middot;
+    <td class="bdrB">sin(&pi;<i>D</i> m)
+  <tr>
+    <td>&pi;
+    <td>m
+  </tbody>
+  </table>
+</table>
+
+<p>
+Some more on the duty cycle. Remember we've done a Fourier analysis 
+of the square wave so we could determine the frequencies in it. Apart 
+from the <b>base frequency</b>, there are also <b>overtones</b> of 
+frequencies <i>m&middot;f</i>. The spectrum 
+(see fig&nbsp;18.3) gives the amplitudes of all 
+these frequencies. Note that even though the figure has lines, only 
+integral 
+values of <i>m</i> are allowed. The base frequency at <i>m</i>=1 has 
+the highest significance and the rest falls off with 1/<i>m</i>. The 
+interesting part is when the sine comes into play: whenever 
+<i>m&middot;D</i> is an integer, that component vanishes! With a 
+fractional duty number &ndash;like the ones we have&ndash; this 
+happens every time <i>m</i> is equal to the denominator. For the 50% 
+duty, every second overtone disappears, leaving a fairly smooth tone;
+for 12.5%, only every eighth vanishes and the result is indeed a 
+noisier sound. Note that for <i>both</i> &frac14; and &frac34; duties 
+every fourth vanishes so that they should be indistinguishable. I was 
+a little surprised about this result, but sure enough, when I checked 
+they really did sound the same to me.
+</p><br>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-snd1freq"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+<span class="nobr">
+  REG_SND1FREQ (SOUND1CNT_X / SG11) @ <code>0400:0062h</code></span>
+  <br> and <br>
+<span class="nobr">
+  REG_SND2FREQ (SOUND2CNT_H / SG21) @ <code>0400:006Ch</code></span>  
+</caption>
+<tr class="bits">
+  <td class="wof">F<td>E<td>D C B
+  <td class="wof">A 9 8 7 6 5 4 3 2 1 0
+<tr class="bf">
+  <td class="rclr1">Re
+  <td class="rclr2">T
+  <td> - 
+  <td class="rclr0">R
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td class="wof">0-A<td class="rclr0">R
+  <td>SFREQ_RATE#
+  <td>Sound <b>rate</b>. Well, initial rate. That's <i>rate</i>, not 
+    frequency. Nor period. The relation between rate and frequency is 
+    <span class="nobr"><i>f</i> = 
+    2<sup>17</sup><big>/</big>(2048-<i>R</i>)</span>. Write-only 
+    field.
+<tr class="bg1">	
+  <td> E <td class="rclr2">T
+  <td>SFREQ_HOLD, SFREQ_TIMED
+  <td><b>Timed</b> flag. If set, the sound plays for as long as 
+    the length field (<code>REG_SNDxCNT</code>{0-5}) indicates. 
+    If clear, the sound plays forever. Note that even if a decaying 
+    envelope has reached 0, the sound itself would still be considered 
+    on, even if it's silent.
+<tr class="bg0">	
+  <td class="wof"> F <td class="rclr1">Re
+  <td>SFREQ_RESET
+  <td>Sound <b>reset</b>. Resets the sound to the initial volume (and 
+    sweep) settings. Remember that the rate field is in this register 
+    as well and due to its write-only nature a simple 
+    &lsquo;<code>|= SFREQ_RESET</code>&rsquo; will <i>not</i> suffice
+    (even though it might on emulators).
+</tbody>
+</table>
+</div><br>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-snd1sweep"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ <code>0400:0060h</code>
+</caption>
+<tr class="bits">
+  <td>F E D C B A 9 8 7<td>6 5 4<td>3<td>2 1 0
+<tr class="bf">
+  <td> - 
+  <td class="rclr2">T
+  <td class="rclr1">M
+  <td class="rclr0">N
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-2<td class="rclr0">N
+  <td>SSW_SHIFT#
+  <td>Sweep <b>number</b>. <i>Not</i> the number of sweeps; see the 
+    discussion below.
+<tr class="bg1">	
+  <td> 3 <td class="rclr1">M
+  <td>SSW_INC, SSW_DEC
+  <td>Sweep <b>mode</b>. The sweep can take the rate either up 
+    (default) or down (if set).
+<tr class="bg0">	
+  <td>4-6<td class="rclr2">T
+  <td>SSW_TIME#
+  <td>Sweep <b>step-time</b>. The time between sweeps is measured in 
+    128 Hz (not kHz!): &Delta;t = <i>T</i>/128 ms &asymp; 7.8<i>T</i> 
+    ms; if <i>T</i>=0, the sweep is disabled. 
+</tbody>
+</table>
+</div>
+
+<p>
+I'm reasonably confident that the <i>exact</i> workings of shifts are 
+explained without due care in most documents, so here are a few more 
+things about it. Sure enough, the sweep <i>does</i> make the pitch 
+go up or down which is controlled by bit 3, and the step-time 
+<i>does</i> change the pitch after that time, but exactly what the 
+sweep-shift does is ambiguous at best. The information is in there, 
+but only if you know what to look for. The usual formula given is 
+something like:
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell">
+    <i>T</i> &nbsp;=&nbsp; <i>T</i> &plusmn; 
+    <i>T</i>&middot;2<sup>&minus;n</sup>
+</table>
+
+<p>
+That's what belogic gives and if you know what the terms are you'll be 
+fine. Contrary to what you may read, the sweep does <i>not</i> apply 
+to the frequency (<i>f</i>). It does <i>not</i> apply to the period 
+(<i>T</i>, see above). It applies to the <b>rate</b> (<i>R</i>). If 
+you look in emulators, you can actually <i>see</i> the rate-value 
+change.
+</p>
+<p>
+Second, the <i>n</i> in the exponent is <i>not</i> the current 
+sweep index that runs up to the number of sweep shifts. It is in fact 
+simply the <b>sweep shift number</b>, and the sweeps continue until 
+the rate reaches 0 or the maximum of 2047.
+</p>
+<p>
+The formulas you may see do say that, but it's easy to misread them. 
+I did. Eq 18.7 holds a number of correct 
+relations. <i>R</i> is the rate, <i>n</i> is the sweep shift 
+(18.7c explains why it's called a <i>shift</i> 
+(singular, not plural)), and <i>j</i> is the current sweep index. You 
+can view them in a number of ways, but they all boil down to 
+exponential functions, that's what 
+&lsquo;d<i>y</i>(<i>x</i>)&nbsp;=&nbsp;<i>a&middot;y</i>(<i>x</i>)d<i>x</i>&rsquo; 
+means, after all. For example, if <i>n</i>=1, then you get 
+1&frac12;<sup>j</sup> and &frac12;<sup>j</sup> behaviour for 
+increasing and decreasing sweeps, respectively; with <i>n</i>=2 it's 
+1&frac14;<sup>j</sup> and &frac34;<sup>j</sup>, etc. The higher 
+the shift, the slower the sweep.
+</p>
+
+<table id="eq-sweep">
+<tr>
+  <td class="eqnrcell">(18.7a)
+  <td class="eqcell">
+    &Delta;<i>R</i> &nbsp;=&nbsp; 2<sup>&minus;n</sup>&middot;<i>R</i>
+</table>
+
+<table>
+<tr>
+  <td class="eqnrcell">(18.7b)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><i>R</i><sub>j</sub> 
+    <td>&nbsp;=&nbsp;
+    <td><i>R</i><sub>j&minus;1</sub> &plusmn; 
+      <i>R</i><sub>j&minus;1</sub>&middot;2<sup>-n</sup>
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td><i>R</i><sub>j&minus;1</sub><big>(</big>1 &plusmn; 
+      2<sup>&minus;n</sup><big>)</big>
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td><i>R</i><sub>0</sub>
+      <big>(</big>1 &plusmn; 2<sup>&minus;n</sup><big>)<sup>j</sup></big>
+  </table>
+</table>
+
+<table>
+<tr>
+  <td class="eqnrcell">(18.7c)
+  <td class="eqcell">
+    <code>R += R&gt;&gt;n;</code>
+</table>
+
+<h3 id="ssec-snd-notes">18.3.5.
+  Playing notes</h3>
+<p>
+Even though the rates are equal, some may be considered more equal 
+than others. I've already given a table with the frequencies for the 
+standard notes (table 18.1 of octave 0. You can 
+of course convert those to rates via eq&nbsp;18.6b 
+and use them as such. However, it might pay to figure out how to 
+play the notes of <i>all</i> octaves.
+</p>
+<p>
+To do this, we'll use some facts I mentioned in section
+18.2.3. about the make-up of the musical scale. 
+While I <i>could</i> make use of the logarithmic relation between 
+successive notes (&Delta;<i>f</i>=2<sup>1/12</sup>&middot;<i>f</i>), 
+I'll restrict myself to the fact that notes between octaves differ 
+by a factor of two. We'll also need the rate-frequency relation 
+(obviously). That's the basic information you need, I'll explain more 
+once we get through all the math. Yes, it's more math, but it'll be 
+the last of this page, I promise.
+</p>
+
+<p>
+The equations we'll start with are the general frequency equation and 
+the rate-frequency relation. In these we have rate <i>R</i>, 
+frequency <i>f</i> and octave <i>c</i>. We also have a base octave 
+<i>C</i> and frequency <i>F</i> in that base octave.
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><i>f</i>(<i>F</i>, <i>c</i>)
+    <td>&nbsp;=&nbsp;
+    <td><i>F</i>&middot;2<sup>c&minus;C</sup>
+  <tr>
+    <td><i>R</i>(<i>F</i>, <i>c</i>)
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/</big> 
+      <i>f</i>(<i>F</i>, <i>c</i>)
+  </table>
+</table>
+
+<p>
+And now for the magic. And you <i>are</i> expected to understand 
+this.
+</p>
+
+<table id="eq-noterate">
+<tr>
+  <td class="eqnrcell">(18.8)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><i>R</i>(<i>F</i>, <i>c</i>)
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/</big> 
+      <i>f</i>(<i>F</i>, <i>c</i>)
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/ 
+      (</big><i>F</i>&middot;2<sup>c&minus;C</sup><big>)</big>
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus; 
+      2<sup>17+C&minus;c</sup> <big>/</big> 
+      <i>F</i>
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus; 1<big>/</big><i>F</i> &middot;   
+      2<sup>17+C+m&minus;(<i>c</i>+m)</sup> 
+  <tr>
+    <td>&nbsp;
+    <td>&nbsp;=&nbsp;
+    <td>2<sup>11</sup> &minus;   
+      <big>{</big> 2<sup>17+C+m</sup><big>/</big><i>F</i> <big>}</big>
+      &middot; 2<sup>&minus;(<i>c</i>+m)</sup> 
+  </table>
+</table>
+
+<p>
+Right, and now for <i>why</i> this thing's useful. Remember that 
+the GBA has no hardware division or floating-point support, so we're 
+left with integers and (if possible) shifts. That's why the last term 
+in the last step of eq&nbsp;18.8 was separated. 
+The term with <i>F</i> gives a rate offset for the base octave, which 
+we need to divide (read: shift) by the octave offset term for the 
+different octaves. Remember that integer division truncates, so we 
+need a big numerator for the most accuracy. This can be done with a 
+large <i>C</i> and by adding an extra term <i>m</i>. Baseically, 
+this makes it an <i>m</i>f fixed point division. The workable octave 
+range is &minus;2 to 5, so we take <i>C</i>=5. The value for 
+<i>m</i> is <i>almost</i> arbitrary, but needs to be higher than two 
+because of the minimum octave is &minus;2, and a shift can never be 
+negative. <i>m</i>=4 will suffice. 
+</p>
+<p>
+Note that there is <i>still</i> a division in there. Fortunately, 
+there are only twelve values available for <i>F</i>, so might just as 
+well store the whole term in a look-up table. The final result is 
+listing 18.1 below.
+</p>
+
+<pre class="proglist" id="cd-snd-rate">
+<span class="cmt">// Listing 18.1: <!--
+-->a sound-rate macro and friends</span>
+
+<span class="keyw">typedef enum</span> 
+{
+    NOTE_C=<span class="num">0</span>, NOTE_CIS, NOTE_D,   NOTE_DIS, 
+    NOTE_E,   NOTE_F,   NOTE_FIS, NOTE_G, 
+    NOTE_GIS, NOTE_A,   NOTE_BES, NOTE_B
+} eSndNoteId;
+
+<span class="cmt">// Rates for traditional notes in octave +5</span>
+<span class="keyw">const</span> u32 __snd_rates[<span 
+class="num">12</span>]=
+{
+    <span class="num">8013</span>, <span class="num">7566</span>, <span 
+class="num">7144</span>, <span class="num">6742</span>, <span 
+class="cmt">// C , C#, D , D#</span>
+    <span class="num">6362</span>, <span class="num">6005</span>, <span 
+class="num">5666</span>, <span class="num">5346</span>, <span 
+class="cmt">// E , F , F#, G</span>
+    <span class="num">5048</span>, <span class="num">4766</span>, <span 
+class="num">4499</span>, <span class="num">4246</span>  <span 
+class="cmt">// G#, A , A#, B</span>
+};
+
+<span class="keyw">#define</span> SND_RATE(note, oct) ( <span 
+class="num">2048</span>-(__snd_rates[note]>>(<span 
+class="num">4</span>+(oct))) )
+
+<span class="cmt">// sample use: note A, octave 0</span>
+    REG_SND1FREQ= SFREQ_RESET | SND_RATE(NOTE_A, <span class="num">0</span>);
+</pre>
+
+<p>
+Here you have a couple of constants for the note-indices, the 
+LUT with rate-offsets <code>__snd_rates</code> and a simple macro 
+that gives you what you want. While <code>__snd_rates</code> is 
+constant here, you may consider a non-const version to allow tuning.
+Not that a square wave is anything worth tuning, but I'm just saying
+&hellip; y'know.
+</p>
+<p>
+One possible annoyance is that you have to splice the note into
+a note and octave part and to do that dynamically you'd need division 
+and modulo by 12. Or do you? If you knew a few things about
+<a href="fixed.htm#sec-rmdiv">division by a constant is
+multiplication by its reciprocal</a>, you'd know what to do. (<small>Hint:
+<i>c</i>=(<i>N</i>*43&gt;&gt;9)&minus;2, with <i>N</i> the total note 
+index between 0 and 95  (octave &minus;2 to +5).</small>)
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">18.4.
+  Demo time</h2>
+<p>
+I think I've done about enough theory for today, don't you dear reader? 
+</p>
+<p>
+&ldquo; @_@ &rdquo;
+</p>
+<p>
+I'll take that as a yes. The demo in question demonstrates the use of 
+the various macros of this chapter, most notably 
+<code>SND_RATE</code>. It also shows how you can play a little song 
+&ndash; and I use the term lightly &ndash; with the square wave 
+generator. I hope you can recognize which one. 
+</p>
+
+<pre class="proglist" id="cd-snddemo1">
+
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+
+u8 txt_scrolly= <span class="num">8</span>;
+
+<span class="keyw">const</span> <span class="keyw">char</span> *names[]=
+{   <span class="str">&quot;C &quot;</span>, <span 
+class="str">&quot;C#&quot;</span>, <span class="str">&quot;D &quot;</span>, <span 
+class="str">&quot;D#&quot;</span>, <span class="str">&quot;E &quot;</span>, <span 
+class="str">&quot;F &quot;</span>, <span class="str">&quot;F#&quot;</span>, <span 
+class="str">&quot;G &quot;</span>, <span class="str">&quot;G#&quot;</span>, <span 
+class="str">&quot;A &quot;</span>, <span class="str">&quot;A#&quot;</span>, <span 
+class="str">&quot;B &quot;</span>  };
+
+<span class="cmt">// === FUNCTIONS ======================================================
+
+// Show the octave the next note will be in</span>
+<span class="keyw">void</span> note_prep(<span class="keyw">int</span> octave)
+{
+    <span class="keyw">char</span> str[<span class="num">32</span>];
+    siprintf(str, <span class="str">&quot;[  %+2d]&quot;</span>, octave);
+    se_puts(<span class="num">8</span>, txt_scrolly, str, <span 
+class="num">0x1000</span>);
+}
+
+
+<span class="cmt">// Play a note and show which one was played</span>
+<span class="keyw">void</span> note_play(<span 
+class="keyw">int</span> note, <span class="keyw">int</span> octave)
+{
+    <span class="keyw">char</span> str[<span class="num">32</span>];
+
+    <span class="cmt">// Clear next top and current rows</span>
+    SBB_CLEAR_ROW(<span class="num">31</span>, (txt_scrolly/<span 
+class="num">8</span>-<span class="num">2</span>)&amp;<span class="num">31</span>);
+    SBB_CLEAR_ROW(<span class="num">31</span>, txt_scrolly/<span 
+class="num">8</span>);   
+
+    <span class="cmt">// Display note and scroll</span>
+    siprintf(str, <span 
+class="str">&quot;%02s%+2d&quot;</span>, names[note], octave);
+    se_puts(<span class="num">16</span>, txt_scrolly, str, <span 
+class="num">0</span>);
+
+    txt_scrolly -= <span class="num">8</span>;
+    REG_BG0VOFS= txt_scrolly-<span class="num">8</span>;
+
+    <span class="cmt">// Play the actual note</span>
+    <b>REG_SND1FREQ = SFREQ_RESET | SND_RATE(note, octave);</b>
+}
+
+
+<span class="cmt">// Play a little ditty</span>
+<span class="keyw">void</span> sos()
+{
+    <span class="keyw">const</span> u8 lens[<span 
+class="num">6</span>]= { <span class="num">1</span>,<span 
+class="num">1</span>,<span class="num">4</span>, <span 
+class="num">1</span>,<span class="num">1</span>,<span class="num">4</span> };
+    <span class="keyw">const</span> u8 notes[<span 
+class="num">6</span>]= { <span class="num">0x02</span>, <span 
+class="num">0x05</span>, <span class="num">0x12</span>,  <span 
+class="num">0x02</span>, <span class="num">0x05</span>, <span 
+class="num">0x12</span> };
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">6</span>; ii++)
+    {
+        note_play(notes[ii]&amp;<span 
+class="num">15</span>, notes[ii]&gt;&gt;<span class="num">4</span>);
+        VBlankIntrDelay(<span class="num">8</span>*lens[ii]);
+    }
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+
+    txt_init_std();
+    txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0</span>, CLR_ORANGE, <span class="num">0</span>);
+    pal_bg_mem[<span class="num">0x11</span>]= CLR_GREEN;
+    
+    <span class="keyw">int</span> octave= <span class="num">0</span>;
+
+    <span class="cmt">// turn sound on</span>
+    <b>REG_SNDSTAT= SSTAT_ENABLE;</b>
+    <span class="cmt">// snd1 on left/right ; both full volume</span>
+    <b>REG_SNDDMGCNT = SDMG_BUILD_LR(SDMG_SQR1, <span class="num">7</span>);</b>
+    <span class="cmt">// DMG ratio to 100%</span>
+    <b>REG_SNDDSCNT= SDS_DMG100;</b>
+
+    <span class="cmt">// no sweep</span>
+    <b>REG_SND1SWEEP= SSW_OFF;</b>
+    <span class="cmt">// envelope: vol=12, decay, max step time (7) ; 50% duty</span>
+    <b>REG_SND1CNT= SSQR_ENV_BUILD(<span class="num">12</span>, <span 
+class="num">0</span>, <span class="num">7</span>) | SSQR_DUTY1_2;</b>
+    REG_SND1FREQ= <span class="num">0</span>;
+
+    sos();
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        key_poll();
+
+        <span class="cmt">// Change octave:</span>
+        octave += bit_tribool(key_hit(-<span class="num">1</span>), KI_R, KI_L);
+        octave= wrap(octave, -<span class="num">2</span>, <span class="num">6</span>);
+        note_prep(octave);
+
+        <span class="cmt">// Play note</span>
+        <span class="keyw">if</span>(key_hit(KEY_DIR|KEY_A))
+        {
+            <span class="keyw">if</span>(key_hit(KEY_UP))
+                note_play(NOTE_D, octave+<span class="num">1</span>);
+            <span class="keyw">if</span>(key_hit(KEY_LEFT))
+                note_play(NOTE_B, octave);
+            <span class="keyw">if</span>(key_hit(KEY_RIGHT))
+                note_play(NOTE_A, octave);
+            <span class="keyw">if</span>(key_hit(KEY_DOWN))
+                note_play(NOTE_F, octave);
+            <span class="keyw">if</span>(key_hit(KEY_A))
+                note_play(NOTE_D, octave);
+        }
+
+        <span class="cmt">// Play ditty</span>
+        <span class="keyw">if</span>(key_hit(KEY_B))
+            sos();      
+    }
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+The bolded code in <code>main()</code> initializes the sound 
+register; nothing fancy, but it has to be done before you hear 
+anything at all. It is important to start with <code>REG_SNDSTAT</code> 
+bit 7 (<code>SSTAT_ENABLE</code>), i.e., the master sound enable. 
+Without it, you cannot even access the other registers. Setting 
+volume to something non-zero is a good idea too, of course. Then 
+we turn off the sweep function and set sound 1 to use a fading 
+envelope with a 50% duty. And that's where the fun starts.
+</p>
+<p>
+I'll explain what <code>sos()</code> in a little while, first 
+something about the controls of the demo. You can play notes with 
+the D-pad and A (hmm, there's something familiar about that 
+arrangement). The octave <i>c</i> you're working in can be changed 
+with L and R; the background color changes with it. B plays 
+<code>sos()</code> again.
+</p>
+
+<div class="lblock">
+<table>
+<tbody valign="top">
+<tr>
+  <th>A / D-pad <td>Play a note
+    <table>
+    <tr><td>&uarr; <td>: D (next octave)
+    <tr><td>&larr; <td>: B 
+    <tr><td>&rarr; <td>: A 
+    <tr><td>&darr; <td>: F 
+    <tr><td> A     <td>: D 
+    </table>
+<tr>
+  <th>L / R <td> Decrease / Increase current octave ([-2, 5], 
+  wraps around)
+<tr>
+  <th> B    <td>Play a little tune.
+</tbody>
+</table>
+</div>
+
+<p>
+The D-pad and A select a note to play, which is handled by 
+<code>note_play()</code>. The bolded line there plays the actual note, 
+the rest is extra stuff that writes the note just played to 
+the screen and scrolls along so you can see the history of 
+what's been played. The code for this is kinda ugly, but is not 
+exactly central to the story so that's fine.
+</p>
+
+<h3 id="ssec-demo-ditty">18.4.1.
+  Playing a little ditty</h3>
+<p>
+So what is <code>sos()</code> all about then? Let's take another look.
+</p>
+
+<pre class="proglist">
+<span class="keyw">void</span> sos()
+{
+    <span class="keyw">const</span> u8 lens[<span 
+class="num">6</span>]= { <span class="num">1</span>,<span 
+class="num">1</span>,<span class="num">4</span>, <span 
+class="num">1</span>,<span class="num">1</span>,<span class="num">4</span> };
+    <span class="keyw">const</span> u8 notes[<span 
+class="num">6</span>]= { <span class="num">0x02</span>, <span 
+class="num">0x05</span>, <span class="num">0x12</span>,  <span 
+class="num">0x02</span>, <span class="num">0x05</span>, <span 
+class="num">0x12</span> };
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">6</span>; ii++)
+    {
+        note_play(notes[ii]&amp;<span 
+class="num">15</span>, notes[ii]&gt;&gt;<span class="num">4</span>);
+        VBlankIntrDelay(<span class="num">8</span>*lens[ii]);
+    }
+}
+</pre>
+
+<p>
+There are two arrays here, <code>notes</code> and <code>lens</code>, 
+and a loop over all elements. We take a byte from <code>notes</code> 
+and use the nybbles for octave and note information, play the note, 
+then wait a while &ndash;the length is indicated by the 
+<code>lens</code> array&ndash; before the next note is played. 
+Basically, we're playing music. Hey, if the likes of <i>Schnappi</i> 
+and <i>Crazy Frog</i> can make it into the top 10, I think I'm 
+allowed to call <i>this</i> music too, alright? Alright.
+</p>
+<p>
+The point I'm trying to make is that it's very well possible to 
+play a tune with just the tone generators, technically you don't 
+need digitized music and all that stuff to play something. Of course, 
+it'll sound better if you do, but if you just need a little jingle 
+the tone generators may be all you need. Just define some notes 
+(the nybble format for octaves and notes will do) and some lengths 
+and you have the basics already. You could even use more than one 
+channel for different effects.
+</p>
+<p>
+If you understood that, then get this: the note+length+channel idea 
+is pretty much what tracked music (mod, it, xm, etc) does, only they 
+use a more sophisticated wave than a square wave. But the principle 
+is the same. Getting it to work takes a little more effort, but 
+that's what Deku's <a href="http://deku.gbadev.org" target="_blank">sound mix 
+tutorial</a> is for.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="swi.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="text.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">BIOS calls</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Text systems</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

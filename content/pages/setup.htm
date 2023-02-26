@@ -1,0 +1,1381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20071229">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Setting up a development environment</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="hardware.htm">Hardware</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="first.htm">First demo</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">2.
+  Setting up a development environment</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a></li>
+  <li><a href="#sec-dkp">devkitPro and devkitARM</a></li>
+  <li><a href="#sec-env">Alternative development environments</a></li>
+  <li><a href="#sec-cli">Command line details and legacy topics</a></li>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">2.1.
+  Introduction</h2>
+
+<p>
+Unless you want to punch in the instructions in binary in a hex editor (&ldquo;Luxury! When we 
+were young we had to toggle each bit individually with magnets!&rdquo;), you'll need a 
+development environment to turn human readable code into machine language. There are several 
+options here, but the main one in GBA homebrew is 
+<a href="http://www.devkitpro.org" target="_blank">devkitPro</a> and the ARM cross-compiler 
+devkitARM. This chapter will show you how to set-up the necessary components and how to get it 
+running and how to compile tonc's code with it. I'll also show where you can find some other 
+development packages currently available, but the focus in this and other chapters will be 
+devkitPro/ARM.
+</p>
+<p>
+The last section explains some of the details about using the command-line and makefiles. It is 
+essentially optional, but for historical reasons I have to cover it before the rest of the 
+chapters instead of putting it in an appendix.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-dkp">2.2.
+  devkitPro and devkitARM</h2>
+
+<h3 id="ssec-dkp-install">2.2.1.
+  Installation</h3>
+
+<div class="cpt_fr" style="width:208px;">
+  <img src="../img/setup/dkp_dir.png" id="img-dkp-dir" 
+    alt="DKP structure"><br>
+  <b>Fig 2.1</b>: devkitPro dir tree.
+</div>
+
+<p>
+In the last few years, 
+<a href="http://www.devkitpro.org" target="_blank"><dfn>devkitPro</dfn></a> (DKP) has become the standard 
+toolchain for GBA homebrew and is available for Windows, Mac and Linux platforms. DevkitPro is 
+actually a package, containing, compilers for a number of systems (including GBA), library and 
+example code and an editor. You can find the actual downloads in the 
+<a href="http://sourceforge.net/project/showfiles.php?group_id=114505" target="_blank">
+download</a> section of the sourceforge page:
+<a href="http://sourceforge.net/projects/devkitpro/" target="_blank">
+http://sourceforge.net/projects/devkitpro/</a>.
+</p>
+<p>
+For the GBA, you will need:
+</p>
+<ul>
+  <li>
+    <b>devkitARM</b> (DKA). The ARM cross-compiler, based on the GCC toolchain.
+  </li>
+  <li>
+    <b>MSys</b>. A shell with basic Unix commands like <tt>make</tt> and 
+	<tt>rm</tt>. Probably only needed for Windows platforms, which usually lack these tools.
+  </li>
+</ul>
+
+<p>
+Other recommended items are:
+</p>
+
+<ul>
+  <li>
+    <b>Programmer's Notepad 2</b>: an advanced plain text editor with code highlighters, 
+      code-folding capabilities and shell execution commands. I suppose you could call it a 
+	  mini-IDE. Even if you had your own editor, it is recommended that you get this one as 
+	  well because both DKP's and Tonc's examples contain PN2 project files, which makes it 
+	  easier to build GBA projects.
+  </li>
+  <li>
+    <b>libgba</b>: a set of basic types, macros and functions for use in GBA development. While 
+	I won't be using it here, it is still worth a look. Currently <tt>libgba</tt> and tonc's 
+	own code library <tt>libtonc</tt> are pretty much incompatible (multiple definitions and 
+	such), I am trying to make sure that there won't be any conflicts.
+  </li>
+  <li>
+    <b>GBA examples</b>: a set of example projects using libgba.
+  </li>
+</ul>
+
+<p>
+For Windows, there is an installer that downloads and installs the components automatically. For 
+Mac and Linux, you'll have to install things yourself. The installation process also creates a 
+number of environment variables for directories to devkitPro and devkitARM, and adds 
+<tt>msys/bin</tt> to the PATH.
+</p><br>
+
+<p>
+When installng DKP on Windows, there's one thing you must be aware of. GCC-based tools have 
+their origins in Unix, and Unix doesn't take kindly to spaces in paths. Therefore <b>do not</b> 
+install into a directory with spaces (like <tt>c:\Program Files</tt>) and don't put your 
+projects in a folder with spaces in the name either (like <tt>My Documents</tt>, which is 
+actually &lsquo;short&rsquo; for <tt>c:\Documents And Settings\UserName\Blah Blah Blah More 
+Ridiculously Long Directory Names That Never Fit In Textboxes\My Documents\</tt>). Basically, 
+don't use the standard Windows directories. My own installation tree looks like 
+fig&nbsp;2.1, but it's customary to put devkitPro in <tt>c:\devkitPro</tt>.
+</p>
+
+<div class="note" id="nt-paths">
+<div class="nhbad">Do not use spaces in paths</div>
+<p>
+GCC makes use of the GCC toolchain, which doesn't cope well with spaces in paths (think 
+<tt>My Documents</tt>). Spaces are used as a separator between command-line options and when 
+you have them in paths the tools will interpret that as new options. While there are ways to 
+use them anyway, you can save yourself a lot of headaches by simply staying clear of them.
+</p>
+</div>
+
+
+<h3 id="ssec-dkp-use">2.2.2.
+  Building projects with DevkitARM</h3>
+
+<div class="cpt_fr" style="width:100px;">
+  <img src="../img/setup/template_dir.png" id="img-templ-dir" 
+    alt="DKP structure"><br>
+  <b>Fig 2.2</b>: Template project.
+</div>
+
+<p>
+There are several ways of building GBA projects, but the recommended process it to use makefiles. 
+In particular, devkitPro's template makefiles. The GBA template makefiles can be found in 
+<tt>$(DEVKITPRO)/examples/gba/template</tt>. When creating a new project of your own, base it 
+on this one. You can see the basic structure of the template project in 
+fig&nbsp;2.2. The <tt>build</tt> directory is where all the 
+intermediate files go. You'd rarely have to look there. The <tt>source</tt> directory is 
+where you put the source code: the C, C++ and perhaps assembly files. If you have header files, 
+put those in <tt>include</tt>.
+</p>
+<p>
+Note that the <tt>build</tt> and <tt>include</tt> directories don't actually exist in the 
+template project yet; <tt>build</tt> is created by the build process itself, and since there 
+are no headers to include, the <tt>include</tt> folder isn't necessary in this case and has 
+been removed, but if you do have headers, you'd put them there.
+</p>
+<p>
+The template directory itself has two files: the PN2 project files, <tt>template.pnproj</tt> 
+and the <tt>Makefile</tt>. Once you've opened the project in PN2, you can <dfn>build</dfn> 
+the project with <tt>Alt+1</tt>, and <dfn>clean</dfn> the project with <tt>Alt+2</tt>. If all 
+is well, you should get something like this:
+</p>
+
+<pre class="proglist">
+<span class="rclr1">&gt; "make"</span> 
+template.c
+arm-none-eabi-gcc -MMD -MP -MF /e/dev/devkitPro/examples/gba/template/build/template.d 
+  -g -Wall -O3 -mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer -ffast-math 
+  -mthumb -mthumb-interwork  -I/e/dev/devkitPro/libgba/include 
+  -I/e/dev/devkitPro/examples/gba/template/build 
+  -c /e/dev/devkitPro/examples/gba/template/source/template.c -o template.o
+linking multiboot
+built ... template_mb.gba
+ROM fixed!
+
+<span class="rclr1">&gt; Process Exit Code: 0</span>
+<span class="rclr1">&gt; Time Taken: 00:02</span>
+</pre>
+
+<p>
+The output consists of 6 lines:
+</p>
+
+<ol>
+  <li>
+    `<tt>make</tt>'. Invokes <tt>make</tt> to run the makefile.
+  </li>
+  <li>
+    `<tt>template.c</tt>'. The file we're compiling.
+  </li>
+  <li>
+    `<tt>arm-none-eabi-gcc -MMD ...</tt>'. This very long line, split over multiple lines here, 
+	invokes the compiler. <tt>gcc</tt> is front-end of the compiler, and <tt>arm-none-eabi</tt> 
+	is the prefix that devkitARM uses to set it apart from all the other versions of gcc. The 
+	rest are the compiler options. Basically, this whole thing turns the source file 
+	<tt>template.c</tt> into an <dfn>object file</dfn> called <tt>template.o</tt>.
+  </li>
+  <li>
+    `<tt>linking multiboot</tt>'. After compilation, all object files have to be 
+	<dfn>linked</dfn> together into the final binary. The actual calling of the linker is 
+	hidden here, but it is another call to <tt>arm-none-eabi-gcc</tt> with a different set 
+	of options. I'll cover what &ldquo;multiboot&rdquo; means later in the section.
+  </li>
+  <li>
+	`<tt>built ... template_mb.gba</tt>'. Indicated everything worked, and we now have a GBA 
+	binary called template_mb.gba.
+  </li>
+  <li>
+    `<tt>ROM fixed!</tt>'. Each GBA ROM starts with a header that the GBA checks to see if it's 
+	a valid GBA program. If the header check fails, the GBA will reject the program (even 
+	though emulators will still accept it). There is a tool called <tt>gbafix</tt> that 
+	patches the ROM with a valid header, which is what this line is about. 
+  </li>
+</ol>
+
+<div class="lblock">
+<div class="cpt" style="width:240px;">
+  <img src="../img/setup/template.png" id="img-templ" 
+    alt=""><br>
+  <b>Fig 2.3</b>: template(_mb).gba.
+</div>
+</div>
+
+<p>
+The `<tt>ROM fixed!</tt>' line means the build has succeeded. You should end up with a 
+<tt>template_mb.gba</tt>. When you open it in VBA or no$gba you should see something like 
+fig&nbsp;2.3. If you don't see a .gba file or it shows a white screen, 
+something beyond your contol went wrong. But before we get to what could be amiss, I want you 
+to take a look inside the Makefile itself first.
+</p>
+
+<div class="note" id="nt-dkp-ide">
+  <div class="nh">Using other editors to manage projects</div>
+  <p>
+Programmer's Notepad 2 is just one of the many editors you can work with. In principle, all 
+you need is an editor capable of running external tools like <tt>make</tt>. 
+<a href="http://www.devkitpro.org/faq/" target="_blank">DevkitPro's FAQ</a> has a nice overview of some of 
+the other options.
+  </p><br>
+
+  <p>
+Even if you do use another editor, it's a good idea to add a <tt>pnproj</tt> file if you want 
+others to build your project since they may not have the same editor. Even an empty one will 
+suffice.
+  </p>
+</div>
+
+<div class="note" id="nt-dkp-prefix">
+  <div class="nhcare">Prefix changes in devkitARM r41</div>
+  <p>
+In devkitARM r41, the common prefix for GCC's tools changed from <tt>arm-eabi</tt> to 
+<tt>arm-none-eabi</tt>. This mean that all older makefiles won't work anymore (including tonc's). 
+To fix this, just replace the old prefix with the new one.
+  </p>
+  <p>
+I <i>could</i> have avoided this by using the standard makefiles, but they didn't exist when I 
+started, and now it's just too late to switch <kbd>:(</kbd>.
+  </p>
+</div>
+
+
+<h3 id="ssec-dkp-makefile">2.2.3.
+  DKP's makefile</h3>
+
+<p>
+A <dfn>makefile</dfn> is a script used to manage the files of a project and the steps necessary 
+to build, clean or install a program. They consist of rules that describe the dependencies 
+between the various files of the project and which commands to use. The devkitPro template 
+makefiles are almost completely automated: all the relevant rules are already in place and 
+all you have to do to add source files to a project is tell the makefile which directories the 
+sources are in. Basically, they're pretty fucking awesome. They're also pretty fucking 
+mystifying for first-time users. If you stick to the standard procedure everything should work 
+right out of the box, but if you want tweak how things are done, here are the most important 
+parts from a user's perspective.
+</p>
+<p>
+The <tt>Makefile</tt> begins like this:
+</p>
+
+<div style="font-size:95%;">
+<pre class="proglist">
+<span class="cmt">#---------------------------------------------------------------------------------
+# Clear the implicit built in rules
+#---------------------------------------------------------------------------------</span>
+<span class="keyw">.SUFFIXES</span>:
+<span class="cmt">#---------------------------------------------------------------------------------</span>
+<span class="keyw">ifeq</span> (<span class="keyw">$(strip</span> $(DEVKITARM)),)
+<span class="keyw">$(error</span> <span class="str">&quot;Please set DEVKITARM in your environment. export DEVKITARM=&lt;path to&gt;devkitARM)</span>
+<span class="keyw">endif
+
+include</span> $(DEVKITARM)/gba_rules
+
+<span class="cmt">#---------------------------------------------------------------------------------
+# TARGET is the name of the output, if this ends with _mb a multiboot image is generated
+# BUILD is the directory where object files &amp; intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#---------------------------------------------------------------------------------</span>
+TARGET      :=  <span class="keyw">$(shell</span> basename $(CURDIR))
+BUILD       :=  build
+SOURCES     :=  source
+DATA        :=  
+INCLUDES    :=
+
+<span class="cmt">#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------</span>
+ARCH    :=  -mthumb -mthumb-interwork
+
+CFLAGS  :=  -g -Wall -O3\
+        -mcpu=arm7tdmi -mtune=arm7tdmi\
+        -fomit-frame-pointer\
+        -ffast-math \
+        $(ARCH)
+
+CFLAGS  +=  $(INCLUDE)
+
+CXXFLAGS    :=  $(CFLAGS) -fno-rtti -fno-exceptions
+
+ASFLAGS :=  $(ARCH)
+LDFLAGS  =   -g $(ARCH) -Wl,-Map,<span class="keyw">$(notdir</span> $@).map
+
+<span class="cmt">#---------------------------------------------------------------------------------
+# path to tools - this can be deleted if you set the path to the toolchain in windows
+#---------------------------------------------------------------------------------</span>
+<span class="keyw">export</span> PATH :=  $(DEVKITARM)/bin:$(PATH)
+
+<span class="cmt">#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------</span>
+LIBS    :=  -lgba
+
+<span class="cmt">#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------</span>
+LIBDIRS :=  $(LIBGBA)
+
+<span class="cmt">## more ...</span>
+</pre>
+</div>
+
+<p>
+This part of the makefile sets up certain variables that are used 
+later. The various -<code>FLAGS</code> variables are compiler, assembly 
+and linker flags. You don't really have to touch those, though you may 
+want to use <code>-O2</code> instead of <code>-O3</code> because 
+<code>-O3</code> tends to bloat code pretty severely. 
+The really important part is this:
+</p>
+
+<div style="font-size:95%;">
+<pre class="proglist">
+<span class="cmt">#---------------------------------------------------------------------------------
+# TARGET is the name of the output, if this ends with _mb a multiboot image is generated
+# BUILD is the directory where object files &amp; intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#---------------------------------------------------------------------------------</span>
+TARGET      :=  $(<span class="keyw">shell</span> basename $(CURDIR))_mb
+BUILD       :=  build
+SOURCES     :=  source
+DATA        :=  
+INCLUDES    :=
+</pre>
+</div>
+
+<p>
+Like the comments say, the <code>SOURCES</code> variable lists the directories where your code 
+is. In this case, all the code is in <tt>source</tt>. If you have code in other directories as 
+well, add them here separated by spaces. Yes, <b>spaces</b>; that's what <tt>make</tt> uses to 
+tell tokens apart (and this is also why you shouldn't put spaces in paths). If you have 
+sub-directories as well, use forward slashes ('/'), not backward slashes ('\\'). 
+</p>
+<p>
+Similarly, <code>DATA</code> and <code>INCLUDES</code> are the lists for binary data and header 
+files. In this case they're empty because there's no extra data or headers. The directories 
+are relative to the location of the makefile; to indicate source is in that directory, use a 
+period ('.'). 
+</p><br>
+
+<p>
+The <code>TARGET</code> line is also interesting. It is the name of the output file, without an 
+extension. `<code>$(shell basename $(CURDIR))</code>' gives the last part of the current 
+directory, which in this case would be <tt>template</tt>. In other words, it automatically 
+uses the name of the project's directory for the ROM name as well.
+</p>
+<p>
+The extra `<tt>_mb</tt>' here indicates this should be built as a multiboot game. There are two 
+kinds of GBA builds: cartridge and multiboot. The main difference is where the code and 
+constant data resides. In a cartridge game it's in ROM (32MB); in multiboot it's in EWRAM 
+(256kb). Technically, cartidge is the normal kind binary, but multiboot can be run over a 
+<a href="first.htm#ssec-testing-hw">multiboot cable</a>.
+</p>
+
+<div class="note">
+<div class="nh">Cart vs multiboot builds</div>
+<p>
+There are two different kinds of gba builds: &lsquo;cart&rsquo; builds 
+and &lsquo;multiboot&rsquo; builds. A cart build puts the main code and
+data in the 32MB ROM (<code>0800:0000h</code>) of a cart. A multiboot 
+build puts that stuff in the 256kB EWRAM (<code>0200:0000</code>).
+Commercial games are obviously cart builds, but make use of multiboot 
+builds to make single-cart multiplayer possible. 
+</p>
+<p>
+Other than the maximum size, there is little difference in gameplay 
+between both. For homebrew, multiboot does have one advantage, namely 
+that you can load a game up to hardware without the need of an expensive
+flashcart; you can build your own PC-GBA cable for peanuts.
+</p><br>
+<p>
+Choosing the kind of build is done at link-time through linker specs. 
+For cart-builds use <tt>-specs=gba.specs</tt> and for multiboot builds 
+use <tt>-specs=gba_mb.specs</tt>. If the TARGET ends with <tt>_mb</tt>, 
+the template makefile will link it as a multiboot game.
+</p>
+</div>
+
+<h3 id="ssec-dkp-error">2.2.4.
+  When compilers attack</h3>
+
+<p>
+In most cases, the steps given thus far will &lsquo;Just Work&rsquo;.
+However, it is possible that the installation or the build didn't 
+quite go the way it should. Here is a short list of potential errors
+you may come across when building the template project.
+</p>
+
+<h4>`make not found'</h4>
+<p>
+Also known as `Failed to create process: 
+The system cannot find the file specified.' or 
+`make: unknown command or filename' or any of the other 
+variants. This means that it can't find the <tt>make</tt> 
+command. This should be in <tt>$(DEVKITPRO)/msys/bin</tt>, and 
+this path <i>should</i> have been added to the system path by the 
+installation. Look in the right directory if <tt>make.exe</tt> is there. 
+If it is there, check the system path in `<tt>My Computer/Advanced/Environment 
+Variables/System Variables</tt>'. As you can probably tell, this 
+should mostly be a Windows issue.
+</p>
+
+<h4>`arm-none-eabi-gcc: no such file or directory'</h4>
+<p>
+<tt>make</tt> works, but it can't find the compiler. The compiler and 
+other tools are in <tt>$(DEVKITARM)/bin</tt> and the makefile already 
+adds that to the path via 
+`<code>export PATH := $(DEVKITARM)/bin:$(PATH)</code>'. so this 
+error shouldn't happen. <tt>DEVKITARM</tt> is one of the system 
+variables the installation creates; if you've moved the directories 
+without updating these variables, this error could happen. It is 
+also possible you have an older version of devkitARM; before r19 the 
+prefix was <tt>arm-elf</tt>, not <tt>arm-none-eabi</tt>.
+</p>
+
+<h4>`This application has requested the Runtime to terminate it 
+	in an unusual way.'</h4>
+<p>
+This is an error I sometimes get when compiling from the Visual C++ 
+IDE. This is not a DKA error, but more a Windows/MSVC one. The next 
+compilation always works.
+</p>
+
+<h4>Windows Vista</h4>
+<p>
+This was a problem before devkitARM r21. Vista and GCC didn't really 
+get along before that.
+</p>
+
+<h4>Build works; ROM shows white screen.</h4>
+<p>
+By default, the GBA screen is white and if you have an empty 
+<code>main()</code>, this would be the result. However, if you're 
+sure that something <i>should</i> have shown, it is likely that 
+something went wrong even before your code was ever called. Before 
+<code>main()</code> the ROM's <dfn>boot code</dfn> is called 
+(<tt>$(DEVKITARM)/arm-none-eabi/lib/gba_crt0.s</tt>, if you're curious), 
+which takes care of some house-keeping. Wintermute (the devkitPro 
+maintainer) sometimes tinkers with the bootcode or linkscripts to 
+improve the process, but sometimes things go wrong (sorry, Dave, 
+you know it's true).
+</p>
+<p>
+Case in point: if you build the template project under devkitARM r21 
+exactly as shown before you'll get a white screen because there is 
+an bug in the linkscript for multiboot builds. The easiest way out 
+of this is to simply not build as multiboot with r21. Alternative 
+solutions can be found at 
+<a href="http://forum.gbadev.org/viewtopic.php?t=14493" target="_blank">forum:14493</a>. 
+</p>
+<p>
+If you ever get a white screen after upgrading devkitARM even though it 
+worked fine before, this is a likely suspect. There is usually an 
+announcement thread in the gbadev forum and chances are that if it 
+is a bootcode/linkscript error you're not the first to notice.
+</p>
+
+
+<h3 id="ssec-dkp-tonc">2.2.5.
+  Building Tonc's examples with devkitARM</h3>
+
+<p>
+All of Tonc's demos and the code library <tt>tonclib</tt> have PN2 
+projects, so it's mainly a matter of opening those in Programmer's 
+Notepad 2 and hitting Alt+1.
+</p>
+<p>
+There are also project files for use on 
+Visual C++ 6 and higher. These make use of a master makefile, 
+<tt>tonc.mak</tt>. This makefile serves as a hub for building 
+and cleaning individual or all projects. For individual projects, 
+set the <code>DEMO</code> the name of the demo you want to build. 
+From within MSVC, choose the proper build configuration and 
+build as usual. Table&nbsp;2.1 has an overview 
+of the options.
+</p>
+
+
+<div class="lblock">
+<table id="tbl-tonc-cfg"
+  border=1 cellspacing=0 cellpadding=2 frame=void rules=cols>
+<caption align="bottom">
+  <b>Table 2.1</b>: building tonc projects.
+</caption>
+<tr align="left">
+  <th>to ...</th>
+  <th>run ...</th>
+  <th>MSVC config</th>
+</tr>
+<tr>
+  <td>build <tt>libtonc.a</tt>	</td>
+  <td>make libtonc</td>
+  <td>Build libtonc</td>
+</tr>
+<tr>
+  <td>build <tt>foo</tt> demo</td>
+  <td>make DEMO=foo</td>
+  <td>Build Single</td>
+</tr>
+<tr>
+  <td>clean <tt>foo</tt> demo</td>		
+  <td>make DEMO=foo clean</td>
+  <td>Clean Single</td>
+</tr>
+<tr>
+  <td>build all demos</td>
+  <td>make build_all</td>
+  <td>Build All</td>
+</tr>
+<tr>
+  <td>clean all demos</td>
+  <td>make clean_all</td>
+  <td>Clean All</td>
+</table>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-env">2.3.
+	Alternative development environments</h2>
+
+<p>
+DevkitARM is the standard toolchain for GBA homebrew right now 
+and almost the only one still being actively maintained. Developing 
+with DKA means C, C++ or assembly and building up everything from 
+scratch (or at least nearly scratch). If you'd like another 
+language or a richer API, these alternatives may be worth a try.
+</p>
+
+<h4>devkit Advance</h4>
+<p>
+I only mention this here because it is still technically an 
+alternative, and most tutorials still refer to it. devkit Advance is 
+another GCC-based toolchain and can be considered the spiritual 
+predecessor to devkitARM. Nowadays, I can't think of any reason to 
+use devkit Advance instead of devkitARM aside perhaps from 
+compatibility with very old projects. If you're still using it, 
+consider switching.
+</p>
+
+<div class="note" id="nt-dka">
+<div class="nhcare">DKA vs DKA</div>
+<p>
+Both devkitARM and devkit Advance are abbreviated as &ldquo;DKA&rdquo;, 
+which might cause some confusion. There is no real way to know which one 
+one is referred to except perhaps by date: documents prior to 2004/2005 
+will refer to devkit Advance; more recent texts will probably mean 
+devkitARM.
+</p>
+</div>
+
+<h4>HAM, visualHAM and HEL</h4>
+<p>
+HAM is another GCC-based toolchain, but it also comes with HAMlib, 
+an API for managing backgrounds, sprites and sound. The windows 
+installation also contains an IDE called visualHAM.
+</p>
+<p>
+Setting up HAM is easy: simply download the freeware version from
+<a href="http://www.ngine.de" target="_blank">www.ngine.de</a> and install. And then 
+install again because it's only the installer that you've just installed
+<kbd>:P</kbd>. After the second install everything will be ready, but 
+you'll actually have two copies of each, one of them can safely be
+removed. As with DKA, don't use spaces in paths.
+</p>
+<p>
+HAM is useful if you don't want to have to involve yourself with the 
+guts of GBA programming, but you <i>still</i> need to some idea 
+of now the GBA functions to make use of HAM properly. Hiding the 
+lower levels can be dangerous on systems where resources are sparse, 
+and the GBA certainly qualifies. I should also point out that 
+HAMlib isn't exactly efficient when it comes to speed. If you're using 
+HAM, also get the add-on library called HEL by Perter Schraut from 
+<a href="http://www.console-dev.de" target="_blank">www.console-dev.de</a>. Unlike 
+many of HAM's functions, HEL's code has been optimized to make the 
+most of the GBA's capabilities. HEL is also still being maintained.
+</p>
+
+<div class="note">
+<div class="nhgood">HAM vs HEL</div>
+<p>VisualHAM's creator, 
+<a href="http://www.console-dev.de" target="_blank">Peter Schraut</a> has also 
+written an add-on library called HEL. Unlike HAM, some time has been 
+spent on optimizing HEL's code, or at the very least to make it 
+not slow. If you're using HAM, consider using HEL as well.
+</div>
+
+<h4>Other languages</h4>
+<p>
+There are some non-C/asm environments for GBA out there, but as far 
+as I know these projects have mostly been abandoned by their 
+original authors. Note that my knowledge of these packages is 
+extremely limited, so I can't do much more than link to the sites 
+where you can find them.
+</p>
+<p>
+There is <a href="http://db.zhilaware.starfusion.org/" target="_blank">dragonBASIC</a>, 
+which provides a BASIC-like syntax. This should be suitable for 
+small projects, but I'm not sure it can be used for full games 
+like a Mario clone. You can find a FreePascal for GBA/NDS at 
+<a href="http://itaprogaming.free.fr/" target="_blank">itaprogaming.free.fr</a>, and 
+instructions for using Forth or Lua at 
+<a href="http://www.torlus.com/index.php?Gba" target="_blank">www.torlus.com</a>. 
+Finally, there is (or at least was) something called Catalpult at 
+<a href="http://www.nocturnal-central.com/" target="_blank">www.nocturnal-central.com</a>. 
+This is a very complete environment with an emulator and I think I've 
+seen a debugger there as well. I think this could be compared to 
+GameMaker, but then again I may be wrong.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-cli">2.4.
+  Command line details and legacy topics</h2>
+
+<p>
+This section serves two purposes: to give those used to dealing 
+solely with GUIs some background information on how to work with 
+command-line tools (and how not to work with them). Now, this would 
+be a subject for an appendix if it weren't for how Tonc's earlier 
+chapters and its examples are structured.
+</p>
+
+<h3 id="ssec-cli-basic">2.4.1.
+  Working with command-line tools.</h3>
+
+<p>
+For most people nowadays, working with programs means double-clicking 
+on a desktop shortcut or double-clicking on a file in Explorer 
+(I'm focussing on Windows here. Sorry, other 10%). For 
+office work this is usually enough, and that'll be the end of it.
+For development work (particularly console dev), it really pays to 
+have a deeper understanding of what's going on.
+</p>
+<p>
+Most of this subsection will have a high <i>duh!</i>-factor. Feel 
+free to skip it if it gets a little too familiar.
+</p><br>
+
+<p>
+Like any other files, program files 
+(<a href="http://en.wikipedia.org/wiki/Executable" target="_blank">executables</a>) 
+are stored somewhere in the file hierarchy. For example, the 
+main executable of Office Word is called <tt>winword.exe</tt> and 
+may be found at 
+<tt>C:/Program Files/(... More Directories ...)/winword.exe</tt>. 
+The pathname is also the command to run the program: simply pass the
+pathname to the 
+<a href="http://en.wikipedia.org/wiki/Shell_%28computing%29" target="_blank">shell</a> 
+the OS will execute the program. Usually you will do this via 
+shortcuts of some sort: double-clicking on a shortcut tells the 
+GUI to run the associated target. 
+You can also invoke it via the command line. In the <tt>Start Menu</tt>, 
+you can find <tt>Run...</tt>. Entering <tt>winword</tt> there will 
+also launch Word, just as a 
+double click did.
+</p>
+
+<div class="lblock">
+<div class="cpt" style="width:347px;">
+  <img src="../img/setup/start_run.png" id="img-run" 
+    alt="Start-&gt;Run"><br>
+  <b>Fig 2.4</b>: Start-&gt;Run window.
+</div>
+</div>
+
+<p>
+Programs often allow <dfn>command-line options</dfn> as well, 
+separated by spaces. The types of options available depends on the 
+program in question, of course. For word, the main option is to pass 
+a filename to open. For example, 
+</p>
+
+<pre class="proglist">
+winword "C:\foo\bar.doc"
+</pre>
+
+<p>
+will open <tt>C:\foo\bar.doc</tt> (see fig&nbsp;2.4).
+The same thing happens when you double-click a Word document: Windows 
+picks up the filename, looks up which application it's associated to and 
+calls that application with the filename as an option.
+</p>
+
+<h4>The value of the command-line</h4>
+
+<p>
+Of course, using the command-line to open a Word document may seem 
+slightly silly considering you can do the same thing by just 
+double-clicking the file itself, but there are instances where the 
+reverse is true. For example, you can use it to open multiple 
+documents at once (`<tt>winword C:\a.doc C:\b.doc</tt>') or make it 
+print them, or whatever the program allows. GUIs may be easier 
+sometimes, but using the command-line allows for more <b>control</b>.
+</p>
+<p>
+A second great thing about the command-line is that you can <b>automate</b> 
+processes. This is particularly important in programming, because 
+that generally involves taking multiple steps for each file in the project. 
+Doing all of that manually for each file in the project and each time 
+you rebuild is simply beyond any rational consideration; you'll want 
+a script for that. Batch-files and makefiles are examples of 
+such scripts.
+</p>
+
+
+<h4 id="sssec-build-steps">Basic steps for building a GBA project</h4>
+<p>
+Converting your C/C++/asm sources into a valid GBA binary requires the 
+following four steps:
+</p>
+
+<ol>
+  <li>
+    <b>Compile/assemble the sources</b>. The first step is turning 
+    the human readable C or C++ files (<tt>.c</tt>/<tt>.cpp</tt>) or 
+    assembly files (<tt>.s</tt>/<tt>.asm</tt>) to a binary format 
+    known as 
+<a href="http://en.wikipedia.org/wiki/Object_code" target="_blank">object files</a> 
+    (<tt>.o</tt>). There is one object file for each source file.<br>
+    The tool for this is called <tt>arm-none-eabi-gcc</tt>. Actually, this 
+	is just a front-end for the real compiler, but that's just 
+	details. The <tt>arm-none-eabi-</tt> here is just a prefix specific 
+	to devkitARM; other toolchains or platforms have different prefixes. 
+	Note that C++ uses <tt>g++</tt> instead of <tt>gcc</tt>.
+  </li>
+  <li>
+    <b>Link the object files</b>. After that, you need to link the 
+    separate object files into a single executable 
+<a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format" target="_blank">ELF</a> 
+    file. Any precompiled code libraries (<tt>.a</tt>) you may have are 
+    linked at this stage too.<br>  
+    You can actually compile and link at the same time, but it is
+    good practice that you keep them separate: serious projects usually
+    contain multiple files and you don't want to have to wait for 
+    the whole world to recompile when you only changed one. This becomes 
+    even more important when you start adding data (graphics, music, 
+    etc).<br>
+    Again, <tt>arm-none-eabi-gcc</tt> is used for invoking the linker, although 
+    the actual linker is called <tt>arm-none-eabi-ld</tt>.
+  </li>
+  <li>
+    <b>Translate/strip to pure executable</b>. The ELF file still 
+	contains debug data and can't actually be read by the GBA (though 
+	most emulators will accept it). <tt>arm-none-eabi-objcopy</tt> strips 
+	the debug data and makes sure the GBA will accept it. Well, almost.
+  </li>
+  <li>
+    <b>Validate header</b>. Each GBA game has a header with a checksum
+    to make sure it's a valid GBA binary. Normally, compilation doesn't
+    supply one, so we have to use a tool like DarkFader's <tt>gbafix</tt>
+    to fix the header. This tool comes with DKA, so you don't have to
+    download it separately.
+  </li>
+</ol>
+
+
+<p>
+The demo in the next chapter is called <tt>first</tt>, which uses a 
+single source file, <tt>first.c</tt>. To create the binary 
+<tt>first.gba</tt>, you'll need to execute the following commands. 
+</p>
+
+
+<pre class="proglist" id="cd-build">
+<span class="cmt"># Compile first.c to first.o</span>
+arm-none-eabi-gcc <i>-mthumb -mthumb-interwork</i> -c <b>first.c</b>
+
+<span class="cmt"># Link first.o (and standard libs) to first.elf</span>
+arm-none-eabi-gcc -specs=gba.specs <i>-mthumb -mthumb-interwork</i> <b>first.o</b> -o <b>first.elf</b>
+
+<span class="cmt"># Strip to binary-only</span>
+arm-none-eabi-objcopy <i>-O binary</i> <b>first.elf</b> <b>first.gba</b>
+
+<span class="cmt"># Fix header</span>
+gbafix <b>first.gba</b>
+</pre>
+
+<p>
+Note that apart from the filenames (bolded), there are also different 
+options for the tools (anything that starts with a hyphen). The options 
+in italics are technically not required, but recommended nonetheless. I've 
+collected a few of the more common flags in the 
+<a href="makefile.htm#sec-flags">makefile appendix</a>, so 
+look them up if you want to know. You can look up the full list of 
+options in the 
+<a href="http://www.gnu.org/manual/manual.html" target="_blank">manuals</a>, though I 
+should warn you that the number of options can be very large.
+</p>
+
+
+<div class="note" id="nt-dka-specs">
+<div class="nhcare">devkitARM's linker requires a -specs option.</div>
+<p>
+Unlike other GBA toolchains, devkitARM requires that either 
+<tt>-specs=gba.specs</tt> or <tt>-specs=gba_mb.specs</tt> is present 
+as a linker option. These specs contain the memory map without which 
+the linker can't do its job. If you're migrating from an older 
+toolchain and find that suddenly the binary doesn't work anymore, 
+this is a likely cause.
+</p><br>
+
+<p>
+It is also a good idea to always have <tt>-mthumb -mthumb-interwork</tt> 
+in the compiler and linker flags. Enabling compiler optimization 
+(like <tt>-O2</tt>) and warnings (<tt>-Wall</tt>) are helpful as well.
+</p>
+</div>
+
+<h4>Better living through automation</h4>
+<p>
+You can build a GBA binary by typing the commands given above into a
+command-line interface each time. It is also possible to clean toilets 
+with a toothbrush before use it on your teeth &ndash; just because 
+you can doesn't always mean you should. To manually enter each line 
+whenever you want to rebuild is, well, insane. It's much more useful 
+to use some sort of script to do this for you. Technically, you can 
+use any kind of scripting environment you want, but I'll focus on 
+two in particular here: batch-files and makefiles.
+</p>
+<p>
+<a href="http://en.wikipedia.org/wiki/Batch_file" target="_blank"><dfn>Batch-files</dfn></a> 
+(<tt>.bat</tt>) are Windows shell script that have been there since 
+ye olde MS-DOS. Batch-files are pretty easy to use: simply drop the 
+commands in a <tt>.bat</tt> file and run that. But as usual, complex 
+questions have easy to understand, wrong answers. While batch-files 
+are indeed very easy to use, they are utterly inadequate for anything 
+but the most simple projects. More complex projects will have multiple
+files and adding extra compilation lines every time you add a file 
+becomes annoying. To be fair, it is possible to use variables and 
+loops and stuff in batch-files to ease this a little, but no one ever 
+mentions those. 
+</p>
+<p>
+Another problem is that if you run a batch-file, you run the whole 
+thing. This means that you're compiling <i>every</i> file every time, 
+and that if there are errors, you'll get the errors for every file 
+in the project. This can be very tricky to navigate and sometimes it 
+may not be possible at all because the first errors are past the 
+scroll-limit. (This was especially true for Windows versions 98 and 
+earlier, which didn't even have a scrollbar for a DOS-box. Eeek!)
+</p>
+<p>
+Lastly, the syntax for batch-files are DOS/Windows only. This makes 
+them unsuited for platform independent development. 
+</p><br>
+
+<p>
+A better solution is using makefiles. 
+<a href="http://en.wikipedia.org/wiki/Make_%28software%29" target="_blank"><dfn>Makefiles</dfn></a> 
+are scripts run by a tool called <dfn>make</dfn> (which windows 
+usually doesn't have, but it comes with MSys). Makefiles are platform 
+independent and make managing files easier by working with rules 
+instead of just commands. You can have pattern rules that tell you 
+how to turn files from one type into files of another type (like 
+compiling <tt>.c</tt> into <tt>.o</tt> files) and <tt>make</tt> will 
+take care of it; all you need to do is give a list of files which need 
+to be compiled. <tt>Make</tt> will also check whether the compilation 
+is necessary in the first place so no unnecessary work will be done 
+if the output file is already up to date.
+</p>
+<p>
+The problem with makefiles is that they're harder to create than 
+batch-files &ndash; at least for the uninitiated. But thanks to the 
+devkitPro template makefiles, you generally don't have to worry about 
+that anymore: you can just set the correct directories and go. That 
+said, it is still worth learning a bit more about how makefiles 
+work. For that reason, the next section explains a bit about the 
+makefile process. The makefiles in the Tonc examples also have a
+makefiles that increase in complexity.
+</p><br>
+
+<p>
+If you're annoyed that makefiles can't be double-clicked to run, 
+you can always create a batch-file that runs the makefile. 
+Something like this should suffice.
+</p>
+
+<pre class="proglist">
+<span class="cmt">REM batch-file to run make</span>
+make
+pause
+</pre>
+
+<p>
+<i>Don't</i> start this batch-file with `<tt>make clean</tt>' though,
+as that would force a complete rebuild &ndash; something we're trying 
+to avoid.. I'd also advise against calling it <tt>make.bat</tt>, 
+because that may clash with the name of the actual <tt>make</tt> tool.
+</p><br>
+
+<p>
+I'd recommend against this method though. The batchfile output will go 
+into a DOS-box, which doesn't exactly navigate nicely. It would be 
+better to use a notepad that can execute shell commands and capture its 
+output. Most of these will also allow you to go to errors by 
+double-clicking on the error message. PN2 is one of the many editors 
+that can do these things.
+</p>
+
+<div class="note" id="nt-make-good">
+<div class="nhgood">Prefer makefiles over batch-files</div>
+<p>
+For all its initial ease, using batch-files will only hurt you 
+in the long run. It's better to use something that can deal with 
+complex projects as well from the get go.
+</p>
+<p>
+A down side to makefiles is that you can't activate them by 
+double-clicking. It's possible to create a dummy batch-file to invoke 
+the makefile, but a better approach would be to use a code editor 
+that can also execute shell commands.
+</p>
+</div>
+
+<h4>Paths and system variables</h4>
+<p>
+If you try to build anything using the commands given earlier, you'll 
+probably find that it doesn't quite work. This is because I omitted 
+an important bit of information: the path. for the shell to execute 
+the commands, it needs to be able to find them first and merely 
+using <tt>arm-none-eabi-gcc</tt> isn't enough because the file itself 
+is actually at <tt>[initial dirs]/devkitPro/devkitARM/bin/arm-none-eabi-gcc</tt>. 
+The <i>full path</i> needs to be visible to the shell in order for 
+anything to happen, not just the filename.
+</p>
+<p>
+Because typing out the whole thing is rather annoying and because 
+my directory structure may be different than yours, the operating 
+system has a variable called <tt>PATH</tt> for standard directories. 
+If you only give the filename, the shell will search in the current 
+directory and all the paths in the <tt>PATH</tt> for a match.
+</p>
+<p>
+It is possible to add the DKA <tt>bin</tt> directory to the path 
+directly, but devkitPro has chosen a cleaner approach. Instead of 
+adding it to the <tt>PATH</tt>, the installer creates a number of 
+environment variables to some of the core directories, and you can 
+use these during the build process to point to the real paths.
+For example, there is a <tt>DEVKITARM</tt> variable, which in my 
+case equates to <tt>/e/dev/devkitPro/devkitARM</tt>. Yours will 
+probably be a little different, but the point is that in both cases
+<tt>$(DEVKITARM)/bin</tt> will be the directory where the main 
+tools are.
+</p><br>
+
+<p>
+Note that the standard Windows format for directories is something 
+like <tt>c:/foo/bar</tt>, whereas the <tt>DEVKITPARM</tt> variable 
+is formatted as a POSIX pathname with forward slashes. As far as I 
+know, Windows is the only OS that doesn't allow POSIX names which, 
+well, kinda sucks. This is where MSys comes in. MSys is a collection 
+of tools to make the standard Unix tools available on DOS/Windows 
+systems. Apart from <tt>make</tt>, it also has the 
+<a href="http://en.wikipedia.org/wiki/Bash" target="_blank">bash shell</a> where 
+you can use POSIX names like every other programmer. To switch to 
+bash in a DOSbox, type `<tt>sh</tt>'. On the whole, bash is a more 
+useful shell than DOS, though you may have to get used to the 
+different command set. But that's why we have 
+<a href="http://www.gnu.org/software/bash/manual/" target="_blank">manuals</a>.
+</p>
+
+
+<h3 id="ssec-cli-make">2.4.2.
+  Basic Makefilese</h3>
+
+<p>
+Like batch-files, makefiles are scripts that can aid you in building 
+a project. The main difference in how they work is that batch-files 
+uses a sequential list of commands, while makefiles use a chain of 
+<dfn>rules</dfn> that define how files are converted into others, 
+eventually leading to the binary. This is the basic format of a rule:
+</p>
+
+<pre class="proglist">
+<span class="cmt"># Makefile rule example</span>
+target : prerequisite
+	command
+</pre>
+
+<p>
+The <dfn>target</dfn> can be the output file or files, or just an 
+identifier for the rule, the <dfn>prerequisite(s)</dfn> are the files 
+the target depends on and the <dfn>command(s)</dfn> are a list of 
+commands that turn the prerequisites into the targets (although 
+technically they can do other things as well). Note that the indentation 
+of the commands <b>must</b> be a tab (ASCII 9), not spaces. This is an 
+annoying little requirement that can trip you up when copy-pasting 
+makefiles, so remember it well.
+</p>
+<p>
+The direct equivalent of the commands used earlier to build 
+<tt>first.gba</tt> would be like this:
+</p>
+
+<pre class="proglist" id="cd-make-mini">
+<span class="cmt">#
+# Equivalent makefile for the earlier build procedure.
+#</span>
+
+PATH   := $(DEVKITARM)/bin:$(PATH)
+
+first.gba : first.c
+	arm-none-eabi-gcc -mthumb -mthumb-interwork -c first.c
+	arm-none-eabi-gcc -specs=gba.specs -mthumb -mthumb-interwork first.o -o first.elf
+	arm-none-eabi-objcopy -v -O binary first.elf first.gba
+	gbafix first.gba
+</pre>
+
+<p>
+There is only one rule here, with target <tt>first.gba</tt> and prerequisite 
+<tt>first.c</tt>. The commands are just what we typed in earlier.
+</p>
+
+<div class="note">
+<div class="nhcare">Tabs, not spaces, before make commands</div>
+<p>
+NOTE: GNU's <tt>make</tt> requires tabs before actual commands, not
+spaces. If you copy-paste, you may have to place the tabs manually.
+</p>
+</div>
+
+
+<h4>Running makefiles</h4>
+<p>
+You can invoke <tt>make</tt> to run the makefile like this:
+</p>
+
+<pre class="proglist">
+make <i>-f file-name</i> <i>target-name</i>
+</pre>
+
+<p>
+The `<tt>-f</tt>' flag indicates which makefile to execute; the 
+<i>target-name</i> tells which rule to start the chain with. Both 
+of these options are actually optional. Without the `<tt>-f</tt>' 
+option, <tt>make</tt> will look in the current directory for 
+files called '<tt>GNUmakefile</tt>', '<tt>Makefile</tt>' or 
+'<tt>makefile</tt>' and run that. This is why makefiles are 
+usually called &lsquo;Makefile&rdquo;. If the target name is absent, 
+the chain starts at the first rule in the file.
+</p>
+<p>
+It's not necessary to go to the commandline and type in `<tt>make</tt>' 
+yourself: IDEs can often do that for you, although setting the IDE up 
+for that can take some doing. Because there are so many editors, I 
+will not cover this here; google or use the help files to figure out what 
+needs to be done for your editor. I have examples for setting up 
+conTEXT, an alternative for PN, and MS Visual Studio (5 and 6) in 
+<a href="edmake.htm">this appendix</a>. The DKP site also has 
+a few examples in its 
+<a href="http://www.devkitpro.org/faq.shtml" target="_blank">FAQ</a>
+</p>
+
+<h4>Makefiles, version 2</h4>
+<p>
+The makefile shown above was just an extremely simple (and limited) 
+example of what a makefile would look like. Proper makefiles have 
+multiple rules and may use <dfn>variables</dfn> to define commonly-used 
+data. The following is a more complex, but also more useful.
+</p>
+
+<pre class="proglist">
+<span class="cmt">#
+# A more complicated makefile
+#</span>
+
+PATH := $(DEVKITARM)/bin:$(PATH)
+
+<span class="cmt"># --- Project details -------------------------------------------------</span>
+
+PROJ    := first
+TARGET  := $(PROJ)
+
+OBJS    := $(PROJ).o
+
+<span class="cmt"># --- Build defines ---------------------------------------------------</span>
+
+PREFIX  := arm-none-eabi-
+CC      := $(PREFIX)gcc
+LD      := $(PREFIX)gcc
+OBJCOPY := $(PREFIX)objcopy
+
+ARCH    := -mthumb-interwork -mthumb
+SPECS   := -specs=gba.specs
+
+CFLAGS  := $(ARCH) -O2 -Wall -fno-strict-aliasing
+LDFLAGS := $(ARCH) $(SPECS)
+
+
+.PHONY : build clean
+
+<span class="cmt"># --- Build -----------------------------------------------------------</span>
+<span class="cmt"># <b>Build process starts here!</b></span>
+build: $(TARGET).gba
+
+<span class="cmt"># Strip and fix header (step 3,4)</span>
+$(TARGET).gba : $(TARGET).elf
+	$(OBJCOPY) -v -O binary $&lt; $@
+	-@gbafix $@
+
+<span class="cmt"># Link (step 2)</span>
+$(TARGET).elf : $(OBJS)
+	$(LD) $^ $(LDFLAGS) -o $@
+
+<span class="cmt"># Compile (step 1)</span>
+$(OBJS) : %.o : %.c
+	$(CC) -c $&lt; $(CFLAGS) -o $@
+		
+<span class="cmt"># --- Clean -----------------------------------------------------------</span>
+
+clean : 
+	@rm -fv *.gba
+	@rm -fv *.elf
+	@rm -fv *.o
+
+<span class="cmt">#EOF</span>
+</pre>
+
+<p>
+The top half of this makefile is spent defining variables for later 
+use. Something like `<code>FOO := bar</code>' defines a variable called 
+<code>FOO</code> which can then be used via <code>$(FOO)</code>. 
+Although I'm only using <code>:=</code> here, there are other methods 
+as well:
+</p>
+
+<div class="lblock">
+<table id="tbl-make-vardef"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table</b> 2.2: variable definitions.
+</caption>
+<tr>
+  <th>=</th>
+  <td>Direct substitution variable (like a C macro).</td>
+</tr>
+<tr>
+  <th>:=</th>
+  <td>Basic variable (overrides previous definition).</td>
+</tr>
+<tr>
+  <th>?=</th>
+  <td>Create variable if it didn't exist yet.</td>
+</tr>
+<tr>
+  <th>+=</th>
+  <td>Add to existing variable.</td>
+</tr>
+</table>
+</div>
+
+<p>
+The variables created here are mostly standard things: names for the 
+compiler and linker (<code>CC</code> and <code>LD</code>) and their 
+flags (<code>CFLAGS</code> and <code>LDFLAGS</code>). These aren't 
+strictly necessary, but they are useful. The things actually related 
+to the project are <code>TARGET</code> and <code>OBJS</code>. 
+<code>TARGET</code> is the base-name of the output binary, and 
+<code>OBJS</code> is the list of object files. Note: <b>list</b> 
+of object files! Right now there's only a single file, but 
+later projects will have multiple source files that all have to be 
+compiled and linked. By using a variable like this, adding a new file 
+to the project is a matter of extending this list. It is also a list 
+of <b>object</b> files, not source files. The rules start are based 
+on the target names, not the prerequisite names. 
+</p>
+<p>
+There are also more rules now. The primary rules are <tt>build</tt> 
+and <tt>clean</tt> (the <code>.PHONY</code> is just to indicate that 
+they're not actually filenames themselves). In the <tt>build</tt> rule 
+you see how the chaining works: <tt>build</tt> depends on the .gba 
+binary, which depends on the .elf file, which depends on the object files, 
+which depends on the source files. It's basically the 
+<a href="#sssec-build-steps">basic steps</a> I gave earlier in reverse.
+</p>
+<p>
+Part of the makefile magic is that a rule will only be executed if the 
+prerequisites are younger than the targets. For example, if a particular 
+source-file has been modified, it will be younger  than its .o file and 
+the compilation rule will run for that particular file but not the 
+others. This is partly why dividing the process into separate rules is 
+useful.
+</p>
+
+<p>
+The funny things with with dollar signs (<code>$@</code>, etc) are 
+<dfn>automatic variables</dfn>. They are shorthand for the target and 
+prerequisite names. You can find what they mean in 
+table&nbsp;2.3. This is just three 
+of the automatic variables available; for a full list, go to the 
+<tt>make</tt> manual.
+</p>
+
+
+<div class="lblock">
+<table id="tbl-make-autovars"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table</b> 2.3: automatic variables for rules.
+</caption>
+<tr><th> $&lt;	</th><td> Name of the first prerequisite</td></tr>
+<tr><th> $^		</th><td> List of all the prerequisites	</td></tr>
+<tr><th> $@		</th><td> Name of the target			</td></tr>
+</table>
+</div>
+
+<p>
+The last thing I want to discuss here concerning this particular 
+makefile is the compilation rule. The form `<code>%o : %.c</code> is 
+an example a <dfn>static pattern rule</dfn>. It basically says 
+&ldquo;for every file in <code>OBJS</code> with the extension 
+&lsquo;.o&rsquo;, look for the corresponding &lsquo;.c&rsquo; file and 
+run the command&rdquo;. Like I said earlier, <code>OBJS</code> can 
+have <i>multiple</i> filenames, each of which will compile 
+automatically via this one rule. Again, this is one of the nice 
+things about makefiles: to add a file for the project, you don't 
+have to write another rule, just add its object name to 
+<code>OBJS</code> and you're done. There are also possibilities to get 
+all files in a directory so that you won't heven have to add it 
+yourself, but that's out of the scope of this section.
+</p>
+
+
+<h3 id="ssec-cli-tonc">
+  2.4.3.Legacy: on Tonc's structure</h3>
+
+<p>
+This last section shouldn't really be here. With devkitPro's 
+template makefiles, managing projects should be easy enough without 
+having to know anything about makefiles, so this stuff could be tucked 
+safely in an appendix. So why is it here?
+</p>
+<p>
+The reason it's put in front is historical in nature. When I started 
+this around 2004, devkitARM was still young and libgba, the installer 
+and the templates simply didn't exist yet. There we a handful of GBA 
+tutorials which did explain the basics, but all used poor 
+(sometimes <i>very</i> poor) programming standards and project 
+structure. With the latter I mean three things:
+</p>
+
+<ul>
+  <li>using the wrong compiler flags;</li>
+  <li>#including the whole program into a single file (covered in some 
+    detail in the <a href="bitmaps.htm#ssec-data-hdr">data section</a> in 
+    the chapter on bitmaps);</li>
+  <li>using batch-files instead of makefiles.</li>
+  <li>code that was simply incorrect or at best very inefficient.</li>
+</ul>
+
+<p>
+Instead of just saying how to do things, I also tried to make a point 
+about how <i>not</i> to do things. Knowing what to avoid can be just as 
+important as knowing the right moves. I've also tried to ease into 
+makefiles so that they wouldn't seem so daunting for new users. This 
+resulted in dividing Tonc into three main parts:
+</p>
+
+<ul>
+  <li>
+    <b>basic</b>: completely stand-alone projects; with very simple 
+    makefiles.
+  </li>
+  <li>
+    <b>extended</b>: projects use tonclib; makefiles are more complex.
+  </li>
+  <li>
+    <b>advanced</b>: projects use tonclib and makefiles derived from 
+	  devkitPro's makefiles.
+  </li>
+</ul>
+
+<p>
+In the &lsquo;basics&rsquo; section, I spend much time on good/bad 
+practices to get it out of the way. This requires knowing elementary 
+makefiles, hence this section. If I had the time or if there was a 
+real need I'd do things differently now, but the requirement of the 
+good/bad practices have made the earlier parts somewhat harder to 
+maintain than the later chapters. One of life's little ironies.
+</p>
+
+
+<br>
+<div class="endtag">
+Modified <span class="time">Mar 24, 2013</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div> 
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="hardware.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="first.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Hardware</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">First demo</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

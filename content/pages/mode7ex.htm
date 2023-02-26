@@ -1,0 +1,3010 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20040303">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Mode 7 Part 2</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="mode7.htm">Mode 7</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="tte.htm">TTE</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+<hr>
+
+<h1 id="ch-">21.
+  Mode 7 Part 2</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>.
+  <li><a href="#sec-theory">Basic mode 7 theory</a>.
+  <li><a href="#sec-horz">Horizon and backdrop</a>.
+  <li><a href="#sec-flr">The floor</a>.
+  <li><a href="#sec-objs">Sprites</a>.
+  <li><a href="#sec-code">Implementation</a>.
+  <li><a href="#sec-conc">Concluding remarks</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">21.1.
+  Introduction</h2>
+<p>
+<a href="mode7.htm">Mode 7: part 1</a> covered the basics of how to 
+get an affine background to look like a 3D plane, and discussed some 
+of the trickier parts of the fixed point arithmetic involved. Getting
+the basic look of a 3D plane is only the first step.
+</p>
+<p>
+In this chapter, we'll look into the general math involved of creating 
+a 3D world and translate it back to a form we can use for mode 7. This 
+includes translations in all directions and looking around (yaw) like 
+before, but also a pitch angle for looking up and down. We'll also see 
+how to deal with the horizon and use a background for the
+backdrop above the horizon. I'll even throw in a bit of fogging to 
+occlude the distant parts of the ground.
+</p>
+<p>
+I'll discuss also working with sprites in 3D space. Not just the 
+transformation from 3D space to 2D screen, but also culling, scaling
+for distance (which is not as simple as one might think), animation 
+and sorting. Note that this part of the chapter is basic 3D sprite 
+theory, and can be applied to 3D games that use sprites in some way.
+</p>
+<p>
+The theory part of the chapter is going to be very math-heavy, as 3D 
+theory always is. Knowing a little bit about 
+<a href="matrix.htm">linear algebra</a> certainly wouldn't hurt. The 
+full story about geometry is beyond the scope of Tonc, but this stuff 
+is quite general; most books on 3D programming will have a chapter on 
+geometric transformations, so you can look at those if you get a little 
+lost here.
+</p>
+<p>
+This chapter touches on almost all of the topics covered so far. It 
+uses <a href="affobj.htm">affine objects</a>, backgrounds (both
+<a href="regbg.htm">regular</a> and <a href="affbg.htm">affine</a>),
+<a href="interrupts.htm">interrupts</a>, 
+<a href="gfx.htm#blend">color effects</a> and a few more. If your 
+understanding of any of these is lacking, you could be in for a rough
+time here.
+</p>
+
+<div class="cblock">
+<table class="bdr" id="img-m7-ex"
+  cellpadding=2 cellspacing=0>
+<tbody align="center">
+<tr>
+<td><img src="../img/mode7/m7_ex_00.png" alt="full mode 7"></td>
+<td><img src="../img/mode7/m7_ex_01.png" alt="full mode 7"></td>
+<tr>
+  <td colspan=2>
+  <b>Fig 21.1</b>: <tt>m7_ex</tt>; with 
+  horizon, sprites, variable pitch angle and distance fogging.
+  </td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+What we're going to try to do is re-create a scene from the 
+SNES Mario Kart (see fig&nbsp;21.1; apologies to 
+Nintendo for using the graphics, but I don't have a lot of options 
+here <kbd>:\</kbd>). This is just a freeze-frame of the game, not 
+actual game play is involved, but this should present a nice target 
+to aim for. The code is distributed over a number of files: 
+<tt>mode7.c</tt> for the simple mode 7 functions and 
+<tt>mode7.iwram.c</tt> for the less simple mode 7 functions and 
+interrupt routines. The code of demo-specific code can be found 
+in <tt>m7_ex.c</tt>, which does the set-up, interaction and main loop. 
+The basic controls are as follows:
+</p>
+
+<div class="lblock">
+<table cellpadding=2 cellspacing=0>
+<col span=2 align="left" valign="top">
+<tr><th>D-pad	<td>Looking
+<tr><th>A/B		<td>Back/forward
+<tr><th>L/R		<td>Strafing
+<tr><th>Select+A/B	<td>Float up/down
+<tr><th>Start	<td>Menu
+</table>
+</div>
+
+<p>
+Movement and looking follows FPS/aircraft motion, or at least as well 
+as could be expected with the number of buttons available. There are 
+several extra options which have been put in a menu. First is 
+<i>motion control</i> which sets difference methods of movement. 
+Option
+&lsquo;local&rsquo; follows the camera axis for flight-controls, 
+&lsquo;level&rsquo; gives movement parallel to the ground, like FPSs
+usually do, and 
+&lsquo;global&rsquo; uses world axis for movement.
+Other options include toggling fog on or off and resetting the demo.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-theory">21.2.
+  Basic mode 7 theory</h2>
+
+<p>
+Fig 21.2 shows what we're up against: 
+we have a camera located at
+<b>a</b><sub>cw</sub>, which has some orientation with respect to the
+world coordinate system. What we have to do is find the transformation 
+that links screen point <b>x</b><sub>s</sub> to world point
+<b>x</b><sub>w</sub>. There are a number of ways to do this. You
+already saw one in the <a href="mode7.htm">first mode 7 chapter</a>,
+where we I had the GBA hardware in mind from the start. You could
+extend this to the general mode 7 case (with a non-zero pitch) with 
+some effort. You could also use pure trigonometry, which is a
+minefield of minus signs and potential sine-cosine mix-ups. Still,
+it is possible. What I'll use here, though, is
+<a href="matrix.htm">linear algebra</a>. There are several reasons 
+for this choice. Firstly, linear algebra has a very concise notation, 
+so you can write down the final solution in just a few lines (in fact, 
+once you get through the definitions, the solution that covers all 
+cases can be written down in 2 lines). Furthermore, the equations are
+well structured and uniform in appearance, making debugging easier. 
+Then there's the fact that inverting the whole thing is very easy. 
+And lastly, it's what true 3D systems use too, so the theory can be 
+applied outside the mode 7 arena as well. Conversely, if you know 
+basic 3D theory, you'll feel right at home here.
+</p>
+
+<div class="lblock">
+<div class="cpt" style="width:378px;">
+<img src="../img/mode7/crd_overview.png" id="img-crd-overview"
+  alt="overview"><br>
+<b>Fig 21.2</b>: 
+The basic 3D situation. The trick is to relate screen 
+point <b>x</b><sub>s</sub> to world point <b>x</b><sub>w</sub>,
+taking the camera position <b>a</b><sub>cw</sub> and its orientation 
+into account.
+</div>
+</div></br>
+
+
+<h3 id="ssec-try-defs">21.2.1.
+  Definitions</h3>
+<p>
+Before you can do anything, though, you need to know <i>exactly</i> 
+what we're going to use. The first thing to note is that we have two 
+main coordinate systems: the <dfn>world</dfn> system 
+<i>S</i><sub>w</sub> and the <dfn>camera</dfn> system 
+<i>S</i><sub>c</sub>. Inside the camera system we have two
+minor coordinate systems, namely the <dfn>projection</dfn> space
+<i>S</i><sub>p</sub> and <dfn>screen</dfn> space <i>S</i><sub>s</sub>. 
+Now, for every transformation between systems <i>S</i><sub>i</sub> and
+<i>S</i><sub>j</sub> the following relation holds:
+</p>
+
+<table id="eq-crd-transf">
+<tr>
+  <td class="eqnrcell">(21.1)
+  <td class="eqcell">
+    <b>M</b><sub>ij</sub>·<b>x</b><sub>j</sub>
+    = <b>x</b><sub>i</sub> &minus; <b>a</b><sub>ji</sub>
+</table>
+
+<p>
+where
+</p>
+
+<div class="lblock">
+<table cellpadding=0>
+<tr>
+  <td><b>x</b><sub>i</sub>
+  <td>the coordinate vector in system <i>S</i><sub>i</sub>;
+<tr>
+  <td><b>x</b><sub>j</sub>
+  <td>the coordinate vector in system <i>S</i><sub>j</sub>;
+<tr>
+  <td><b>a</b><sub>ji</sub>
+  <td>the origin of system <i>S</i><sub>j</sub>, expressed in
+  coordinates of system <i>S</i><sub>i</sub>;
+<tr>
+  <td><b>M</b><sub>ij</sub>
+  <td>the transformation matrix, which is basically the matrix formed 
+  by the principle vectors of <i>S</i><sub>j</sub>, in terms of
+  <i>S</i><sub>i</sub>.
+</table>
+</div>
+
+<p>
+Once you get over the initial shock of the many indices (meh, in 
+general relativity you have something called the Riemann tensor,
+which has <i>four</i> indices), you'll see that this equation makes
+sense. If you don't get it right away, think of them as arrays and
+matrices. An observant reader will also recognise the structure 
+in the <a href="affbg.htm#sec-aff-ofs">screen&harr;map 
+transformation</a> we had for affine maps: 
+<b>P·q</b>&nbsp;=&nbsp;<b>p &minus; dx</b>. 
+Eq 21.1 is a very 
+general equation, by the way, it holds for every kind of linear 
+coordinate transformation. In fact, systems <i>S</i><sub>i</sub> and 
+<i>S</i><sub>j</sub> don't even have to have the same number of 
+dimensions!
+</p>
+<p>
+As said, we have 4 systems in total, so we have 4 subscripts for 
+<dfn>w</dfn>(orld), <dfn>c</dfn>(amera), <dfn>p</dfn>(rojection), 
+<dfn>s</dfn>(creen). Remember these, for they will appear on a very
+regular basis. The final forms of the matrices and origins depend 
+very much on the exact definitions of these systems, so make sure 
+you know exactly what each means.
+</p>
+
+<h3 id="ssec-try-world">21.2.2.
+  World system</h3>
+<p>
+The first of these, the world system <i>S</i><sub>w</sub>, is easy 
+to deal with. This is simply a right-handed Cartesian system with 
+principle axes <b>i</b>, <b>j</b>, and <b>k</b>, which are its 
+x-, y- and z-axes, respectively. 
+In the right-handed system that is used in computer
+graphics, the x-axis (<b>i</b>) points to the right, the y-axis
+(<b>j</b>) points up and the z-axis (<b>k</b>) points <i>backward</i>!
+This means that you're looking in the negative <i>z</i> direction, 
+which may seem weird at first. If you absolutely must have a forward
+pointing <b>k</b>, you could use a left-handed system. While this 
+utterly destroys my 3d intuition, if you want it be my guest.
+Before you do that, though, remember that the map marks the floor of
+world space and in a right-handed system, the texture coordinates will
+match up neatly to world coordinates.
+</p>
+
+<h3 id="ssec-try-cam">21.2.3.
+  The camera frame</h3>
+
+<div class="cpt_fr" style="width:260px;">
+  <img src="../img/mode7/crd_w2c.png" id="img-w2c"
+  alt="word to camera transformation"><br>
+<b>Fig 21.3</b>: 
+  Camera orientation {<b>u, v, w</b>} in world space
+  {<b>i, j, k</b>}, given by angles &theta; and &phi;
+</div>
+<p>
+The transformation to the camera system is probably the major hurdle in
+the whole thing. At least it would be if it wasn't for matrices. 
+Rewriting eq&nbsp;21.1, the transformation 
+between camera and world space is given by
+</p>
+
+<table id="eq-w2c">
+<tr>
+   <td class="eqnrcell">(21.2)
+   <td class="eqcell">
+    <b>C</b> &middot; <b>x</b><sub>c</sub> 
+	= <b>x</b><sub>w</sub> &minus; <b>a</b><sub>cw</sub>
+</table>
+
+<p>
+As you can expect, the origin of camera space is the camera position,
+<b>a</b><sub>cw</sub>. The camera matrix <b>C</b> is formed by the 
+principle axes of camera space, which are <b>u, v</b> and <b>w</b>
+for the local x-, y- and z-axes, respectively. This means that the
+camera matrix is <b>C</b>&nbsp;=&nbsp;[<b>u v w</b>].
+</p>
+<p>
+The orientation of the camera with respect to world space is defined 
+by 3 angles: <dfn>pitch</dfn> (rotation around the x-axis), 
+<dfn>yaw</dfn> (rotation around the y-axis) and <dfn>roll</dfn> 
+(around z-axis). The combination of these give <b>C</b>. Traditionally,
+the rotation direction of these is such that if you look down one of 
+these axes, a positive angle turns the system counter-clockwise. 
+However, I'll do the exact opposite, because it makes a number of 
+things easier. Additionally, I will only be using two angles: pitch and 
+yaw. For mode 7 it is impossible to incorporate roll into the picture. 
+Why? Look at it this way: if you're rolled on your side, the ground 
+would be on the right or left of the screen, which would require a 
+vertical perspective division, which is impossible to achieve since we 
+can only change the affine parameters at HBlank. Therefore, only
+pitch (&theta;) and yaw (&phi;) are allowed. I want my positive &theta;
+and &phi; to the view down and right, respectively, meaning I need the 
+following rotation matrices:
+</p>
+
+<table id="eq-mat-rot">
+<tr>
+  <td class="eqnrcell">(21.3a)
+  <td class="eqcell">
+    <b>R</b><sub>x</sub>(&theta;) =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=3>&ensp;
+      <td> 1 <td>&nbsp; 
+	  <td> 0 <td>&nbsp;
+	  <td> 0
+      <td class="bdrRR" rowspan=3>&ensp;
+    <tr>
+      <td> 0 <td>&nbsp; 
+	  <td>cos(&theta;) <td>&nbsp; 
+	  <td>sin(&theta;)
+    <tr>
+      <td> 0 <td>&nbsp;
+	  <td>&minus;sin(&theta;) 
+	  <td>&nbsp; <td>cos(&theta;)
+  </tbody>
+  </table> 
+</table>
+
+<table>
+<tr>
+  <td class="eqnrcell">(21.3b)
+  <td class="eqcell">
+    <b>R</b><sub>y</sub>(&phi;) =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=3>&ensp;
+      <td>cos(&phi;) <td>&nbsp; 
+	  <td> 0 <td>&nbsp; 
+	  <td>&minus;sin(&phi;)
+      <td class="bdrRR" rowspan=3>&ensp;
+    <tr>
+      <td> 0 <td>&nbsp; 
+	  <td> 1 <td>&nbsp; 
+	  <td> 0
+    <tr>
+      <td>sin(&phi;) <td>&nbsp; 
+	  <td> 0 <td>&nbsp;
+	  <td>cos(&phi;)
+  </tbody>
+  </table> 
+</table>
+
+<p>
+But now the next problem arises: do we do pitch first, or yaw? That
+really depends on what kind of effect you want to have <i>and</i> in
+relation to what system you do your rotation. There is actually only 
+one order that is possible for the same reason that roll wasn't 
+allowed: you cannot have a vertical perspective. What this boils down 
+to is that <b>u</b> (the x-axis of the camera frame) <i>must</i> be 
+parallel to the ground plane, i.e., <i>u</i><sub>y</sub> must be zero. 
+In order to do that, you must do pitch first, then
+yaw. This is depicted in fig&nbsp;21.3. To get a 
+feel for this: stand up, tilt your head down (pitch 
+&theta;&gt;0), then turn to your right (yaw &phi;&gt;0). The full 
+camera matrix then becomes:
+</p>
+
+<table id="eq-rotxy">
+<tr>
+  <td class="eqnrcell">(21.4)
+  <td class="eqcell">
+    <b>C</b>(&theta;, &phi;) = 
+    <b>R</b><sub>y</sub>(&phi;) 
+	&middot; <b>R</b><sub>x</sub>(&theta;) =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=3>&ensp;
+      <td>cos(&phi;) <td>&nbsp;
+      <td>sin(&phi;)&middot;sin(&theta;) <td>&nbsp;
+      <td>&minus;sin(&phi;)&middot;cos(&theta;)
+      <td class="bdrRR" rowspan=3>&ensp;
+    <tr>
+      <td> 0 <td>&nbsp; 
+	  <td>cos(&theta;) <td>&nbsp; 
+	  <td>sin(&theta;)
+    <tr>
+      <td>sin(&phi;) <td>&nbsp;
+      <td>&minus;cos(&phi;)&middot;sin(&theta;) <td>&nbsp;
+      <td>cos(&phi;)&middot;cos(&theta;)
+  </tbody>
+  </table>
+</table>
+
+<p>
+Aside from being correct, this matrix has two nice properties. Firstly,
+the column vectors are of unit length. Secondly, the component vectors 
+are perpendicular. This means that <b>C</b> is an <dfn>orthogonal
+matrix</dfn>, which has the very nice feature that
+<b>C</b><sup>&minus;1</sup>&nbsp;=&nbsp;<b>C</b><sup>T</sup>. This 
+makes the world&rarr;camera transformation a relatively simple 
+operation.
+</p><br>
+
+<p>
+One last thing here: if you were to rotate the camera system by
+180&deg; around <b>i</b>, this would give you a forward pointing 
+<b>w</b> and a downward pointing <b>v</b>, both of which decrease the
+number of awkward minus signs in later calculations, at the expense of 
+an awkward camera frame. Whether you want to do this is up to you.
+</p>
+
+<div class="note">
+<div class="nh">Matrix transforms and the system they occur in.</div>
+<p>
+I said that to mimic the rotations of <b>C</b> you to tilt your head 
+first (&theta;), then rotate your body (&phi;). You might think that 
+you can get the same effect by doing it the other way: turn first, then 
+look down. However, this is incorrect.
+</p>
+<p>
+It may <i>feel</i> the same, but in the second case you'd not actually 
+be using the <b>R</b><sub>x</sub>(&theta;) to invoke the tilt. A 
+matrix isn't a thing in itself, it &lsquo;lives&rsquo; in a space. In 
+this case, both <b>R</b><sub>x</sub>(&theta;) and 
+<b>R</b><sub>y</sub>(&phi;) are defined in terms of the <i>world</i> 
+coordinate system, and when applying them the directions follow the 
+world's axes. The turn-then-tilt order would use 
+<b>R</b><sub>x</sub>(&theta;) in a local frame, which is a legal 
+operation, but not the one that the math requires.
+</p>
+<p>
+I know it's a subtle point, but there really is an important 
+difference. Try visualizing it with a 90° rotation in both orders, 
+maybe that'd help. 
+</p>
+</div>
+
+<h3 id="ssec-try-proj">21.2.4.
+  The projection plane</h3>
+
+<div class="cpt_fr" style="width:256px;">
+  <img src="../img/mode7/crd_c2p.png" id="img-c2p"
+  alt=""><br>
+  <b>Fig 21.4</b>: perspective projection.
+</div>
+
+<p>
+To create the illusion of depth we need a <dfn>perspective view</dfn>.
+For this, you need a <dfn>center of projection</dfn> (COP) and a
+<dfn>projection plane</dfn>. Naturally, both need to be in camera space.
+While you're free to choose these any way you want, you can simplify
+matters by placing the center of projection at the origin of camera 
+space and the projection plane at a distance <i>D</i> in front of the
+camera, so that the plane is given by <b>x</b><sub>p</sub> =
+(<i>x</i><sub>p</sub>,&nbsp;<i>y</i><sub>p</sub>,&nbsp;&minus;<i>D</i>). 
+Yes, that's a negative <i>z</i><sub>p</sub>, because we're looking in 
+the negative z-direction. The projected coordinates are the
+intersections of the line between COP and <b>x</b><sub>c</sub>, 
+and the projection plane. Since the COP is at the
+origin, the relation between <b>x</b><sub>c</sub> and 
+<b>x</b><sub>p</sub> is
+</p>
+
+<table id="eq-c2p">
+<tr>
+  <td class="eqnrcell">(21.5)
+  <td class="eqcell">
+    &lambda; <b>x</b><sub>p</sub> = <b>x</b><sub>c</sub>
+</table>
+
+<p>
+Here &lambda; is a simple scaling factor, the value of which can be 
+determined in a variety of ways, depending of the information available
+at the point in your derivations. For example, since
+<i>z</i><sub>p</sub>&nbsp;=&nbsp;&minus;<i>D</i>, by definition, we 
+have &lambda;&nbsp;=&nbsp;&minus;<i>z</i><sub>c</sub>/<i>D</i>. Later 
+we'll see another expression. The interesting thing about this 
+expression is that &lambda; is proportional to the distance in camera 
+space, which in turn tells you how much the camera position is to be 
+scaled <i>down</i>, or zoomed. This is useful, since the scaling 
+parameters of the affine matrix scales down as well. Also, the 
+distance <i>D</i> attenuates the scaling, which means that it acts 
+as a <dfn>focus length</dfn>. Note that when 
+<i>z</i><sub>c</sub>&nbsp;=&nbsp;&minus;<i>D</i>, the scale is one, 
+meaning that the objects at this distance appear in their normal size.
+</p>
+
+<h3 id="ssec-try-view">21.2.5.
+  Viewport and viewing volume</h3>
+
+<div class="cpt_fr" style="width:308px;">
+  <img src="../img/mode7/viewport.png" id="img-viewport"
+  alt=""><br>
+<b>Fig 21.5</b>: 
+  Viewing frustum in camera space. The green
+  rectangle is the visible part of the projection plane
+  (i.e., the screen).
+</div>
+
+<p>
+Before I give the last step of the transformation to the screen, I
+have to say a few words about the viewport and the viewing volume. As
+you can imagine, you can only see a certain portion of the world. You 
+see the world through a region called the <dfn>viewport</dfn>. This
+is an area on the projection plane, usually rectangular, that defines 
+the horizontal and vertical boundaries of what you can see. In 
+particular, you have a left side (<i>L</i>), right side (<i>R</i>), top
+(<i>T</i>) and bottom (<i>B</i>). With the axes defined as they are
+and the origin is usually centered (see 
+fig&nbsp;21.5, inset), we have
+<i>R&gt;0&gt;L</i> and <i>T&gt;0&gt;B</i>. Yup, in this particular 
+case <i>L</i> is negative, and <i>T</i> is positive!
+</p>
+<p>
+The width and height of the viewport are 
+<i>W</i>&nbsp;=&nbsp;|<i>R&minus;L</i>| and 
+<i>H</i>&nbsp;=&nbsp;|<i>B&minus;T</i>|, respectively. Together with 
+the center of projection, the viewport defines the 
+<dfn>viewing volume</dfn> (see fig&nbsp;21.5). 
+For a rectangular viewport this will be a pyramid.
+</p>
+<p>
+Most of the time you will want boundaries in depth as well, because
+things too near will obstruct everything else from view (besides,
+dividing by 0 is never good), and very distant objects will become 
+so small that they are barely noticeable, and why waste so many 
+calculations on a handful of pixels? These boundaries in depth are
+called the <dfn>near</dfn> (<i>N</i>) and <dfn>far</dfn> (<i>F</i>)
+planes, and will turn the viewing volume in a frustum. The
+numbers for these distances are a matter of taste. Whatever you use,
+be aware that the z-values are actually negative. I would prefer to 
+have the values of <i>N</i> and <i>F</i> positive, so that the 
+order or distance is 0&gt;&minus;<i>N</i>&gt;&minus;<i>F</i>.
+</p><br>
+
+<p>
+Another point is the notion of the <dfn>field of view</dfn> (FOV).
+This is the horizontal angle &alpha; that you can see, meaning that
+</p>
+
+<table id="eq-fov-cam">
+<tr>
+  <td class="eqnrcell">(21.6)
+  <td class="eqcell">
+    tan(&frac12;&alpha;) = &frac12;<i>W/D</i>
+</table>
+
+<p>
+I am told that a commonly used FOV is about 90&deg;, which would 
+require 
+<i>D</i>&nbsp;=&nbsp;&frac12;<i>W</i>. 
+With <i>D</i>&nbsp;=&nbsp;128 you get close enough to 
+this requirement, with the added benefit that it's a power of 2, but 
+that, of course, is an implementation detail. <i>However</i>,  it 
+seems that 
+<i>D</i>&nbsp;=&nbsp;256 is more common, so we'll use that instead.
+</p>
+
+<h3 id="ssec-try-scr">21.2.6.
+  The screen</h3>
+
+<div class="cpt_fr" style="width:192px;">
+  <img src="../img/mode7/crd_p2s.png" id="img-p2s"
+  alt=""><br>
+<b>Fig 21.6</b>: screen space vs camera space
+</div>
+
+<p>
+The last step is the one from the projection plane onto the screen.
+This step is almost trivial, but the almost can cause you a lot of
+trouble if you're not careful. The situation is shown in 
+fig&nbsp;21.6, where
+you are looking through the camera. The axes <b>u</b> and <b>v</b> 
+are the up and right axes of the camera system, while the green arrows
+denote the x- and y-axes of screen space. And if you have paid
+attention to any of the tutorials, you should know that the screen's 
+y-axis points <i>down</i>. This is bugfest
+number&nbsp;1. Also, the origins of camera and screen space differ.
+Since the screen corresponds to the viewport, the origin of the 
+screen in camera/projection space is
+<b>a</b><sub>sp</sub>&nbsp;=&nbsp;(<i>L,&nbsp;T,&nbsp;&minus;D</i>). 
+Be careful not to reverse the signs here; that would be bugfest
+number&nbsp;2. Also remember that since this is in camera space, 
+<i>L</i> is negative and <i>T</i> is positive. Taking both the 
+inverted vertical axis and the origin of screen-space in mind, we
+have
+</p>
+
+<table id="eq-p2s">
+<tr>
+  <td class="eqnrcell">(21.7)
+  <td class="eqcell">
+    <b>S</b>(1,&minus;1,1)·<b>x</b><sub>s</sub> =
+    <b>x</b><sub>p</sub> &minus; <b>a</b><sub>sp</sub>
+</table>
+
+<p>
+The scaling matrix reverses the sign of the y-axis. We could have 
+avoided the extra matrix if we had rotated the camera frame by another 
+180&deg;, in which case <b>v</b> would have pointed down and 
+<b>w</b> would have pointed forward. But I didn't, so we'll have to 
+live with it here. Also, since the origin of the screen in
+camera space, is 
+<b>a</b><sub>sp</sub>&nbsp;=&nbsp;(<i>L,&nbsp;T,&nbsp;&minus;D</i>), 
+the screen position is 
+<b>x</b><sub>s</sub>&nbsp;=&nbsp;(<i>x</i><sub>s</sub>,&nbsp;<i>y</i><sub>s</sub>,&nbsp;0), 
+in other 
+words <i>z</i><sub>s</sub> is always zero. If you want to check 
+whether everything is OK, see if the corners of the viewport give the 
+right screen coordinates.
+</p>
+
+<h3 id="ssec-try-sum">21.2.7.
+  Theory summary</h3>
+<p>
+And that's basically it, phew. Since it took three pages to get here, I'll 
+repeat the most important things. First, the main equations we need are:
+</p>
+
+<table id="eq-m7-main">
+<col span=2 align="right">
+<tr>
+  <td class="eqnrcell">(21.8a)
+  <td class="eqcell"> &lambda;<b>C</b> · <b>x</b><sub>p</sub>
+  <td class="eqcell">=
+  <td class="eqcell"> <b>x</b><sub>w</sub> &minus; <b>a</b><sub>cw</sub>
+<tr>
+  <td class="eqnrcell">(21.8b)
+  <td class="eqcell"> <b>S</b>(1,-1,1) · <b>x</b><sub>s</sub>
+  <td class="eqcell">=
+  <td class="eqcell"> (<b>x</b><sub>p</sub> &minus; <b>a</b><sub>sp</sub>)
+</table>
+
+<p>where</p>
+
+<div class="lblock">
+<table cellpadding=0>
+<tr><td width="8%"><b>x</b><sub>w</sub>
+  <td>coordinates in world space;
+<tr><td><b>x</b><sub>p</sub>
+  <td> coordinates on the projection plane, <b>x</b><sub>p</sub>=
+    (<i>x</i><sub>p</sub>, <i>y</i><sub>p</sub>, &minus;<i>D</i>);
+<tr><td><b>x</b><sub>s</sub>
+  <td>coordinates on the screen, <b>x</b><sub>s</sub>=
+    (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>, 0);
+<tr><td><b>a</b><sub>cw</sub>
+  <td>the location of the camera in world space;
+<tr><td><b>a</b><sub>sp</sub>
+  <td>the location of the screen origin in camera space space,
+    <b>a</b><sub>sp</sub>&nbsp;=&nbsp;(<i>L, T, &minus;D</i>);
+<tr><td><b>C</b>
+  <td>the camera matrix, as function of pitch &theta; and yaw &phi;:
+    <b>C</b> =
+    <b>R</b><sub>y</sub>(&phi;)· <b>R</b><sub>x</sub>(&theta;);
+<tr><td>&lambda;
+  <td>the scaling factor. Its value can be determined by the
+    boundary conditions.
+</table></div>
+
+<p>
+Remember these equations and terms, for I will refer to them often.
+The break between eq&nbsp;21.8a and 
+eq&nbsp;21.8b is by design: all the real
+information is in eq&nbsp;21.8a; 
+eq&nbsp;21.8b is just a final step that 
+needs to be taken to complete the transformation. In the remainder of 
+the text, I will make frequent use of 
+eq&nbsp;21.8a and leave out 
+eq&nbsp;21.8b unless necessary. Other 
+interesting things to know:
+</p>
+
+<ul>
+<li>World system 
+  <i>S</i><sub>w</sub>&nbsp;=&nbsp;{<b>i</b>,<b>j</b>,<b>k</b>} and
+  camera system 
+  <i>S</i><sub>c</sub>&nbsp;=&nbsp;{<b>u</b>, <b>v</b>, <b>w</b>} are 
+  right-handed Cartesian coordinate systems. As expected, the columns 
+  of camera matrix <b>C</b> are the principle axes of <i>S</i><sub>c</sub>:
+  <b>C</b>&nbsp;=&nbsp;[<b>u&nbsp;v&nbsp;w</b>];
+<li>The viewport and viewing frustum are in camera space, meaning that 
+  their boundaries are too. This means that
+  <table>
+    <tr><td><i>R</i> &gt; 0 &gt; <i>L</i> <td>(horizontal)
+    <tr><td><i>T</i> &gt; 0 &gt; <i>B</i> <td>(vertical)
+    <tr><td>0 &gt; &minus;<i>N</i> &gt; &minus;<i>F</i> <td>(depth)
+  </table>
+<li>If we use the GBA screen size as a basis (<i>W</i>&nbsp;=&nbsp;240,
+  <i>H</i>&nbsp;=&nbsp;160), and <i>D</i>&nbsp;=&nbsp;256, reasonable 
+  values for the viewing frustum boundaries are
+  <table>
+  <col span=1 width=64>
+
+    <tr><td><i>L</i> = &minus;120  <td><i>R</i> = &minus;120
+    <tr><td><i>T</i> =  80   <td><i>B</i> = &minus;80
+    <tr><td><i>N</i> =  24   <td><i>F</i> = 1024
+  </table>
+  But you can pick others if you want.
+</ul>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-horz">21.3.
+  Horizon and backdrop</h2>
+<p>
+Take the essential mode 7 case:  a floor in perspective. Due to
+the perspective division, the distant parts of the floor will approach 
+a single line: the <dfn>horizon</dfn>. Since the map really is just a 
+floor, the horizon really will be just that: one horizontal line. 
+The space above that is usually empty, but to make it a little less 
+bland, we will use a <dfn>backdrop</dfn>: a panorama view of the 
+distant environment that moves along with the camera's rotation.
+</p>
+
+<h3 id="sec-horz-find">21.4.
+  Finding the horizon</h3>
+<p>
+Roughly put, the horizon is where z&nbsp;=&nbsp;&minus;&infin;. If 
+you have lines on the floor, the horizon is where all parallel lines 
+seem to meet: the vanishing line. Naturally, if you only have a floor, 
+then you should only draw it below the horizon and the graphics above 
+it should be part of a skybox. I'm sure you've seen this in the 
+original Mario Kart and other mode 7 racers. Since we're limited to a 
+roll-less camera, the horizon will always be a horizontal line: 
+one scanline <i>y</i><sub>s,h</sub>. To find it, all we have to do 
+is take the 
+<i>y</i>-component of eq&nbsp;21.8a and 
+rearrange the terms to get
+</p>
+
+<table id="eq-horz-line">
+<tr>
+  <td class="eqnrcell">(21.9a)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> &lambda; (<i>v</i><sub>y</sub> <i>y</i><sub>p,h</sub> &minus;
+      <i>w</i><sub>y</sub> D) 
+	<td> = 
+	<td>&minus;<i>a</i><sub>cw,y</sub>
+  <tr>
+    <td> <i>y</i><sub>p,h</sub>
+    <td>=
+    <td> (<i>w</i><sub>y</sub>D &minus;
+      <i>a</i><sub>cw,y</sub> / &lambda;) / <i>v</i><sub>y</sub>
+  </table>
+</table>
+
+<p>
+And if we were to take our horizon at infinity, them 
+&lambda;&nbsp;=&nbsp;&minus;&infin;, which would reduce 
+eq&nbsp;21.9 to
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">(21.9b)
+  <td class="eqcell">
+    <i>y</i><sub>p,h</sub> 
+	  = <i>D w</i><sub>y</sub>/<i>v</i><sub>y</sub>
+      = <i>D</i> tan(&theta;)
+</table>
+
+<p>
+However, you need to think about whether you want to use this 
+simplified equation. At very large &lambda;, the gaps in 
+displayed map points are so large that you're effectively showing 
+noise, which can be very ugly indeed. A better way would be making 
+use of the far clipping plane at 
+<i>z</i><sub>c</sub>&nbsp;=&nbsp;&minus;<i>F</i>. In that case,
+&lambda;&nbsp;=&nbsp;<i>F/D</i> and we can use 
+eq&nbsp;21.9 to calculate the horizon,
+which will be something like
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">(21.9c)
+  <td class="eqcell">
+    <i>y</i><sub>p,h</sub> 
+	  = <i>D/F</i> · (<i>F w</i><sub>y</sub> &minus;
+      <i>a</i><sub>cw,y</sub>) / <i>v</i><sub>y</sub>
+
+<!--  = <i>D</i>tan(&theta;) 
+    - <i>D/F</i> ·<i>a</i><sub>cw,y</sub>/cos &theta; -->
+</table>
+
+<p>
+As expected, if <i>F</i>&nbsp;=&nbsp;&minus;&infin; then 
+eq&nbsp;21.9c reduces to 
+eq&nbsp;21.9b. Regardless of whether you 
+chose a finite of infinite <i>z</i><sub>c</sub>, the horizon will be 
+at scanline 
+<i>y</i><sub>s,h</sub>&nbsp;=&nbsp;<i>T &minus; y</i><sub>p,h</sub>.
+</p>
+
+<h3 id="ssec-horz-use">21.4.1.
+  Using the horizon</h3>
+<p>
+The horizon marks the line between the map and &lsquo;far far 
+away&rsquo;: between the floor and the backdrop. The floor 
+should be an affine background, obviously; for the backdrop, we 
+will use a regular background, although that's not required. What 
+we need to a way to switch between the two at the horizon scanline.
+The simplest way is by HBlank interrupt: once the horizon scanline is 
+reached, make the switch between floor and backdrop settings in the 
+BG control registers and perhaps initiate HDMA for the affine parameter 
+transfers if you chose to use DMA for that.
+</p>
+<p>
+Switching between the backdrop and floor backgrounds is actually 
+trickier than it sounds. You could, for example, have a separate 
+background for each and enable/disable them depending on your needs. 
+The problem is that it seems to take about 3 scanlines before a 
+background is fully set up in hardware (see 
+<a href="http://forum.gbadev.org/viewtopic.php?t=1303" target="_blank">forum:1303</a>), 
+so you'll see crap during that time. In other words, this solution 
+is no good.
+</p>
+<p>
+An other way would be to have one background for both and switch the 
+video-mode from 0 to 1 or 2. This won't give you 3 lines of garbage, 
+but now another problem arises: chances are very high that the 
+backdrop and floor have very different tiles and map attributes. 
+This is easy to solve though: simply change the screen (and char) 
+base blocks in <code>REG_BGxCNT</code>.
+</p>
+
+<div class="lblock">
+<div class="cpt" style="width:336px;">
+  <img src="../img/mode7/bg_switch.png" id="img-bg-switch" 
+    alt="bg-switch"><br>
+  <b>Fig 21.7</b>:
+  Switch video-mode and background parameters at the horizon.
+</div>
+
+<div class="cpt" style="width:450px;">
+  <img src="../img/mode7/panorama.png" id="img-pan" 
+    alt="panorama" width=450><br>
+  <b>Fig 21.8</b>: 
+  peeling a panoramic view from a cylinder.
+</div>
+</div>
+
+<h3 id="ssec-horz-backdrop">21.4.2.
+  Making and placing the backdrop</h3>
+<p>
+The space directly above the horizon is for the backdrop. You probably 
+want a nice image of a distant town or tree line over there, not just 
+a boring empty sky. 
+The backdrop offers a panoramic view, which can be considered 
+a map painted on the inside of a cylinder and then peeled off to a 
+normal 2D surface (see fig&nbsp;21.8). The idea is 
+to put that surface on a background and the scroll around.
+</p>
+<p>
+Vertically, the bottom of the background should connect to the horizon. 
+Because regular backgrounds use wrap-around coordinates this is 
+actually quite easy: place the ground-level of the backdrop at the 
+bottom of a screen-block and set the vertical offset to 
+&minus;<i>y</i><sub>s,h</sub>.
+</p>
+<p>
+Horizontally, there are several issues to be aware of. The first is 
+the width of the map, which is simply the perimeter <i>P</i> 
+of the cylinder. As we should have a scrolled a full map's width 
+for a 360&deg; rotation, the correct scroll ratio per unit angle 
+is simply <i>P</i>/2&pi;&nbsp;=&nbsp;<i>R</i>, the radius. In principle, 
+<i>R</i> is arbitrary, but the best result can be had when the 
+field of view formed by the angle of the panorama 
+(&alpha;<sub>p</sub>&nbsp;=&nbsp;<i>W</i>/<i>R</i>), is equal to the 
+camera field-of-view angle &alpha;<sub>c</sub> from 
+eq&nbsp;21.6. If all is right we should have 
+&alpha;<sub>p</sub>&nbsp;=&nbsp;&alpha;<sub>c</sub>&nbsp;=&nbsp;&alpha;.
+</p>
+
+<table id="eq-fov">
+<tr>
+  <td class="eqnrcell">(21.10)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> &alpha;
+    <td>=
+    <td> 2·arctan(&frac12;<i>W</i>/<i>D</i>)
+  <tr>
+    <td> &alpha;
+    <td>=
+    <td> <i>W</i>/<i>R</i>
+  <tr>
+    <td> <i>R</i>
+    <td>=
+    <td> &frac12;<i>W</i> / arctan(&frac12;<i>W</i>/<i>D</i>)
+  <tr>
+    <td> &nbsp;
+    <td>&asymp;
+    <td> <i>D</i> <big>/ (</big> 1 &minus; 
+	  (&frac12;<i>W</i>/<i>D</i>)<sup>2</sup>/3 <big>)</big>
+  </table>
+</table>
+
+<p>
+That last approximation stems from the first couple of terms of the 
+<a href="http://en.wikipedia.org/wiki/Taylor's_theorem" target="_blank">Taylor 
+series</a> of the arctangent. Interestingly enough, even 
+<i>R</i> &asymp; <i>D</i> seems somewhat adequate. Anyway, filling 
+in <i>W</i>&nbsp;=&nbsp;240 and <i>D</i>&nbsp;=&nbsp;256 gives 
+<i>P</i>&nbsp;=&nbsp;1720, 
+which isn't a very convenient map size, is it? Now, it is possible 
+to create a map of any size and update VRAM if we go outside the 
+screenblock's boundaries (commercial games do it all the time),
+but doing so would distract for the subject at hand, so you know 
+what? We're going to bend the rules a bit and just force 
+<i>P</i>&nbsp;=&nbsp;1024.
+</p>
+<p>
+&ldquo;Wait a sec ... you can't do that!&rdquo; Well, yes I can 
+actually. I'm not <i>supposed</i> to do it, but that's another
+issue. The fact of the matter is that, I don't think there is a 
+<i>single</i> mode 7 game that scrolls the backdrop properly!
+For example, the Mario Kart's often use multiple backgrounds with 
+different scrolling speeds in their backdrops, which is absolutely 
+ridiculous, mathematically speaking, because looking around doesn't 
+change relative lines of sight. But I guess nobody noticed or at 
+least nobody cares. What I'm trying to say is: we're in good 
+company <kbd>:P</kbd>
+</p>
+<p>
+So, we just define a perimeter value and with it backdrop map-width 
+ourselves. In this case I'm going to use <i>P</i>&nbsp;=&nbsp;1024, 
+which is a nice round number and for which we can use a 512 px wide 
+tile-map will effectively end up as a panorama with 180° rotational 
+symmetry. Taking into account the circle partitioning of 
+2&pi;&nbsp;&hArr;&nbsp;10000h, the scrolling value is simply 
+&phi;*<i>P</i>/10000h&nbsp;=&nbsp;&phi;/64. We'll have to offset this 
+by <i>L</i> as well because I want to map &phi;&nbsp;=&nbsp;0 to due 
+north. The final position of the backdrop is given in
+21.11.
+</p>
+
+<table id="eq-bd-pos">
+<tr>
+  <td class="eqnrcell">(21.11)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><i>dx</i>
+    <td>=
+    <td>&phi;/64 + <i>L</i>
+  <tr>
+    <td> <i>dy</i>
+    <td>=
+    <td> &minus;<i>y</i><sub>s,h</sub>
+  </table>
+</table>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-flr">21.5.
+  The floor</h2>
+
+<h3 id="ssec-flr-parms">21.5.1.
+  Affine parameters for the floor</h3>
+<p>
+Eq 21.8 describes the world&harr;screen 
+transformation but that information uses 3D vectors, while the 
+GBA only has a 2&times;2 affine matrix <b>P</b> and a 2D 
+displacement vector <b>dx</b> at its disposal. So we have some 
+rewriting to do. Now, I could give you the full derivation, 
+2d&harr;3d conversions and all, but something tells me you really 
+don't want to see that. So instead, I'll give you the set of 
+equations you need to solve, and hints on how to do that.
+</p>
+
+<table id="eq-m7-set">
+<tr>
+  <td class="eqnrcell">(21.12)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> &lambda;<b>C</b> · <b>x</b><sub>p</sub>
+    <td>=
+    <td> <b>x</b><sub>w</sub> &minus; <b>a</b><sub>cw</sub>
+  <tr>
+    <td> <b>S</b>(1,&minus;1,1) · <b>x</b><sub>s</sub>
+    <td>=
+    <td> (<b>x</b><sub>p</sub> &minus; <b>a</b><sub>sp</sub>)
+  <tr>
+    <td> <b>P &middot; q</b>
+    <td>=
+    <td> <b>p &minus; dx</b>
+  </table>
+</table>
+
+<p>
+The first two equations are just eq&nbsp;21.8 
+again, I just them list for completeness. The last equation is the 
+relation between screen point <b>q</b> and map point <b>p</b> for 
+an affine map, an equation that should be familiar by now. Now, 
+remember that our map lies on the floor, in other words 
+<b>p</b>&nbsp;=&nbsp;(<i>x</i><sub>w</sub>,&nbsp;<i>z</i><sub>w</sub>). 
+The 2D screen point <b>q</b> is, of course, 
+similar to the 3D screen vector of <b>x</b><sub>s</sub>. The only 
+thing that you have to remember is that when writing to 
+<code>REG_BGxY</code>, the left of the current scanline is taken 
+as the origin, so that effectively 
+<b>q</b>&nbsp;=&nbsp;(<i>x</i><sub>s</sub>,&nbsp;0), 
+which in turn means that
+<i>p</i><sub>b</sub> and <i>p</i><sub>d</sub> are of no consequence.
+The values of the other elements of <b>P</b> are simply the 
+<i>x</i>- and <i>z</i>-components of the scaled camera x-axis, 
+&lambda;<b>u</b>. If you use these values, you will see that 
+eventually you will end up with an expression that can best be 
+summed up by:
+</p>
+
+<table id="eq-m7-ofs">
+<tr>
+  <td class="eqnrcell">(21.13)
+  <td class="eqcell">
+    <b>dx</b>' 
+	= <b>a</b><sub>cw</sub> 
+	+ &lambda; <b>C</b> &middot; <b>b</b>
+</table>
+
+<p>where</p>
+
+<div class="lblock">
+<table>
+<col align="right">
+<tr><td><b>dx'</b> <td>= (<i>dx</i>, 0, <i>dy</i>)
+<tr><td><b>b</b>   <td>= (<i>L</i>, 
+  <i>T&minus;y</i><sub>s</sub>, &minus;<i>D</i>)
+</table>
+</div>
+
+<p>
+Everything you need for the displacement is neatly packed into this 
+one equation, now we need to disassemble it to construct the 
+algorithm. First, we can use the <i>y</i>-component of <b>dx'</b> to 
+calculate &lambda;. Once we have that we can use it to calculate the 
+other two elements, i.e., the actual affine offsets. The affine matrix 
+was already given earlier.
+</p>
+<p>
+Eq&nbsp;21.14
+gives all the relations explicitly, though I hope you'll forgive me 
+when I prefer the conciseness of eq&nbsp;21.13 
+myself.
+</p>
+
+<table id="eq-m7-sum">
+<col span=2 align="right">
+<tr>
+  <td rowspan=5 class="eqnrcell">(21.14)
+  <td> &lambda;
+  <td>= <i>a</i><sub>cw,y</sub> / 
+    ( (<i>y</i><sub>s</sub>&minus;<i>T</i>)<i>v</i><sub>y</sub> +
+	 <i>Dw</i><sub>y</sub> )
+<tr><td><i>p</i><sub>a</sub>
+  <td>= &lambda; <i>u</i><sub>x</sub>
+<tr><td><i>p</i><sub>c</sub>
+  <td>= &lambda; <i>u</i><sub>z</sub>
+<tr><td><i>dx</i>
+  <td>= <i>a</i><sub>cw,x</sub> + &lambda;
+    ( <i>Lu</i><sub>x</sub> +
+     (<i>T&minus;y</i><sub>s</sub>)<i>v</i><sub>x</sub> &minus;
+	 <i>Dw</i><sub>x</sub> )
+<tr><td><i>dy</i>
+  <td>= <i>a</i><sub>cw,z</sub> + &lambda;
+    ( <i>Lu</i><sub>z</sub> +
+     (<i>T&minus;y</i><sub>s</sub>)<i>v</i><sub>z</sub> &minus;
+	 <i>Dw</i><sub>z</sub> )
+</table>
+
+<p>
+Note that if we take the top at 0 and no pitch (<i>T</i>=0 and 
+&theta;=0) we have exactly the same result as in the first mode 7 
+chapter, and if we look straight down (&theta;=90&deg;), the whole 
+thing reduces to a simple scaling/rotation around point 
+(&minus;<i>L,&nbsp;T</i>), which is exactly it should be. 
+Eq&nbsp;21.14 is the general equation for 
+mode 7; for the implementation, you can often make a 
+number of shortcuts that speed up calculation, but well get to that
+<a href="#eq-aff-calc">later</a>.
+</p>
+
+<h3 id="ssec-flr-fog">21.5.2.
+  Distance fogging</h3>
+<p>
+In the real world, light coming from far away objects has to 
+travel through the atmosphere, which scatters the photons, attenuating 
+the beam. What you'll end up seeing is partly the object itself and 
+partly the ambient color, and the further the original object, the 
+smaller its contribution is. Because such effect is most easily 
+visible in fog conditions, I'll call this effect <dfn>fogging</dfn>.
+</p>
+<p>
+Fogging offers a hint of distance and including it can increase the
+sense of depth. Also, it can hide objects popping into view as they're 
+loaded. GBA-wise, it can be implemented by using different alpha-blends 
+at every scanline.
+</p><br>
+
+<p>
+The fundamental equation for this is the following differential 
+equation:
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    d<i>I</i> = &minus;<i>I k</i>(&nu;) &rho; d<i>z</i>
+</table>
+
+<p>
+where <i>I</i> is the intensity; <i>k</i>(&nu;) is the absorption
+coefficient of the medium, which depends on the frequency of the light, 
+&nu; and possibly position; &rho; is the density and <i>z</i> 
+is the distance. Solving this would lead to an exponential decay over
+distance. And I do mean real distance, with squares and roots and
+everything. 
+</p>
+<p>
+Fortunately, we don't have to use something that complicated; all we
+really need is some functional relation that gives 0 at infinity and 
+1 close up. Interestingly enough, we already have something like 
+that, namely &lambda; as function of the scanline (see 
+21.14). This is basically a hyperbola, all you 
+have to do then is fiddle with scalers and offsets a bit to get 
+something that looks nice. In my case, &lambda;*6/16 seems to work 
+well enough.
+</p>
+
+<div class="cblock">
+<table class="bdr" id="img-fog"
+  border=0 cellpadding=2 cellspacing=2>
+<tr>
+<td> <img src="../img/mode7/fog_off.png" alt="fog off"> </td>
+<td> <img src="../img/mode7/fog_on.png" alt="fog on"> </td>
+</tr>
+<tr>
+<td>
+  <b>Fig 21.9</b>: fog off (left) and on (right).
+</td>
+</tr>
+</table>
+</div>
+
+<p>
+Fig 21.9 shows screenshots with and without the 
+fogging effect as seen from a fairly high altitude. The distance to 
+the floor is relatively small at the bottom of the screen, so those 
+are still very visible. At the horizon, the floor is completely 
+obscured by the orange fog; which is actually a good thing, as the
+lines near the horizon are usually not much to look at anyway.
+</p>
+<p>
+By the way, note that I said <i>orange</i> fog. If you'd paid 
+attention in the <a href="gfx.htm#sec-blend">graphics effects</a> 
+chapter will know that the GBA only has fading modes for white and
+black. Nevertheless, fades to an arbitrary color are very much
+possible, but I'll explain once we get to the implementation. 
+While you ponder over how it can be done, I'll move on to 3D sprites.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-objs">21.6.
+  Sprites</h2>
+<p>
+Sprites and 3D are a strange combination. By their very nature, 
+sprites are 2D objects &ndash; like stickers stuck against the viewport 
+(i.e., the screen).
+To make them appear part of the 3D world, you have to make them move 
+over the screen in such a way that they appear to move with the world 
+and scale them according to their distance. Once again, the basic of 
+this is eq&nbsp;21.8, but there is 
+considerably more to it.
+</p>
+<p>
+Four topics must be covered here. The first is sprite <b>positioning</b>. 
+Eq&nbsp;21.8 will work at point/pixel level, 
+and a sprite is a simple rectangle. While it's possible to rewrite the 
+sprite's pixels to work around that, it kind of defeats the purpose
+of using sprites in the first place. Instead, we'll link one point on 
+the object to the world coordinate of the sprite and set the OAM 
+position and matrix to accommodate this. This is basically the theory
+of <a href="affobj.htm#sec-combo">anchoring</a> discussed in the 
+affine object chapter. 
+</p>
+<p>
+Next up: sprite <b>culling</b>. Once you have the 
+correct OAM positions you can't use them as is, you have to make sure 
+the sprite is only active if it is actually visible inside the 
+viewport. If not, it should be disabled.
+</p>
+<p>
+Then there's the matter of sprite <b>animation</b>. Consider Toad's 
+kart in fig&nbsp;21.10, which has the correct anchored 
+position, but no matter which angle you look at it, it'll always show 
+the same side. To make it look as if you can actually move around the 
+object, we'll use different frames of animation to show different 
+sides.
+</p>
+<p>
+Lastly, sprite <b>sorting</b>. By default, objects will be ordered 
+according to the objects' numbers: obj 0 over obj 1, over obj 2, etc. 
+Always linking a sprite to the same object means that the order would be 
+wrong if you look at them from the other side, so we need to sort them by 
+distance.
+</p>
+<p>
+Those are the main issues to deal with. There are a few others, like 
+placing a shadow, and using pre-scaled objects to get around the hardware 
+limitation of 32 affine matrices, but these are fairly easy if the other 
+points are already taken care of. One thing I will discuss as well is 
+what I call object <b>normalization</b>: applying an extra scaling for 
+objects so that they don't grow too big for their clipping rectangle.
+</p>
+
+<table id="img-m7-obj"
+  class="bdr" style="width:512px; margin:10px auto;"
+  border=0 cellpadding=2 cellspacing=0>
+<tr>
+  <td><img src="../img/mode7/obj_back.png" alt="normal view"></td>
+  <td><img src="../img/mode7/obj_down.png" alt="looking down"></td>
+  <td><img src="../img/mode7/obj_right.png" alt="looking down and left"></td>
+</tr>
+<tr>
+  <td colspan=3>
+  <b>Fig&nbsp;21.10</b>: anchored sprite. The position 
+  is good, but no matter how you turn, Toad always turns away. 
+  Maybe it's the hat.
+  </td>
+</tr>
+</table>
+
+<h3 id="ssec-obj-pos">21.6.1.
+  Positioning and anchoring</h3>
+<p>
+Positioning sprites consists of two facets. The first is to transform 
+the sprites world position <b>x</b><sub>w</sub> to a position on the 
+screen <b>x</b><sub>s</sub>. After that, you need to use that point 
+to determine the most appropriate OAM coordinates.
+</p>
+<p>
+The first part is just another application of 
+eq&nbsp;21.8 again, only in reverse. Normally, 
+inverting 3D matrix is a particularly un-fun process, but the camera 
+matrix happens to be an orthonormal matrix. An 
+<dfn>orthonormal matrix</dfn> is a matrix of which the component 
+vectors are orthogonal (perpendicular to each other) and have a 
+length of 1. The neat thing about an orthonormal matrix is that its
+inverse is simply its transpose: 
+<b>C</b><sup>&minus;1</sup>&nbsp;=&nbsp;<b>C</b><sup>T</sup>. 
+That leads us to the following equations:
+</p>
+
+<table id="eq-obj-w2s">
+<tr>
+  <td class="eqnrcell">(21.15)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><b>x</b><sub>p</sub>
+    <td>=
+    <td> <b>C</b><sup>T</sup> &middot; 
+	  (<b>x</b><sub>w</sub> &minus; <b>a</b><sub>cw</sub>) / &lambda;
+  <tr>
+    <td> <b>x</b><sub>s</sub>
+    <td>=
+    <td> <b>S</b>(1,&minus;1,1) &middot; 
+	  (<b>x</b><sub>p</sub> &minus; <b>a</b><sub>sp</sub>)
+  </table>
+</table>
+
+<p>
+The only real unknown here is &lambda;, which we can calculate by 
+using the fact that 
+<i>z</i><sub>p</sub>&nbsp;=&nbsp;&minus;<i>D</i>. Now 
+let the distance between camera and sprite be 
+<b>r</b>&nbsp;=&nbsp;<b>x</b><sub>w</sub>&nbsp;&minus;&nbsp;<b>a</b><sub>cw</sub>; 
+using <b>C</b>&nbsp;=&nbsp;[<b>u&nbsp;v&nbsp;w</b>], we find
+
+<table>
+<tr>
+  <td class="eqfill">&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td>&lambda;
+    <td>=
+    <td>&minus;<b>w</b>·<b>r</b> / <i>D</i>
+  <tr>
+    <td><i>x</i><sub>p</sub>
+    <td>= 
+    <td><b>u</b>·<b>r</b> / &lambda;
+  <tr>
+    <td><i>y</i><sub>p</sub>
+    <td>= 
+    <td><b>v</b>·<b>r</b> / &lambda;
+  </table>
+</table>
+
+<div class="cpt_fr" style="width:88px;">
+<img src="../img/mode7/anchor.png" id="img-anchor"
+  alt="a sprite, with anchor"><br>
+<b>Fig&nbsp;21.11</b>:  
+a 32&times;32 sprite, with the anchor <b>p</b><sub>0</sub> 
+  relative to the top-left.
+</div>
+
+<p>
+Finding the screen position of <b>x</b><sub>w</sub> is trivial after 
+that. And now the anchoring part. Instead of stickers, think of 
+objects as pieces of pater to be tacked onto a board (i.e., the 
+screen). The tack goes through one spot of the object, and that spot 
+is fixed to the board. That spot is the <dfn>anchor</dfn>. For 
+affine objects it's not quite as simple as that, because we have to 
+specify OAM coordinates rather than anchor coords, so there is
+some math involved in how to express the OAM coordinates <b>x</b> in 
+terms of the texture anchor <b>p</b><sub>0</sub> and the screen 
+anchor <b>q</b><sub>0</sub>. This theory was covered in the
+<a href="affobj.htm#sec-combo">affine object</a> chapter, which led
+to eq&nbsp;21.16.
+The other quantities there are size of the objects, 
+<b>s</b>&nbsp;=&nbsp;(<i>w</i>,&nbsp;<i>h</i>), and <i>m</i> which 
+is &frac12; for normal affine objects and 1 for double-size affine 
+objects.
+</p>
+
+<table id="eq-anchor">
+<tr>
+  <td class="eqnrcell">(21.16)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tbody valign="middle">
+  <tr>
+    <td> <b>x</b>
+    <td>=
+    <td> <b>q</b><sub>0</sub> &minus; <i>m</i><b>s</b> &minus; 
+	  <b>P</b><sup>&minus;1</sup>·
+	  (<b>p</b><sub>0</sub> &minus; &frac12;<b>s</b>)
+  </tbody>
+  </table>
+</table>
+
+
+<p>
+Now the task is to link the data we have to this equation.
+The screen anchor <b>q</b><sub>0</sub> is just 
+<b>x</b><sub>s</sub>. The texture anchor <b>p</b><sub>0</sub> is 
+the pixel in texture space you want to keep fixed and is yours to 
+choose. For the kart-sprite, it makes sense to put it near the bottom 
+of the kart, as is depicted in fig&nbsp;21.11.
+&lsquo;Vector&rsquo; <b>s</b> is given by the size of the object, 
+which in this case is (32,&nbsp;32) and because I'm choosing to always 
+use double-size objects here, <i>m</i>=1. The <b>P</b>-matrix is 
+just a scaling by &lambda;, unless you want to add other things as 
+well. All that remains then is just to fill it in the numbers.
+</p>
+
+<h3 id="ssec-obj-cull">21.6.2.
+  Sprite culling</h3>
+
+<div class="cpt_fr" style="width:308px;">
+  <img src="../img/mode7/viewport_obj.png" id="img-vp-obj"
+  alt=""><br>
+<b>Fig 21.12</b>: 
+  View-frustum with sprites <i>a</i>, <i>b</i> and <i>c</i>.
+  <i>b</i> and <i>c</i> are visible, <i>a</i> is not.
+</div>
+
+<p>
+<dfn>Culling</dfn> is the process removing any part of the world 
+that cannot be seen. In this case, it means removing those sprites 
+that do not fall within the viewing volume. This is a very smart 
+thing to do, and it makes even more sense for sprites, because not 
+doing so would seriously screw things up because OAM couldn't cope 
+with the possible range of <b>x</b><sub>s</sub>.
+</p>
+<p>
+The first thing to do would be a distance check: if the object 
+is too far away, it should not be seen. It's also a good idea to 
+have a near-plane distance check. Then you have to test it for 
+intersections with the viewport. Each sprite is bounded by a certain 
+rectangle on the projection plane and if this is completely outside 
+the viewport, the object should not be rendered.
+</p>
+<p>
+Fig 21.12 shows a few examples of this. 
+Objects <i>a</i> and <i>b</i> have already been projected onto the
+projection plane. Object <i>a</i> is outside the viewport, and should
+be disabled. Object <i>b</i> is partially visible and should be 
+rendered. Object <i>c</i> is not projected yet, but falls between 
+the near and far plane and should at least be tested (and then found
+fully visible).
+</p><br>
+
+<p>
+It's actually easier to do the view volume checks in 3D camera 
+space instead of 2D projection space. The object rectangle can 
+easily be calculated from 
+<b>x</b><sub>c</sub>&nbsp;=&nbsp;<b>C</b><sup>T</sup>·<b>r</b>, 
+the anchor <b>p</b><sub>0</sub> and the size <b>s</b>. The viewport 
+will have to be scaled by &lambda;, and this gives us the 
+following rests to perform:
+</p>
+
+<div class="lblock">
+<table id="tbl-culltest"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 21.1</b>:
+  Object rect and culling tests in camera space. Note the signs!
+</caption>
+<tbody>
+<tr>
+  <th>&nbsp;</th><th>Object position</th><th>Visible if</th>
+</tr>
+<tr>
+  <th> Depth </th>
+  <td> <i>d</i> = -<i>z</i><sub>c</sub> = <b>w</b>·<b>r</b> </td>
+  <td> <i>N</i> &le; <i>d</i> 
+    &amp;&amp; <i>d</i> &lt; <i>F</i> </td>
+</tr>
+<tr>
+  <th> Horizontal </th>
+  <td> <i>l</i> = <i>x</i><sub>c</sub> &minus; <i>p</i><sub>0,x</sub> </td>
+  <td> &lambda;<i>L</i> &le; <i>l</i> + <i>w</i> 
+    &amp;&amp; <i>l</i> &lt; &lambda;<i>R</i> </td>
+</tr>
+<tr>
+  <th> Vertical </th>
+  <td> <i>t</i> = &minus;<i>y</i><sub>c</sub> &minus; 
+    <i>p</i><sub>0,y</sub> </td>
+  <td> &minus;&lambda;<i>T</i> &le; <i>t</i> + <i>h</i> 
+    &amp;&amp; <i>t</i> &lt; &minus;&lambda;<i>B</i> </td>
+</tr>
+</tbody>
+</table></div>
+
+<p>
+If all these conditions are true, then the object should be visible. 
+Now, please note the <i>signs</i> of the tests, particularly in the 
+vertical checks. 
+</p><br>
+
+<!-- Having world and screen systems with opposite signs 
+really sucks, but there's little one can do about that.
+-->
+
+
+<h3 id="ssec-obj-ani">21.6.3.
+  Animation</h3>
+
+<div class="cpt_fr" style="width:200px;">
+  <img src="../img/mode7/psi_def.png" id="img-psi-def" 
+    alt="view angle"><br>
+  <b>Fig 21.13</b>:
+  Finding the view-angle &psi;.
+</div>
+
+<p>
+Rotation animation, to be precise. As we saw in 
+fig&nbsp;21.10, the sprite will show the same 
+side regardless of where you are looking from. This is only logical, 
+as the sprite is not actually a 3D entity. To make it <i>look</i> 
+a little more 3D, we need to have images of the sprite taken from 
+different camera angles, and then pick the one we need depending on 
+which angle we're looking from.
+</p>
+<p>
+First, finding the correct view angle, &psi;. 
+Fig&nbsp;21.13 shows the general situation.
+The angle 
+you need is the angle between the vector between the camera and 
+the object (red, dashed) and the global looking direction of the 
+object. In the figure, you can see the global direction angles 
+for the camera and object: &phi;<sub>c</sub> and &phi;<sub>o</sub>, 
+respectively. Also indicated is the angle between the camera 
+direction and the sprite, &alpha;. If you look at these angles 
+closely, you'll see that 
+&phi;<sub>c</sub>&nbsp;+&nbsp;&alpha;&nbsp;+&nbsp;&psi;&nbsp;=&nbsp;&phi;<sub>o</sub>. 
+In other words:
+</p>
+
+<table id="eq-psi">
+<tr>
+  <td class="eqnrcell">(21.17) </td>
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td>&psi;
+    <td>=
+    <td>&phi;<sub>o</sub> &minus; &phi;<sub>c</sub> 
+    &minus; &alpha;
+  <tr>
+    <td>&nbsp;
+    <td>=
+    <td>&phi;<sub>o</sub> &minus; &phi;<sub>c</sub> 
+    &minus; arctan(<i>x</i><sub>c</sub> / &minus;<i>z</i><sub>c</sub>) 
+  </table>
+</table>
+
+<p>
+Whether the minus-sign inside the arctan() is necessary depends on how 
+you define the terms all the terms. Eq&nbsp;21.17 is 
+the fully correct version, but if the arctan doesn't appeal to you, 
+you'll be glad to know that in most cases the &alpha;-term can be 
+safely ignored without anyone noticing.
+</p><br>
+
+<p>
+Now that we have our viewing angle, we need to use it somehow. 
+Suppose you have <i>N</i> frames of rotation, which divides the 
+circle into equal parts each 2&pi;/<i>N</i> radians wide. To get the 
+slice that &psi; is in, we merely have to divide by the angle of each 
+slice: 
+<i>i</i>&nbsp;=&nbsp;&psi;/(2&pi;/<i>N</i>)<!--
+-->&nbsp;=&nbsp;<i>N</i>·&psi;/(2&pi;).
+If you have defined your circle in power-of-two divisions (which we 
+have) then this part is ridiculously easy: just use a right-shift. 
+Once you have the frame-index, the rest should be easy. Mostly. There 
+are some intricacies that that can fog things up, but those are 
+implementation-dependent and will be saved for later.
+</p>
+
+<h3 id="ssec-obj-sort">21.6.4.
+  Sprite sorting</h3>
+<p>
+Disregarding priority bits for the moment, the order of objects 
+on-screen is determined by the object number: a lower number will be 
+in front of higher numbers. In 2D games, you can often ignore this 
+because sprites will be on the same layer; in 3D games, you really, 
+really can't. Take fig&nbsp;21.14, for example. 
+The four thwomps here have a specific object order. In the left 
+picture, the closest thwomp happens to have the lowest object and 
+the visual ordering is correct. When viewed from the other side, 
+however, (middle picture) things are a little different. There are 
+two visual cues for depth: scaling (more distance is smaller) and 
+occlusion (distance objects are obscured by closer objects). In the 
+middle picture, these two conflict because the closest object has 
+the <i>highest</i> number, making the overall picture a little 
+disconcerting. In the picture on the right, everything looks okay 
+again, because steps were taken to ensure the correct object order.
+</p>
+
+<table id="img-obj-sort"
+  class="bdr" style="width:512px; margin:10px auto;"
+  border=0 cellpadding=2 cellspacing=2>
+<tr>
+  <td><img src="../img/mode7/order_dflt.png" alt="default order"></td>
+  <td><img src="../img/mode7/order_nosort.png" alt="non-sorted"></td>
+  <td><img src="../img/mode7/order_sorted.png" alt="sorted"></td>
+</tr>
+<tr>
+  <td colspan=3>
+  <b>Fig 21.14</b>. 
+  Non-sorted objects look alright (left) from one angle, but not from 
+  the other way (middle). You need to sort them to get the correct 
+  order (right).
+  </td>
+</tr>
+</table>
+
+<p>
+What needs to be done is sort the objects in OAM according to 
+depth; a kind of
+<a href="http://en.wikipedia.org/wiki/Z-buffering" target="_blank">Z-buffer</a> 
+for objects. The depth of a sprite is simply <i>z</i><sub>c</sub>, 
+and we need to fill OAM with the sprite's object attributes in 
+order of ascending <i>z</i><sub>c</sub>. For good measure, it's 
+probably a good idea to give hidden objects the maximum 
+depth-value possible or to leave them out of the sorting process 
+entirely.
+</p>
+<p>
+There are many possible strategies for sorting the objects. My own 
+choice aright now would be to not sort the sprites or objects 
+directly but to create an <b>index table</b>, which indicates 
+the order the sprites' attributes should go into OAM. The 
+pseudo-code for this is given below. Which algorithm you use to 
+sort the keys doesn't really matter at this time, as long as it 
+does the job. I'm sure that faster methods can be found, but 
+probably at the expense of more code and I want to keep things 
+relatively simple.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Pseudo code for sorting sprites for OAM</span>
+<span class="keyw">void</span> spr_sort()
+{
+    <span class="keyw">int</span> ids[N];     <span 
+class="cmt">// Index table</span>
+    <span class="keyw">int</span> keys[N];    <span 
+class="cmt">// Sort keys
+</span>
+    <span class="cmt">// Create initial index and sort-key table</span>
+    <span class="keyw">for</span> ii=<span 
+class="num">0</span>; ii&lt;N; ii++)
+    {
+        ids[ii]= ii;
+        keys[ii]= is_visible(sprite[ii]) ? sprite[ii].depth : DEPTH_MAX;
+    }
+
+    <span class="cmt">// Sort keys (i.e., fill ids)</span>
+    id_sort(ids, keys);
+
+    <span class="cmt">// Fill OAM according to </span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;N; ii++)
+        oam_mem[ii]= sprite[ids[ii]].obj;   
+}
+</pre>
+
+<h3 id="ssec-obj-norm">21.6.5.
+  Renormalization</h3>
+<p>
+I wouldn't be surprised if you've never heard of this term before. 
+<dfn>Normalization</dfn> means that you scale a quantity to a 
+user-friendly value &ndash; usually 1. You have already scaled the
+sprite by a factor &lambda;, but that's not enough. In most cases, you
+have to scale it further, i.e <i>renormalize</i> it. Here's why.
+</p>
+<p>
+By definition, the scaling factor &lambda; will be one when
+<i>z</i><sub>c</sub>&nbsp;=&nbsp;&minus;<i>D</i>. Now consider what 
+happens if you look at a closer object, say at 
+<i>z</i><sub>c</sub>&nbsp;=&nbsp;&minus;&frac12;<i>D</i>. In this 
+case, &lambda; will be &frac12; and the object will be scaled by a 
+factor of two. In other words, it'll already fill the double-size 
+canvas. And higher scales are possible too: with the suggested values 
+of <i>D</i>&nbsp;=&nbsp;256 and <i>N</i>&nbsp;=&nbsp;24, 
+you could end up with scaling of 10! This will not do.
+</p>
+<p>
+It is possible to get around this by moving the near-plane further 
+away. However, then you'll see object disappearing if they're still 
+quite far off, which will look just as strange as seeing them clipped. 
+A better solution is to give the objects an extra scaling factor.
+In <tt>m7_ex</tt> I have scaled the objects by an additional factor of 
+&frac14;, so that a 32x32 sprite is actually only 8x8 
+&lsquo;world&rsquo;-pixels in size. This seems to work out quite 
+nicely.
+</p>
+<p>
+This renormalization means that you're actually working with 
+<i>two separate</i> scaling factors: one for the coordinate 
+transformation, and one for visual effects. It is the 
+<i>visual</i> scaling you need to use in positioning and culling the 
+sprites, not the transformation scaling; the latter's influence stops 
+once you've found the screen-position of the anchor.
+</p><br>
+<p>
+There's probably an official term for this process, but I wouldn't know
+what it is. I'm familiar with the process of renormalization from
+physics (a few Dutch professors got the Nobel Prize for this subject a 
+few years back) and it seemed to fit. If you know the official term,
+I'd like to hear it.
+</p>
+
+<div class="cblock">
+<table id="img-obj-norm"
+  class="bdr" width=512
+  border=0 cellpadding=4 cellspacing=0>
+<tr>
+  <td><img src="../img/mode7/norm_1x.png" alt="norm 1x"></td>
+  <td><img src="../img/mode7/norm_2x.png" alt="norm 2x"></td>
+  <td><img src="../img/mode7/norm_4x.png" alt="norm 4x"></td>
+</tr>
+<tr>
+  <td colspan=3>
+  <b>Fig 21.15</b>. 
+  Object renormalization. Left: normal (ew, no!). 
+  Middle: &times;&frac12; (hmmm, no).
+  Right: &times;&frac14; (yeah, that's it).
+  </td>
+</tr>
+</table>
+</div>
+
+<p>
+And with that, we've reached the end of the theory. Now to actually 
+implement all of this.
+</p>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-code">21.7.
+  Implementation</h2>
+
+<h3 id="ssec-code-design">21.7.1.
+  Design considerations.</h3>
+<p>
+My aim here is not to merely dish out a couple of functions 
+that can make mode 7 happen, but also provide something that can be 
+easily modified if necessary. The code of the <tT>m7_ex</tt> demo 
+is spread over 4 files: one for the things specific to the demo 
+itself <tt>m7_ex.c</tt>; and three for mode 7 specific stuff,
+<tt>mode7.h</tt>, <tt>mode7.c</tt> and <tt>mode7.iwram.c</tt>. Yes, 
+iwram functions too; some of these things are going to be computation 
+extensive and I want them as fast as possible right off the bat. 
+I'm also borrowing the object sorter from the 
+<a href="lab.htm##ssec-prio-objsort">priority demo</a>.
+</p>
+<p>
+There are three main areas of interest here: the <b>camera</b>, 
+<b>background stuff</b> and <b>sprites</b>. For each of these we will 
+use a struct and/or array to keep their data so it's nice and 
+OOPy. There will also be a sort of manager struct for the mode 7 stuff 
+as a whole. And, of course, we need constants for the view volume, 
+focus length and a few other items. A handful of functions will 
+then operate on these items to give up what we need.
+</p>
+
+<h4>Constants</h4>
+<p>
+There aren't too many constants. Most have to do with the viewport, 
+the others with the focus and renormalization.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> M7_D        <span 
+class="num">256</span>     <span class="cmt">//!&lt; Focal length</span>
+<span class="keyw">#define</span> M7_D_SHIFT    <span 
+class="num">8</span>     <span class="cmt">//!&lt; Focal shift</span>
+<span class="keyw">#define</span> M7O_NORM      <span 
+class="num">2</span>     <span class="cmt">//!&lt; Object renormalization shift (by /4)
+
+// View frustum limits</span>
+<span class="keyw">#define</span> M7_LEFT     (-<span 
+class="num">120</span>)      <span class="cmt">//!&lt; Viewport left</span>
+<span class="keyw">#define</span> M7_RIGHT     <span 
+class="num">120</span>        <span class="cmt">//!&lt; Viewport right</span>
+<span class="keyw">#define</span> M7_TOP        <span 
+class="num">80</span>        <span class="cmt">//!&lt; Viewport top (y-axis up)</span>
+<span class="keyw">#define</span> M7_BOTTOM   (-<span 
+class="num">80</span>)       <span class="cmt">//!&lt; Viewport bottom (y-axis up!)</span>
+<span class="keyw">#define</span> M7_NEAR       <span 
+class="num">24</span>        <span class="cmt">//!&lt; Near plane (objects)</span>
+<span class="keyw">#define</span> M7_FAR       <span 
+class="num">512</span>        <span class="cmt">//!&lt; Far plane (objects)
+</span>
+<span class="keyw">#define</span> M7_FAR_BG    <span 
+class="num">768</span>        <span class="cmt">//!&lt; Far plane (floor)</span>
+</pre>
+
+<h4 id="ssec-code-class">Structs and variables</h4>
+
+<p>
+Mode 7 would be a wonderful place to use classes, but since I'm 
+working in C, not C++, I'm sticking to structs. Apart from the 
+<code>BG_AFFINE</code>
+struct I presented in the <a href="affbg.htm">affine background</a> 
+page, you need one struct for the camera and one struct for the mode 7 
+objects. I'm also using a mode 7 container struct to keep track of 
+all the parts that go into the mode 7 functionality, so that you 
+won't have loose global variables lying around the place. 
+</p>
+<p>
+You're free to create your own structs for these, but the 
+ones I will use are given below. If you've been paying attention,
+most of the members should be familiar. 
+Oh, the <code>POINT</code> and <code>VECTOR</code> structs are 
+2D and 3D vectors, of course. 
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! 3D sprite struct</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> M7_SPRITE
+{
+    VECTOR pos;     <span 
+class="cmt">//!&lt; World position.</span>
+    POINT anchor;   <span 
+class="cmt">//!&lt; Sprite anchor.</span>
+    OBJ_ATTR obj;   <span 
+class="cmt">//!&lt; Object attributes.</span>
+    s16 phi;        <span 
+class="cmt">//!&lt; Azimuth angle.</span>
+    u8 obj_id;      <span 
+class="cmt">//!&lt; Object index.</span>
+    u8 aff_id;      <span 
+class="cmt">//!&lt; OBJ_AFFINE index.</span>
+    TILE *tiles;    <span 
+class="cmt">//!&lt; Gfx pointer.</span>
+    VECTOR pos2;    <span 
+class="cmt">//!&lt; Position in cam space (subject to change)</span>
+} M7_SPRITE;
+
+<span class="cmt">//! 3D camera struct</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> M7_CAM 
+{
+    VECTOR pos;     <span 
+class="cmt">//!&lt; World position.</span>
+    <span class="keyw">int</span> theta;      <span 
+class="cmt">//!&lt; Polar angle.</span>
+    <span class="keyw">int</span> phi;        <span 
+class="cmt">//!&lt; Azimuth angle.</span>
+    VECTOR u;       <span 
+class="cmt">//!&lt; local x-axis (right)</span>
+    VECTOR v;       <span 
+class="cmt">//!&lt; local y-axis (up)</span>
+    VECTOR w;       <span 
+class="cmt">//!&lt; local z-axis (back)</span>
+} M7_CAM;
+
+
+<span class="cmt">//! One struct to bind them all</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> M7_LEVEL
+{
+    M7_CAM *camera;         <span 
+class="cmt">//!&lt; Camera variables</span>
+    BG_AFFINE *bgaff;       <span 
+class="cmt">//!&lt; Affine parameter array</span>
+    M7_SPRITE *sprites;     <span 
+class="cmt">//!&lt; 3D sprites</span>
+    <span class="keyw">int</span> horizon;            <span 
+class="cmt">//!&lt; Horizon scanline (sorta)</span>
+    u16 bgcnt_sky;          <span 
+class="cmt">//!&lt; BGxCNT for backdrop</span>
+    u16 bgcnt_floor;        <span 
+class="cmt">//!&lt; BGxCNT for floor</span>
+} M7_LEVEL;
+</pre>
+
+<p>
+There's not much more I have to say about these structs.
+The <code>M7_SPRITE</code> has the attributes of its object as a 
+member itself, rather than an index or pointer to any sort of buffer. 
+The reason behind this is essentially &ldquo;why the hell not&rdquo;. 
+Because I have to sort the objects anyway, using an extra buffer 
+might not be worthwhile, so I chose this. I'm also keeping 
+track of the position in camera space because I need it on more than 
+one occasion, and a TILE pointer for graphics. The reason for this 
+will become apparent when we implement animation.
+</p>
+<p>
+The <code>M7_LEVEL</code> holds pointers to the main variables for 
+mode 7 (the camera, affine array and sprites) as well as the horizon 
+scanline needed to switch from backdrop to floor, and two variables 
+containing the data of the bg control register, as this will be 
+different for the backdrop and floor.
+</p><br>
+
+<p>
+Now we need these four variables using these structs. Because these 
+are technically part of the demo itself, I've put them in 
+<tt>m7_ex.c</tt> instead of the main mode 7 code, although that code 
+does require an actual <codE>m7_level</code> variable to exist for 
+the HBlank interrupt. <code>SPR_COUNT</code> is the number of sprites, 
+which is <i>definitely</i> demo specific. There are 161 entries 
+in <code>m7_bgaffs</code> rather than just 160 for the same reason 
+as in the <a href="dma.htm#sec-demo">DMA demo</a>: HBlank sets up 
+the next line, rather than the current one, and having this is 
+better (and faster) than the alternative with if/else blocks.
+</p>
+
+<pre class="proglist">
+M7_CAM m7_cam;
+BG_AFFINE m7_bgaffs[SCREEN_HEIGHT+<span class="num">1</span>];
+M7_SPRITE m7_sprites[SPR_COUNT];
+
+M7_LEVEL m7_level;
+</pre>
+
+
+<div class="note">
+<div class="nhgood">Type and order of struct members</div>
+<p>
+My usual advice is to use ints for your data types, but for structs 
+this may not always be the best thing to do. Local variables 
+may not use up memory, but structs do. And when you have arrays of 
+structs, the extra space that word-sized members cost adds up quickly.
+So in that case feel free to use non-ints. 
+</p>
+<p>
+Having said that, when it's time to use those members it can pay to 
+copy its data to a local 32bit variable, rather an using a byte or 
+halfword member for all the calculations.
+</p>
+<p>
+Also, and this is <i>very</i> important, you won't be saving any
+space if you don't pay attention to the order of the members. 
+An int will still require word-alignment, even when it comes right 
+after a byte member. The compiler may add padding after bytes 
+and halfwords to ensure the next member is correctly aligned. It'd 
+be best if you ordered the members in such a way that there's as 
+little padding as possible.
+</p>
+</div>
+
+<h3 id="ssec-code-bg">21.7.3.
+  Background functions</h3>
+
+<p>
+These are my four main background functions:
+</p>
+<ul>
+<li>
+  <code>void m7_prep_horizon(M7_LEVEL *level)</code>.
+  Calculates the horizon scanline.
+</li>
+<li>
+  <code>IWRAM_CODE void m7_prep_affines(M7_LEVEL *level)</code>.
+  Calculates the affine parameters for the floor, based on camera 
+  position and orientation..
+</li>
+<li>
+  <code>void m7_update_sky(const M7_LEVEL *level)</code>.
+  Positions the backdrop.
+</li>
+<li>
+  <code>IWRAM_CODE void m7_hbl_floor()</code>. HBlank interrupt 
+  routine. Switches to mode 2 when necessary and copies affine 
+  parameters and creates fog effect.
+</li>
+</ul>
+
+<p>
+<code>m7_prep_horizon()</code> and <code> m7_update_sky()</code> 
+are simple implementations of eq&nbsp;21.9 
+and eq&nbsp;21.17, respectively, so I can be brief with 
+these. 
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Calculate the horizon scanline</span>
+<span class="keyw">void</span> m7_prep_horizon(M7_LEVEL *level)
+{
+    <span class="keyw">int</span> horz;
+    M7_CAM *cam= level-&gt;camera;
+
+    <span class="keyw">if</span>(cam-&gt;v.y != <span 
+class="num">0</span>)
+    {
+        horz= M7_FAR_BG*cam-&gt;w.y - cam-&gt;pos.y;
+        horz= M7_TOP - Div(horz*M7_D, M7_FAR_BG*cam-&gt;v.y);
+    }
+    <span class="keyw">else</span>    <span class="cmt">// looking <!--
+-->straight down (w.y &gt; 0) means horizon at -inf scanline</span>
+        horz= cam-&gt;w.y &gt; <span 
+class="num">0</span> ? INT_MIN : INT_MAX;
+    
+    level-&gt;horizon= horz;
+}
+
+<span class="cmt">//! Update sky-bg position</span>
+<span class="keyw">void</span> m7_update_sky(<span 
+class="keyw">const</span> M7_LEVEL *level)
+{
+    REG_BG2HOFS= (level-&gt;camera-&gt;phi&gt;&gt;<span 
+class="num">6</span>)+M7_LEFT;
+    REG_BG2VOFS= -clamp(level->horizon, <span 
+class="num">0</span>, <span class="num">228</span>)-<span 
+class="num">1</span>;
+}
+</pre>
+
+<p>
+The horizon calculation makes use of a clipping far-plane, though this 
+is not strictly necessary. If you want the horizon at infinity, remove 
+the subtraction by the camera's height and use 
+<code>M7_FAR_BG</code>&nbsp;=&nbsp;1. Note the check for 
+<i>v</i><sub>y</sub>&nbsp;=&nbsp;0. 
+As <i>v</i><sub>y</sub>&nbsp;=&nbsp;cos(&theta;), this will be true 
+when looking straight up or straight down. The distinction is important
+because sees the sky (no affine bg) and one sees only floor (no 
+backdrop). Technically these should be &plusmn;infinity, but as this 
+is fixed-point, <code>INT_MIN/MAX</code> will have to do.
+</p>
+<p>
+As for the backdrop placement: I'm taking a <i>lot</i> of shortcuts 
+here. A mathematically correct backdrop would use a background map 
+1720 pixels wide. It can be done, but mostly it's just annoying. 
+Instead, I'm using a 512x256p regular background and use 
+<i>P</i>&nbsp;=&nbsp;1024 in the angle&rarr;scroll-offset conversion. 
+This means the map shows up twice in one 360&deg; rotation and that the 
+<i>dx</i> is just &phi;/64. Yes, the floor and backdrop field-of-view 
+will be slightly out of sync, but you'll only notice if you know what 
+to look for, so that's alright.
+</p>
+<p>
+Strictly speaking, the vertical offset should be 
+bgHeight &minus; horizon, but the bg-height can be ignored due to 
+wrapping. The reason I'm also clamping the horizon to the size of 
+the viewport is because the horizon scanline can become very large 
+&ndash; the tan(&theta;) in it will approach infinity when looking up, 
+remember? If you don't clamp it you'll scroll through the whole 
+backdrop map a couple of times when panning up, which just looks awful.
+</p>
+
+<h4>Preparing the affine parameter table</h4>
+<p>
+Calculating the affine parameters happens in 
+<code>m7_prep_affines()</code>. You could try to do this in the HBlank 
+isr, but because it requires a division, it would simply take too 
+long. Also, doing it in one spot is more efficient, as you only have 
+to set-up the variables once. This routine carries out the
+calculations of eq&nbsp;21.14. It has to do 
+quite a number of calculations for each scanline, including a 
+division, so you can expect it to be rather costly; which is why I'm
+putting it in IWRAM right from the start.
+</p>
+<p>
+Now, you don't have to calculate things for every scanline:
+just the ones below the horizon. As for implementing 
+eq&nbsp;21.14 itself: it turns out that 
+it works much better if you take the camera matrix apart again and 
+work with sines and cosines of &theta; and &phi;, rather than the 
+nine matrix entries. This next paragraph will explain how, but 
+feel free to skip it and go onto the code.
+</p>
+<p>
+Remember that the camera matrix is 
+<b>C</b>&nbsp;=&nbsp;<b>R</b><sub>y</sub>(&phi;)·<b>R</b><sub>x</sub>(&theta;);
+and that &lambda; and <b>dx</b> are calculated via 
+eq&nbsp;21.13: 
+<b>dx</b>&prime;&nbsp;=&nbsp;<b>a</b><sub>cw</sub> + 
+&lambda;·<b>C</b>·<b>b</b>. 
+You can break up <b>C</b> can combine it with <b>b</b> to form 
+<b>b</b>&prime;&nbsp;=&nbsp;<b>R</b><sub>x</sub>(&theta;)·<b>b</b>. 
+This new vector takes care of the pitch entirely &ndash; it's as if 
+we only had a rotation around the vertical axis, i.e., the case 
+discussed in the previous chapter. With this pre-rotation, the code 
+becomes simpler and faster.
+</p>
+
+<pre class="proglist">
+IWRAM_CODE <span 
+class="keyw">void</span> m7_prep_affines(M7_LEVEL *level)
+{
+    <span class="keyw">if</span>(level-&gt;horizon &gt;= SCREEN_HEIGHT)
+        <span class="keyw">return</span>;
+
+    <span class="keyw">int</span> ii, ii0= (level-&gt;horizon&gt;=<span 
+class="num">0</span> ? level-&gt;horizon : <span class="num">0</span>);
+
+    M7_CAM *cam= level-&gt;camera;
+    FIXED xc= cam-&gt;pos.x, yc= cam-&gt;pos.y, zc=cam-&gt;pos.z;
+
+    BG_AFFINE *bga= &amp;level-&gt;bgaff[ii0];
+
+    FIXED yb, zb;           <span 
+class="cmt">// b' = Rx(theta) *  (L, ys, -D)</span>
+    FIXED cf, sf, ct, st;   <span 
+class="cmt">// sines and cosines</span>
+    FIXED lam, lcf, lsf;    <span 
+class="cmt">// scale and scaled (co)sine(phi)</span>
+    cf= cam-&gt;u.x;      sf= cam-&gt;u.z;
+    ct= cam-&gt;v.y;      st= cam-&gt;w.y;
+    <span class="keyw">for</span>(ii= ii0; ii&lt;SCREEN_HEIGHT; ii++)
+    {
+        yb= (ii-M7_TOP)*ct + M7_D*st;
+        lam= DivSafe( yc&lt;&lt;<span 
+class="num">12</span>,  yb);     <span class="cmt">// .12f</span>
+
+        lcf= lam*cf&gt;&gt;<span 
+class="num">8</span>;                 <span class="cmt">// .12f</span>
+        lsf= lam*sf&gt;&gt;<span 
+class="num">8</span>;                 <span class="cmt">// .12f</span>
+
+        bga-&gt;pa= lcf&gt;&gt;<span 
+class="num">4</span>;                <span class="cmt">// .8f</span>
+        bga-&gt;pc= lsf&gt;&gt;<span 
+class="num">4</span>;                <span class="cmt">// .8f</span>
+
+        <span class="cmt">// lambda&middot;Rx&middot;b</span>
+        zb= (ii-M7_TOP)*st - M7_D*ct;   <span class="cmt">// .8f</span>
+        bga-&gt;dx= xc + (lcf&gt;&gt;<span 
+class="num">4</span>)*M7_LEFT - (lsf*zb&gt;&gt;<span 
+class="num">12</span>);  <span class="cmt">// .8f</span>
+        bga-&gt;dy= zc + (lsf&gt;&gt;<span 
+class="num">4</span>)*M7_LEFT + (lcf*zb&gt;&gt;<span 
+class="num">12</span>);  <span class="cmt">// .8f</span>
+
+        <span 
+class="cmt">// hack that I need for fog. pb and pd are unused anyway</span>
+        bga-&gt;pb= lam;
+        bga++;
+    }
+    level-&gt;bgaff[SCREEN_HEIGHT]= level-&gt;bgaff[<span class="num">0</span>];
+}
+</pre>
+
+<p>
+We begin by getting the scanline to begin calculating at 
+(which may be nothing), and defining <i>lots</i> of temporaries. Not 
+all of the temporaries are necessary, but they make the code more 
+readable. Names aside, the code within the loop is very similar to 
+that of <code>hbl_mode7_c</code> in the 
+<a href="mode7.htm#ssec-order-code">first mode 7 demo</a>, except 
+that in calculating &lambda; we use a rotated 
+<i>y</i><sub>s</sub>-value, and in calculating the offsets a rotated 
+<i>z</i><sub>s</sub> (=&nbsp;&minus;<i>D</i>) value. Annnd, that's 
+it.
+</p>
+<p>
+The comments behind the calculations indicate the fixed-point count 
+of the results, which in this case can be either .8f or .12f. Now 
+hear this: it is <b>very</b> important that the scaled (co)sine of 
+&phi;, <code>lcf</code> and <code>lsf</code>, use 12 bits of 
+precision or more. I've tried 8, it's not pretty &ndash; the 
+displacements are all off at close range. Secondly, note the order of 
+multiplications and shifts in the displacements; it is also very 
+important that these stay the way they are. Particularly the one 
+with <i>L</i>: the multiplication by <code>M7_LEFT</code> 
+<b>must</b> happen after the shift, trust me on this.
+</p>
+<p>
+The last interesting point is the line after the loop, which copies 
+the parameters for scanline 0 to the back of the array to compensate 
+for the HBlank-interrupt obiwan error.
+</p><br>
+
+<p>
+This function is probably as fast as you can make it in C, and it 
+the compiler does its job pretty well so there is little to 
+be gained by going to manual assembly. This does not mean it doesn't 
+still take quite some time. The division alone costs something like 
+100 to 400 cycles (the cycle-count for BIOS division is 
+roughly 90 + 13/significant bit). At one division per scanline, 
+this can really add up. The best strategy to deal with this is 
+to <i>not do it</i> if you don't have to. If you use a fixed pitch 
+angle, you can precalculate all the divisions and just look them up. 
+
+If you must have a variable pitch, you can also go the trig way. 
+Look back at fig&nbsp;21.4. 
+If &beta; is the angle between 
+(0,&nbsp;<i>y</i><sub>p</sub>,&nbsp;&minus;<i>D</i>) and
+(0,&nbsp;0,&nbsp;&minus;<i>D</i>), then 
+tan(&beta;)&nbsp;=&nbsp;<i>y</i><sub>p</sub>/<i>D</i>.
+With a good deal of trigonometry, you could rewrite the formula for
+&lambda; to
+</p>
+
+<table id="eq-lambda-alt">
+<tr><td class="eqnrcell">(21.18)
+  <td class="eqcell">
+<!-- <img src="../img/mode7/lam_trig.png" alt=""> -->
+  &lambda; = <i>a</i><sub>cw,y</sub>/<i>D</i> &middot; 
+  cos(&beta;)/sin(&theta;+&beta;)
+</table>
+
+<p>
+You can get &beta; via an arctan LUT of 160 entries, one for each
+scanline (hey, you could even put that into <i>p</i><sub>d</sub>!),
+and then use a 1/sine LUT. You have to be careful to use large enough
+LUTs, though. Since the arguments of LUTs are integers, &beta;
+will be truncated, and you will lose a <i>lot</i> of accuracy though
+this, especially near the horizon. Now, I haven't actually tried the
+trig-way yet, but I have done some basic tests in Excel which would
+suggest that with a 1/sine LUT of 512/circle, you'd get
+&lambda;-errors well over 10% near the horizon, and errors around 1%
+everywhere else. With that in mind, I'd suggest 1024/circle at least. 
+Or interpolating between LUT entries, which you can do with tonclib's 
+<code>lu_lerp16()</code> and <code>lu_lerp32()</code> functions.
+</p>
+<p>
+Aside from going triggy with it, you can probably speed up the 
+division as well in a number of ways. But before you go and optimize 
+this, ask yourself if you really need it first. Premature optimization 
+is the root of all evil, after all.
+</p>
+
+
+<div class="note">
+<div class="nh">Speed-ups for affine calculations</div>
+<p>
+Tried three optimizations recently. First, ARM/IWRAM, which brings 
+the thing down to 23k-58k cycles. Then, a little refactoring that 
+presented itself in a discussion with sgeos: the camera vectors 
+can resolve to a smaller set of variables, saving 10-20%. Then, 
+the trig thing, which can bring the whole thing down to 10-20k or
+even 7k-14k max, depending on whether you get cos(&beta;) and 
+1/sin(&theta;+&beta;) via large luts, or smaller luts and linear 
+interpolation. Once you get the math, shifts, and signs in order,
+it works like a charm.
+</p>
+</div>
+
+<h4>The mode 7 HBlank interrupt routine</h4>
+<p>
+To keep things simple, nearly everything that has to happen during 
+VDraw happens inside one HBlank isr 
+called <code>m7_hbl_floor()</code>. Earlier versions of this demo 
+used a system of VCount/HBlank interrupts, but that turned out to be 
+more trouble than it's worth. This is also an IWRAM routine because 
+it really needs to be as fast as possible. The interrupt service 
+routine does the following things:
+</p>
+
+<ol>
+<li>
+  <b>Check vcount for floor-range</b>. If this scanline is not part 
+  of the floor, return.
+</li>
+<li>
+  <b>Check vcount for horizon</b>. At reaching the horizon scanline 
+  the video mode should change and <code>REG_BG2CNT</code> should 
+  be set to the floor's settings.
+</li>
+<li>
+  <b>Copy affine parameters to <code>REG_BG_AFFINE[2]</code></b>. 
+  Copy the <i>next</i> scanline's parameters to 
+  <code>REG_BG_AFFINE[2]</code>, as we've already past the current 
+  scanline.
+</li>
+<li>
+  <b>Fogging</b>. Fade to orange in this case.
+</li>
+</ol>
+
+<pre class="proglist">
+<span class="cmt">// from tonc_core.h</span>
+<span class="cmt">//! Range check; true if xmin&lt;=x&lt;xmax</span>
+<span class="keyw">#define</span> IN_RANGE(x, min, max)  <!--
+-->( (x) &gt;= (min) &amp;&amp; (x) &lt; (max) )
+</pre>
+
+<pre class="proglist">
+IWRAM_CODE <span class="keyw">void</span> m7_hbl_floor()
+{
+    <span class="keyw">int</span> vc= REG_VCOUNT;
+    <span class="keyw">int</span> horz= m7_level.horizon;
+
+    <span class="cmt">// <b>(1)</b> Not in floor range: quit</span>
+    <span class="keyw">if</span>(!IN_RANGE(vc, horz, SCREEN_HEIGHT) )
+        <span class="keyw">return</span>;
+
+    <span class="cmt">// <b>(2)</b> <!--
+-->Horizon: switch to mode 1; set-up bg control for floor</span>
+    <span class="keyw">if</span>(vc == horz)
+    {
+        BF_SET(REG_DISPCNT, DCNT_MODE1, DCNT_MODE);
+        REG_BG2CNT= m7_level.bgcnt_floor;
+    }
+
+    <span 
+class="cmt">// <b>(3)</b> Looking at floor: copy affine params</span>
+    BG_AFFINE *bga= &amp;m7_level.bgaff[vc+<span class="num">1</span>];
+    REG_BG_AFFINE[<span class="num">2</span>] = *bga;
+
+    <span class="cmt">// <b>(4)</b> <!--
+-->A distance fogging with high marks for hack-value</span>
+    u32 ey= bga-&gt;pb*<span 
+class="num">6</span>&gt;&gt;<span class="num">12</span>;
+    <span class="keyw">if</span>(ey&gt;<span class="num">16</span>)
+        ey= <span class="num">16</span>;
+
+    REG_BLDALPHA= BLDA_BUILD(<span class="num">16</span>-ey, ey);
+}
+</pre>
+
+<p>
+Points (3) and (4) could benefit from a bit more explanation. As 
+mentioned several times now, the isr of any scanline <i>vc</i> should 
+set-up the parameters of <i>next</i> scanline, which is why we're 
+copying from <code>level.bgaff[vc+1]</code> rather than 
+just <code>[vc]</code>. Scanline zero's uses the set from 
+<i>vc</i>&nbsp;=&nbsp;160, which is alright because we've copied 
+zero's data to the last element in the array. As usual, struct copies 
+ftw.
+</p>
+<p>
+For the fogging I use <i>p</i><sub>b</sub> which filled with &lambda; 
+in <code>m7_prep_affines()</code> for this very reason. A scaled 
+&lambda; is not the most accurate model for fogging, but the 
+effect looks well enough. Because the blending registers cap at 16, 
+I need to make sure it doesn't wrap around at higher values.
+</p>
+<p>
+This <i>still</i> leaves the question of what I'm actually blending 
+with, as orange isn't part of the GBA's fade repertoire. At least, not 
+<i>directly</i>. It is, however, quite possible to blend with the 
+backdrop, which just shows bg-color 0. This color can be anything, 
+including orange.
+</p>
+
+<h3 id="ssec-code-spr">21.7.4.
+  Sprites and objects</h3>
+<p>
+Sprite and object handling has been distributed over the following 
+three functions:
+</p>
+<ul>
+<li>
+  <code>void update_sprites()</code>. This is the main sprite handler, 
+  which calls other functions to do positioning, sorting and animation.
+</li>
+<li>
+  <code>IWRAM_CODE void m7_prep_sprite(M7_LEVEL *level, 
+  M7_SPRITE *spr)</code>. This calculates the correct position and 
+  scale of the sprite.
+</li>
+<li>
+  <code>void kart_animate(M7_SPRITE *spr, const M7_CAM *cam)</code>. 
+  This selects the correct frame for rotating around the karts.
+</li>
+</ul>
+
+<p>
+Only <code>m7_prep_sprite()</code> is actually part of the mode 7 
+functions; the others could very well differ for every mode 7 game 
+you have in mind. The main sprite handler, 
+<code>update_sprites()</code>, is pretty simple: it needs to call 
+<code>m7_prep_sprite()</code> for each sprite and create the sprite's 
+sorting key, sort all the sprites and copy the sorted attributes to 
+OAM. It also calls <code>kart_animate()</code> for each kart-sprite for 
+their animations; if I had animations for the thwomps or other sprites 
+they'd probably go here as well.
+</p>
+
+<pre class="proglist">
+<span class="keyw">void</span> update_sprites()
+{
+    <span class="keyw">int</span> ii;
+
+    M7_SPRITE *spr= m7_level.sprites;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+    {
+        m7_prep_sprite(&amp;m7_level, &amp;spr[ii]);
+
+        <span class="cmt">// Create sort key</span>
+        <span class="keyw">if</span>(BF_GET2(spr[ii].obj.attr0, <!--
+-->ATTR0_MODE) != ATTR0_HIDE)
+            sort_keys[ii]= spr[ii].pos2.z;
+        <span class="keyw">else</span>
+            sort_keys[ii]= INT_MAX;
+    }
+
+    <span class="cmt">// Sort the sprites</span>
+    id_sort_shell(sort_keys, sort_ids, SPR_COUNT);
+
+    <span class="cmt">// Animate karts</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">8</span>; ii++)
+        kart_animate(&amp;spr[ii], m7_level.camera);
+
+    <span class="cmt">// Update real OAM</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SPR_COUNT; ii++)
+        obj_copy(&amp;oam_mem[ii], &amp;spr[sort_ids[ii]].obj, <span 
+class="num">1</span>);
+}
+</pre>
+
+<p>
+Most of the code has to do with sorting the sprites, which was 
+already described in the theory. The  <code>pos2</code> member of 
+the sprites is set by <code>m7_prep_sprite()</code> to contain the 
+sprite's position in camera space. The sorting routine 
+<code>id_sort_shell()</code> is the index-table sorter described in 
+the <a href="lab.htm#sec-prio">priority section</a>.
+</p>
+<p>
+If I had wanted to have more advanced animation or sprite things, 
+they'd be put here as well. But I didn't, so I haven't.
+</p>
+
+<h4>Sprite positioning and scaling</h4>
+
+<p>
+The function <code>m7_prep_sprite()</code> calculates the correct 
+on-screen position for a sprite, sets up the affine matrix with 
+the proper (renormalized) scales and hides the sprite if it falls 
+outside the view volume.
+</p>
+<p>
+The first step is convert to the convert the world-position of the 
+sprite to a vector in the camera space, using the first part of 
+eq&nbsp;21.15: 
+<b>x</b><sub>c</sub>&nbsp;=&nbsp;<b>C</b><sup>T</sup>·<b>r</b>, 
+with 
+<b>r</b> being the position of the sprite relative to the camera: 
+<b>r</b>&nbsp;=&nbsp;<b>x</b><sub>w</sub>&minus;<b>a</b><sub>cw</sub>. 
+This is put into variable <code>vc</code>, but with the signs
+of <i>y</i> and <i>z</i> switched! This makes subsequent 
+calculations a little easier. This vector is also stored in 
+<code>spr-&gt;pos2</code>, which is used in sorting elsewhere.
+</p>
+<p>
+The second step is checking whether the sprite would actually be 
+visible, using the conditions from 
+table&nbsp;21.1, with one exception: 
+the checks now use the <i>renormalized</i> rectangle of the 
+sprite. Leaving that part out could create artifacts for some
+orientations. To calculate the sprite rectangle I'm using the 
+sizes of the object rectangle. It is possible to get a tighter 
+fit if you'd also define a sprite rectangle indicating the visible
+pixels within the object frame, but that might be going a little 
+too far here.
+</p>
+<p>
+Note that most of the code from the bounds checks on is done in a 
+<code>do-while(0)</code> loop. This pattern is sort of a poor-man's 
+<code>try/catch</code> block &ndash; I <i>could</i> have used 
+<code>goto</code>s here, but as they're considered harmful I decided 
+against it. Anyway, an out-of-bounds &lsquo;exception&rsquo; here 
+would indicate that the sprite should be hidden, which is done in 
+step (5).
+</p>
+<p>
+If we've passed the bounds-checks, we need to set-up the affine 
+matrix and calculate the object's position via the anchoring equation 
+of eq&nbsp;21.16.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Setup an object's attr/affine with the right attributes
+/*! \param level    Mode 7 level data
+*   \param spr      3D sprite to calculate for
+*/</span>
+IWRAM_CODE <span class="keyw">void</span> <!--
+-->m7_prep_sprite(M7_LEVEL *level, M7_SPRITE *spr)
+{
+    M7_CAM *cam= level-&gt;camera;
+    VECTOR vr, vc;      <span 
+class="cmt">// Difference and inverted-cam vector</span>
+    <span class="keyw">int</span> sx, sy;         <span 
+class="cmt">// Object size</span>
+    RECT rect;          <span 
+class="cmt">// Object rectangle</span>
+
+    <span class="cmt">// <b>(1)</b> Convert to camera frame</span>
+    vec_sub(&amp;vr, &amp;spr-&gt;pos, &amp;cam-&gt;pos);
+    vc.x=  vec_dot(&amp;vr, &amp;cam-&gt;u);
+    vc.y= -vec_dot(&amp;vr, &amp;cam-&gt;v);
+    vc.z= -vec_dot(&amp;vr, &amp;cam-&gt;w);
+    spr-&gt;pos2= vc;
+
+    OBJ_ATTR *obj= &amp;spr-&gt;obj;
+    sx= obj_get_width(obj);
+    sy= obj_get_height(obj);
+    
+    <span class="cmt">// --- Check with viewbox ---</span>
+    <span class="keyw">do</span> 
+    {
+        <span class="cmt">// <b>(2a)</b> check distance</span>
+        <span class="keyw">if</span>(M7_NEAR*<span 
+class="num">256</span> &gt; vc.z || vc.z &gt; M7_FAR*<span 
+class="num">256</span>)
+            <span class="keyw">break</span>;  
+
+        <span class="cmt">// <b>(2b)</b> check horizontal</span>
+        rect.l= vc.x - spr-&gt;anchor.x*(<span 
+class="num">256</span>&gt;&gt;M7O_NORM);       
+        rect.r= rect.l + sx*(<span 
+class="num">256</span>&gt;&gt;M7O_NORM);
+        <span class="keyw">if</span>(M7_LEFT*vc.z &gt; rect.r*M7_D <!--
+-->|| rect.l*M7_D &gt; M7_RIGHT*vc.z)
+            <span class="keyw">break</span>;  
+
+        <span class="cmt">// <b>(2c)</b> check vertical</span>
+        rect.t= vc.y - spr-&gt;anchor.y*(<span 
+class="num">256</span>&gt;&gt;M7O_NORM);       
+        rect.b= rect.t + sy*(<span class="num">256</span>&gt;&gt;M7O_NORM);
+        <span class="keyw">if</span>(-M7_TOP*vc.z &gt; rect.b*M7_D <!--
+-->|| rect.t*M7_D &gt; -M7_BOTTOM*vc.z)
+            <span class="keyw">break</span>;  
+
+        <span class="cmt">// <b>(3)</b> Set-up affine matrix</span>
+        OBJ_AFFINE *oa= &amp;obj_aff_mem[spr-&gt;aff_id];
+        oa-&gt;pa= oa-&gt;pd= vc.z&gt;&gt;(M7_D_SHIFT-M7O_NORM);    <span 
+class="cmt">// normalized lambda</span>
+        oa-&gt;pb= oa-&gt;pb= <span class="num">0</span>;
+
+        FIXED scale= DivSafe(M7_D&lt;&lt;<span 
+class="num">16</span>, vc.z);   <span class="cmt">// (.16 / .8) = .8</span>
+
+        <span class="cmt">// <b>(4)</b> anchoring</span>
+        <span class="cmt">// Base anchoring equation:</span>
+        <span class="cmt">// x = q0 - s - A(p0 - s/2)</span>
+        <span class="cmt">// In this case A = 1/lam; and q0 = xc/lam</span>
+        <span class="cmt">// -&gt; x = (xc - p0 + s/2)/lam - s + screen/2</span>
+        <span class="keyw">int</span> xscr, yscr;
+        xscr  = spr-&gt;anchor.x*<span 
+class="num">256</span> - sx*<span class="num">128</span>;             <span 
+class="cmt">// .8</span>
+        xscr  = (vc.x - (xscr&gt;&gt;M7O_NORM))*scale&gt;&gt;<span 
+class="num">16</span>;    <span class="cmt">// .0</span>
+        xscr += -sx - M7_LEFT;
+
+        yscr  = spr-&gt;anchor.y*<span 
+class="num">256</span> - sy*<span class="num">128</span>;             <span 
+class="cmt">// .8</span>
+        yscr  = (vc.y - (yscr&gt;&gt;M7O_NORM))*scale&gt;&gt;<span 
+class="num">16</span>;    <span class="cmt">// .0</span>
+        yscr += -sy + M7_TOP;
+        obj_unhide(obj, ATTR0_AFF_DBL);
+        obj_set_pos(obj, xscr, yscr);
+
+        <span class="keyw">return</span>;
+    }
+    <span class="keyw">while</span>(<span class="num">0</span>);
+
+    <span class="cmt">// <b>(5)</b> If we're here, <!--
+-->we have an invisible sprite</span>
+    obj_hide(obj);
+}
+</pre>
+
+<h4>Kart animation</h4>
+<p>
+The basic theory for animation around a sprite is simple, namely 
+eq&nbsp;21.17: the viewing angle &psi; is the 
+difference between the global sprite angle &phi;<sub>o</sub>, 
+and the camera angle &phi;<sub>c</sub> and the angle to the 
+sprite in camera-space &alpha;: 
+&psi; = &phi;<sub>o</sub>&minus;&phi;<sub>c</sub>&minus;&alpha;. 
+The angle translates to an animation frame to use and you're done.
+</p>
+<p>
+In theory.
+</p>
+<p>
+The practice has a number of snares, especially the way SMK does it. 
+First, look at fig&nbsp;21.16. 
+These 12 frames are the ones that Super Mario Kart uses for Toad. 
+The first complication is that this is only the right side of the 
+rotation; the left side is done via mirroring. That's easy enough:
+just change the sign of <i>p</i><sub>a</sub> of the view-angle is
+negative.
+</p>
+<p>
+The second problem is the number of tiles. 12 frames for half a 
+circle means 24 for the full rotation (well 22 actually, as we 
+don't need to duplicate the front and back frames).
+At 4x4=16 tiles each, this 
+gives 384 tiles for Toad alone (and only the rotation animation at 
+that!) Multiply by 8 for the full set of characters and you're 
+<i>way</i> out of VRAM. This means that you can't load all the 
+frames into VRAM in one go and use an object's tile-index for 
+animation: you have to dynamically load frames you need. This is 
+why the sprite struct had a <code>tiles</code> member, pointing 
+to the full sprite sheet in ROM.
+</p>
+<p>
+The third complication is that the frames aren't uniformly divided 
+over the circle. If you look closely, the first 8 frames are for 
+angles 0&deg; through 90&deg;, the remaining four for 
+90&deg;-180&deg;. The reason behind this is that most of the time 
+you'll see the karts from the back, so it pays to have more frames 
+for those. Now, in the theory we could calculate the animation frame 
+quite nicely, namely <i>N</i>·&psi;/2<sup>16</sup>. However, that 
+relied on having <i>N</i> equal slices, which we don't have anymore.
+Or do we?
+</p>
+<p>
+Well no, we don't have equal slices anymore. But we can <i>make</i> 
+equal slices again, using a sort of mapping. 
+Fig&nbsp;21.17 shows could the principle works. 
+In the figure there are 12 main partitions (inside circle), with 
+0, 1, 10 and 11 covering more angular space than 2-9. However, we can 
+also divide the circle into 16 parts (outer circle), and use the same 
+frame for multiple entries. For example, slice-0 of the main 
+sequence is now covered by slice-0 and slice-1 of the new sequence.
+While it's possible to use if/else blocks to the mapping, it's 
+easier on everyone to just use a LUT for it. This actually 
+takes care of two other problems I hadn't mentioned before, namely 
+that mirroring would require some sort of reversal of the normal 
+sequence, and the fact that the slices actually have to be offset 
+by half a slice so that you don't have a slice-switch when looking 
+exactly at the front or back, for example. A LUT solves all those 
+problems in one go.
+</p>
+
+<div class="cblock">
+<table cellspacing=4>
+<tr valign="top">
+<td>
+<div class="cpt" style="width:392px;">
+  <img src="../img/mode7/toad_frames.png" id="img-obj-frames" 
+    alt="animation frames"><br>
+  <b>Fig 21.16</b>:
+  Toad's frames from different angles.
+</div>
+
+</td>
+<td>
+<div class="cpt" style="width:160px;">
+  <img src="../img/mode7/psi_lut.png" id="img-psi-lut" 
+    alt="view LUT"><br>
+  <b>Fig 21.17</b>:
+  Using &psi; for 16-element LUT entry, instead of 12 non-equal 
+  partitions.
+</div>
+</td>
+</tr>
+</table>
+</div>
+
+<pre class="proglist">
+<span class="keyw">const</span> u8 cKartFrames[<span class="num">32</span>]=
+{
+     <span class="num">0</span>,  <span class="num">1</span>,  <span 
+class="num">2</span>, <span class="num">3</span>, <span 
+class="num">4</span>, <span class="num">5</span>, <span 
+class="num">6</span>, <span class="num">7</span>, <span 
+class="num">7</span>, <span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">9</span>, <span 
+class="num">9</span>, <span class="num">10</span>, <span 
+class="num">10</span>, <span class="num">11</span>, 
+    <span class="num">11</span>, <span class="num">10</span>, <span 
+class="num">10</span>, <span class="num">9</span>, <span 
+class="num">9</span>, <span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">7</span>, <span 
+class="num">7</span>, <span class="num">6</span>, <span 
+class="num">5</span>, <span class="num">4</span>, <span 
+class="num">3</span>,  <span class="num">2</span>,  <span 
+class="num">1</span>,  <span class="num">0</span>, 
+};
+
+<span class="cmt">//! Animate kart sprite</span>
+<span class="keyw">void</span> kart_animate(M7_SPRITE *spr, <span 
+class="keyw">const</span> M7_CAM *cam)
+{
+    OBJ_ATTR *obj= &amp;spr-&gt;obj;
+
+    <span 
+class="keyw">if</span>(BF_GET2(obj-&gt;attr0,ATTR0_MODE) == ATTR0_HIDE)
+        <span class="keyw">return</span>;
+
+    TILE *dst= &amp;tile_mem[<span 
+class="num">4</span>][BF_GET(obj-&gt;attr2, ATTR2_ID)];
+    s16 psi= spr-&gt;phi - cam-&gt;phi;
+    
+    <span class="cmt">// Extra arctan angle for correctness</span>
+    <span class="keyw">if</span>(g_state &amp; STATE_OBJ_VIEW_ATAN)
+        psi -= ArcTan2(spr-&gt;pos2.z&gt;&gt;<span 
+class="num">8</span>, spr-&gt;pos2.x&gt;&gt;<span class="num">8</span>);
+
+    memcpy32(dst, &amp;spr-&gt;tiles[cKartFrames[(psi&gt;&gt;<span 
+class="num">11</span>)&amp;<span class="num">31</span>]*<span 
+class="num">16</span>], <span class="num">16</span>*<span class="num">8</span>);
+    
+    OBJ_AFFINE *oa= &amp;obj_aff_mem[spr-&gt;aff_id];
+    <span class="keyw">if</span>(psi &lt; <span class="num">0</span>)
+        oa-&gt;pa= -oa-&gt;pa;
+}
+</pre>
+<p>
+The snippet above shows the kart's angle-LUT and animation routine. 
+The LUT has 32 entries, with the first and last 7 using single chunks 
+and the rest being doubled. Also note that the LUT is symmetric, which 
+is required for the mirroring.
+</p>
+<p>
+The routine itself isn't exactly pretty, but it gets the job done. 
+It checks whether the sprite is visible first and bugs out if it's 
+not: no point in doing work if we can't see its results. The sprite's 
+in-camera angle, &alpha;, requires an arctan. I've added a switch in
+the menu so you can see the results with and without the 
+&alpha;-correction, and I think you'll find that the difference is 
+pretty small. Since I always use the same VRAM for each sprite, 
+finding the destination of the tile-copy is easy; finding the 
+source frame looks a little ugly, but it's just the &psi;&rarr;slice 
+conversion and the look-up, really.
+</p>
+
+<h3 id="ssec-code-misc">21.7.5.
+  Rounding up: the main loop and other fluff</h3>
+<p>
+The hard parts of mode 7 have more or less been covered now,
+with the possible exception of the main loop, which we'll get to in a 
+moment. There is, of course, initialization of the registers, the 
+sprites and mode 7 variables, loading of VRAM and input, but that's 
+rather easy and tends to vary from game to game anyway. For those 
+things, please see the actual code.
+</p>
+
+<h4>The main program flow</h4>
+<p>
+In the snippet below you can see the <code>main()</code> function and 
+its major branches. <code>init_main()</code> sets up the main mode 7 
+variables, <code>m7_level</code> through <code>m7_init()</code>, 
+initializes the VBlank and HBlank interrupts and various other things.
+The main loop is quite short. The function <code>input()</code> does 
+both the movement of the camera and menu.
+</p>
+<p>
+After that come the actual 
+mode 7 functions. <code>m7_prep_horizon()</code> has to come first, 
+but the order of the rest is pretty arbitrary. I would suggest 
+calling <code>m7_prep_affines()</code> last, though: it's the most 
+costly function here, but it'd be alright to let it run into VDraw 
+time. Not that that happens here (I've clocked the main loop to end 
+around scanline 170-210), but it'd be okay if it did.
+</p>
+
+<pre class="proglist">
+<span class="keyw">int</span> main()
+{
+    init_main();
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        input();
+
+        m7_prep_horizon(&amp;m7_level);
+        <span class="cmt">// Switch to backdrop display.</span>
+        <span class="keyw">if</span>(m7_level.horizon &gt; <span 
+class="num">0</span>)
+        {
+            BF_SET(REG_DISPCNT, DCNT_MODE0, DCNT_MODE);
+            REG_BG2CNT= m7_level.bgcnt_sky;
+            REG_BLDALPHA= <span class="num">16</span>;
+        }
+        m7_update_sky(&amp;m7_level);
+
+        update_sprites();
+        m7_prep_affines(&amp;m7_level);
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<h4>Movement in 3D</h4>
+<p>
+This is the last thing I want to cover: how to move things in 3D.
+To be precise: how to do different methods of motion in 3D; which
+I'm sure people might want to know.
+</p>
+<p>
+3D movement is actually much the same as 2D movement, except with an
+extra dimension. The reason why people sometimes find it difficult is 
+that they think in terms of angles, when what they <i>should</i> 
+be thinking in is vectors. Vector-based movement (or vector-based 
+anything) usually makes things much easier than with angles and 
+trigonometry. This is also why the theory of this chapter has been 
+using vectors and matrices.
+</p>
+<p>
+Here I'll look into three different modes of camera movements: 
+one using the world coordinate system, one using the camera system, 
+and one somewhere in between so that it stays parallel to the 
+ground. But first, let's take a look at what moving in a 
+certain direction actually <i>means</i>.
+</p><br>
+
+<p>
+Every object in 3D space has its own little coordinate space, the 
+<dfn>local frame</dfn>. This is defined as a set of 3 vectors, 
+denoting the directions of the local <i>x</i>, <i>y</i> and <i>z</i> 
+directions. In the case of the camera, I named these <b>u</b>, 
+<b>v</b> and <b>w</b>, respectively. The local matrix is just another 
+way of writing down this set of vectors. Movement is usually 
+defined as steps along these vectors. 
+</p>
+<p>
+As an example of this, consider your head to be the camera and use 
+arrows to indicate the local axes: <b>u</b> would stick out of your 
+right ear, <b>v</b> out of the top of your head and <b>w</b> out the 
+back. A step right would be along the <b>u</b> direction, and one 
+forward along &minus;<b>w</b>. A general movement could be written as 
+<i>x</i> steps right, <i>y</i> steps up, and <i>z</i> steps back. 
+<i>x</i>, <i>y</i> and <i>z</i> are used as <i>multipliers</i>
+for the direction vectors, and the final displacement in global 
+space is <b>dx</b> = 
+<i>x</i>·<b>u</b> + <i>y</i>·<b>v</b> + <i>z</i>·<b>w</b>. 
+</p>
+<p>
+And where matrices come in. Those three multipliers 
+can be written a vector 
+<b>r</b>&nbsp;=&nbsp;(<i>x</i>,&nbsp;<i>y</i>,&nbsp;<i>z</i>), which 
+is the distance vector in <i>local</i> space. The three directions 
+formed a matrix <b>C</b>, The definition of <b>dx</b> given above is 
+nothing else than the long way of writing down
+<b>dx</b>&nbsp;=&nbsp;<b>C</b>·<b>r</b>. The matrix multiplication 
+is just shorthand for &ldquo;scale the vectors of <b>C</b> by 
+the elements of <b>r</b> and add them all up&rdquo;.
+Note that this procedure would work for any object, in any 
+orientation. All you need to do is find the correct local matrix.
+</p><br>
+
+<p>
+In my case, I construct vector <b>r</b> in <code>input()</code>, 
+based on various buttons. At this point it doesn't really mean 
+anything yet. 
+Each of the movement methods has its own set of directions and 
+hence its own matrix that has to be applied to <b>r</b>; 
+I have functions that can perform them and add the results to 
+the camera position. All of these can be found in 
+table 21.2 and the code below it.
+</p>
+<p> 
+The &lsquo;level&rsquo; (that is, level to the ground) is probably 
+the most common for camera systems for ground-based objects, 
+though using the local system might make sense for flying objects. 
+Experiment with them and see what you like.
+</p>
+
+<div class="cblock">
+<table id="tbl-motion"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 21.2</b>: 
+  Movement methods and their associated transformations to world-space.
+  New position of an object is given by 
+  <b>x</b><sub>w</sub> += <b>v</b><sub>w</sub>.
+</caption>
+<tbody>
+<tr> <th>Method</th><th>Function</th><th>Transformation</th> </tr>
+<tr>
+  <td>Global frame</td> 
+  <td><code>m7_translate_global()</code></td>
+  <td><b>dx</b> = <b>I</b> · <b>r</b> = <b>r</b>
+</tr>
+<tr>
+  <td>Local (camera) frame</td> 
+  <td><code>m7_translate_local()</code></td>
+  <td><b>dx</b> = <b>C</b>(&theta;, &phi;) · <b>r</b>
+</tr>
+<tr>
+  <td>Level: local but parallel to ground</td> 
+  <td><code>m7_translate_level()</code></td>
+  <td><b>dx</b> = <b>R</b><sub>y</sub>(&phi;) · <b>r</b>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+<pre class="proglist">
+<span class="cmt">//! Translate by \a dir in global frame</span>
+<span class="keyw">void</span> m7_translate_global(M7_CAM *cam, <span 
+class="keyw">const</span> VECTOR *dir)
+{
+    vec_add_eq(&amp;cam-&gt;pos, dir);
+}
+
+<span class="cmt">//! Translate by \a dir in local frame</span>
+<span class="keyw">void</span> m7_translate_local(M7_CAM *cam, <span 
+class="keyw">const</span> VECTOR *dir)
+{
+    cam-&gt;pos.x += (cam-&gt;u.x * dir-&gt;x + <!--
+-->cam-&gt;v.x * dir-&gt;y + cam-&gt;w.x * dir-&gt;z) &gt;&gt; <span 
+class="num">8</span>;
+    cam-&gt;pos.y += ( <span class="num">0</span>                + <!--
+-->cam-&gt;v.y * dir-&gt;y + cam-&gt;w.y * dir-&gt;z) &gt;&gt; <span 
+class="num">8</span>;
+    cam-&gt;pos.z += (cam-&gt;u.z * dir-&gt;x + <!--
+-->cam-&gt;v.z * dir-&gt;y + cam-&gt;w.z * dir-&gt;z) &gt;&gt; <span 
+class="num">8</span>;
+}
+
+<span class="cmt">//! Translate by \a dir using <!--
+-->local frame for x/y, but global z</span>
+<span class="keyw">void</span> m7_translate_level(M7_CAM *cam, <span 
+class="keyw">const</span> VECTOR *dir)
+{
+    cam-&gt;pos.x += (cam-&gt;u.x * dir-&gt;x - <!--
+-->cam-&gt;u.z * dir-&gt;z)&gt;&gt;<span class="num">8</span>;
+    cam-&gt;pos.y += dir-&gt;y;
+    cam-&gt;pos.z += (cam-&gt;u.z * dir-&gt;x + <!--
+-->cam-&gt;u.x * dir-&gt;z)&gt;&gt;<span class="num">8</span>;
+}
+</pre>
+
+<p>
+If you're not really familiar with matrices they may seem bright 
+and scary, but they can be a lifesaver once you get used to them a 
+bit. There is a <i>reason</i> why large 3D systems use them non-stop; 
+doing everything by raw trig is hard, very hard. Matrices allow you 
+to work within whatever coordinate system is most natural to the 
+task at hand, and then transform to whatever system you need in the 
+end. If you have any work related to geometry, learning more about 
+the basics of linear algebra (the rules for vector and matrix use) 
+is well worth the effort.
+</p>
+
+<div class="note">
+<div class="nh">Side note : centering on a sprite</div>
+<p>
+As an example of how easy matrices can make life, consider the issue 
+of centering the camera on a given sprite and then rotating around it.
+You have the camera matrix <b>C</b>, the distance you want to view
+from, <i>Z</i> and presumably the sprite position, 
+<b>x</b><sub>w</sub>. What you need to do is: move the camera to 
+the sprite's position, then take <i>Z</i> steps back. In other 
+words 
+<b>a</b><sub>cw</sub>&nbsp;=&nbsp;<b>x</b><sub>w</sub>+<b>C</b>·(0, 0, <i>Z</i>),
+which boils down to 
+<b>a</b><sub>cw</sub>&nbsp;=&nbsp;<b>x</b><sub>w</sub>+<i>Z</i><b>w</b>, 
+</p>
+<p>
+Once you know the camera matrix, positioning it practically writes 
+itself.
+</p>
+</div>
+
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-conc">21.8.
+  Concluding remarks</h2>
+<p>
+It's done, finally! This chapter's text explained the most 
+important elements of a mode 7 game: calculation of the affine 
+parameters, adding a horizon and backdrop, positioning, sorting 
+<i>and</i> animating 3D sprites and as a bonus how to use create 
+a distance fogging effect. In the preceding text, I've used stuff 
+from just about every subject described in the rest of Tonc, 
+and not just the easy parts. If you're here and understood all or 
+most of the above, congratulations.
+</p>
+<p>
+But still I've omitted a few things that would make it a little 
+better. Getting rid of all those divisions in the &lambda; 
+calculations, for instance. Or getting around the 32 affine 
+object limitation or placing shadows for the sprites on the floor. 
+Nor have I shown how to correctly allow for loopings, instead of 
+clamping the pitch at straight up or down. These things are 
+relatively easy to grasp, conceptually, but implementing them 
+would require a lot more code. If you understood this 
+text, I'm sure you can figure it out on your own.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="mode7.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="tte.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Mode 7</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">TTE</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

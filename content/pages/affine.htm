@@ -1,0 +1,1036 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20040217">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: The Affine Transformation Matrix</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="regbg.htm">Backgrounds</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="affobj.htm">Affine objects</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">10.
+  The Affine Transformation Matrix (a.k.a. <b>P</b>)</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">About this page</a>.
+  <li><a href="#sec-texmap">Texture mapping and affine transformations</a>.
+  <li><a href="#sec-pov">&quot;Many of the truths we cling to depend 
+greatly upon our own point of view.&quot;</a>.
+  <li><a href="#sec-finish">Finishing up</a>.
+  <li><a href="#sec-aff-fun">Tonc's affine functions</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">10.1.
+  About this page</h2>
+<p>
+As you probably know, the GBA is capable of applying geometric 
+transformations like rotating and/or scaling to sprites and
+backgrounds. To set them apart from the regular items, the 
+transformable ones are generally referred to as Rot/Scale sprites 
+and backgrounds. The transformations are described by four parameters, 
+<code>pa</code>, <code>pb</code>, <code>pc</code> and <code>pd</code>. 
+The locations and exact names differ for sprites and backgrounds but 
+that doesn't matter for now.
+</p>
+<p>
+There are two ways of interpreting these numbers. The first is to 
+think of each of them as individual offsets to the sprite and
+background data. This is how the reference documents like
+<a href="http://nocash.emubase.de/gbatek.htm" target="_blank">GBATek</a> and 
+<a href="http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm" target="_blank">
+CowBite Spec</a> describe them. The other way is to see them as the
+elements of a 2x2 matrix which I will refer to as <b>P</b>. This is 
+how pretty much all tutorials describe them. These tutorials also 
+give the following matrix for rotation and scaling:
+</p>
+
+<table id="eq-prs-bad">
+<tr>
+  <td class="eqnrcell">(10.1)
+  <td class="eqcell"> <b>P</b> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>p</i><sub>a</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>b</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>p</i><sub>c</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>d</sub>
+  </tbody>
+  </table>
+  <td class="eqcell"> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>s</i><sub>x</sub>&middot;cos(&alpha;)
+    <td>&nbsp;
+    <td><i>s</i><sub>y</sub>&middot;sin(&alpha;)
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>&minus;<i>s</i><sub>x</sub>&middot;sin(&alpha;)
+    <td>&nbsp;
+    <td><i>s</i><sub>y</sub>&middot;cos(&alpha;)
+  </tbody>
+  </table>
+</table>
+
+<p>
+Now, this is indeed a rotation and scale matrix. Unfortunately, it's
+also the <span class="rem">wrong one</span>! Or at least, it probably 
+does not do what you'd expect. For example, consider the 
+case with a scaling of <i>s</i><sub>x</sub>= 1.5, <i>s</i><sub>y</sub>= 1.0
+and a rotation of &alpha;= 45. You'd probably expect something like
+fig&nbsp;10.1a, but what you'd actually get is
+10.1b. The sprite has rotated, but in the 
+wrong direction, it has shrunk rather than expanded and there's an 
+extra shear as well. Of course, you can always say that you meant
+for this to happen, but that's probably not quite true.
+</p>
+
+<div class="lblock">
+<table id="img-metr-rs">
+<tr valign="top">
+<td>
+  <div class="cpt" style="width:160px;">
+  <img src="../img/affine/metr_rs_good.png" alt=""><br>
+  <b>Fig 10.1a</b>: when you say 
+  &lsquo;rotate and scale&rsquo;,  you probably expect this &hellip;
+  </div>
+<td>
+  <div class="cpt" style="width:160px">
+  <img src="../img/affine/metr_rs_bad.png" alt=""><br>
+  <b>Fig 10.1b</b>: but with <b>P</b> 
+  from eq&nbsp;10.1, this is what you get.
+  </div>
+</table>
+</div>
+
+<p>
+Unfortunately, there is a lot of incorrect or misleading information on 
+the transformation matrix around; the matrix of 
+eq&nbsp;10.1 is just one aspect of it. This actually 
+starts with the moniker &ldquo;Rot/Scale&rdquo;, which does not fit 
+with what actually occurs, continues with the fact that the terms
+used are never properly defined and that most people often 
+just copy-paste from others without even considering checking whether
+the information is correct or not. The irony is that the principle 
+reference document, GBATek, gives the correct descriptions of each 
+of the elements, but somehow it got lost in the translation to matrix 
+form in the tutorials.
+</p>
+<p>
+In this chapter, I'll provide the <b>correct</b> interpretation
+of the <b>P</b>-matrix; how the GBA uses it and how to construct one
+yourself. To do this, though, I'm going into full math-mode. If you
+don't know your way around vector and matrix calculations you may have
+some difficulties understanding the finer points of the text. 
+There is an appendix on <a href="matrix.htm">linear algebra</a> for
+some pointers on this subject.
+</p><br>
+<p>
+This is going to be a purely theoretical page: you will find
+nothing that relates directly to sprites or backgrounds here; that's
+what the next two sections are for. Once again, we will be assisted 
+by the lovely metroid (keep in cold storage for safe use). Please
+mind the direction of the y-axis and the angles, and do <i>not</i>
+leave without reading the <a href="#sec-finish">finishing up</a>
+paragraph. This contains several key implementation details that 
+will be ignored in the text preceding it, because they will only get
+in the way at that point.
+</p>
+
+<div class="note">
+<div class="nhcare">Be wary of documents covering affine parameters</div>
+<p>
+It's true. Pretty much every document I've seen that deals with 
+this subject is problematic in some way. A lot of them give the wrong 
+rotate-scale matrix (namely, the one in 
+eq&nbsp;10.1), or misname and/or misrepresent the 
+matrix and its elements.
+</p>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-texmap">10.2.
+  Texture mapping and affine transformations.</h2>
+
+<h3 id="ssec-tex-gen">10.2.1.
+  General 2D texture mapping</h3>
+<p>
+What the GBA does to get sprites and tiled backgrounds on screen is
+very much like texture mapping. So forget about the GBA right now and 
+look at how texture mapping is done. In 
+fig&nbsp;10.2a, we see a metroid 
+texture. For convenience I am using the standard Cartesian 2D 
+coordinate system (y-axis points up) and have normalised the 
+texture, which means that the right and top side of the texture 
+correspond precisely with the unit-vectors <b>e</b><sub>x</sub> and 
+<b>e</b><sub>y</sub> (which are of length 1).  The texture mapping 
+brings <b>p</b> (in texture space) to a point <b>q</b> (in screen 
+space). The actual mapping is done by a 2&times;2 matrix <b>A</b>:
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell">
+    <b>q</b>= <b>A &middot; p</b>.
+</table>
+
+<p>
+So how do you find <b>A</b>? Well, that's actually not that hard.
+The matrix is formed by lining up the transformed base vectors, 
+which are <b>u</b> and <b>v</b> (this works in any number of 
+dimensions, btw), so that gives us:
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell"> <b>A</b> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>u</i><sub>x</sub>
+    <td>&nbsp;
+    <td><i>v</i><sub>x</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>u</i><sub>y</sub>
+    <td>&nbsp;
+    <td><i>v</i><sub>y</sub>
+  </tbody>
+  </table>
+</table>
+
+<div class="lblock">
+<table id="img-texmap">
+<caption align="bottom">
+  A forward texture mapping via affine matrix <b>A</b>.
+</caption>
+<tr>
+<td>
+  <div class="cpt" style="width:128px;">
+  <img src="../img/affine/metr_tex.png" alt="A metroid texture..."><br>
+  <b>Fig 10.2a</b>: a texture.
+  </div>
+<td width="20%" align= center><font size=10><b>A</b> <br> &rarr;</font>
+<td>
+  <div class="cpt" style="width:128px;">
+  <img src="../img/affine/metr_texmapA.png" alt=" ... mapped"><br>
+  <b>Fig 10.2b</b>: a texture mapped
+  </div>
+</table>
+</div>
+
+
+<h3 id="ssec-tex-aff">10.2.2.
+  Affine transformations</h3>
+<p>
+The transformations you can do with a 2D matrix are called 
+<dfn><a href="http://en.wikipedia.org/wiki/Affine" target="_blank">affine</a></dfn> 
+transformations. The technical definition of an 
+affine transformation is one that preserves parallel lines, which 
+basically means that you can write them as matrix transformations, or 
+that a rectangle will become a parallelogram under an affine 
+transformation (see fig&nbsp;10.2b).
+</p>
+<p>
+Affine
+transformations include rotation and scaling, but <i>also</i> shearing.
+This is why I object to the name &ldquo;Rot/Scale&rdquo;: that
+term only refers to a special case, not the general transformation. It
+is akin to calling colors shades of red: yes, reds are colors too,
+but not all colors are reds, and to call them that would give a 
+distorted view of the subject.
+</p>
+<p>
+As I said, there are three basic 2d transformations, though you can
+always describe one of these in terms of the other two. The 
+transformations are: rotation (<b>R</b>), scaling (<b>S</b>) 
+and shear (<b>H</b>). Table 10.1 shows what 
+each of the transformations does to the regular metroid sprite. The 
+black axes are the normal base vectors (note that <i>y</i> points 
+down!), the blue axes are the transformed base vectors and the cyan 
+variables are the arguments of the transformation. Also given are the 
+matrix and inverse matrix of each transformation. Why? You'll see.
+</p><br>
+
+<table id="eq-2d-inv">
+<tr>
+  <td class="eqnrcell">(10.2)
+  <td class="eqcell"> <b>A</b> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>a</i>
+	<td>&nbsp;
+	<td><i>b</i>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>c</i>
+	<td>&nbsp;
+	<td><i>d</i>
+  </tbody>
+  </table>
+  <td width=32>&nbsp;
+  <td class="eqcell"> <b>A</b><sup>&minus;1</sup> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB"> 1
+  <tr>
+    <td><i>ad &minus; bc</i>
+  </tbody>
+  </table>
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>d</i>
+	<td>&nbsp;
+	<td><i>&minus;b</i>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>&minus;c</i>
+	<td>&nbsp;
+	<td><i>a</i>
+  </tbody>
+  </table>
+</table>
+
+<div class="cblock">
+<table id="tbl-aff-def"
+  border=1 cellpadding=4 cellspacing=0>
+<caption>
+  Table 10.1: transformation matrices and 
+  their inverses.
+</caption>
+<tbody align="center">
+<tr><th>Identity<th>Rotation<th>Scaling<th>Shear
+<tr>
+<td><img src="../img/affine/metr_id.png" alt="Normal metroid">
+<td><img src="../img/affine/metr_rot.png" alt="Rotated metroid">
+<td><img src="../img/affine/metr_scale.png" alt="Scaled metroid">
+<td><img src="../img/affine/metr_shear.png" alt="Sheared metroid">
+<tr>
+<td> <!-- Identity -->
+  <table>
+  <tr>
+    <td class="eqcell"> <b>I</b> =
+    <td>
+    <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=2>&nbsp;
+      <td>1
+      <td>&nbsp;
+      <td>0
+      <td class="bdrRR" rowspan=2>&nbsp;
+    <tr>
+      <td>0
+      <td>&nbsp;
+      <td>1
+    </tbody>
+    </table>
+  </table>
+<td> <!-- Rotation -->
+  <table>
+  <tr>
+    <td class="eqcell"> <b>R</b>(&theta;) =
+    <td>
+    <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=2>&nbsp;
+      <td> cos(&theta;)
+      <td>&nbsp;
+      <td> &minus;sin(&theta;)
+      <td class="bdrRR" rowspan=2>&nbsp;
+    <tr>
+      <td> sin(&theta;)
+      <td>&nbsp;
+      <td> cos(&theta;)
+    </tbody>
+    </table>
+  </table>
+<td> <!-- Scaling -->
+  <table>
+  <tr>
+    <td class="eqcell">
+	  <b>S</b>(<i>s</i><sub>x</sub> , <i>s</i><sub>y</sub>) =
+    <td>
+    <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=2>&nbsp;
+      <td> <i>s</i><sub>x</sub>
+      <td>&nbsp;
+      <td> 0
+      <td class="bdrRR" rowspan=2>&nbsp;
+    <tr>
+      <td> 0
+      <td>&nbsp;
+      <td> <i>s</i><sub>y</sub>
+    </tbody>
+    </table>
+  </table>
+<td> <!-- Shear -->
+  <table>
+  <tr>
+    <td class="eqcell">
+	  <b>H</b>(<i>h</i><sub>x</sub> , <i>h</i><sub>y</sub>) =
+    <td>
+    <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tbody align="center">
+    <tr>
+      <td class="bdrLL" rowspan=2>&nbsp;
+      <td> 1
+      <td>&nbsp;
+      <td> <i>h</i><sub>x</sub>
+      <td class="bdrRR" rowspan=2>&nbsp;
+    <tr>
+      <td> <i>h</i><sub>y</sub>
+      <td>&nbsp;
+      <td> 1
+    </tbody>
+    </table>
+  </table>
+<tr>
+  <td class="eqcell">
+    <b>I</b><sup>&minus;1</sup> = <b>I</b>
+  <td class="eqcell"> 
+    <b>R</b><sup>&minus;1</sup>(&theta;) = <b>R</b>(&minus;&theta;)
+  <td class="eqcell"> 
+    <b>S</b><sup>&minus;1</sup>(s<sub>x</sub> , s<sub>y</sub>) = <br>
+	<b>S</b>(1/s<sub>x</sub> , 1/s<sub>y</sub>)
+  <td class="eqcell">
+    <b>H</b><sup>&minus;1</sup>(h<sub>x</sub> , h<sub>y</sub>) = <br>
+	<b>H</b>(&minus;h<sub>x</sub> , &minus;h<sub>y</sub>) /
+	(1&minus;h<sub>x</sub>h<sub>y</sub>)
+</tbody>
+</table>
+</div>
+
+<p>
+We can now use these definitions to find the correct matrix for 
+enlargements by <i>s</i><sub>x</sub> and <i>s</i><sub>y</sub>, followed 
+by a <b>counter-clockwise</b> rotation by &alpha; (=&minus;&theta;), by 
+matrix multiplication.
+</p>
+
+<table id="eq-ars-good">
+<tr>
+  <td class="eqnrcell">(10.3)
+  <td class="eqcell">
+    <b>A</b> = <b>R</b>(-&alpha;) &middot;
+    <b>S</b>(s<sub>x</sub> , s<sub>y</sub>) =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>s</i><sub>x</sub>&middot;cos(&alpha;)
+    <td>&nbsp;
+    <td><i>s</i><sub>y</sub>&middot;sin(&alpha;)
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>&minus;<i>s</i><sub>x</sub>&middot;sin(&alpha;)
+    <td>&nbsp;
+    <td><i>s</i><sub>y</sub>&middot;cos(&alpha;)
+  </tbody>
+  </table>
+</table>
+
+<p>
+&hellip; ermm, wait a sec &hellip; I'm having this strange sense of
+d&eacute;ja-vu here &hellip;
+</p>
+
+<div class="note">
+<div class="nh">Clockwise vs counterclockwise</div>
+<p>
+It's a minor issue, but I have to mention it. If the definition 
+of <b>R</b> uses a clockwise rotation, why am I suddenly using a 
+counter-clockwise one? Well, traditionally <b>R</b> is given as that
+particular matrix, in which the angle runs from the x-axis towards 
+the y-axis. Because <i>y</i> is downward, this comes down to 
+clockwise. However, the affine routines in BIOS use a 
+counter-clockwise rotation, and I thought it'd be a good idea to use 
+that as a guideline for my functions.
+</p>
+</div>
+
+<div class="note">
+<div class="nh">Nomenclature: Affine vs Rot/Scale</div>
+<p>
+The matrix <b>P</b> is not a rotation matrix, not a scaling matrix, 
+but a general affine transformation matrix. Rotation and scaling may 
+be what the matrix is mostly used for, but that does not mean they're
+the only things possible, as the term &lsquo;Rot/Scale&rsquo;
+would imply.
+</p>
+<p>
+To set them apart from regular backgrounds and sprites, I suppose 
+&lsquo;Rotation&rsquo; or &lsquo;Rot/Scale&rsquo; are suitable 
+enough, just not entirely accurate. However, calling the 
+<b>P</b>-matrix by those names is simply wrong.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-pov">10.3.
+  &ldquo;Many of the truths we cling to depend 
+greatly upon our own point of view.&rdquo;</h2>
+
+<div class="cpt_fr" style="width:160px">
+<img src="../img/affine/metr_texmapA.png" id="img-pov-human"
+  alt="Human view"><br>
+<b>Fig 10.3</b>: Mapping process as 
+  seen by humans. <b>u</b> and <b>v</b> are the columns of 
+  <b>A</b> (in screen space).
+</div>
+
+<p>
+As you must have noticed, eq&nbsp;10.3 is 
+identical to eq&nbsp;10.1, 
+which I said was incorrect. So what gives? Well, if you enter this 
+matrix into the <code>pa-pd</code> elements you do indeed get 
+something different than what
+you'd expect. Only now I've proven what you were supposed to expect 
+in the first place (namely a scaling by <i>s</i><sub>x</sub> and 
+<i>s</i><sub>y</sub>, followed by a counter-clockwise rotation by 
+&alpha;). The <i>real</i> question is of course, why doesn't this 
+work? To answer this I will present two different approaches to the 
+2D mapping process.
+</p>
+
+<h3 id="ssec-pov-human">10.3.1.
+  Human point of view</h3>
+<p>
+&ldquo;Hello, I am Cearn's brain. I grok geometry and can do matrix-
+transformations in my head. Well, his head actually. When it comes to
+texture mapping I see the original map (in texture space) and then 
+visualize the transformation. I look at the original map and look at 
+where the map's pixels end up on screen. The transformation matrix for 
+this is <b>A</b>, which ties texel <b>p</b> to screen pixel <b>q</b> 
+via <b>q</b>= <b>A · p</b>. The columns of <b>A</b> are simply the
+transformed unit matrices. Easy as &pi;.&rdquo;
+</p>
+
+<h3 id="ssec-pov-comp">10.3.2.
+  Computer point of view</h3>
+
+<div class="cpt_fr" style="width:160px">
+<img src="../img/affine/metr_texmapB.png" id="img-pov-comp"
+ alt="puter view"><br>
+<b>Fig 10.4</b>: Mapping process as seen by 
+  computers. <b>u</b> and <b>v</b> (in texture space) are the columns 
+  of <b>B</b> and are mapped to the principle axes in screen space.
+</div>
+
+<p>
+&ldquo;Hello, I am Cearn's GBA. I'm a lean, mean gaming machine that fits in
+your pocket, and I can push pixels like no one else. Except perhaps my 
+owner's GeForce 4 Ti4200, the bloody show-off. Anyway, one of the things 
+I do is texture mapping. And not just ordinary texture-mapping, I can 
+do cool stuff like rotation and scaling as well. What I do is fill
+pixels, all I need to know is for you to tell me where I should get 
+the pixel's color from. In other words, to fill screen pixel <b>q</b>, 
+I need a matrix <b>B</b> that gives me the proper texel <b>p</b> via
+<b>p = B · q</b>. I'll happily use any matrix you give me; I have 
+complete confidence in your ability to supply me with the matrix for 
+the transformation you require.&rdquo;
+</p>
+
+<h3 id="ssec-pov-res">10.3.3.
+  Resolution</h3>
+<p>
+I hope you spotted the crucial difference between the two points of 
+view. <b>A</b> maps <i>from</i> texture space <i>to</i> screen space, 
+while <b>B</b> does the exact opposite (i.e., 
+<b>B = A</b><sup>-1</sup>). I think you know which one you should give 
+the GBA by now. That's right: <b>P = B</b>, not <b>A</b>. This one bit 
+of information is the crucial piece of the affine matrix puzzle.
+</p>
+<p>
+So now you can figure out <b>P</b>'s elements in two ways. You can stick
+to the human POV and invert the matrix at the end. That's why I gave 
+you the inverses of the affine transformations as well. You could also
+try to see things in the GBA's way and get the right matrix directly.
+Tonc's main affine functions (<tt>tonc_video.h</tt>, 
+<tt>tonc_obj_affine.c</tt> and <tt>tonc_bg_affine.c</tt>) do things 
+the GBA way, setting <b>P</b> directly; but inverted functions are also 
+available using an &quot;<code>_inv</code>&quot; affix. 
+Mind you, these are a little slower. Except for when scaling is 
+involved; then it's a <i>lot</i> slower.
+</p>
+<p>
+In case you're curious, the proper matrix for scale by
+(<i>s</i><sub>x</sub>, <i>s</i><sub>x</sub>) and 
+counter-clockwise rotation by &alpha; is:
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>A</b>
+    <td> =
+    <td> <b>R</b>(&minus;&alpha;)·<b>S</b>(<i>s</i><sub>x</sub> ,
+    <i>s</i><sub>y</sub>)
+  <tr>
+    <td> <b>P</b> 
+	<td> = 
+	<td> <b>A</b><sup>&minus;1</sup>
+  <tr>
+    <td>&nbsp;
+	<td> =
+	<td> ( <b>R</b>(&minus;&alpha;)·<b>S</b>(<i>s</i><sub>x</sub> ,
+      <i>s</i><sub>y</sub>) )<sup>&minus;1</sup>
+  <tr>
+    <td>&nbsp;
+    <td> = 
+    <td> <b>S</b>(<i>s</i><sub>x</sub>,
+      <i>s</i><sub>y</sub>)<sup>&minus;1</sup>
+	  &middot; <b>R</b>(&minus;&alpha;)<sup>&minus;1</sup>
+  </table>
+</table>
+
+<p>
+Using the inverse matrices given earlier, we find
+</p>
+
+<table id="eq-prs-good">
+<tr>
+  <td class="eqnrcell">(10.4)
+  <td class="eqcell"> <b>P</b> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>p</i><sub>a</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>b</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>p</i><sub>c</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>d</sub>
+  </tbody>
+  </table>
+  <td class="eqcell"> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>x</sub>
+    <td>&nbsp;
+    <td>&minus;sin(&alpha;) / <i>s</i><sub>x</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>sin(&alpha;) / <i>s</i><sub>y</sub>
+    <td>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>y</sub>
+  </tbody>
+  </table>
+</table>
+
+<div class="note">
+Just to make it perfectly clear:
+<p>
+The affine matrix <b>P</b> maps from screen space <i>to</i> texture 
+space, not the other way around!
+</p>
+
+In other words:<br>
+<p><i>p</i><sub>a</sub> : texture <i>x</i>-increment / pixel</p>
+<p><i>p</i><sub>b</sub> : texture <i>x</i>-increment / scanline</p>
+<p><i>p</i><sub>c</sub> : texture <i>y</i>-increment / pixel</p>
+<p><i>p</i><sub>d</sub> : texture <i>y</i>-increment / scanline</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-finish">10.4.
+  Finishing up</h2>
+<p>
+Knowing what the <b>P</b>-matrix is used for is one thing, knowing 
+how to use them properly is another. There are three additional points 
+you need to remember when you're going to deal with affine 
+objects/backgrounds and the affine matrices.
+</p>
+<ol>
+  <li>Datatypes</li>
+  <li>Luts</li>
+  <li>Initialisation</li>
+</ol>
+
+
+<h3 id="ssec-fin-type">10.4.1.
+  Data types of affine elements</h3>
+<p>
+Affine transformations are part of mathematics and, generally speaking, 
+math numbers will be real numbers. That is to say, floating point 
+numbers. However, if you were to use floating points for the 
+<b>P</b> elements, you'd be in for two rude surprises.
+</p>
+<p>
+The first one is that the matrix elements are not floats, but 
+integers. The reason behind this is that <span class="ack">the GBA 
+has no floating point unit!</span> All floating-point operations 
+have to be done in software and without an FPU, that's going to 
+be pretty slow. Much slower than integer math, at any rate. Now, 
+when you think about this, it does create some problems with 
+precision and all that. For example, the (co)sine and functions have 
+a range between &minus;1 and 1, a range which isn't exactly large 
+when it comes to integers. However, the range would be much greater 
+if one didn't count in units of 1, but in fractions, say in units of 
+1/256. The [&minus;1, +1] range then becomes [&minus;256, +256],
+</p>
+<p>
+This strategy of representing real numbers with scaled integers 
+is known as <dfn>fixed point arithmetic</dfn>, which you can read 
+more about in <a href="fixed.htm">this appendix</a> and on 
+<a href="http://en.wikipedia.org/wiki/Fixed-point_arithmetic" target="_blank">wikipedia</a>. 
+The GBA makes use of fixed point for its affine parameters, but you 
+can use it for other things as well. The <b>P</b>-matrix elements 
+are 8.8 fixed point numbers, meaning a halfword with 8 integer bits 
+and 8 fractional bits. To set a matrix to identity (1s on the 
+diagonals, 0s elsewhere), you wouldn't use this:
+</p>
+
+<pre class="proglist">
+    <span class="cmt">// Floating point == Bad!!</span>
+    pa= pd= <span class="num">1.0</span>;
+    pb= pc= <span class="num">0.0</span>;
+</pre>
+
+<p>
+but this:
+</p>
+
+<pre class= proglist>
+    <span class="cmt">// .8 Fixed-point == Good</span>
+    pa= pd= <span class="num">1</span>&lt;&lt;<span class="num">8</span>;
+    pb= pc= <span class="num">0</span>;
+</pre>
+
+<p>
+In a fixed point system with <i>Q</i> fractional bits, &lsquo;1&rsquo; 
+(&lsquo;one&rsquo;) is represented by 2<sup>Q</sup> or 
+1&lt;&lt;<i>Q</i>, because simply that's how fractions work.
+</p>
+<p>
+Now, fixed point numbers are still just integers, but there are 
+different types of integers, and it is important to use the right 
+ones. 8.8f are 16bit variables, so the logical choice there is 
+<code>short</code>. However, this should be a <i>signed</i> short: 
+<code>s16</code>, not <code>u16</code>. Sometimes is doesn't matter, 
+but if you want to do any arithmetic with them they'd better be 
+signed. Remember that internally the CPU works in words, which are 
+32bit, and the 16bit variable will be converted to that. 
+You really want, say, a 16bit &quot;&minus;1&quot;
+(<code>0xFFFF</code>) to turn into a 32bit 
+&quot;&minus;1&quot; (<code>0xFFFFFFFF</code>), and not 
+&quot;65535&quot; (<code>0x0000FFFF</code>), which is
+what happens if you use unsigned shorts. Also, when doing fixed point 
+math, it is recommended to use signed ints (the 32bit kind) for 
+them, anything else will slow you down and you might get overflow 
+problems as well.
+</p><br>
+
+<div class="note">
+<div class="nhgood">Use 32-bit signed ints for affine temporaries</div>
+<p>
+Of course you should use 32bit variables for everything anyway (unless 
+you actually <i>want</i> your code to bloat and slow down). If you use 
+16bit variables (<code>short</code> or <code>s16</code>), not only will your 
+code be slower because of all the extra instructions that are added to 
+keep the variables 16bit, but overflow problems can occur much sooner. 
+</p>
+<p>
+Only in the final step to hardware should you go to 8.8 format. Before 
+that, use the larger types for both speed and accuracy.
+</p>
+</div>
+
+<h3 id="ssec-fin-lut">10.4.2.
+  LUTs</h3>
+<p>
+So fixed point math is used because floating point math is just to 
+slow for efficient use. That's all fine and good for your own 
+math, but what about mathematical functions like sin() and cos()? 
+Those are still floating point internally (even worse, 
+<i><code>double</code>s</i>!), so those are going to be ridiculously 
+slow. 
+</p>
+<p>
+Rather than using the 
+functions directly, we'll use a time-honored tradition to weasel our 
+way out of using costly math functions: we're going to build a 
+<dfn>look-up table</dfn> (LUT) containing the sine and cosine values. 
+There are a number of ways to do this. If you want an easy 
+strategy, you can just declare two arrays of 360 8.8f numbers and 
+fill them at initialization of your program. However, this is a 
+poor way of doing things, for reasons explained in the 
+<a href="fixed.htm#sec-lut">section on LUTs</a> in the appendix.
+</p>
+<p>
+Tonclib has a single sine lut which can be used for both sine and 
+cosine values. The lut is called <code>sin_lut</code>, a 
+<code>const short</code> array of 512 4.12f entries 
+(12 fractional bits), created by my 
+<a href="http://www.coranac.com/projects/#excellut" target="_blank">excellut</a> 
+lut creator. In <tt>tonc_math.h</tt> you can find two inline 
+functions that retrieve sine and cosine values:
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Look-up a sine and cosine values
+/*! \param theta Angle in [0,FFFFh] range
+*   \return .12f sine value
+*/</span>
+
+INLINE s32 lu_sin(uint theta)
+{   <span class="keyw">return</span> sin_lut[(theta&gt;&gt;<span 
+class="num">7</span>)&amp;<span class="num">0x1FF</span>];           }
+
+INLINE s32 lu_cos(uint theta)
+{   <span class="keyw">return</span> sin_lut[((theta&gt;&gt;<span 
+class="num">7</span>)+<span class="num">128</span>)&amp;<span 
+class="num">0x1FF</span>];     }
+</pre>
+<p>
+Now, note the angle range: 0-10000h. Remember you don't <i>have</i> 
+to use 360 degrees for a circle; in fact, on computers it's better to 
+divide the circle in a power of two instead. In this case, the angle 
+is in 2<sup>16</sup> parts for compatibility with BIOS functions, 
+which is brought down to a 512 range inside the look-up functions.
+</p>
+
+<h3 id="ssec-fin-init">10.4.3.
+  Initialization</h3>
+<p>
+When flagging a background or object as affine, you <i>must</i> 
+enter at least some values into <code>pa-pd</code>. Remember 
+that these are zeroed out by default. A zero-offset means it'll use the 
+first pixel for the whole thing. If you get a single-colored
+background or sprite, this is probably why. To avoid this, set <b>P</b>
+to the identity matrix or any other non-zero matrix.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-aff-fun">10.5.
+  Tonc's affine functions</h2>
+<p>
+Tonclib contains a number of functions for manipulating the affine 
+parameters of objects and backgrounds, as used by the 
+<code>OBJ_AFFINE</code> and <code>BG_AFFINE</code> structs. Because 
+the affine matrix is stored differently in both structs you can't 
+set them with the same function, but the functionality is the same. 
+In table 10.2 you can find the basic formats 
+and descriptions; just replace <i>foo</i> with 
+<code>obj_aff</code> or <code>bg_aff</code> and <i>FOO</i> with 
+<code>OBJ</code> or <code>BG</code> for objects and backgrounds, 
+respectively. The functions themselves can be found in 
+<tt>tonc_obj_affine.c</tt> for objects, <tT>tonc_bg_affine.c</tt> for 
+backgrounds, and inlines for both in <tt>tonc_video.h</tt> &hellip; 
+somewhere. 
+</p>
+
+<div class="cblock">
+<table id="tbl-aff-fun"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 10.2</b>: affine functions
+ </caption>
+<tr align="left"><th width="60%">Function</th>  <th>Description</th></tr>
+<tr>
+  <td>void <i>foo</i>_copy(<i>FOO</i>_AFFINE *dst, 
+  const <i>FOO</i>_AFFINE *src, uint count);</td>
+  <td>Copy affine parameters</td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_identity(<i>FOO</i>_AFFINE *oaff);</td>
+  <td><b>P</b> = <b>I</b></td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_postmul(<i>FOO</i>_AFFINE *dst, 
+  const <i>FOO</i>_AFFINE *src);</td>
+  <td>Post-multiply: <b>D</b> = <b>D</b>&middot;<b>S</b></td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_premul(<i>FOO</i>_AFFINE *dst, 
+  const <i>FOO</i>_AFFINE *src);</td>
+  <td>Pre-multiply: <b>D</b> = <b>S</b>&middot;<b>D</b></td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_rotate(<i>FOO</i>_AFFINE *aff, u16 alpha);</td>
+  <td>Rotate counter-clockwise by &alpha;&middot;&pi;/8000h.</td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_rotscale(<i>FOO</i>_AFFINE *aff, 
+  FIXED sx, FIXED sy, u16 alpha);</td>
+  <td>Scale by 1/<i>s</i><sub>x</sub> and 1/<i>s</i><sub>y</sub>, then
+  rotate counter-clockwise by &alpha;&middot;&pi;/8000h.</td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_rotscale2(<i>FOO</i>_AFFINE *aff, 
+  const AFF_SRC *as);</td>
+  <td>As <code><i>foo</i>_rotscale()</code>, but input stored in 
+  an <code>AFF_SRC</code> struct.</td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_scale(<i>FOO</i>_AFFINE *aff, 
+  FIXED sx, FIXED sy);</td>
+  <td>Scale by 1/<i>s</i><sub>x</sub> and 1/<i>s</i><sub>y</sub></td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_set(<i>FOO</i>_AFFINE *aff, 
+  FIXED pa, FIXED pb, FIXED pc, FIXED pd);</td>
+  <td>Set <b>P</b>'s elements</td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_shearx(<i>FOO</i>_AFFINE *aff, 
+  FIXED hx);</td>
+  <td>Shear top-side right by <i>h</i><sub>x</sub></td>
+</tr>
+<tr>
+  <td>void <i>foo</i>_sheary(<i>FOO</i>_AFFINE *aff, 
+  FIXED hy);</td>
+  <td>Shear left-side down by <i>h</i><sub>y</sub></td>
+</tr>
+</table>
+</div>
+
+<h3 id="ssec-fin-rs">10.5.1.
+  Sample rot/scale function</h3>
+<p>
+My code for a object version of the scale-then-rotate 
+function (&agrave; la eq&nbsp;10.4) is 
+given below. Note that it is from the computer's point of view, so 
+that <code>sx</code> and <code>sy</code> scale down. Also, the 
+alpha <code>alpha</code> uses 10000h/circle (i.e., the unit of 
+&alpha; is &pi;/8000h = 0.096 mrad, or 180/8000h = 0.0055&deg;) 
+and the sine lut is 
+in .12f format, which is why the shifts by 12 are required. The 
+background version is identical, except in name and type. If this 
+were C++, templates would have been mighty useful here.
+
+<pre class="proglist">
+<span class="keyw">void</span> obj_aff_rotscale(OBJ_AFFINE *oaff, <span 
+class="keyw">int</span> sx, <span class="keyw">int</span> sy, u16 alpha)
+{
+    <span class="keyw">int</span> ss= lu_sin(alpha), cc= lu_cos(alpha);
+
+    oaff-&gt;pa= cc*sx&gt;&gt;<span 
+class="num">12</span>;    oaff-&gt;pb=-ss*sx&gt;&gt;<span 
+class="num">12</span>;
+    oaff-&gt;pc= ss*sy&gt;&gt;<span 
+class="num">12</span>;    oaff-&gt;pd= cc*sy&gt;&gt;<span 
+class="num">12</span>;
+}
+</pre>
+
+<p>
+With the information in this chapter, you know most of what you need 
+to know about affine matrices, starting with why they should be 
+referred to <i>affine</i> matrices, rather than merely rotation or 
+rot/scale or the other names you might see elsewhere. You should now 
+know what the thing actually does, and how you can set up a matrix 
+for the effects you want. You should also know a little bit about 
+fixed point numbers and luts (for more, look in the 
+<a href="fixed.htm">appendices</a>) and why they're Good Things; if 
+it hadn't been clear before, you should be aware that the choice  
+of the data types you use actually <i>matters</i>, and you should 
+not just use the first thing that comes along. 
+</p>
+<p>
+What has not been discussed here is how you actually set-up objects 
+and backgrounds to use affine transformation, which is what the next 
+two chapters are for. For more on affine transformations, try 
+searching for &lsquo;linear algebra&rsquo;
+</p>
+
+
+
+<br>
+<div class="endtag">
+Modified <span class="time">Jul 17, 2009</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="regbg.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="affobj.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Backgrounds</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Affine objects</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

@@ -1,0 +1,905 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031229">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Software Interrupts</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="interrupts.htm">Interrupts</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="sndsqr.htm">Sound intro</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">17.
+  BIOS Calls</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>
+  <li><a href="#sec-funs">The BIOS functions</a>
+  <li><a href="#sec-usage">Using BIOS calls</a>
+  <li><a href="#sec-demo">Demo graphs</a>
+  <li><a href="#sec-vsync2">Vsyncing part II, VBlankIntrWait</a>
+  <li><a href="#sec-concs">Final thoughts</a>
+</ul>
+<!-- [[/toc]] -->
+
+<br>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">17.1.
+  Introduction</h2>
+<p>
+Apart from <a href="interrupts.htm">hardware interrupts</a>, like 
+HBlank and cartridge interrupts, there are also things called 
+<dfn>software interrupts</dfn>, also known as <dfn>BIOS calls</dfn>. 
+The software interrupts work very much like ordinary functions:
+you set-up input, call the routine, and get some output back. 
+The difference lies in how you reach the code; for normal functions 
+you just, well, jump to the routine you want. Software interrupts
+use the <code>swi</code> instruction, which diverts the program flow
+to somewhere in BIOS, carries out the requested algorithm and then 
+restores the normal flow of your program. This is similar to what 
+hardware interrupts do, only now you raise the interrupt 
+programmatically. Hence: software interrupt.
+</p>
+<p>
+The GBA BIOS has 42 software interrupts, with basic routines for 
+copying, math (division, square root), affine transformations for 
+sprites and backgrounds, decompression among others. There are
+also some very special functions like the <code>IntrWait</code>
+routines, which can stop the CPU until a hardware interrupt occurs.
+The VBlank variant is highly recommended, which is what makes this 
+chapter important.
+</p>
+<p>
+Using software interrupts isn't too hard if it weren't for one 
+thing: the <code>swi</code> instruction itself. This again requires 
+some assembly. However, not <i>much</i> assembly, and it's easy to 
+write C wrappers for them, which we'll also cover here.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-funs">17.2.
+  The BIOS functions</h2>
+<p>
+Calling the BIOS functions can be done via the 
+&lsquo;<code>swi <i>n</i></code>&rsquo; instruction, where <i>n</i> 
+is the BIOS call you want to use. Mind you, the exact numbers you need 
+to use depends 
+on whether your code is in ARM or THUMB state. In THUMB the argument 
+is simply the <i>n</i> itself, but in ARM you need to use 
+<i>n</i>&lt;&lt;16. Just like normal functions, the BIOS calls can have 
+input and output. The first four registers (r0-r3) are used for this 
+purpose; though the exact purpose and the number of registers differ 
+for each call.
+</p>
+
+<p>
+Here's a list containing the names of each BIOS call. I am not going
+to say what each of them does since other sites have done that already 
+and it seems pointless to copy their stuff verbatim. For full 
+descriptions go 
+to <a href="http://nocash.emubase.de/gbatek.htm" target="_blank">GBATek</a>, for 
+example. I will give a description of a few of them so you can get a 
+taste of how they work.
+</p>
+
+<h3 id="ssec-funs-list">17.2.1.
+  Full list</h3>
+
+<center>
+<table width="70%">
+<col span=5 align="left">
+<tr><th>id		<th width="30%">Name  <th width="10%">	<th>id		<th>Name
+<tr><td>0x00	<td>SoftReset		<td><td>0x08	<td>Sqrt
+<tr><td>0x01	<td>RegisterRamReset<td><td>0x09	<td>ArcTan 
+<tr><td>0x02	<td>Halt			<td><td>0x0A	<td>ArcTan2
+<tr><td>0x03	<td>Stop			<td><td>0x0B	<td>CPUSet 
+<tr><td>0x04	<td>IntrWait		<td><td>0x0C	<td>CPUFastSet 
+<tr><td>0x05	<td>VBlankIntrWait	<td><td>0x0D	<td>BiosChecksum 
+<tr><td>0x06	<td>Div				<td><td>0x0E	<td>BgAffineSet 
+<tr><td>0x07	<td>DivArm			<td><td>0x0F	<td>ObjAffineSet 
+
+<tr><td>&nbsp;
+<tr><td>0x10	<td>BitUnPack		<td><td>0x18	<td>Diff16bitUnFilter 
+<tr><td>0x11	<td>LZ77UnCompWRAM	<td><td>0x19	<td>SoundBiasChange 
+<tr><td>0x12	<td>LZ77UnCompVRAM	<td><td>0x1A	<td>SoundDriverInit 
+<tr><td>0x13	<td>HuffUnComp		<td><td>0x1B	<td>SoundDriverMode 
+<tr><td>0x14	<td>RLUnCompWRAM	<td><td>0x1C	<td>SoundDriverMain 
+<tr><td>0x15	<td>RLUnCompVRAM	<td><td>0x1D	<td>SoundDriverVSync 
+<tr><td>0x16	<td>Diff8bitUnFilterWRAM	<td><td>0x1E <td>SoundChannelClear 
+<tr><td>0x17	<td>Diff8bitUnFilterVRAM	<td><td>0x1F <td>MIDIKey2Freq
+
+<tr><td>&nbsp;
+<tr><td>0x20	<td>MusicPlayerOpen		<td><td>0x28 <td>SoundDriverVSyncOff
+<tr><td>0x21	<td>MusicPlayerStart	<td><td>0x29 <td>SoundDriverVSyncOn 
+<tr><td>0x22	<td>MusicPlayerStop		<td><td>0x2A <td>GetJumpList
+<tr><td>0x23	<td>MusicPlayerContinue
+<tr><td>0x24	<td>MusicPlayerFadeOut
+<tr><td>0x25	<td>MultiBoot
+<tr><td>0x26	<td>HardReset
+<tr><td>0x27	<td>CustomHalt
+</table>
+</center>
+
+<h3 id="ssec-funs-smpl">17.2.2.
+  Div, Sqrt, Arctan2 and  ObjAffineSet descriptions</h3>
+
+<dl>
+<dt>0x06: Div</dt>
+<dd>
+Input:
+  <p>r0: numerator</p>
+  <p>r1: denominator</p>
+ Output:
+  <p>r0: numerator / denominator</p>
+  <p>r1: numerator % denominator</p>
+  <p>r3: abs(numerator / denominator)</p>
+ Note: do NOT divide by zero!
+<br>
+</dd>
+
+<dt>0x08: Sqrt</dt>
+<dd>
+Input:
+  <p>r0: num, a unsigned 32-bit integer</p>
+Output:
+  <p>r1: sqrt(num)</p>
+<br>
+</dd>
+
+<dt>0x0a: ArcTan2</dt>
+<dd>
+Input:
+  <p>r0: <i>x</i>, a <b>signed 16bit</b> number (<code>s16</code>)</p>
+  <p>r1: <i>y</i>, a <b>signed 16bit</b> number (<code>s16</code>)</p>
+Output:
+  <p>r0: 
+    <i>x</i>&ge;0 : <i>&theta;</i>= arctan(<i>y/x</i>) &or;
+    <i>x</i>&lt;0 : <i>&theta;</i>= 
+      sign(<i>y</i>)*(&pi; &minus; arctan(|<i>y/x</i>|).<br>
+  </p>
+    This does the full inverse of <i>y</i> = <i>x</i>*tan(&theta;).
+    The problem with the tangent is that the domain is a semi-circle,
+    as is the range of arc tangent. To get the full circle range, both
+    <i>x</i> and <i>y</i> values are required for not only their 
+    quotient, but their signs as well. The mathematical range of
+    <i>&theta;</i> is [&minus;&pi;,&nbsp;&pi;&rang;, which corresponds
+    to [&minus;0x8000,&nbsp;0x8000&rang; (or
+    [0,&nbsp;2&pi;&rang; and [0,&nbsp;0xFFFF] if you like)
+<br>
+</dd>
+
+<dt>0x0f: ObjAffineSet</dt>
+<dd>
+Input:
+  <p>r0: source address</p>
+  <p>r1: destination address</p>
+  <p>r2: number of calculations</p>
+  <p>r3: Offset of <b>P</b> matrix elements (2 for bgs,
+    8 for objects)</p>
+</dd>
+</dl>
+
+<p>
+The source address points to an array of <code>AFF_SRC</code>
+structs (also known as <code>ObjAffineSource</code>, which 
+is a bit misleading since you can use them for backgrounds 
+as well). The <code>AFF_SRC</code> struct consist of two 
+scales <i>s</i><sub>x</sub> , <i>s</i><sub>y</sub> and an
+angle &alpha;, which again uses the range [0,&nbsp;0xFFFF] for 
+2&pi;. The resulting <b>P</b>:
+</p>
+
+<table id="eq-pswi">
+<tr>
+  <td class="eqnrcell">(17.1)
+  <td class="eqcell"> <b>P</b> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>s</i><sub>x</sub>&middot;cos(&alpha;)
+    <td>&nbsp;
+    <td>&minus;<i>s</i><sub>x</sub>&middot;sin(&alpha;)
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>s</i><sub>y</sub>&middot;sin(&alpha;)
+    <td>&nbsp;
+    <td><i>s</i><sub>y</sub>&middot;cos(&alpha;)
+  </tbody>
+  </table>
+</table>
+
+<p>
+By now you should know what this does: it scales horizontally by 
+1/<i>s</i><sub>x</sub>, vertically by 1/<i>s</i><sub>y</sub> followed 
+by a counter-clockwise rotation by <i>&alpha;</i>. 
+<code>ObjAffineSet()</code> does almost exactly what 
+<code>obj_aff_rotscale()</code> and <code>bg_aff_rotscale()</code> do, 
+except that <code>ObjAffineSet()</code> can also set multiple 
+matrices at once.
+</p>
+<p>
+The source data is kept in <code>ObjAffineSource</code> (i.e., 
+<code>AFF_SRC</code>) structs. Now, as the routine sets affine 
+matrices, you might think that the destinations are either 
+<code>OBJ_AFFINE</code> or <code>ObjAffineDest</code> 
+structs. However, you'd be wrong. Well, partially anyway. 
+The problem is that the destination always points to a 
+<i>p</i><sub>a</sub>-element, which is not necessarily the first 
+element in struct. You <i>will</i> make the mistake of 
+simply supplying an <code>OBJ_AFFINE</code> pointer when you try 
+to use it to fill those. Don't say I didn't warn you.
+</p>
+<p>
+Two other things need to be said here as well. First, once 
+again we have a bit of a misnomer: ObjAffineSet doesn't really have 
+much to do with objects per se, but can be used in that 
+capacity by setting <code>r3</code> to 8 instead of 2. The 
+second is that the routine can also be used to set up multiple arrays 
+via <code>r2</code>. However, <i>be careful</i> when you do this 
+with devkitPro 19. <code>ObjAffineSet()</code> expects its source 
+structs to be <a href="bitmaps.htm#ssec-data-align">word-aligned</a>, 
+which they won't be unless you add the alignment attributes yourself.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Source struct. Note the alignment!</span>
+<span class= keyw>typedef struct</span> AFF_SRC
+{
+    s16 sx, sy;
+    u16 alpha;
+} <b>ALIGN4</b> AFF_SRC, ObjAffineSource;
+
+<span class="cmt">// Dst struct for background matrices</span>
+<span class= keyw>typedef struct</span> Aff_DST
+{
+    s16 pa, pb;
+    s16 pc, pd;
+} ALIGN4 AFF_DST, ObjAffineDest;
+
+<span class="cmt">// Dst struct for objects. Note that r1 should be
+// the address of pa, not the start of the struct</span>
+<span class= keyw>typedef struct</span> OBJ_AFFINE
+{
+    u16 fill0[<span class= num>3</span>];    <b>s16 pa</b>;
+    u16 fill1[<span class= num>3</span>];    s16 pb;
+    u16 fill2[<span class= num>3</span>];    s16 pc;
+    u16 fill3[<span class= num>3</span>];    s16 pd;
+} ALIGN4 OBJ_AFFINE;
+</pre>
+
+<!--
+<p>
+Now I should say that the names I use for the actual functions are 
+a little bit different from the conventional ones. My names are all 
+prefixed by <code>swi_</code> and then a lower-case indicator for the 
+specific function. I've added definitions to <tt>swi.h</tt> that will 
+allow you to use the official names as well, but I try to use my own. 
+</p>
+-->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-usage">17.3.
+  Using BIOS calls</h2>
+
+<h3 id="ssec-use-swi-asm">17.3.1.
+  Assembly for BIOS calls</h3>
+<p>
+You might think this whole discussion was rather pointless since you 
+can't access the registers and the <code>swi</code> instruction 
+unless you use assembly, which will be pretty tough, right? Well, no, 
+yes and no. The necessary assembly steps for BIOS calls are actually 
+rather simple, and are given below.
+</p>
+
+
+<pre class="proglist" id="cd-swi-asm">
+<span class="cmt">@ In tonc_bios.s</span>
+
+<span class="cmt">@ at top of your file</span>
+    .text           <span class="cmt">@ aka .section .text</span>
+    .code <span class="num">16</span>        <span 
+class="cmt">@ aka .thumb</span>
+
+<span class="cmt">@ for each swi (like division, for example)</span>
+    .align <span class="num">2</span>        <span 
+class="cmt">@ aka .balign 4</span>
+    .global Div
+    .thumb_func
+Div:
+    swi     <span class="num">0x06</span>
+    bx      lr
+</pre>
+
+<p>
+This is assembly code for the GNU assembler (GAS); for Goldroad or 
+ARM STD the syntax is likely to be slightly different. The first thing 
+you need to do is give some <dfn>directives</dfn>, which tells some 
+details about the following code. In this case, we use the 
+&lsquo;<code>.text</code>&rsquo; to put the code in the 
+<code>text</code> section (ROM or EWRAM for multiboot). We also say that 
+the code is THUMB code by using &lsquo;<code>.code 16</code>&rsquo; 
+or &lsquo;<code>.thumb</code>&rsquo;. If you place these at the top 
+of the file, they'll hold for the rest of the thing. For each 
+BIOS call, you'll need the following 6 items.
+</p>
+<ul>
+<li><b>Word-alignment</b>. 
+  Or at least halfword alignment, but words 
+  are probably preferable. There are two directives for this, 
+  <code>.align <i>n</i></code> and <code>.balign <i>m</i></code>. 
+  The former aligns to 2<sup><i>n</i></sup> so requires 
+  &lsquo;<code>.align 2</code>&rsquo;; the latter aligns to <i>m</i> 
+  so you can just use &lsquo;<code>balign <i>m</i></code>&rsquo;. 
+  Note that both will only work on the <i>next</i> piece of code 
+  or data and no further, which is why it's best to add it for each 
+  function.
+<li><b>Scope</b>. 
+  The <code>.global <i>name</i></code> directive makes a symbol out 
+  of <i>name</i>, which will then be visible for other files in the 
+  project as well. A bit like <code>extern</code> or, rather, an 
+  anti-<code>static</code>.
+<li><b>Thumb indicator</b>
+  It would seem that <code>.code 16</code> alone isn't enough, you 
+  also need <code>.thumb_func</code>. In fact, if I read the manual 
+  correctly this one also implies <code>.code 16</code>, which would 
+  make that directive redundant.
+<li><b>Label</b>.
+  &lsquo;<i>name</i>:&rsquo; marks where the symbol <i>name</i> 
+  starts. Obviously, to use a function it must actually exist.
+<li><b>BIOS call</b>
+  To actually activate the BIOS call, use &lsquo;swi <i>n</i>&rsquo;, 
+  with <i>n</i> the BIOS call you want.
+<li><b>Return</b>
+  And we're practically done already, all we have to do now is return 
+  to the caller with &lsquo;bx lr&rsquo;.
+</ul>
+
+<p>
+See? It's really not that complicated. Sometimes you might want a 
+little more functionality than this, but for the most part you only 
+need two measly instructions.
+</p>
+
+<h3 id="ssec-use-aapcs">17.3.2.
+  The Arm Architecture Procedure Call Standard</h3>
+<p>
+That's all fine and good, but that still leaves the questions of a) 
+how do I combine this with C code and b) where'd all the input and 
+output go? The answer to the first is simple: just add a function 
+declaration like usual:
+</p>
+
+<pre class="proglist" id="cd-swi-decl">
+<span class="cmt">// In tonc_bios.h</span>
+
+<span class="keyw">int</span> Div(<span 
+class="keyw">int</span> num, <span class="keyw">int</span> denom);
+</pre>
+
+<p>
+Mkay, but that <i>still</i> doesn't explain where my input and 
+output went. Well actually &hellip; it <i>does</i>.
+</p>
+
+<blockquote>
+&ldquo;I am not sure how clouds get formed. But the clouds know 
+how to do it, and that is the important thing&rdquo; 
+</blockquote>
+
+<p>
+Found that quote 
+long ago in one of those Kids on Science lists, and I'm always 
+reminded of it when programming. The thing about computers is that 
+they don't think in terms of input, output, text, pictures etc. 
+Actually, they don't think at all, but that's another story. All a 
+computer sees is data; not even code and data, just data since code 
+is data too. Of course, <i>you</i> may not see it that way because 
+you're used to C or VB or whatever, but when all is said and done, 
+it's all just ones and zeros. If the ones and zeros come to the 
+CPU via the program counter (<b>PC</b> register, <code>r15</code>) 
+it's code, otherwise it's data.
+</p>
+<p>
+So how does that explain the input/output? Well, it doesn't do it 
+directly, but it points to how you should be looking at the situation. 
+Consider you're the compiler and you have to convert some bloke's 
+C code into machine code (or assembly, which is almost the same thing)
+that a CPU can actually use. You come across the line 
+&ldquo;<code>q= Div(x,y);</code>&rdquo;. What does <code>Div()</code> 
+do? Well, if there's no symbol in the C-file for that name (and 
+there isn't, as it's in <tt>tonc_bios.s</tt>), you wouldn't know. 
+Technically, you don't even know <i>what</i> it is. But 
+<code>Div</code> knows, and that's the important thing. At least, 
+that's <i>almost</i> how it works. The compiler should still need 
+to know what sort of critter 
+<code>Div</code> is to avoid confusion: A variable? A macro? A 
+function? That's what the declarations are for. And the declaration 
+above says that <code>Div</code> is a function that expects two 
+signed integers and returns one too. As far as the compiler's 
+concerned, it ends there.
+</p><br>
+
+
+<p>
+Of course, that still doesn't explain how the compiler knows 
+what do to. Well, it simply follows the <i>ARM Architecture 
+Procedure Call Standard</i>, <dfn>AAPCS</dfn> for short. This states 
+how functions should pass arguments to each other. This PDF document 
+can be found <a href="http://www.arm.com/miscPDFs/8031.pdf" target="_blank">here</a> 
+and if you're contemplating assembly is a very worthwhile download.
+</p>
+<p>
+For now, here's what you need to know. The first four arguments are
+placed in the first four registers <code>r0-r3</code>, every one 
+after that is placed on the stack. The output value is placed in 
+<code>r0</code>. As long as you take the argument list of the BIOS 
+call as the list in the declaration, it should work fine. Note that 
+the declaration also takes care of any casting that needs to be 
+done. It is important that you realize just what the declaration 
+means here: <i>it</i> determines how the function is called, not 
+the actual <i>definition</i> assembly function. Or even C function. 
+Things can go very wrong if you mess up the declaration.
+</p>
+<p>
+Another thing the AAPCS tells you is that register r0-r3 (and r12) 
+are so-called <dfn>scratch</dfn> registers. This means that the 
+caller <i>expects</i> the called function to mess these up. After 
+the function returns their contents are to be considered undefined 
+&ndash; unless you're the one writing both asm functions, in which 
+case there may be certain &hellip; allowances. Having these as scratch 
+registers means that a function can use them without needing to 
+push and pop the originals on and off the stack, thus saving time. 
+This does not hold for the other registers, though: r4-r11, r13, 
+r14 <i>must</i> be returned in the way the calling function got 
+them. The last one, r15, is exempt from this, as you shouldn't screw 
+around with the program counter.
+</p>
+
+<h3 id="ssec-use-inl-asm">17.3.3.
+  Inline assembly</h3>
+<p>
+Actually, you don't even need a full assembly file for BIOS calls: 
+you could use <dfn>inline assembly</dfn>. With inline assembly, you can 
+mix C code and assembly code. Since the functions are usually rather 
+simple, you could use something like
+</p>
+
+<pre class="proglist">
+<span class="cmt">// In a C file</span>
+<span class="keyw">int</span> Div(<span class="keyw">int</span> num,<!--
+--> <span class="keyw">int</span> denom)
+{   asm(<span class="str">"swi 0x06"</span>);   }
+</pre>
+<p>
+This does exactly the same thing as the assembly version of 
+<code>Div</code>. However, you need to be careful with inline 
+assembly because you can't see the code around it and might 
+accidentally <dfn>clobber</dfn> some registers that you shouldn't 
+be messing with, thus ruining the rest of the code. For the full 
+rules on inline assembly, see the 
+<a href="http://www.gnu.org/manual/manual.html" target="_blank">GCC manual</a>. You can 
+also find a short faq on inline assembly use at
+<a href="http://www.devrs.com/gba/" target="_blank">devrs.com</a>. The 
+&lsquo;proper&rsquo;
+syntax of inline assembly isn't the friendliest in the world, mind 
+you, and there are other problems as well. Consider the C function 
+given above. Since it doesn't really do anything itself, the 
+optimiser may be tempted to throw it away. This will happen with 
+<tt>-O3</tt> unless you take appropriate precautions. Also, the 
+compiler will complain that the function doesn't return anything, 
+even though it should. It has a point, of course, considering that 
+part is taken care of inside the assembly block. There are probably 
+a few other problems that I'm not aware of at present; in the end 
+it's easier to use the full-assembly versions so you know what's 
+happening. 
+</p>
+
+<h3 id="ssec-use-swi-call">17.3.4.
+  The <kbd>swi_call</kbd> macro</h3>
+<p>
+On the other hand, there are also BIOS calls that use no arguments, 
+which can be run via a mere macro. The <code>swi_call(x)</code> 
+macro will run the BIOS call <i>x</i>, and can be found in 
+<tt>swi.h</tt>, and in Wintermute's 
+<a href="http://www.devkitpro.org" target="_blank">libgba</a>, which is where I got it 
+from. It's a little more refined than the <code>Div</code>
+function given above. First, it uses the <code>volatile</code> 
+keyword, which should keep your optimizer from deleting the function 
+(just like we did for all the registers). Secondly, it uses a 
+<dfn>clobber list</dfn> (after the triple colons). This will tell 
+the compiler which registers are used by the inline assembly. Thirdly, 
+it will take care of the THUMB/ARM switch automatically. If you use 
+the <tt>-mthumb</tt> compiler option, the compiler will define 
+<code>__thumb__</code> for us, which we will now use to get the 
+right swi-number. Clever, eh?
+</p>
+<pre class="proglist">
+<span class="keyw">#ifndef</span>(__thumb__)
+<span class="keyw">#define</span> swi_call(x)   <!--
+-->asm <span class="keyw">volatile</span>(<span 
+class="str">"swi\t"</span>#x ::: "r0", "r1", "r2", "r3")
+<span class="keyw">#else</span>
+<span class="keyw">#define</span> swi_call(x)   <!--
+-->asm <span class="keyw">volatile</span>(<span 
+class="str">"swi\t"</span>#x"&lt;&lt;16" ::: "r0", "r1", "r2", "r3")
+<span class="keyw">#endif</span>
+</pre><br>
+
+<p>
+By the way, if you want more information about assembly, you can 
+find a number of tutorials on ARM assembly at gbadev.org. Another 
+nice way to learn is by using the <tt>-S</tt> compiler flag, which 
+will give you a compiler-generated assembly file of your code. This 
+will show you exactly what the compiler does to your code, including 
+optimisation steps and use of the AAPCS. Really, you should see this 
+at least once. 
+</p>
+<p>
+It may also help to use <tt>-fverbose-asm</tt>, which will write out 
+the original variable names and operations in comments. Usually in 
+the right place too. Also handy is the <code>ASM_CMT()</code> macro 
+shown below. This will give you some hints as to where specific 
+blocks of code are. But again, not all the time.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> ASM_CMT(str) <span 
+class="keyw">asm volatile</span>("<span class="str">@ </span>" str)
+
+<span class="cmt">//In code. Outputs "@ Hi, I'm here!" <!--
+-->in the generated asm</span>
+ASM_CMT("<span class="str">Hi, I'm here!</span>");
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">17.4.
+  Demo graphs</h2>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/swi_demo.png" id="img-swi-demo" 
+  alt="Fig 1: math graphs"><br>
+<b>Fig 1</b>: div, sqrt, arctan2, sin and cos graphs, courtesy of BIOS.
+</div>
+
+<p>
+To illustrate the use of BIOS calls I am using Div, Sqrt, ArcTan and 
+ObjAffineSet to create graphs if a hyperbole, square root, sine and 
+cosine. I've scaled them in such a way so that they fit nicely 
+on the 240x160 screen. The definitions are
+</p>
+
+<table>
+<tr><td>division	<td><i>y</i>= 2560/<i>x</i>
+<tr><td>square root	<td><i>y</i>= 160*sqrt(<i>x</i>/240)
+<tr><td>arctan  	<td><i>y</i>= 80 + 64*(2/&pi;)*(arctan(<i>x</i>-120)/16))
+<tr><td>sine		<td><i>y</i>=  1*sy*sin(2&pi;·<i>x</i>/240)	<td>; sy= 80
+<tr><td>cosine		<td><i>y</i>= 80*sx*cos(2&pi;·<i>x</i>/240)	<td>; sx= 1
+</table>
+<p>
+and these functions have been plotted in fig&nbsp;1. If you're wondering
+how I got the sine and cosine values, as there are no calls for those, 
+take a look at eq&nbsp;1 again. The <b>P</b> matrix has them. I've used 
+<i>p</i><sub>a</sub> for the cosine and <i>p</i><sub>c</sub> for the 
+sine. Note that the graphs appear instantly; there is no sense of loading 
+time while the graphs are plotted. An earlier version of the mode 7 demo
+(or PERNs mode 7 demo) used calls to the actual division, sine and cosine
+functions to build up the LUTs. Even with the symmetry rules of 
+trigonometry, <code>sin()</code> and <code>cos()</code> are still noticeably 
+slower than the BIOS equivalent. 
+</p>
+
+<pre class="proglist" id="cd-swi-demo">
+<span class="keyw">#include</span> &lt;stdio.h&gt;
+<span class="keyw">#include</span> &lt;tonc.h&gt;
+
+<span class="cmt">// === swi calls ======================================================
+
+// Their assembly equivalents can be found in tonc_bios.s
+</span>
+<span class="keyw">void</span> VBlankIntrWait()
+{   swi_call(<span class="num">0x05</span>); }
+
+<span class="keyw">int</span> Div(<span class="keyw">int</span> num, <span 
+class="keyw">int</span> denom)
+{   swi_call(<span class="num">0x06</span>); }
+
+u32 Sqrt(u32 num)
+{   swi_call(<span class="num">0x08</span>); }
+
+s16 ArcTan2(s16 x, s16 y)
+{   swi_call(<span class="num">0x0a</span>); }
+
+<span class="keyw">void</span> ObjAffineSet(<span 
+class="keyw">const</span> AFF_SRC *src, <span 
+class="keyw">void</span> *dst, <span 
+class="keyw">int</span> num, <span class="keyw">int</span> offset)
+{   swi_call(<span class="num">0x0f</span>); }
+
+
+<span class="cmt">// === swi demos ======================================================
+
+// NOTE!
+// To be consistent with general mathematical graphs, the 
+// y-axis has to be reversed and the origin moved to the 
+// either the bottom or mid of the screen via
+// &quot;iy = H - y&quot;
+// or
+// &quot;iy = H/2 - y&quot;
+//
+// functions have been scaled to fit the graphs on the 240x160 screen
+
+// y= 2560/x</span>
+<span class="keyw">void</span> div_demo()
+{
+    <span class="keyw">int</span> ix, y;
+
+    <span class="keyw">for</span>(ix=<span class="num">1</span>; ix&lt;SCREEN_WIDTH; ix++)
+    {
+        y= Div(<span class="num">0x0a000000</span>, ix)&gt;&gt;<span class="num">16</span>;
+        <span class="keyw">if</span>(y &lt;= SCREEN_HEIGHT)
+            m3_plot(ix, SCREEN_HEIGHT - y, CLR_RED);
+    }
+    tte_printf(<span class="str">&quot;#{P:168,132;ci:%d}div&quot;</span>, CLR_RED);
+}
+
+<span class="cmt">// y= 160*sqrt(x/240)</span>
+<span class="keyw">void</span> sqrt_demo()
+{
+    <span class="keyw">int</span> ix, y;
+    <span class="keyw">for</span>(ix=<span class="num">0</span>; ix&lt;SCREEN_WIDTH; ix++)
+    {
+        y= Sqrt(Div(<span class="num">320</span>*ix, <span class="num">3</span>));
+        m3_plot(ix, SCREEN_HEIGHT - y, CLR_LIME);
+    }
+    tte_printf(<span class="str">&quot;#{P:160,8;ci:%d}sqrt&quot;</span>, CLR_LIME);
+}
+
+<span class="cmt">// y = 80 + tan((x-120)/16) * (64)*2/pi</span>
+<span class="keyw">void</span> arctan2_demo()
+{
+    <span class="keyw">int</span> ix, y;
+    <span class="keyw">int</span> ww= SCREEN_WIDTH/<span 
+class="num">2</span>, hh= SCREEN_HEIGHT/<span class="num">2</span>;
+    <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix &lt; SCREEN_WIDTH; ix++)
+    {
+        y= ArcTan2(<span class="num">0x10</span>, ix-ww);
+        m3_plot(ix, hh - y/<span class="num">256</span>, CLR_MAG);
+    }
+    tte_printf(<span class="str">&quot;#{P:144,40;ci:%d}atan&quot;</span>, CLR_MAG);
+}
+
+<span class="cmt">// wX= 1, wY= 80
+// cc= 80*sx*cos(2*pi*alpha/240)
+// ss=  1*sy*sin(2*pi*alpha/240)</span>
+<span class="keyw">void</span> aff_demo()
+{
+    <span class="keyw">int</span> ix, ss, cc;
+    ObjAffineSource af_src= {<span class="num">0x0100</span>, <span 
+class="num">0x5000</span>, <span class="num">0</span>};    <span 
+class="cmt">// sx=1, sy=80, alpha=0</span>
+    ObjAffineDest af_dest= {<span class="num">0x0100</span>, <span 
+class="num">0</span>, <span class="num">0</span>, <span 
+class="num">0x0100</span>};  <span class="cmt">// =I (redundant)</span>
+
+    <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;SCREEN_WIDTH; ix++)
+    {
+        ObjAffineSet(&amp;af_src, &amp;af_dest, <span class="num">1</span>, BG_AFF_OFS);
+        cc= <span class="num">80</span>*af_dest.pa&gt;&gt;<span class="num">8</span>; 
+        ss= af_dest.pc&gt;&gt;<span class="num">8</span>;
+        m3_plot(ix, <span class="num">80</span> - cc, CLR_YELLOW);
+        m3_plot(ix, <span class="num">80</span> - ss, CLR_CYAN);
+        <span class="cmt">// 0x010000/0xf0 = 0x0111.111...</span>
+        af_src.alpha += <span class="num">0x0111</span>;
+    }
+
+    tte_printf(<span class="str">&quot;#{P:48,38;ci:%d}cos&quot;</span>, CLR_YELLOW);
+    tte_printf(<span class="str">&quot;#{P:72,20;ci:%d}sin&quot;</span>, CLR_CYAN);
+}
+
+<span class="cmt">// === main ===========================================================
+</span>
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    tte_init_bmp_default(<span class="num">3</span>);
+    tte_init_con();
+
+    div_demo();
+    sqrt_demo();
+    aff_demo();
+
+    arctan2_demo();
+    
+    <span class="keyw">while</span>(<span class="num">1</span>);
+    
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-vsync2">17.5.
+  Vsyncing part II, VBlankIntrWait</h2>
+<p>
+Until now, all demos used the function <code>vid_vsync</code> to 
+synchronize the action to the VBlank (see the 
+<a href="video.htm#sec-vsync1">graphics introduction</a>). What this 
+did was to check <code>REG_VCOUNT</code> and stay in a while loop 
+until the next VBlank came along. While it works, it's really a 
+pretty poor way of doing things for two reasons. First, because of 
+the potential problem when you are in a VBlank already, but that one 
+had been covered. The second reason is more important: while you're 
+in the while loop, you're wasting an awful lot of CPU cycles, all 
+of which slurp battery power.
+</p>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/swi_vsync.png" id="img-swi-vsync" 
+  alt="Fig 2: swi_vsync"><br>
+<b>Fig 2</b>: <tt>swi_vsync</tt> demo.
+</div>
+
+<p>
+There are a number of BIOS calls 
+that can put the CPU into a low power mode, thus sparing the 
+batteries.
+The main BIOS call for this is Halt (#2), but what we're 
+currently interested in is VBlankIntrWait (#5). This will set 
+things up to wait until the next VBlank interrupt. To use it, you 
+have to have interrupts switched on, of course, in particular the 
+VBlank interrupt. As usual, the VBlank isr will have to acknowledge 
+the interrupt by writing to <code>REG_IF</code>. But it <i>also</i> 
+has to write to its BIOS equivalent, <code>REG_IFBIOS</code>. This 
+little bit of information is a little hard to find elsewhere (in part 
+because few tutorials cover BIOS calls); for more info, see <a 
+href="http://nocash.emubase.de/gbatek.htm#bioshaltfunctions">GBATek,
+BIOS Halt Functions</a>. Fortunately for us, the switchboard presented 
+in the <a href="interrupts.htm#sec-switch">interrupts</a> section has 
+this built in.
+</p>
+<p>
+To show you how to set it up, see the <tt>swi_vsync</tt> demo. The
+most important code is given below; a screen shot can be found in
+fig&nbsp;2. What it does is give a rotating metroid sprite with an 
+angular velocity of &pi; rad/s (this corresponds to &Delta;&theta; = 
+0x10000/4/60= 0x0111). The basic steps for interrupt handling should 
+be familiar, except the fact that there's no real VBlank isr because 
+the switchboard already takes care of acknowledging the interrupt.
+After that it's pretty simple: we use 
+<code>ObjAffineSet()</code> to calculate the required affine matrix 
+and <code>VBlankIntrWait</code> puts the CPU on Halt until the next 
+VBlank interrupt.
+</p>
+
+<pre class="proglist" id="cd-swi-vsync">
+<span class="cmt">// inside main, after basic initialisations</span>
+
+AFF_SRC as= { <span class="num">0x0100</span>, <span 
+class="num">0x0100</span>, <span class="num">0</span> };
+OBJ_AFFINE oaff;
+
+<span class="cmt">// enable isr switchboard and VBlank interrupt</span>
+irq_init(NULL);
+irq_add(II_VBLANK, NULL);
+
+<span class="keyw">while</span>(<span class="num">1</span>)
+{
+    VBlankIntrWait();
+
+    <span class="cmt">// Full circle = 10000h
+    // 10000h/4/60= 111h -&gt; 1/4 rev/s = 1 passing corner/s</span>
+    as.alpha += <span class="num">0x0111</span>;
+    ObjAffineSet(&amp;as, &amp;oaff.pa, <span class="num">1</span>, <span 
+class="num">8</span>);
+
+    obj_aff_copy(obj_aff_mem, &amp;oaff, <span class="num">1</span>);
+}
+</pre>
+
+<div class="note">
+<div class="nhgood">Prefer VBlankIntrWait() over vid_vsync()</div>
+<p>
+Waiting for the VBlank via <code>vid_vsync()</code> (or its 
+functional equivalent) is not a good idea: it wastes too much battery 
+power. The recommended procedure is using <code>VBlankIntrWait()</code> 
+to halt the processor, to be woken again on the VBlank interrupt.
+</p>
+</div>
+
+
+<div class="note">
+<div class="nhcare">Acknowledging IntrWait routines</div>
+<p>
+<code>VBlankIntrWait()</code> is only one of the BIOS's 
+<code>IntrWait()</code> routines that can stop the CPU until an 
+interrupt has been raised. However, it doesn't look at 
+<code>REG_IF</code> but at <code>REG_IFBIOS</code> (0300:7FF8) for the 
+acknowledgement of the interrupt. If your game locks up after trying 
+<code>VBlankIntrWait()</code>, this may be why. Note that you may 
+find the address under other names, as there isn't really an official 
+one for it.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-concs">17.6.
+  Final thoughts</h2>
+<p>
+Now that you know how to use them, I should warn you that you shouldn't 
+go overboard with them. It appears that the BIOS routines have been 
+designed for space, not speed, so they aren't the fastest in the world. 
+Not only that, there's an overhead of at least 60 cycles for each one 
+(mind you, normal functions seem to have a 30 cycle overhead). 
+If speed is what you're after then the BIOS calls may not be the best 
+thing; you can probably find faster routines on the web ... somewhere. 
+This doesn't mean that the BIOS routines can't be useful, of course, 
+but if you have alternative methods, use those instead. Just remember 
+that that's an optimisation step, which you shouldn't do prematurely.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Apr 16, 2008</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="interrupts.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="sndsqr.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Interrupts</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Sound intro</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

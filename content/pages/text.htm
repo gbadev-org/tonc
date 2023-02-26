@@ -1,0 +1,2656 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20050519">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Text Systems</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="sndsqr.htm">Sound intro</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="mode7.htm">Mode 7</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+<hr>
+
+<h1 id="ch-">19.
+  Text systems</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>
+  <li><a href="#sec-in">Text system internals</a>
+  <li><a href="#sec-bm">Bitmap text</a>
+  <li><a href="#sec-tile">Tilemap text</a>
+  <li><a href="#sec-obj">Sprite text</a>
+  <li><a href="#sec-demo">Some demos</a>
+  <li><a href="#sec-misc">Other considerations</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+<div class="note">
+<div class="nh">Deprecation notice</div>
+<p>
+This chapter has been superceded by <a href="tte.htm">TTE</a>.
+Information from this chapter can still be useful, but for serious 
+work, TTE should be preferred.
+</p>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">19.1.
+  Introduction</h2>
+
+<pre class="proglist" id="cd-hello">
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+
+<span class="keyw">int</span> main()
+{
+    printf(<span class="str">"Hello World"</span>);
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+Aaah, yes, &ldquo;Hello world&rdquo;: the canonical first example 
+for every C course and system. Except for consoles. While printing 
+text on a PC is the easiest thing in the world, it is actually a 
+little tricky on a console. It's not that there's no 
+<code>printf()</code> function, but rather that there is nowhere for 
+it to write to or even a font to write with (and that's hardly the 
+full list of things to consider). Nope, if you want to be able to 
+display text, you'll have to build the whole thing from scratch 
+yourself. And you do want to be able to write text to the screen, 
+</p>
+<!--
+<p>
+And you do want to be able to write text to the screen. Not just
+because every game needs at least some of it &ndash; if only in the 
+form of score counters and the like &ndash; but it's also very handy 
+in the whole development process. Logging is a tried-and-true method of 
+debugging: sprinkle your code with print statements to see what the code 
+actually does makes debugging so much easier. With emulators you may 
+have memory viewers and the like, but it's not the same. Besides, those
+things are unavailable when you're on hardware anyway, so you 
+<i>need</i> text-writers there. <small>(Ok, ok, there <i>are</i> 
+hardware debuggers, and you can write to xcomms with libgba, but it's 
+still useful, alright?)</small>
+</p>--><br>
+
+<p>
+So, what do we need for a text system? Well, that's actually not a 
+simple question. Obviously, you need a font. Just a bitmap with 
+the various characters here, no need to depress ourselves with 
+vector-based fonts on a GBA. Second, you need a way of taking 
+specific characters and show them on the screen.</p>
+<p>
+But wait a minute, which video mode are we using? There's tilemaps, 
+bitmap modes and sprites to choose from, all of which need to be dealt 
+with in entirely different ways. 
+Are we settling for one of them, or create something usable for all? 
+Also, what is the font we're using, and what are the character sizes? 
+Fixed width or variable width? Variable width and sizes aren't much of
+a problem for the bitmap modes, but it's a bitch to splice them for 
+tiles. 
+Also, just for tiles, do we keep the full font in VRAM? If so, that's 
+a lot of tiles, especially considering you'll hardly be using all of them 
+at the same time. It would be more VRAM efficient to only copy in the 
+glyphs that you're using at that time. This will take some management, 
+though.
+</p>
+<p>
+Just with these items, you'd have enough options for over 20 different 
+text system implementations, all incompatible in very subtle ways. At 
+the very least you'll need <code>putc()</code> and <code>puts()</code> 
+for each. And then perhaps a <code>printf()</code>-like function too; 
+for each text-type, mind you, because glyph placement goes on the inside. 
+Maybe a screen clear too; or how about scrolling functionality. Well, 
+you get the idea.
+</p>
+<p>
+I suppose it's possible to create a big, complicated system, tailoring
+to every need anyone could possibly have. But I'm not going to. 
+Firstly, because it's a bit waste of time: the chances you'll need the 
+ability to run, say, bitmap and tilemap modes concurrently are 
+virtually &ndash;if not actually&ndash; nil. Most of the time, you'll 
+use a single video mode and stick to that. Spending time (and space) 
+for allow every variation imaginable, when hardly any will ever be
+used is probably not worth the trouble. Besides, writing tons of code
+that is almost identical except for some small detail in the heart of
+the routine is just plain bleh.
+</p><br>
+
+<p>
+The point of this chapter is to show how to build and use a set of 
+simple, lightweight text writers. Don't expect the mother of all text 
+systems, I'm mainly interested in getting the essential thing done, 
+namely getting the characters of a string on the screen. This is a 
+core text system, with the following features:
+</p>
+<ul>
+  <li>Bitmap (mode 3, 4, 5), regular tilemap (mode 0, 1) and sprite 
+    support.
+  <li>
+    There will be a <code>xxx_puts()</code> for showing the 
+    string, and a <code>xxx_clrs()</code> to wipe it. Their arguments 
+    will a string, the position to plot to, and some color 
+    information. If you want scrolling and/or format specifiers, I'll 
+    leave that up to you.
+  <li>The font is a fixed width, monochrome font with one 8x8 tile
+    per character. The glyphs can be smaller than 8x8, and I'll even 
+    leave in hooks that allow variable widths, but things just get 
+    horrible if I'd allowed for multi-tile fonts.
+  <li>A variable character map. This is a great feature if you plan 
+    on using only a small set of characters, or non-ascii glyph orders.
+</ul>
+
+<p>
+This arrangement allows for the most basic cases and allows for some
+variations in set-up, but very little on the side. However, those
+extras would probably be very game specific anyway, and might be 
+ill suited for a general text system. If you want extras, it shouldn't
+be too hard to write them yourself.
+</p>
+
+<div class="note">
+<div class="nh">No printf(). O rly?</div>
+<p>
+I said that there is no <code>printf()</code> on the GBA, but this 
+isn't quite true; not anymore, anyway. It is possible to hook your 
+own IO-system to the standard IO-routines, which is done in 
+<tt>libgba</tt>. 
+</p>
+</div>
+
+<div class="note">
+<div class="nh">Semi-obsolete</div>
+<p>
+I have another text system here 
+that is much more powerful (as in, really working on every video mode 
+and has a printf too) than what's described in this page. 
+However, it's rather large, not completely finished and it would take 
+some time to write the description page and alter the text to fit 
+the demos again. A tonclib version that has the relevant changes 
+can be found at 
+<a href="http://www.coranac.com/files/misc/tonclib-1.3b.rar" target="_blank">
+http://www.coranac.com/files/misc/tonclib-1.3b.rar</a>.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-in">19.2.
+  Text system internals</h2>
+
+<h3 id="ssec-in-tb">19.2.1.
+  Variables</h3>
+<p>
+For keeping track of the text-system's state, we'll need a couple of 
+variables. The obvious variables are a font and a character map. 
+Because I like to keep things flexible, I'll also use two pointers 
+for these so that you can use your own font and char-map if you want. 
+You also need to know where it is you want to write to, which is done 
+via a base-destination pointer. As extras, I'll also have character 
+size variables for variable glyph spacing, and even a pointer to a 
+char-width array, for a possible variable-width font.
+</p>
+<p>
+I'll use a 
+struct to store these, partially because it's easier for me to
+maintain, but also because the CPU and compiler can deal with them 
+more efficiently. I'll also leave a few bytes empty for any eventual 
+expansion. Finally, an instance of this struct, and a pointer to it 
+so you can switch between different systems if you ever need to 
+(which is unlikely, but still). Yes, I am wasting a few bytes, but if 
+you max out IWRAM over this, I dare say you have bigger problems to 
+worry about.
+</p>
+
+<pre class="proglist" id="cd-txt-base">
+<span class="cmt">// In text.h</span>
+<span class="keyw">typedef struct</span> tagTXT_BASE
+{
+    u16 *dst0;      <span 
+class="cmt">// writing buffer starting point</span>
+    u32 *font;      <span 
+class="cmt">// pointer to font used</span>
+     u8 *chars;     <span 
+class="cmt">// character map (chars as in letters, not tiles)</span>
+     u8 *cws;       <span 
+class="cmt">// char widths (for VWF)</span>
+     u8  dx,dy;     <span 
+class="cmt">// letter distances</span>
+    u16  flags;     <span 
+class="cmt">// for later</span>
+     u8  extra[<span class="num">12</span>]; <span 
+class="cmt">// ditto</span>
+} TXT_BASE;
+
+<span class="keyw">extern</span> TXT_BASE __txt_base, *gptxt;
+
+<span class="cmt">// In text.c</span>
+TXT_BASE __txt_base;                <span 
+class="cmt">Main TXT_BASE instance</span>
+TXT_BASE *gptxt= &amp;__txt_base;       <span 
+class="cmt"> and a pointer to it</span>
+</pre>
+
+<h3 id="ssec-in-font">19.2.2.
+  The font</h3>
+
+<div class="lblock">
+<div class="cpt" style="width:400px;">
+<img src="../img/tonc_font.png" alt="Default tonc font" id="img-tonc-font"><br>
+<b>Fig 19.1</b>: Default tonc font: mini-ascii, 
+monochrome, 8x8 pixels per glyph.
+</div>
+</div>
+
+<p>
+Fig 19.1 shows the font I'll be using.
+This particular font is monochrome and each of the glyphs fits into an
+8x8 box. The 96 glyphs themselves a subset of the full ASCII that I'll
+refer to as <dfn>mini-ascii</dfn>. It's the lower ascii half that 
+contains the majority of the standard ASCII table, but leaves out 
+ASCII 0-31 because they're escape codes and not really part of the
+printable characters anyway.
+</p>
+<p>
+It is possible to use a different font with another glyph order, 
+but the functions I'll present below rely on one tile per glyph, 
+<i>and</i> in tile layout. I need this arrangement because I intend 
+to use it for all modes, and non single-tile formats would be hell 
+in tile modes.
+</p>
+<p>
+Another restriction is that the font must be bitpacked to 1bpp. I 
+have a couple of reasons for this. First, there is the size 
+consideration. A 96 glyph, 16bit font (for modes 3/5) would take up
+12kB. Pack that to 1bpp and it's less that one kB! Yes, you're restricted
+to monochrome, but for a font, that's really not much of a problem.
+Often fonts are monochrome anyway and using 16 bits where you only 
+need one seems a bit of a waste. Secondly, how would you get a 16bpp
+font to work for 4bpp or 8bpp tiles? Going from a low bpp to a higher 
+one is just a lot easier. Of course, if you don't like this 
+arrangement, feel free to write your own functions.
+</p><br>
+
+<p>
+As for the font data itself, here is the whole thing.
+</p>
+
+<div style="font-size:90%">
+<pre class="proglist" id="cd-toncfont">
+<span class="keyw">const unsigned int</span> toncfontTiles[<span 
+class="num">192</span>]=
+{
+    <span 
+class="num">0x00000000</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x18181818</span>, <span class="num">0x00180018</span>, <span 
+class="num">0x00003636</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x367F3636</span>, <span class="num">0x0036367F</span>, 
+    <span 
+class="num">0x3C067C18</span>, <span class="num">0x00183E60</span>, <span 
+class="num">0x1B356600</span>, <span class="num">0x0033566C</span>, <span 
+class="num">0x6E16361C</span>, <span class="num">0x00DE733B</span>, <span 
+class="num">0x000C1818</span>, <span class="num">0x00000000</span>, 
+    <span 
+class="num">0x0C0C1830</span>, <span class="num">0x0030180C</span>, <span 
+class="num">0x3030180C</span>, <span class="num">0x000C1830</span>, <span 
+class="num">0xFF3C6600</span>, <span class="num">0x0000663C</span>, <span 
+class="num">0x7E181800</span>, <span class="num">0x00001818</span>, 
+    <span 
+class="num">0x00000000</span>, <span class="num">0x0C181800</span>, <span 
+class="num">0x7E000000</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x00000000</span>, <span class="num">0x00181800</span>, <span 
+class="num">0x183060C0</span>, <span class="num">0x0003060C</span>, 
+    <span 
+class="num">0x7E76663C</span>, <span class="num">0x003C666E</span>, <span 
+class="num">0x181E1C18</span>, <span class="num">0x00181818</span>, <span 
+class="num">0x3060663C</span>, <span class="num">0x007E0C18</span>, <span 
+class="num">0x3860663C</span>, <span class="num">0x003C6660</span>, 
+    <span 
+class="num">0x33363C38</span>, <span class="num">0x0030307F</span>, <span 
+class="num">0x603E067E</span>, <span class="num">0x003C6660</span>, <span 
+class="num">0x3E060C38</span>, <span class="num">0x003C6666</span>, <span 
+class="num">0x3060607E</span>, <span class="num">0x00181818</span>,
+    <span 
+class="num">0x3C66663C</span>, <span class="num">0x003C6666</span>, <span 
+class="num">0x7C66663C</span>, <span class="num">0x001C3060</span>, <span 
+class="num">0x00181800</span>, <span class="num">0x00181800</span>, <span 
+class="num">0x00181800</span>, <span class="num">0x0C181800</span>, 
+    <span 
+class="num">0x06186000</span>, <span class="num">0x00006018</span>, <span 
+class="num">0x007E0000</span>, <span class="num">0x0000007E</span>, <span 
+class="num">0x60180600</span>, <span class="num">0x00000618</span>, <span 
+class="num">0x3060663C</span>, <span class="num">0x00180018</span>, 
+
+    <span 
+class="num">0x5A5A663C</span>, <span class="num">0x003C067A</span>, <span 
+class="num">0x7E66663C</span>, <span class="num">0x00666666</span>, <span
+class="num">0x3E66663E</span>, <span class="num">0x003E6666</span>, <span 
+class="num">0x06060C78</span>, <span class="num">0x00780C06</span>, 
+    <span 
+class="num">0x6666361E</span>, <span class="num">0x001E3666</span>, <span 
+class="rem">0x1E06067E</span>, <span class="rem">0x007E0606</span>, <span
+class="num">0x1E06067E</span>, <span class="num">0x00060606</span>, <span 
+class="num">0x7606663C</span>, <span class="num">0x007C6666</span>, 
+    <span 
+class="num">0x7E666666</span>, <span class="num">0x00666666</span>, <span 
+class="num">0x1818183C</span>, <span class="num">0x003C1818</span>, <span 
+class="num">0x60606060</span>, <span class="num">0x003C6660</span>, <span 
+class="num">0x0F1B3363</span>, <span class="num">0x0063331B</span>, 
+    <span 
+class="num">0x06060606</span>, <span class="num">0x007E0606</span>, <span 
+class="num">0x6B7F7763</span>, <span class="num">0x00636363</span>, <span 
+class="num">0x7B6F6763</span>, <span class="num">0x00636373</span>, <span 
+class="num">0x6666663C</span>, <span class="num">0x003C6666</span>, 
+    <span 
+class="num">0x3E66663E</span>, <span class="num">0x00060606</span>, <span 
+class="num">0x3333331E</span>, <span class="num">0x007E3B33</span>, <span
+class="num">0x3E66663E</span>, <span class="num">0x00666636</span>, <span 
+class="num">0x3C0E663C</span>, <span class="num">0x003C6670</span>, 
+    <span 
+class="num">0x1818187E</span>, <span class="num">0x00181818</span>, <span 
+class="num">0x66666666</span>, <span class="num">0x003C6666</span>, <span 
+class="num">0x66666666</span>, <span class="num">0x00183C3C</span>, <span 
+class="num">0x6B636363</span>, <span class="num">0x0063777F</span>, 
+    <span 
+class="num">0x183C66C3</span>, <span class="num">0x00C3663C</span>, <span 
+class="num">0x183C66C3</span>, <span class="num">0x00181818</span>, <span 
+class="num">0x0C18307F</span>, <span class="num">0x007F0306</span>, <span 
+class="num">0x0C0C0C3C</span>, <span class="num">0x003C0C0C</span>, 
+    <span 
+class="num">0x180C0603</span>, <span class="num">0x00C06030</span>, <span 
+class="num">0x3030303C</span>, <span class="num">0x003C3030</span>, <span 
+class="num">0x00663C18</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x00000000</span>, <span class="num">0x003F0000</span>, 
+
+    <span 
+class="num">0x00301818</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x603C0000</span>, <span class="num">0x007C667C</span>, <span 
+class="num">0x663E0606</span>, <span class="num">0x003E6666</span>, <span 
+class="num">0x063C0000</span>, <span class="num">0x003C0606</span>, 
+    <span 
+class="num">0x667C6060</span>, <span class="num">0x007C6666</span>, <span 
+class="num">0x663C0000</span>, <span class="num">0x003C067E</span>, <span 
+class="num">0x0C3E0C38</span>, <span class="num">0x000C0C0C</span>, <span 
+class="num">0x667C0000</span>, <span class="num">0x3C607C66</span>, 
+    <span 
+class="num">0x663E0606</span>, <span class="num">0x00666666</span>, <span 
+class="num">0x18180018</span>, <span class="num">0x00301818</span>, <span 
+class="num">0x30300030</span>, <span class="num">0x1E303030</span>, <span 
+class="num">0x36660606</span>, <span class="num">0x0066361E</span>,
+    <span 
+class="num">0x18181818</span>, <span class="num">0x00301818</span>, <span 
+class="num">0x7F370000</span>, <span class="num">0x0063636B</span>, <span 
+class="num">0x663E0000</span>, <span class="num">0x00666666</span>, <span 
+class="num">0x663C0000</span>, <span class="num">0x003C6666</span>, 
+    <span 
+class="num">0x663E0000</span>, <span class="num">0x06063E66</span>, <span 
+class="num">0x667C0000</span>, <span class="num">0x60607C66</span>, <span 
+class="num">0x663E0000</span>, <span class="num">0x00060606</span>, <span 
+class="num">0x063C0000</span>, <span class="num">0x003E603C</span>, 
+    <span
+class="num">0x0C3E0C0C</span>, <span class="num">0x00380C0C</span>, <span 
+class="num">0x66660000</span>, <span class="num">0x007C6666</span>, <span 
+class="num">0x66660000</span>, <span class="num">0x00183C66</span>, <span 
+class="num">0x63630000</span>, <span class="num">0x00367F6B</span>, 
+    <span 
+class="num">0x36630000</span>, <span class="num">0x0063361C</span>, <span 
+class="num">0x66660000</span>, <span class="num">0x0C183C66</span>, <span 
+class="num">0x307E0000</span>, <span class="num">0x007E0C18</span>, <span 
+class="num">0x0C181830</span>, <span class="num">0x00301818</span>, 
+    <span 
+class="num">0x18181818</span>, <span class="num">0x00181818</span>, <span 
+class="num">0x3018180C</span>, <span class="num">0x000C1818</span>, <span 
+class="num">0x003B6E00</span>, <span class="num">0x00000000</span>, <span 
+class="num">0x00000000</span>, <span class="num">0x00000000</span>, 
+};
+</pre>
+</div>
+
+<p>
+Yes, this is the <i>entire</i> font, fitting nicely on one single
+page. This is what bitpacking can do for you but, like any
+compression method, it may be a little tricky seeing that it is indeed
+the font given earlier, so here's a little explanation of what you 
+got in front of you.
+</p>
+
+<h4>Bitpacking</h4>
+
+<div class="cpt_fr" style="width:200px;">
+<table id="tbl-endian"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 19.1</b>: Big endian vs little 
+  endian interpretation of byte-sequence 01h, 02h, 03h, 04h
+</caption>
+<tbody align="center">
+<tr>
+  <th>big u32     <td colspan=4> 0x01020304
+<tr>
+  <th>big u16     <td colspan=2> 0x0102 <td colspan=2> 0x0304
+<tr>
+  <th>u8          <th> 0x01 <th> 0x02   <th> 0x03 <th> 0x04
+<tr>
+  <th>little u16  <td colspan=2> 0x0201 <td colspan=2> 0x0403
+<tr>
+  <th>little u32  <td colspan=4> 0x04030201
+</tbody>
+</table>
+</div>
+
+<p>
+Bitpacking isn't hard to understand. Data is little more a big field
+of bits. In bitpacking, you simply drop bits at regular intervals
+and tie the rest back together. Our font is monochrome, meaning 
+we only have one bit of information. Now, even in the smallest C
+datatype, bytes, this would leave 7 bits unused if you were to use one 
+byte per pixel. However, you could also cram eight pixels into one byte,
+and thus save a factor 8 in space. For the record, that's a compression 
+level of 88%, pretty good I'd say. Of course, if you read all the other 
+pages already, you'd have already recognized instances of bitpacking: 
+4bpp tiles are bitpacked with 2 pixels/byte. So this stuff shouldn't 
+be completely new.
+</p>
+
+<p>
+Bitpacking can save a lot of room, and in principle, it's easy to do, 
+as it's just a matter of masking and shifting. There is one major 
+catch, however: <dfn>endianness</dfn>. You already seen one 
+incarnation of this in other data-arrays: the word 
+<code>0x01234567</code> would actually be stored as the byte-sequence 
+<code>0x67</code>, <code>0x45</code>, <code>0x23</code>, 
+<code>0x01</code> on ARM (and intel) systems. This is called 
+<dfn>little-endian</dfn>, because the little end (the lower bytes 
+of a multi-byte type) 
+of the word are stored in the lower addresses. There is also 
+<dfn>big-endian</dfn>, which stores the most significant bytes
+first. You can see the differences in table 
+19.1. Some hex editors or memory viewers 
+(in VBA for example) allow you to switch viewing data as bytes, 
+halfwords or words, so you can see the differences interactively 
+there. Please remember that the data itself does <i>not</i> change 
+because of this, you just <i>look</i> at it in a different way.
+</p>
+<p>
+For bitpacking, you also have to deal with endianness at the bit
+level. The font data is packed in a consistent bit-little and 
+byte-little format for three reasons. First, this is how GBA bitpacked
+stuff works anyway, so you can use the BIOS BitUnpack routine for it.
+Second, it is a more natural form in terms of counting: lower bits
+come first. Third, because you can shift down all the time and discard
+covered bits that way, masking is easier and faster. Now, big-endian 
+would be more natural visually due to the fact we write numbers
+that way too, so bitmaps are often bit-little as well. Windows BMP 
+files, for example, these have their leftmost pixels in
+the most significant bits, making them bit-big. However, Windows runs 
+on Intel architecture, which is actually <i>byte</i> little-endian, 
+for maximum confusion. Sigh. Oh well.
+</p>
+<p>
+In case it's still a bit hazy, fig&nbsp;19.2 
+shows how the &lsquo;F&rsquo; is packed from 8x8 pixels into 
+2 words. All 64 pixels are numbered 0 to 63. These correspond to the
+bit-numbers. Each eight successive bits form a byte: 0-7 make up
+byte 0, 8-15 form byte 1, etc. Note how the bits seem to mirror
+horizontally, because we generally write numbers big-endian. So try to 
+forget about that and think of bits in memory to walk through from 0 to
+63. You can also view the bits as words, bits 0-31 for word 0 and 
+32-63 for word 1.
+</p>
+
+<!-- frame -->
+<div class="cblock">
+<div class="cpt" style="width:512px;">
+
+<table id="img-fontpack"
+  border=0 cellpadding=4 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <th>pixels
+    <td valign="middle" rowspan=2><span style="font-size:200%;">&rarr;</span>
+    <th>bits
+    <td valign="middle" rowspan=2><span style="font-size:200%;">&rarr;</span>
+    <th>bytes
+    <td valign="middle" rowspan=2><span style="font-size:200%;">&rarr;</span>
+    <th>words
+  <tr>
+    <td>
+    <img src="../img/font_pack.png" alt="pixels" width=133>
+    <td> <!-- bits -->
+    <table class="reg" cellpadding=1 cellspacing=0>
+      <tr>
+        <td class="bdrLL">&nbsp;
+        <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
+        <td class="bdrRR">&nbsp;
+      <tr>
+        <td class="bdrLL" rowspan=8>&nbsp;
+        <td> 0 <th> 1 <th> 1 <th> 1 <th> 1 <th> 1 <th> 1 <td> 0
+        <td class="bdrRR" rowspan=8>&nbsp;
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+      <tr>
+        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0
+    </table>
+    <td> <!-- bytes -->
+    <table cellpadding=1 cellspacing=0>
+      <tr>
+        <th colspan=3>&nbsp;
+      <tr>
+        <td class="bdrLL" rowspan=4>&nbsp;
+          <td> 0x7E
+        <td class="bdrRR" rowspan=4>&nbsp;
+      <tr><td> 0x06
+      <tr><td> 0x06
+      <tr><td> 0x1E
+      <tr>
+        <td class="bdrLL" rowspan=4>&nbsp;
+          <td> 0x06
+        <td class="bdrRR" rowspan=4>&nbsp;
+      <tr><td> 0x06
+      <tr><td> 0x06
+      <tr><td> 0x00
+    </table>
+    <td> <!-- words -->
+    <table cellpadding=1 cellspacing=0>
+      <tr>
+        <th colspan=3>&nbsp;
+      <tr>
+        <td class="bdrLL">&nbsp;
+          <td> 0x1E06067E
+        <td class="bdrRR">&nbsp;
+      <tr>
+        <td class="bdrLL">&nbsp;
+          <td> 0x00060606
+        <td class="bdrRR">&nbsp;
+    </table>
+   </tbody>
+</table>
+  <b>Fig 19.2</b>: 
+  &lsquo;F&rsquo;, from 8x8 tile to 1bpp bit-little, byte-little 
+  words.
+</div>
+</div>
+
+<h3 id="ssec-in-charmap">19.2.3.
+  Character map</h3>
+<p>
+Having the mini-ascii font is nice and all but as strings are 
+full-ascii, this may present a problem. Well, not really, but there 
+are several ways of going about the conversion.
+</p>
+<p>
+First, you can create a giant switch-block that converts, say, 
+&lsquo;A&rsquo; (ascii 65) into glyph-index 33. And do that for all
+96 glyphs. It should be obvious that this is a dreadful way of
+going about things. Well it <i>should</i>, but apparently it's not 
+because code like that is out there; I only mention it here so you can 
+recognize it for what it is and stay to far, far away from it. Simply 
+put, if you have a switch-block where the only difference between the 
+cases is returning a different offset &ndash;and a <i>fixed</i> offset
+at that&ndash; you're doing something very, very wrong.
+</p>
+<p>
+A second method which is an enormous improvement in every way is 
+to simply subtract 32. That's how mini-ascii was defined after all. 
+Quick, short, and to the point.
+</p>
+<p>
+However, I kinda like the third option: look-up tables. We've 
+already seen how useful LUTs can be for mathematics, but you can use 
+them for a lot more than that. In this case, the lut is
+a <dfn>charcter map</dfn>, containing the glyph-index for each ascii
+character. This has almost all the benefits of the simple subtract
+(a look-up may be a few cycles slower), but is much more flexible. 
+For example, you can have non-ascii charmaps or alias the cases,
+things like that. Another &lsquo;interesting&rsquo; thing is that 
+you don't really need the font to be text as such, it can be any 
+kind of mapped image data; with a lut you could easily use the 
+text system for drawing borders, as long as you have a border 
+&lsquo;font&rsquo; for it. The lut I'm using is 256 bytes long. This 
+may not be enough for Unicode (sorry Eastern dudes), but it's enough 
+to suit my purposes.
+</p>
+
+<h4>General design</h4>
+<p>
+The first thing to do code-wise is to initialize the members of 
+the text-base. That means attach the font, set the glyph sizes, 
+and initialize the lut. This can be done with 
+<code>txt_init_std()</code>.
+</p>
+
+<pre class="proglist">
+
+u8 txt_lut[<span class="num">256</span>];
+
+<span class="cmt">// Basc initializer for text state</span>
+<span class="keyw">void</span> txt_init_std()
+{
+    gptxt-&gt;dx= gptxt-&gt;dy= <span class="num">8</span>;
+
+    gptxt-&gt;dst0= vid_mem;
+    gptxt-&gt;font= (u32*)toncfontTiles;
+    gptxt-&gt;chars= txt_lut;
+    gptxt-&gt;cws= NULL;
+
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">96</span>; ii++)
+        gptxt-&gt;chars[ii+<span class="num">32</span>]= ii;
+}
+</pre>
+
+<p>
+Depending on the type of text, you may need more specialized 
+initializers, which we'll get to when the time comes. As for writing 
+a string, the basic structure can bee seen below. It's actually
+quite simple and very general, but unfortunately the fact that 
+<code>xxx_putc()</code> is in the inner loop means that you have to 
+have virtually identical wrappers around each char-plotter for 
+each text method. I also have functions called <code>xxx_clrs()</code>
+that clear the string from the screen (they don't wipe the whole
+screen). They are almost identical to their <code>puts()</code>
+siblings in form and also rather simple, so I won't elaborate on
+them here.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Pseudo code for xxx_puts</span>
+<span class="keyw">void</span> xxx_puts(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, [[more]])
+{
+    [[find real writing start]]
+    <span class="keyw">while</span>(c=*str++)     <span 
+class="cmt">// iterate through string</span>
+    {
+        <span class="keyw">switch</span>(c)
+        {
+        <span class="keyw">case</span> [[special chars ('\n' etc)]]:
+            [[handle special]]
+        <span class="keyw">case</span> [[normal chars]]:
+            [[xxx_putc(destination pointer, lut[c])]]
+            [[advance destination]]
+        }
+    }
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-bm">19.3.
+  Bitmap text</h2>
+<p>
+Bitmap text concerns modes 3, 4 and 5. If you can do mode 3, you 
+pretty much have mode 5 as well, as the two differ only by the 
+pitch and, perhaps, the starting point. Mode 4 is different, not 
+only because it's 8bpp, but also because this means we have to do 
+2 pixels at once.
+</p>
+
+<h3 id="ssec-bm-intl">19.3.1.
+  Internal routines</h3>
+<p>
+I tend to do bitmap related functions in two parts: there are 
+internal 16bit and 8bit functions that take an address and pitch as 
+their arguments, and then inline interface functions with 
+coordinates that call these. The internal 16bit writer is given 
+in below, with an explanation of the main parts below that.
+</p>
+<pre class="proglist" id="cd-bm16-puts">
+<span class="keyw">void</span> bm16_puts(u16 *dst, <span 
+class="keyw">const char</span> *str, COLOR clr, <span 
+class="keyw">int</span> pitch)
+{
+    <span class="keyw">int</span> c, x=<span class="num">0</span>;
+
+    <span class="keyw">while</span>((c=*str++) != <span 
+class="num">0</span>)      <span 
+class="cmt">// (1) for each char in string</span>
+    {
+        <span class="cmt">// (2) real char/control char switch</span>
+        <span class="keyw">if</span>(c == <span 
+class="str">'\n'</span>)       <span class="cmt">// line break</span>
+        {    
+            dst += pitch*gptxt-&gt;dy;    
+            x=<span class="num">0</span>;    
+        }
+        <span class="keyw">else </span>               <span 
+class="cmt">// normal character</span>
+        {
+            <span class="keyw">int</span> ix, iy;
+            u32 row;
+            <span 
+class="cmt">// (3) point to glyph; each row is one byte</span>
+            u8 *pch= (u8*)&amp;gptxt-&gt;font[<span 
+class="num">2</span>*gptxt-&gt;chars[c]];
+            <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;<span class="num">8</span>; iy++)
+            {
+                row= pch[iy];
+                <span 
+class="cmt">// (4) plot pixels until row-byte is empty</span>
+                <span class="keyw">for</span>(ix=x; row&gt;<span 
+class="num">0</span>; row &gt;&gt;= <span class="num">1</span>, ix++)
+                    <span class="keyw">if</span>(row&amp;<span 
+                    class="num">1</span>)
+                        dst[iy*pitch+ix]= clr;
+            }
+            x += gptxt-&gt;dx;
+        }
+    }
+}
+</pre>
+
+<ol>
+  <li>
+    Traditional way to loop through all characters in a string. 
+    <code>c</code> will be the character we have to deal with, 
+    unless it's the delimiter (<code>'\0'</code>), then we'll stop.
+  <li>
+    Normal char/control char switch. Control characters like 
+    <code>'\n'</code> and <code>'\t'</code> should be taken care of 
+    separately. I'm only checking for the newline right now, but 
+    others could easily be added.
+  <li>
+    This is where it gets interesting. What this line does is first 
+    use the lut to look up the glyph index in the font, look up the 
+    actual glyph in the font (multiply by 2 because there are 2
+    words/glyph), and then set-up a byte-pointer <code>pch</code> 
+    to point to the glyph.<br>
+    A couple of things come together here. First, because all glyphs 
+    are exactly 8 bytes apart, finding the glyph data is very easy.
+    If you create your own text system with your own fonts, I'd
+    advise using constant offsets, even if it wastes pixels like you
+    would for small characters like &lsquo;I&rsquo;. Second, because
+    of the 1bpp tiled format, each row is exactly one byte long, and 
+    all the glyphs bits are in consecutive bytes, so you don't have to 
+    jump around for each new row. This is a good thing.
+  <li>
+    The <code>ix</code> loop is even more interesting. First, we read 
+    the actual row of pixels into the (word) variable <code>row</code>. 
+    To test whether we need to write a pixel, we simply check for a 
+    given bit. However, because the packing is <i>little</i> endian, 
+    this allows for two shortcuts.<br>
+    The first one is that looping through the bits goes from low to 
+    high bits, meaning that we can simply shift-right on each 
+    iteration and test bit 0. The corollary to this is that the bits 
+    we've already done are thrown away, and <i>this</i> means that 
+    when <code>row</code> is 0, there will be no more pixels, and 
+    we're done for that row. As this short-circuit happens inside
+    the inner of a <i>triple</i> loop, the speed-up can be 
+    substantial.
+</ol>
+
+<p>
+This function only does the bare essentials to get a string on screen. 
+It plots the non-zero pixels only (transparent characters), there
+is no wrapping at the side and no scrolling. The only non-trivial 
+feature is that it can do line-breaks. When those happen, the cursor 
+returns to the original x-position on screen.
+</p><br>
+
+<p>
+The 8bit function is almost identical to this one, &lsquo;almost&rsquo;
+because of the no-byte-write rule for VRAM. The obvious ones are that
+the pitch and character spacing need to be halved. I'm also making it
+<b>requirement</b> that the start of each character needs to be on an
+even pixel boundary. By doing so, you can have an almost identical
+inner loop as before; it just does two pixels in it instead of one.
+Yes, it's a hack; no, I don't care.
+</p>
+
+<pre class="proglist" id="cd-bm8-puts">
+<span class="keyw">void</span> bm8_puts(u16 *dst, <span 
+class="keyw">const char</span> *str, u8 clrid)
+{
+    <span class="keyw">int</span> c, x=<span class="num">0</span>, <!--
+-->dx= gptxt-&gt;dx &gt;&gt; <span class="num">1</span>;
+
+    <span class="keyw">while</span>((c=*str++) != <span 
+class="num">0</span>)
+    {
+        <span class="cmt">// &lt;snip char-switch and iy loop&gt;</span>
+                <span class="keyw">for</span>(ix=x; row&gt;<span 
+class="num">0</span>; row &gt;&gt;= <span class="num">2</span>, ix++)
+                {
+                    pxs= dst[iy*<span class="num">120</span>+ix];
+                    <span class="keyw">if</span>(row&amp;<span 
+class="num">1</span>)
+                        pxs= (pxs&amp;<span 
+class="num">0xFF00</span>) | clrid;
+                    <span class="keyw">if</span>(row&amp;<span 
+class="num">2</span>)
+                        pxs= (pxs&amp;<span 
+class="num">0x00FF</span>) | (clrid&lt;&lt;<span class="num">8</span>);
+
+                    dst[iy*<span class="num">120</span>+ix]= pxs;
+                }
+        <span class="cmt">// &lt;snip&gt;</span>
+    }
+}
+</pre>
+
+<h3 id="ssec-bm-iface">19.3.2.
+  Interface functions</h3>
+<p>
+The interface functions are straightforward. All they have 
+to do is set-up the destination start for the internal routines, 
+and for the 16bit versions, provide a pitch. Mode 3 uses 
+<code>vid_mem</code> as its base, and mode 4 and 5 use 
+<code>vid_page</code> to make sure it works with page flipping. 
+<code>m4_puts()</code> also ensures that the characters start at even 
+pixels, and please remember that this routine uses a color-index, 
+rather than a true color.
+</p>
+
+<pre class="proglist" id="cd-mx-puts">
+<span class="cmt">// Bitmap text interface. Goes in text.h</span>
+INLINE <span class="keyw">void</span> m3_puts(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, COLOR clr)
+{    bm16_puts(&amp;vid_mem[y*<span 
+class="num">240</span>+x], str, clr, <span class="num">240</span>);     }
+
+INLINE <span class="keyw">void</span> m4_puts(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, u8 clrid)
+{    bm8_puts(&amp;vid_page[(y*<span 
+class="num">240</span>+x)&gt;&gt;<span
+class="num">1</span>], str, clrid);   }
+
+INLINE <span class="keyw">void</span> m5_puts(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, COLOR clr)
+{    bm16_puts(&amp;vid_page[y*<span 
+class="num">160</span>+x], str, clr, <span class="num">160</span>);    }
+</pre>
+
+<h3 id="ssec-bm-clrs">19.3.3.
+  Clearing text</h3>
+<p>
+Doing a text clear is almost the same as writing out a string. The only 
+functional difference is that you're always putting a space (or rather, a 
+solid filled rectangle) instead of the original characters. You still 
+need the full string you tell you how long the line goes on, and how 
+many lines there are.
+</p>
+<p>
+With that in mind, the <code>bm16_clrs()</code> function below 
+shouldn't be that hard to understand. The whole point of it is to 
+read the string to find out the length in pixels of each line in the 
+string (<code>nx*gptxt-&gt;dx</code>), then fill the rectangle spanned 
+by that length and the height of the characters 
+(<code>gptxt-&gt;dy</code>). There's some bookkeeping to make sure it 
+all goes according to plan, but in the end that's all it does. The same 
+goes for the clear routines of the other text-types, so I'm not going 
+to show those.
+</p><br>
+
+<pre class="proglist" id="cd-bm16-clrs">
+<span class="keyw">void</span> bm16_clrs(u16 *dst, <span 
+class="keyw">const</span> <span 
+class="keyw">char</span> *str, COLOR clr, <span 
+class="keyw">int</span> pitch)
+{
+    <span class="keyw">int</span> c, nx=<span class="num">0</span>, ny;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        c= *str++;
+        <span class="keyw">if</span>(c==<span 
+class="str">'\n'</span> || c==<span class="str">'\0'</span>)
+        {
+            <span class="keyw">if</span>(nx&gt;<span class="num">0</span>)
+            {
+                nx *= gptxt-&gt;dx;
+                ny= gptxt-&gt;dy;
+                <span class="keyw">while</span>(ny--)
+                {
+                    memset16(dst, clr, nx);
+                    dst += pitch;
+                }
+                nx=<span class="num">0</span>;
+            }
+            <span class="keyw">else</span>
+                dst += gptxt-&gt;dy*pitch;
+            <span class="keyw">if</span>(c==<span class="str">'\0'</span>)
+                <span class="keyw">return</span>;
+        }
+        <span class="keyw">else</span>
+            nx++;
+    }
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-tile">19.4.
+  Tilemap text</h2>
+<p>
+In some ways, text for tile-modes is actually easier than for 
+bitmaps, as you can just stuff the font into a charblock and then you 
+don't need any reference to the font itself anymore. That is, unless 
+you want to have a variable width font, in that case you'll be in 
+bit-shifting hell. But I'm sticking to a fixed width, single tile 
+font, which keeps things very simple indeed. 
+</p>
+
+<h3 id="ssec-tile-init">19.4.1.
+  Tile initialisation</h3>
+<p>
+The first order of business is to be able to unpack the font to either
+4 or 8 bit. The easiest way of doing this is to just setup a call to
+<code>BitUnpack()</code> and be done with it. However, VBA's
+implementation of it isn't (or wasn't, they may have fixed it by now)
+quite correct for what I had planned for it, so I'm going  to roll my
+own. Arguments <code>dstv</code> and <code>srcv</code> are the source
+and destination addresses, respectively; <code>len</code> is the
+number of source bytes and <code>bpp</code> is the destination
+bitdepth. <code>base</code> serves two purposes. Primarily, it is a
+number to be added to all the pixels if bit 31 is set, or to all 
+except zero values if it is clear. This allows a greater range of 
+outcomes than just the 0 and 1 that a source bitdepth of one would 
+supply; and an other cute trick that I'll get to later.
+</p>
+
+<pre class="proglist" id="cd-txt-bup">
+<span class="cmt">// Note, the BIOS BitUnpack does exactly the same <!--
+-->thing!</span>
+<span class="keyw">void</span> txt_bup_1toX(<span 
+class="keyw">void</span> *dstv, const <span 
+class="keyw">void</span> *srcv, u32 len, <span 
+class="keyw">int</span> bpp, u32 base)
+{
+    u32 *src= (u32*)srcv;
+    u32 *dst= (u32*)dstv;
+
+    len= (len*bpp+<span class="num">3</span>)&gt;&gt;<span 
+class="num">2</span>;    <span class="cmt">// # dst words</span>
+    u32 bBase0= base&amp;(<span class="num">1</span>&lt;&lt;<span 
+class="num">31</span>);    <span class="cmt">// add to 0 too?</span>
+    base &amp;= ~(<span class="num">1</span>&lt;&lt;<span 
+class="num">31</span>);
+
+    u32 swd, ssh=<span 
+class="num">32</span>;    <span class="cmt">// src data and shift</span>
+    u32 dwd, dsh;       <span class="cmt">// dst data and shift</span>
+    <span class="keyw">while</span>(len--)
+    {
+        <span class="keyw">if</span>(ssh &gt;= <span
+class="num">32</span>)
+        {
+            swd= *src++;
+            ssh= <span class="num">0</span>;
+        }
+        dwd=<span class="num">0</span>;
+        <span class="keyw">for</span>(dsh=<span 
+class="num">0</span>; dsh&lt;<span class="num">32</span>; dsh += bpp)
+        {
+            u32 wd= swd&amp;<span class="num">1</span>;
+            <span class="keyw">if</span>(wd || bBase0)
+                wd += base;
+            dwd |= wd&lt;&lt;dsh;
+            swd &gt;&gt;= <span class="num">1</span>;
+            ssh++;
+        }
+        *dst++= dwd;
+    }
+}
+</pre>
+
+<p>
+The actual map-text initialization is done by 
+<code>txt_init_se()</code>. Its first two arguments are exactly 
+what you'd expect: the background that the system should use 
+for text and the control-flags that should go there (charblock, 
+screenblock, bitdepth, all that jazz). The third argument,
+<code>se0</code>, indicates the &lsquo;base&rsquo; for palette and 
+tile indexing, similar to the base for unpacking. The format is 
+just like normal screen entries: <code>se0</code>{0-9} indicate 
+the tile offset, and <code>se0</code>{C-F} are for the 16 color 
+palette bank. <code>clrs</code> contains the color for the text, 
+which will go into the palette indicated by the sub-palette and 
+the fifth argument, <code>base</code>, the base for bit-unpacking.
+</p>
+<p>
+For now, ignore the <i>second</i> color in <code>clrs</code>, and 
+the extra palette write for 4 bpp. In all likelihood, you don't 
+want to know. I'm going to tell you about them 
+<a href="#ssec-demo-se1">later</a> anyway, though.
+</p>
+
+<pre class="proglist" id="cd-txt-init-se">
+<span class="keyw">void</span> txt_init_se(<span 
+class="keyw">int</span> bgnr, u16 bgcnt, SB_ENTRY se0, u32 clrs, u32 base)
+{
+    bg_cnt_mem[bgnr]= bgcnt;
+    gptxt-&gt;dst0= se_mem[BF_GET(bgcnt, BG_SBB)];    
+
+    <span class="cmt">// prep palette</span>
+    <span class="keyw">int</span> bpp= (bgcnt&amp;BG_8BPP) ? <span 
+class="num">8</span> : <span class="num">4</span>;
+    <span class="keyw">if</span>(bpp == <span class="num">4</span>)
+    {
+        COLOR *palbank= &amp;pal_bg_mem[<!--
+-->BF_GET(se0, SE_PALBANK)&lt;&lt;<span class="num">4</span>];
+        palbank[(base+<span class="num">1</span>)&amp;<span 
+class="num">15</span>]= clrs&amp;<span class="num">0xFFFF</span>;
+        palbank[(base&gt;&gt;<span class="num">4</span>)&amp;<span 
+class="num">15</span>]= clrs&gt;&gt;<span class="num">16</span>;
+    }
+    <span class="keyw">else</span>
+        pal_bg_mem[(base+<span class="num">1</span>)&amp;<span 
+class="num">255</span>]= clrs&amp;<span class="num">0xFFFF</span>;
+
+    <span class="cmt">// account for tile-size difference</span>
+    se0 &amp;= SE_ID_MASK;
+    if(bpp == <span class="num">8</span>)
+        se0 *= <span class="num">2</span>;
+
+    <span class="cmt">// Bitunpack the tiles</span>
+    txt_bup_1toX(&amp;tile_mem[BF_GET(bgcnt, BG_CBB)][se0],
+        toncfontTiles, toncfontTilesLen, bpp, base);
+}
+</pre>
+
+<p>
+If you don't want to deal with all kinds of offsets, you can just 
+leave the third and fifth arguments zero. It's probably not a good 
+idea to leave the others zero, but for those two it's not a problem.
+</p>
+
+<h3 id="ssec-tile-puts">19.4.2.
+  Screen entry writer</h3>
+<p>
+This is arguably the most simple of the text writers. As there is one
+glyph per screen entry, all you have to do is write a single halfword 
+to the screenblock in the right position and you have a letter. Repeat 
+this for a whole string.
+</p>
+<p>
+There are a few things to note about this implementation, though. 
+First, like before, no kind of wrapping or scrolling. If you want 
+that, you'll have to 
+do all that yourself. Also, the <i>x</i> and <i>y</i> coordinates 
+are still in <i>pixels</i>, not tiles. I've done this 
+mainly for consistency with the other writers, nothing more. Oh, 
+in case you hadn't noticed before, <code>gptxt-&gt;dst0</code> is 
+initialized to point to the start of the background's screenblock in 
+<code>txt_init_se()</code>. Lastly, <code>se0</code> is added to 
+make up the actual screen entry; if you had a non-zero 
+<code>se0</code> in initialization, chances are you'd want to use it 
+here too.
+</p>
+
+<pre class="proglist">
+<span class="keyw">void</span> se_puts(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, SB_ENTRY se0)
+{
+    <span class="keyw">int</span> c;
+    SB_ENTRY *dst= &amp;gptxt-&gt;dst0[(y&gt;&gt;<span 
+class="num">3</span>)*<span class="num">32</span>+(x&gt;&gt;<span
+class="num">3</span>)];
+
+    x=<span class="num">0</span>;
+    <span class="keyw">while</span>((c=*str++) != <span 
+class="num">0</span>)
+    {
+        <span class="keyw">if</span>(c == <span 
+class="str">'\n'</span>)    <span class="cmt">// line break</span>
+        {    dst += (x&amp;~<span class="num">31</span>) + <span 
+class="num">32</span>;    x=<span class="num">0</span>;    }
+        else
+            dst[x++] = (gptxt-&gt;chars[c]) + se0;
+    }    
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-obj">19.5.
+  Sprite text</h2>
+<p>
+Sprite text is similar to tilemap text, only you use OBJ_ATTRs now 
+instead of screen entries. You have to set the position manually
+(attributes 0 and 1), and attribute 2 is almost the same as the 
+screen entry for regular tilemaps. The initializer 
+<code>txt_init_obj()</code> is similar to <code>txt_init_se()</code>, 
+except that the tilemap details have been replaced by their OAM 
+counterparts. Instead of a screenblock, we point to a base 
+OBJ_ATTR <code>oe0</code>, and <code>attr2</code> works 
+in much the same way as <code>se0</code> did. The code is actually
+simpler because we can always use 4bpp tiles for the objects that 
+we use, without upsetting the others.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// OAM text initializer</span>
+<span class="keyw">void</span> txt_init_obj(OBJ_ATTR *oe0, <!--
+-->u16 attr2, u32 clrs, u32 base)
+{
+    gptxt-&gt;dst0= (u16*)oe0;
+
+    COLOR *pbank= &amp;pal_obj_mem[<!--
+-->BF_GET(attr2, ATTR2_PALBANK)&lt;&lt;<span class="num">4</span>];
+    pbank[(base+<span class="num">1</span>)&amp;<span 
+class="num">15</span>]= clrs&amp;<span class="num">0xFFFF</span>;
+    pbank[(base&gt;&gt;<span class="num">4</span>)&amp;<span 
+class="num">15</span>]= clrs&gt;&gt;<span class="num">16</span>;
+    
+    txt_bup_1toX(&amp;tile_mem[<span 
+class="num">4</span>][attr2&amp;ATTR2_ID_MASK], toncfontTiles, 
+        toncfontTilesLen, <span class="num">4</span>, base);
+}
+</pre>
+
+<pre class="proglist">
+
+<span class="cmt">// OAM text writer</span>
+<span class="keyw">void</span> obj_puts(<span 
+class="keyw">int</span> x, <span 
+class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, u16 attr2)
+{
+    <span class="keyw">int</span> c, x0= x;
+    OBJ_ATTR *oe= (OBJ_ATTR*)gptxt-&gt;dst0;
+
+    <span class="keyw">while</span>((c=*str++) != <span 
+class="num">0</span>)
+    {
+        <span class="keyw">if</span>(c == <span 
+class="str">'\n'</span>)    <span class="cmt">// line break</span>
+        {    y += gptxt-&gt;dy; x= x0; }
+        else
+        {
+            <span class="keyw">if</span>(c != <span 
+class="str">' '</span>) <span class="cmt">// Only act on a non-space</span>
+            {
+                oe-&gt;attr0= y &amp; ATTR0_Y_MASK;
+                oe-&gt;attr1= x &amp; ATTR1_X_MASK;
+                oe-&gt;attr2= gptxt-&gt;chars[c] + attr2;
+                oe++;
+            }
+            x += gptxt-&gt;dx;
+        }
+    }    
+}
+</pre>
+
+<p>
+The structure of the writer itself should feel familiar now. 
+The <code>attr2</code> again acts as a base offset to allow 
+palette swapping and an offset tile start. Note that I'm only 
+entering the position in attributes 0 and 1, and nothing else. 
+I can do this because the rest of the things are already set to 
+what I want, namely, 8x8p sprites with 4bpp tiles and no frills. 
+Yes, this may screw things up for some, but if I <i>did</i> mask 
+out everything properly, it'd screw up other stuff. This is a 
+judgement call, feel free to disagree and change it.
+</p>
+<p>
+That writer always starts at a fixed OBJ_ATTR, overwriting any 
+previous ones. Because that might be undesirable, I also have
+a secondary sprite writer, <code>obj_puts2</code>, which takes 
+an OBJ_ATTR as an argument to serve as the new base. 
+</p>
+
+<pre class="proglist">
+INLINE <span class="keyw">void</span> obj_puts2(<span 
+class="keyw">int</span> x, <span 
+class="keyw">int</span> y, <span 
+class="keyw">const char</span> *str, u16 attr2, OBJ_ATTR *oe0)
+{
+    gptxt-&gt;dst0= (u16*)oe0;
+    obj_puts(x, y, str, attr2);
+}
+</pre>
+
+<p>
+There are some side notes on memory use that I should mention. 
+Remember, there are only 128 OBJ_ATTRs, and at one entry/glyph 
+it may become prohibitively expensive if used extensively. In the same 
+vein, 1024 tiles may seem like a lot, but you can run out quickly if 
+you have a couple of complete animations in there as well. Also, 
+remember that you only have 512 tiles in the bitmap modes: a full 
+ASCII character set in bitmap modes would take up <i>half</i> the 
+sprite tiles! 
+</p>
+<p>
+If you're just using it to for a couple of characters you're not 
+likely to run into trouble, but if you want screens full of text, you 
+might be better of with something else. There are ways to get around 
+these things, of course; quite simple ways, even. But because they're 
+really game-specific, it's difficult to give a general solution for it.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">19.6.
+  Some demos</h2>
+
+<h3 id="ssec-demo-bm">19.6.1.
+  Bitmap text demo</h3>
+<p>
+I suppose I could start with &ldquo;Hello world&rdquo;, but as that's 
+pretty boring I thought I'd start with something more interesting. The 
+<tt>txt_bm</tt> demo does something similar to <tt>bm_modes</tt>: namely 
+show something on screen and allow switching between modes 3, 4 and 5 
+to see what the differences are. Only now, we're going to use the 
+bitmap <code>puts()</code> versions to write the actual strings 
+indicating the current mode. Because that's still pretty boring, 
+I'm also going to put a movable cursor on screen and write out its 
+coordinates. Here's the full code:
+</p>
+
+<pre class="proglist" id="cd-txt-bm">
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+
+<span class="keyw">#define</span> CLR_BD    <span 
+class="num">0x080F</span>
+
+<span class="keyw">const</span> TILE cursorTile= 
+{{  <span class="num">0x0</span>, <span 
+class="num">0x21</span>, <span class="num">0x211</span>, <span
+class="num">0x2111</span>, <span class="num">0x21111</span>, <span 
+class="num">0x2100</span>, <span class="num">0x1100</span>, <span 
+class="num">0x21000</span>  }};
+
+<span class="keyw">void</span> base_init()
+{
+    vid_page= vid_mem;
+
+    <span class="cmt">// init interrupts</span>
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+
+    <span class="cmt">// init backdrop</span>
+    pal_bg_mem[<span class="num">0</span>]= CLR_MAG;
+    pal_bg_mem[CLR_BD&gt;&gt;<span class="num">8</span>]= CLR_BD;
+    pal_bg_mem[CLR_BD&amp;<span class="num">255</span>]= CLR_BD;
+    m3_fill(CLR_BD);
+
+    <span class="cmt">// init mode 4 pal</span>
+    pal_bg_mem[<span class="num">1</span>]= CLR_LIME;
+    pal_bg_mem[<span class="num">255</span>]= CLR_WHITE;
+
+    <span class="cmt">// init cursor</span>
+    tile_mem[<span class="num">5</span>][<span 
+class="num">0</span>]= cursorTile;
+    pal_obj_mem[<span class="num">1</span>]= CLR_WHITE;
+    pal_obj_mem[<span class="num">2</span>]= CLR_GRAY;
+}
+
+<span class="keyw">int</span> main()
+{
+    base_init();
+
+    txt_init_std();
+
+    <span class="cmt">// (1) print some string so we know what <!--
+-->mode we're at</span>
+    m3_puts( <span class="num">8</span>,  <span 
+class="num">8</span>, <span 
+class="str">&quot;mode 3&quot;</span>, CLR_CYAN);
+    m4_puts(<span class="num">12</span>, <span 
+class="num">32</span>, <span 
+class="str">&quot;mode 4&quot;</span>, <span 
+class="num">1</span>);
+    m5_puts(<span class="num">16</span>, <span 
+class="num">40</span>, <span 
+class="str">&quot;mode 5&quot;</span>, CLR_YELLOW);
+
+    <span class="cmt">// init variables</span>
+    u32 mode=<span class="num">3</span>, bClear=<span 
+class="num">0</span>;
+    OBJ_ATTR cursor= { <span class="num">80</span>, <span 
+class="num">120</span>, <span class="num">512</span>, <span 
+class="num">0</span> };
+
+    <span class="cmt">// init video mode</span>    
+    REG_DISPCNT= DCNT_BG2 | DCNT_OBJ | <span 
+class="num">3</span>;
+
+    <span class="cmt">// init cursor string</span>
+    <span class="keyw">char</span> str[<span 
+class="num">32</span>];
+    siprintf(str, <span class="str">&quot;o %3d,%3d&quot;</span>, <!--
+-->cursor.attr1, cursor.attr0);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        oam_mem[<span class="num">0</span>]= cursor;
+        key_poll();
+
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            bClear ^= <span class="num">1</span>;
+
+        <span class="cmt">// move cursor</span>
+        cursor.attr1 += key_tri_horz();
+        cursor.attr0 += key_tri_vert();
+
+        <span class="cmt">// adjust cursor(-string) only if <!--
+-->necessary</span>
+        <span class="keyw">if</span>(key_is_down(KEY_ANY))
+        {
+            <span class="cmt">// (2) clear previous coords</span>
+            <span class="keyw">if</span>(bClear)
+                bm_clrs(<span class="num">80</span>, <span 
+class="num">112</span>, str, CLR_BD);
+
+            cursor.attr0 &amp;= ATTR0_Y_MASK;
+            cursor.attr1 &amp;= ATTR1_X_MASK;
+            <span class="cmt">// (3) update cursor string</span>
+            siprintf(str, <span 
+class="str">&quot;%c %3d,%3d&quot;</span>, (bClear ? <span 
+class="str">'c'</span> : <span class="str">'o'</span>),  
+                cursor.attr1, cursor.attr0);
+        }
+        
+        <span class="cmt">// switch modes
+</span>        <span class="keyw">if</span>(key_hit(KEY_L) <!--
+-->&amp;&amp; mode&gt;<span class="num">3</span>)
+            mode--;
+        <span class="keyw">else</span> <span 
+class="keyw">if</span>(key_hit(KEY_R) &amp;&amp; mode&lt;<span 
+class="num">5</span>)
+            mode++;
+        REG_DISPCNT &amp;= ~DCNT_MODE_MASK;
+        REG_DISPCNT |= mode;
+
+        <span class="cmt">// (4) write coords</span>
+        bm_puts(<span class="num">80</span>, <span 
+class="num">112</span>, str, CLR_WHITE);
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/txt_bm.png" alt="" id="img-txt-bm"><br>
+<b>Fig 19.3</b>: <tt>txt_bm</tt> demo.
+</div>
+
+<p>
+Controls:
+</p>
+
+<table>
+<tbody valign="top">
+<tr><th>D-pad<td>Moves cursor.
+<tr><th>Start<td>Toggles string clearing.
+<tr><th>L, R<td>Decrease or increase mode.
+</tbody>
+</table>
+
+<p>
+Many things here should be either self explanatory or fairly 
+irrelevant. The interesting things are indicated by numbers, so let's 
+go through them, shall we?
+</p><br>
+
+<p>
+<b>1. Mode indicators</b>. This is where we write three strings to 
+VRAM, indicating the modes. Note that the interfaces are nearly 
+identical; the only real difference is that the fourth argument for 
+<code>m4_puts()</code> is a palette index, rather than a real color.
+</p>
+
+<p>
+<b>2. Clear previous cursor-string</b>. The cursor string keeps 
+track of the cursor as you move across the screen. The first thing 
+you'll notice is that the string turns into a horrible mess because 
+the bitmap writers only write the <i>non-zero</i> pixels of the font. 
+In other words, it does <i>not</i> clear out the rest of the space 
+allotted for that glyph. Essentially <code>mx_puts()</code> are
+transparent string writers.
+</p>
+<p>
+Sure, I could have added a switch that would erase the whole glyph 
+field to the writers. Quite easily, actually, it only takes an extra 
+<code>else</code> clause. However, the current way is actually more 
+practical. For one thing, what if you actually <i>want</i> 
+transparency? You'd have to write another routine just for that. 
+The method I've chosen is to have an extra clearing routine (which 
+you'd probably need anyway). To overwrite the whole glyphs, simply 
+call <code>mx_clrs()</code> first; which is what I'm doing here. 
+Well, as long as the <code>bClear</code> variable is set (toggle with 
+Start).
+</p>
+<p>
+A second reason is that this method is just so much faster. Not only 
+because I wouldn't be able to use my premature breaking from the 
+<code>ix</code>-loop if I had to erase the whole field and the mere 
+presence of an extra branch adds more cycles (inside a triple loop), 
+but plotting individual characters will always be slower than to do 
+it by whole blocks at a time. <code>mx_clrs()</code> uses 
+<code>memset16()</code>, which is basically <code>CpuFastSet()</code> 
+plus safeties, and will be faster after just a mere half a dozen 
+pixels. 
+</p>
+<p>
+Oh, in case you're wondering why I'm talking about 
+<code>mx_clrs()</code> when the code mentions <code>bm_clrs()</code>, 
+the latter function is merely a function that uses a switch-block 
+with the current bitmap mode to call the correct mode-specific 
+string clearer. 
+</p>
+<p>
+<b>3. Updating the cursor string</b>. As the writers don't have 
+format specification fields, how can we write numbers? Simple, 
+use <code>sprintf()</code> to prepare a string first, and then use 
+that one instead. Or rather, use <code>siprintf()</code>. This 
+is an integer-only version of <code>sprintf()</code>, which is 
+better suited to GBA programming since you're not supposed to 
+use floating point numbers anyway.
+It should be relatively simple to create functions to wrap around 
+<code>siprintf()</code> and <code>mx_puts()</code>, but I'm not sure 
+it's worth the effort.
+</p>
+<p>
+I should perhaps point out that using <code>siprintf</code> and 
+other routines that can turn numbers into strings use division by 
+10 to do so, and you know what that means. And even if you do not 
+ask it to convert numbers, it calls a dozen or so routines from 
+the standard library, which adds around 25kb to your binary. 
+This isn't much for ROM, but for multiboot things (256kb max) it may 
+become problematic. With that in mind, I'd like you to take a look 
+at <b>posprintf</b> by <a href="http://www.danposluns.com/" target="_blank">Dan 
+Posluns</a>. This is hand-coded assembly using a special algorithm 
+for the decimal conversion. It may not be as rich in options as 
+<code>siprintf()</code>, but it's both faster and smaller 
+by a very large margin, so definitely worth checking out.
+</p>
+
+<p>
+<b>4. Write cursor string</b>. This writes the current cursor 
+string to position (80, 120). Like in the cases of wiping the 
+string, I'm using a <code>bm_puts()</code> function that switches 
+between the current mode writers.
+</p>
+
+<h3 id="ssec-demo-obj">19.6.2.
+  Sprite text; Hello world!</h3>
+<p>
+Yes! Hello world! Now, in principle, all you have to do is call 
+<code>txt_init()</code>, <code>txt_init_obj()</code> and then 
+<code>obj_puts()</code> with the right parameters, but again that's 
+just boring, so I'll add some interesting things as well. 
+The <tt>txt_obj</tt> demo shows one of the things best performed 
+with sprites: individual letter animation. The letters of the 
+phrase &ldquo;hello world!&rdquo; will fall from the top of the 
+screen, bouncing to a halt on the floor (a green line halfway 
+across the screen).
+</p>
+
+<pre class="proglist" id="cd-txt_obj">
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+
+<span class="cmt">// === CONSTANTS &amp; <!--
+-->STRUCTS ============================================</span>
+
+<span class="keyw">#define</span> POS0 (<span 
+class="num">80</span>&lt;&lt;<span class="num">8</span>)
+<span class="keyw">#define</span> GRAV <span class="num">0x40</span>
+<span class="keyw">#define</span> DAMP <span class="num">0xD0</span>
+<span class="keyw">#define</span> HWLEN <span class="num">12</span>
+
+<span class="keyw">const char</span> hwstr[]= <span 
+class="str">"Hello world!"</span>;
+
+<span class="keyw">typedef struct</span>
+{
+    u32 state;
+    <span class="keyw">int</span> tt;
+    FIXED fy;
+    FIXED fvy;
+} PATTERN;
+
+<span class="cmt">// === FUNCTIONS <!--
+-->======================================================</span>
+
+<span class="keyw">void</span> pat_bounce(PATTERN *pat)
+{
+    <span class="keyw">if</span>(pat-&gt;tt &lt;= <span 
+class="num">0</span>)    <span 
+class="cmt">// timer's run out: play pattern</span>
+    {
+        pat-&gt;fvy += GRAV;
+        pat-&gt;fy += pat-&gt;fvy;
+
+        <span class="cmt">// touched floor: bounce</span>
+        <span class="keyw">if</span>(pat-&gt;fy &gt; POS0)
+        {
+            <span class="cmt">// damp if we still have enough speed
+            // otherwise kill movement</span>
+            <span class="keyw">if</span>(pat-&gt;fvy &gt; DAMP)
+            {
+                pat-&gt;fy= <span class="num">2</span>*POS0-pat-&gt;fy;
+                pat-&gt;fvy= DAMP-pat-&gt;fvy;
+            }
+            <span class="keyw">else</span>
+            {
+                pat-&gt;fy= POS0;
+                pat-&gt;fvy= <span class="num">0</span>;
+            }
+        }
+    }
+    else    <span class="cmt">// still in waiting period</span>
+        pat-&gt;tt--;
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2 | DCNT_OBJ;
+
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    memset16(&amp;vid_mem[<span class="num">88</span>*<span 
+class="num">240</span>], CLR_GREEN, <span class="num">240</span>);
+
+    <span class="cmt">// (1) init sprite text</span>
+    txt_init_std();
+    txt_init_obj(&amp;oam_mem[<span class="num">0</span>], <span 
+class="num">0xF200</span>, CLR_YELLOW, <span class="num">0xEE</span>);
+    <span class="cmt">// (2) 12 px between letters</span>
+    gptxt-&gt;dx= <span class="num">12</span>;
+
+    <span class="cmt">// (3) init sprite letters</span>
+    OBJ_ATTR *oe= oam_mem;
+    obj_puts2(<span class="num">120</span>-<span 
+class="num">12</span>*HWLEN/<span class="num">2</span>, <span 
+class="num">8</span>, hwstr, <span class="num">0xF200</span>, oe);
+
+    <span class="keyw">int</span> ii;
+    PATTERN pats[HWLEN];
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;HWLEN; ii++)
+    {
+        // init patterns
+        pats[ii].state=<span class="num">0</span>;
+        pats[ii].tt= <span class="num">3</span>*ii+<span 
+class="num">1</span>;
+        pats[ii].fy= -<span class="num">12</span>&lt;&lt;<span 
+class="num">8</span>;
+        pats[ii].fvy= <span class="num">0</span>;
+        
+        // init sprite position
+        oe[ii].attr0 &amp;= ~ATTR0_Y_MASK;
+        oe[ii].attr0 |= <span class="num">160</span>;
+    }
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;HWLEN; ii++)
+        {
+            pat_bounce(&amp;pats[ii]);
+
+            oe[ii].attr0 &amp;= ~ATTR0_Y_MASK;
+            oe[ii].attr0 |= (pats[ii].fy&gt;&gt;<span 
+	class="num">8</span>)&amp; ATTR0_Y_MASK;
+        }
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/txt_oe.png" alt="" id="img-txt-obj"><br>
+<b>Fig 19.4</b>: <tt>txt_obj</tt> demo.
+</div>
+
+<p>
+Very little of this code is actually concerned with the string 
+itself, namely the items 1, 2 and 3. There's a call to 
+<code>txt_init_std()</code> for the basic initialization and a call 
+to the sprite text initializer, <code>txt_init_obj()</code>. The second 
+argument is the base for attribute 2 (if you don't remember what 
+attribute 2 is, see the chapter on 
+<a href="regobj.htm#ssec-obj-attr2">sprites</a> again); 
+<code>0xF200</code> means I'm using the sub-palette 15 and start 
+the character tiles at tile-index 512 (because of the bitmap mode). 
+The font color will be yellow, and out at index 255. That's 240 from
+the pal-bank, <code>0x0E</code>=14 from the unpacking and 1 for the 
+actual 1bpp pixels 240+14+1=255. After this call, I'm also setting 
+the horizontal pixel offset to 12 to spread out the letters a little 
+bit. After that, I just call <code>obj_puts2()</code> to set up the 
+first few sprites of OAM so that they show &ldquo;hello 
+world!&rdquo; centered at the top of the screen.
+</p>
+<p>
+I could have stopped there, but the demo is actually just beginning.
+The thing about using sprites as glyphs is that they can still 
+<i>act</i> as normal sprites; <code>obj_puts()</code> just 
+sets them up to use letters instead of graphics that are more 
+sprite-like.
+</p>
+
+<h4>Bouncy, bouncy, bouncy</h4>
+<p>
+The goal here is to let the letters drop from the top of the screen, 
+the bounce up again when it hits a floor, but with a little less 
+speed than before due to friction and what not. Physically, the falling 
+part is done using a constant acceleration, <i>g</i>. Acceleration 
+is the change in velocity, so the velocity is linear; velocity 
+is the change in position, so the height is parabolic. At the bounce, 
+we do an <dfn>inelastic collision</dfn>; in other words, one where 
+energy is lost. In principle, this would mean that the difference 
+between the squares of the velocities before and after the collision 
+differ by a constant 
+( |<b>v</b><sub>out</sub>|<sup>2</sup> - 
+  |<b>v</b><sub>in</sub>|<sup>2</sup> = 
+  Q ). However, this would require a square root to find the new 
+velocity, and I don't care for that right now so I'm just going to 
+scrap the squares here. I'm sure there are situations where this is 
+actually quite valid <kbd>:P</kbd>. As a further simplification, I'm 
+doing a first-order integration for the position. With this, the 
+basic code for movement becomes very simple
+</p>
+<pre class="proglist">
+<span class="cmt">// 1D inelastic reflections
+// y, vy, ay: position, velocity, acceleration.
+// Q: inelastic collision coefficient.</span>
+vy += ay;
+ y += vy;
+<span class="keyw">if</span>(y>ymay)  <span 
+class="cmt">// collision</span>
+{
+    <span class="keyw">if</span>((ABS(vy)>Q)
+    {
+        vy= -(vy-SGN(vy)*Q);  <span 
+class="cmt">// lower speed, switch direction</span>
+        y= <span class="num">2</span>*ymay-y;          <span 
+class="cmt">// Mirror y at r: y= r-(y-r)= 2r-y</span>
+    }
+    <span class="keyw">else</span>  <span 
+class="cmt">// too slow: stop at ymay</span>
+    {   vy= <span class="num">0</span>; y= ymay; }
+}
+</pre>
+
+<p>
+This could be replaced by the following, more accurate code, 
+using second-order integration and &lsquo;proper&rsquo; recoil, 
+but you hardly notice anything from the improved integration. 
+I actually prefer the look of the simple, linear recoil over the 
+square root though.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// accelerate</span>
+ k= vx+GRAV;
+<span class="cmt">// Trapezium integration rule: 
+//   x[i+1]= x[i] + (v[i]+v[i+1])/2;</span>
+ x += (vx+k)/<span class="num">2</span>;
+vx= k;
+<span class="keyw">if</span>(x>xmax)  <span 
+class="cmt">// collision</span>
+{
+    <span class="keyw">if</span>(vx*vx > Q2)
+    {   vx= -Sqrt(vx*vx-Q2); x= <span 
+class="num">2</span>*xmax-x; }
+    <span class="keyw">else</span>
+    {   vx= <span class="num">0</span>;               x= xmax;     }
+}
+</pre>
+
+<h3 id="ssec-demo-se1">19.6.3.
+  Map text : colors and borders</h3>
+<p>
+Next up is the first of two map text demos. The official name 
+for what I call a regular background is &ldquo;text background&rdquo;, 
+and they're called that for a reason: in most cases when there is 
+text, it's done using regular backgrounds. Of course, in most cases 
+everything else is <i>also</i> done with those, so strictly speaking 
+associating them with &ldquo;text&rdquo; is a misnomer, but we'll 
+let that one slide for today. The first demo is about how you can 
+use the text functions for a variety of effects. Apart from simply 
+showing text (boring), you'll see palette swapping and framing text, 
+and how you can easily use different fonts and borders concurrently.
+Because of the way I've designed my functions, all this takes is 
+a change in a parameter. Cool huh. 
+</p>
+<p>
+The demo will also feature adding shading to a monochrome font, and 
+adding an opaque background for it. Now, the way I'm going about this 
+will probably reserve me a place in the Computer Science Hell, but, 
+well, the coolness of the tricks will probably keep me from burning up 
+there.
+</p>
+
+<pre class="proglist" id="cd-txt_se1">
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;border.h&quot;</span>
+
+<span class="cmt">// === CONSTANTS &amp; STRUCTS <!--
+-->============================================</span>
+
+<span class="keyw">#define</span> TID_FRAME0        <span 
+class="num">96</span>
+<span class="keyw">#define</span> TID_FRAME1       <span 
+class="num">105</span>
+<span class="keyw">#define</span> TID_FONT           <span 
+class="num">0</span>
+<span class="keyw">#define</span> TID_FONT2        <span 
+class="num">128</span>
+<span class="keyw">#define</span> TID_FONT3        <span 
+class="num">256</span>
+<span class="keyw">#define</span> TXT_PID_SHADE   <span 
+class="num">0xEE</span>
+<span class="keyw">#define</span> TXT_PID_BG      <span 
+class="num">0x88</span>
+
+<span class="cmt">// === FUNCTIONS <!--
+-->======================================================</span>
+
+<span class="keyw">void</span> init()
+{
+    <span class="keyw">int</span> ii;
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+
+    txt_init_std();
+
+    <span class="cmt">// (1a) Basic se text initialization</span>
+    txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0x1000</span>, CLR_RED, <span class="num">0x0E</span>);
+
+    <span class="cmt">// (1b) again, with a twist</span>
+    txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0xF000</span>|TID_FONT2, 
+        CLR_YELLOW | (CLR_MAG&lt;&lt;<span 
+class="num">16</span>), TXT_PID_SHADE);
+
+    <span class="cmt">// (1c) and once more, with feeling!</span>
+    txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0xE000</span>|TID_FONT3,
+        <span class="num">0</span>, TXT_PID_SHADE);
+    u32 *pwd= (u32*)&amp;tile_mem[<span class="num">0</span>][TID_FONT3];
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">96</span>*<span 
+class="num">8</span>; ii++)
+        *pwd++ |= quad8(TXT_PID_BG);
+
+    <span class="cmt">// extra border initialisation</span>
+    memcpy32(pal_bg_mem, borderPal, borderPalLen/<span 
+class="num">4</span>);
+    memcpy32(&amp;tile_mem[<span class="num">0</span>][TID_FRAME0], <!--
+-->borderTiles, borderTilesLen/<span class="num">4</span>);
+
+    <span class="cmt">// (2) overwrite /\ [] `% ^_ to use border tiles</span>
+    <span class="cmt">//  / ^ \</span>
+    <span class="cmt">//  [ # ]</span>
+    <span class="cmt">//  ` _ '  </span>
+    <span class="keyw">const</span> u8 bdr_lut[<span 
+class="num">9</span>]= <span class="str">&quot;/^\\[#]`_\'&quot;</span>;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">9</span>; ii++)
+        gptxt-&gt;chars[bdr_lut[ii]]= TID_FRAME0+ii;
+
+    <span class="cmt">// (3) set some extra colors</span>
+    pal_bg_mem[<span class="num">0x1F</span>]= CLR_RED;
+    pal_bg_mem[<span class="num">0x2F</span>]= CLR_GREEN;
+    pal_bg_mem[<span class="num">0x3F</span>]= CLR_BLUE;
+
+    pal_bg_mem[<span class="num">0xE8</span>]= pal_bg_mem[<span 
+class="num">0x08</span>]; <span class="cmt">// bg</span>
+    pal_bg_mem[<span class="num">0xEE</span>]= CLR_ORANGE;   <span 
+class="cmt">// shadow</span>
+    pal_bg_mem[<span class="num">0xEF</span>]= pal_bg_mem[<span 
+class="num">0x0F</span>]; <span class="cmt">// text</span>
+}
+
+<span class="keyw">void</span> txt_se_frame(<span 
+class="keyw">int</span> l, <span class="keyw">int</span> t, <span 
+class="keyw">int</span> r, <span class="keyw">int</span> b, u16 se0)
+{
+    <span class="keyw">int</span> ix, iy;
+    u8 *lut= gptxt-&gt;chars;
+    u16 *pse= (u16*)gptxt-&gt;dst0;
+    pse += t*<span class="num">32</span> + l;
+    r -= (l+<span class="num">1</span>);
+    b -= (t+<span class="num">1</span>);
+
+    <span class="cmt">// corners</span>
+    pse[<span class="num">32</span>*<span class="num">0</span>  + <span 
+class="num">0</span>] = se0+lut[<span class="str">'/'</span>];
+    pse[<span class="num">32</span>*<span 
+class="num">0</span>  + r] = se0+lut[<span class="str">'\\'</span>];
+    pse[<span class="num">32</span>*b  + <span 
+class="num">0</span>] = se0+lut[<span class="str">'`'</span>];
+    pse[<span class="num">32</span>*b  + r] = se0+lut[<span 
+class="str">'\''</span>];
+
+    <span class="cmt">// horizontal</span>
+    <span class="keyw">for</span>(ix=<span 
+class="num">1</span>; ix&lt;r; ix++)
+    {
+        pse[<span class="num">32</span>*<span 
+class="num">0</span>+ix]= se0+lut[<span class="str">'^'</span>];
+        pse[<span class="num">32</span>*b+ix]= se0+lut[<span 
+class="str">'_'</span>];
+    }
+    <span class="cmt">// vertical + inside</span>
+    pse += <span class="num">32</span>;
+    <span class="keyw">for</span>(iy=<span 
+class="num">1</span>; iy&lt;b; iy++)
+    {
+        pse[<span class="num">0</span>]= se0+lut[<span 
+class="str">'['</span>];
+        pse[r]= se0+lut[<span class="str">']'</span>];
+        <span class="keyw">for</span>(ix=<span 
+class="num">1</span>; ix&lt;r; ix++)
+            pse[ix]= se0+lut[<span class="str">'#'</span>];
+        pse += <span class="num">32</span>;
+    }
+}
+
+<span class="keyw">int</span> main()
+{
+    init();
+
+    <span class="cmt">// (4a) red, green, blue text</span>
+    se_puts(<span class="num">8</span>, <span class="num">16</span>, <span 
+class="str">&quot;bank 1:\n  red&quot;</span>,   <span 
+class="num">0x1000</span>);
+    se_puts(<span class="num">8</span>, <span class="num">40</span>, <span 
+class="str">&quot;bank 2:\n  green&quot;</span>, <span 
+class="num">0x2000</span>);
+    se_puts(<span class="num">8</span>, <span class="num">72</span>, <span 
+class="str">&quot;bank 3:\n  blue&quot;</span>,  <span 
+class="num">0x3000</span>);
+    <span class="cmt">// (4b) yellow text with magenta shadow</span>
+    se_puts(<span class="num">8</span>, <span class="num">96</span>, <span 
+class="str">&quot;bank 15:\n yellow, \nwith mag \nshadow&quot;</span>, <span 
+class="num">0xF000</span>|TID_FONT2);
+
+    <span class="cmt">// (5a) framed text, v1</span>
+    txt_se_frame(<span class="num">10</span>, <span 
+class="num">2</span>, <span class="num">29</span>, <span 
+class="num">9</span>, <span class="num">0</span>);
+    se_puts( <span class="num">88</span>, <span 
+class="num">24</span>, <span 
+class="str">&quot;frame 0:&quot;</span>, <span class="num">0</span>);
+    se_puts(<span class="num">104</span>, <span 
+class="num">32</span>, <span 
+class="str">&quot;/^\\[#]`_'&quot;</span>, <span class="num">0</span>);
+    se_puts( <span class="num">88</span>, <span 
+class="num">40</span>, <span class="str">&quot;bank  0:\n  basic text,<!--
+-->\n  transparent bg&quot;</span>, <span class="num">0</span>);
+
+    <span class="cmt">// (5b) framed text, v2</span>
+    txt_se_frame(<span class="num">10</span>, <span 
+class="num">11</span>, <span class="num">29</span>, <span 
+class="num">18</span>, TID_FRAME1-TID_FRAME0);
+    se_puts( <span class="num">88</span>,  <span 
+class="num">96</span>, <span class="str">&quot;frame 1:&quot;</span>, <span 
+class="num">0xE000</span>|TID_FONT3);
+    se_puts(<span class="num">104</span>, <span 
+class="num">104</span>, <span 
+class="str">&quot;/^\\[#]`_'&quot;</span>, <span class="num">9</span>);
+    se_puts( <span class="num">88</span>, <span 
+class="num">112</span>, <span class="str">&quot;bank 14:<!--
+-->\n  shaded text\n  opaque bg&quot;</span>, <span 
+class="num">0xE000</span>|TID_FONT3);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+        VBlankIntrWait();
+    <span class="keyw">return</span> <span class="num">0</span>;
+}</pre><br>
+
+
+<div class="lblock">
+<table id="img-txt-se1">
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="../img/demo/txt_se1.png" alt="txt_se1 demo"><br>
+  <b>Fig 19.5a</b>: First map text demo.
+  </div>
+<td>
+  <div class="cpt" style="width:256px">
+  <img src="../img/demo/txt_se1_tiles.png" alt="txt_se1 tileset"><br>
+  <b>Fig 19.5b</b>: accompanying tileset.
+  </div>
+</table>
+</div>
+
+
+<h4>Code rundown</h4>
+
+<p>
+Fig 19.5 shows what this code produces. 
+All the actual text drawing is done in the main function, and I'll 
+go by them one by one. The first three 
+things are red, green and blue text (point 4a), done using palette 
+swapping. I've loaded up red, green and blue to palette indices 
+<code>0x1F</code>, <code>0x2F</code> and <code>0x3F</code> (point 3), 
+and can switch between them with the last parameter of
+<code>se_puts()</code>, which you will recall is added to each of the 
+screen entries. The values <code>0x1000</code>, <code>0x2000</code> 
+and <code>0x3000</code> indicate that we'll use palette banks 1, 2 
+and 3, respectively.
+</p>
+<p>
+If you look closely, you'll see that fourth text (point 4b) is 
+yellow with a magenta (no it's not pink, it's <i>magenta</i>) shading 
+on the right edge of each letter. At least part of this is done with 
+the <code>se0</code> parameter, which is now <code>0xF080</code>. The 
+reason it's shaded is because of the last part: I'm actually using a 
+slightly different font, one that starts at tile 128. I'll repeat, 
+the reason I can do all this with the same function is because of that 
+offset parameter of <code>se_puts()</code>.
+</p>
+<p>
+Points (5a) and (5b) are for framing, and the text inside it. The 
+function <code>txt_se_frame()</code> draws my border. It takes a 
+rectangle as its input, and draws a frame on it. Note that the frame 
+includes the top-left, but excludes the bottom-right. Again, I have 
+one extra <code>se0</code> parameter as an offset. This is how the 
+second border is actually done; I just offset the thing by the 
+difference between border tiles.
+</p>
+<p>
+The borders themselves are actually drawn pretty much as if they were 
+text. In <code>init()</code> I've reassigned nine characters in the 
+character lut to use the tile indices for the primary border tileset 
+(point 2). There is no particular reason I'm doing this, other than 
+the mere fact that I can. Just illustrating the things you can do 
+with a text writer and some clever lut manipulation.
+</p>
+<p>
+The texts inside the frames are an interesting story as well. As you 
+can see from the text in the first frame, the standard text doesn't 
+quite work. The problem is that the main tileset I'm using is 
+transparent, but the frame's background isn't. Mix the two and 
+they'll clash. So how to solve that? Well, you create 
+<i>another</i> font, 
+one that does not have 0 as its background color. There are a number 
+of ways to do that, one of them being adding 1&lt;&lt;31 to the 
+bit-unpacking flag. But I'm opting for another method, which I'll get 
+into later. Note that whatever I'm doing, it does work: the text in 
+the second frame is opaque after all. Note that I'm writing that text 
+using pal-bank 14, and am now using a <i>third</i> tileset for the 
+fonts.
+</p><br>
+<p>
+Now, up to this point it's all been pretty easy. The usage of 
+<code>se_puts()</code> and <code>txt_se_frame()</code> I mean. I hope 
+you understood all of the above, because the rest is going to be pretty 
+interesting. Not quite &ldquo;oh god, oh god, we're all gonna 
+die&rdquo;-interesting, but still a mite hairy for some.
+</p>
+
+<h4>Bit fiddling fun</h4>
+
+<p>
+I've indicated that I'm using three different fonts. But if you study 
+the code, you will find no trace of font definitions or copies. That's 
+because there are none: it's all based on the same bit-packed font 
+I showed earlier. Also, the mathematically inclined will 
+have noticed that bitpacking a 1bpp font will result in two colors. 
+That's what 1bpp <i>means</i>, after all. But I have a background 
+color, a foreground color, and shading; that's three. Furthermore, 
+there doesn't seem to be any code that does the shading. This all leads 
+to one simple question, namely: what the hell am I doing?
+</p>
+<p>
+Well &hellip; this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> TID_FONT           <span 
+class="num">0</span>
+<span class="keyw">#define</span> TID_FONT2        <span 
+class="num">128</span>
+<span class="keyw">#define</span> TID_FONT3        <span 
+class="num">256</span>
+<span class="keyw">#define</span> TXT_PID_SHADE   <span 
+class="num">0xEE</span>
+<span class="keyw">#define</span> TXT_PID_BG      <span 
+class="num">0x88</span>
+
+<span class="cmt">// (1a) Basic se text initialization</span>
+txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0x1000</span>, CLR_RED, <span class="num">0x0E</span>);
+
+<span class="cmt">// (1b) again, with a twist</span>
+txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0xF000</span>|TID_FONT2, 
+    CLR_YELLOW | (CLR_MAG&lt;&lt;<span 
+class="num">16</span>), TXT_PID_SHADE);
+
+<span class="cmt">// (1c) and once more, with feeling!</span>
+txt_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>) | BG_SBB(<span class="num">31</span>), <span 
+class="num">0xE000</span>|TID_FONT3,
+    <span class="num">0</span>, TXT_PID_SHADE);
+u32 *pwd= (u32*)&amp;tile_mem[<span class="num">0</span>][TID_FONT3];
+<span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">96</span>*<span 
+class="num">8</span>; ii++)
+    *pwd++ |= quad8(TXT_PID_BG);
+</pre>
+
+
+<p>
+These six statements set up the three fonts, complete with shading 
+and opacity. The first one sets up the standard font, in charblock 0, 
+screenblock 31, pal-bank 1 and using <code>0x0E</code> for the 
+bit-unpacking offset, so that the text color is at <code>0x1F</code>. 
+We've seen the same thing with the object text.
+</p><br>
+
+<div class="cpt_fr" style="width:200px;">
+<center>
+<table id="tbl-bupshade"
+    cellpadding=2 cellspacing=0 bgcolor=#E0E0E0>
+<caption align="bottom">
+  <b>Table 19.2</b>: 
+  bit-unpacking with with base <code>0xEE</code>.
+</caption>
+<tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=9>&nbsp;
+    <th>bit 
+    <th class="bdrL">val
+    <td class="bdrRR" rowspan=9>&nbsp;
+    <td class="bdrLL">&nbsp;
+    <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
+    <td class="bdrRR">&nbsp;
+  <tr>
+    <th>0	<td class="bdrL"> 0
+    <td class="bdrLL" rowspan=8>&nbsp;
+    <td> . <td> . <td> . <td> . <td> . <td> . <td> . <td> 0
+    <td class="bdrRR" rowspan=8>&nbsp;
+  <tr>
+    <th> 1	<td class="bdrL"> 1
+    <td> . <td> . <td> . <td> . <td> . <td> E <td> F <td> .
+  <tr>
+    <th> 2	<td class="bdrL"> 1
+    <td> . <td> . <td> . <td> . <td> E <td> F <td> . <td> .
+  <tr>
+    <th> 3	<td class="bdrL"> 1
+    <td> . <td> . <td> . <td> E <td> F <td> . <td> . <td> .
+  <tr>
+    <th> 4	<td class="bdrL"> 0
+    <td> . <td> . <td> . <td> 0 <td> . <td> . <td> . <td> .
+  <tr>
+    <th> 5	<td class="bdrL"> 0
+    <td> . <td> . <td> 0 <td> . <td> . <td> . <td> . <td> .
+  <tr>
+    <th> 6	<td class="bdrL"> 1
+    <td> E <td> F <td> . <td> . <td> . <td> . <td> . <td> .
+  <tr>
+    <th> 7	<td class="bdrL"> 0
+    <td> 0 <td> . <td> . <td> . <td> . <td> . <td> . <td> .
+<tr>
+  <td colspan=4> OR: 
+    <td class="bdrLL">&nbsp;
+    <th> E <th> F <th> 0 <th> E <th> F <th> F <th> F <th> 0
+    <td class="bdrRR">&nbsp;
+</tbody>
+</table>
+</center>
+</div>
+
+<p>
+The second call to <code>txt_se_init()</code> sets up the second 
+font set, the one with shading. <code>se0</code> indicates the use of 
+pal-bank 15 and to start at 128, but the important stuff happens in 
+the <code>clrs</code> and <code>base</code> parameters. There are 
+now two colors in <code>clrs</code>, yellow and magenta. The lower 
+halfword will be the text color, and the upper halfword the shading 
+color. 
+</p>
+<p>
+The actual shading happens because of the value of <code>base</code>, 
+which is <code>0xEE</code>, and the way the whole bit-unpacking 
+routine works. The offset is added to each &lsquo;on&rsquo;-bit in the 
+packed font, giving <code>0xEF</code>, which is then ORred to the 
+current word with the appropriate shift. Because we're dealing with a 
+4bpp font, the result will actually overflow into the next nybble. 
+Now, if the next bit is also on, it'll OR <code>0xEF</code> with the 
+overflow value of <code>0x0E</code>. As
+<code>0xF</code> | <code>0xE</code> is just <code>0xF</code>, it's as 
+if the overflow never happened. But, if the next bit was <i>off</i>, 
+the value for that pixel would be <code>0xE</code>. Lastly, if there 
+was no overflow for a zero source bit, the result is a 0. And now we 
+have the three possible values: 0 (background), 14 (shade) and 15 
+(text). Table 19.2 shows the procedure more 
+graphically. The bits for the source byte are on the left, and the 
+bit-unpacked result for each bit on the grid on the right, in the 
+correct position. These are then ORed together for the end result. 
+For <code>0x46</code> that'd be the word <code>0xEF0EFFF0</code>. One 
+word is one row of 8 pixels in a 4bpp tile, and because lower nybbles 
+are the left-most pixels, the shade will be on the right of the 
+character even though it uses the more significant bits.
+</p>
+<p>
+The base <code>0xEE</code> is one of many values for which this 
+trick works. The key thing is that the high nybble must be completely 
+overwritten by the lower nybble+1. Any number with equal and even 
+nybbles will work.
+</p>
+<p>
+Now, I'll be the first to admit that this is something of a hack. A 
+lot of things have to come together for it to work. The word-size must 
+be able to fit a whole tile row, both packed and unpacked data must be 
+little-endian in both bit and byte order, and the unpacking routine 
+must actually allow overflow, and probably a few other things that 
+escape me right now. All of these conditions are satisfied on the 
+GBA, but I doubt very much if you can use the trick on other systems. 
+There are other ways of applying shading, of course, better ones at 
+that. It's just so deliciously nasty that I can't resist using it.
+</p><br>
+
+<p>
+The final <code>txt_se_init()</code> work pretty much in the same way 
+as the second one: shading through overflow. What it doesn't do is 
+make the tiles opaque. While it's possible to do that with BitUnpack, 
+you can't have that <i>and</i> shading with one call, that simply 
+doesn't work. But there are other ways. All we really need for the 
+tiles to be opaque is some value other than zero for it for the 
+background pixels. Well, that's easily done: just offset (add or OR) 
+everything by a number. In this case I can't add a value because the 
+text value is already at maximum, so I'll use OR here. The value I'll 
+OR with is <code>0x88888888</code>, which doesn't change 
+the text or shading, but sets the background pixels to use 
+<code>8</code>, so we've got what we wanted.
+</p><br>
+
+<p>
+And that, as they say, is how we do that. Or at least how <i>I</i> do 
+that. If the above seems like mumbo-jumbo to you, no one's forcing 
+you to do it in the same way. You can always take the easy way out 
+and include multiple fonts into the program rather than construct 
+them from what you have. I'm just showing what can be done with a 
+little creating coding.
+</p>
+
+<h3 id="ssec-demo-se2">19.6.4.
+  Map text : profiling</h3>
+<p>
+The last thing I'll show you is an easy one, but something that might 
+come in handy when it's time to optimize a few things. In case you 
+haven't noticed, debugging GBA programs isn't quite as easy as 
+debugging PC programs. There is the possibility of debugging with 
+Insight and the GDB (the GCC debugger), but even then things are 
+iffy, or so I hear. Well, now that you can print your own text, you 
+can at least do something of that sort. Write out diagnostic messages 
+and the like.
+</p>
+<p>
+But that's not what I'm going to show you now. The last demo will show
+you how to do something that usually comes <i>after</i> debugging: 
+profiling. Profiling tells you how much time is spent doing what, so 
+you can tell what would be the best places to try to optimize. What 
+I'll show you is a simple way of getting the time spent inside a 
+function. Stuff like that is good to know, especially on a platform 
+like this where you still have to worry about things like speed and 
+efficiency and other silly stuff like that.
+</p>
+<p>
+The next demo will clock five different ways of copying data, in this 
+case a mode 4 bitmap from EWRAM (my code is set up for  multiboot by 
+default, which means everything goes in EWRAM rather than ROM) to VRAM. 
+The methods are:
+</p>
+<ul>
+  <li><b>u16 array</b>. Copy in 16-bit (halfword) chunks. Probably the 
+    one you'll see most in other tutorials, but not here. With reason, 
+	as we'll see in a minute.
+  <li><b>u32 array</b>. Copy in 32-bit (word) chunks. 
+  <li><b><code>memcpy()</code></b>. The standard C copy routine, the one 
+    I'm using in the earlier demos. Well, nowadays I am.
+  <li><b><code>memcpy32()</code></b>. Home grown assembly, explained 
+    in detail <a href="asm.htm#sec-cpy">here</a>. Basically 
+    does what <code>CpuFastSet()</code> does, only without the restriction 
+	that the number of words must be a multiple of 8.
+  <li><b><code>dma_memcpy()</code></b>. Copy via 32-bit DMA.
+</ul>
+
+<pre class="proglist" id="cd-txt-se2">
+<span class="keyw">#include</span> <span 
+class="str">&lt;string.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdlib.h&gt;</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&quot;gba_pic.h&quot;</span>
+
+<span class="cmt">// === CONSTANTS &amp; <!--
+-->STRUCTS ============================================</span>
+
+<span class="keyw">int</span> gtimes[<span class="num">5</span>];
+
+<span class="keyw">const</span> <span class="keyw">char</span> *strs[<span 
+class="num">5</span>]=
+{   <span class="str">&quot;u16 array&quot;</span>, <span 
+class="str">&quot;u32 array&quot;</span>, <span 
+class="str">&quot;memcpy&quot;</span>, <span 
+class="str">&quot;memcpy32&quot;</span>, <span 
+class="str">&quot;DMA32&quot;</span> };
+
+<span class="cmt">// === FUNCTIONS <!--
+-->======================================================</span>
+
+<span class="cmt">// copy via u16 array</span>
+<span class="keyw">void</span> test_0(u16 *dst, <span 
+class="keyw">const</span> u16 *src, u32 len)
+{
+    u32 ii;
+    profile_start();
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;len/<span class="num">2</span>; ii++)
+        dst[ii]= src[ii];
+    gtimes[<span class="num">0</span>]= profile_stop();
+}
+
+<span class="cmt">// copy via u32 array</span>
+<span class="keyw">void</span> test_1(u32 *dst, <span 
+class="keyw">const</span> u32 *src, u32 len)
+{
+    u32 ii;
+    profile_start();
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;len/<span class="num">4</span>; ii++)
+        dst[ii]= src[ii];
+    gtimes[<span class="num">1</span>]= profile_stop();
+}
+
+<span class="cmt">// copy via memcpy</span>
+<span class="keyw">void</span> test_2(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, u32 len)
+{
+    profile_start();
+    memcpy(dst, src, len);
+    gtimes[<span class="num">2</span>]= profile_stop();
+}
+
+<span class="cmt">// copy via my own memcpy32</span>
+<span class="keyw">void</span> test_3(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, u32 len)
+{
+    profile_start();
+    memcpy32(dst, src, len/<span class="num">4</span>);
+    gtimes[<span class="num">3</span>]= profile_stop();
+}
+
+<span class="cmt">// copy using DMA</span>
+<span class="keyw">void</span> test_4(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, u32 len)
+{
+    profile_start();
+    dma3_cpy(dst, src, len);
+    gtimes[<span class="num">4</span>]= profile_stop();
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+
+    test_0((u16*)vid_mem, (<span 
+class="keyw">const</span> u16*)gba_picBitmap, gba_picBitmapLen);
+    test_1((u32*)vid_mem, (<span 
+class="keyw">const</span> u32*)gba_picBitmap, gba_picBitmapLen);
+    test_2(vid_mem, gba_picBitmap, gba_picBitmapLen);
+    test_3(vid_mem, gba_picBitmap, gba_picBitmapLen);
+    test_4(vid_mem, gba_picBitmap, gba_picBitmapLen);
+
+    <span class="cmt">// clear the screenblock I'm about to use</span>
+    memset32(&amp;se_mem[<span class="num">7</span>], <span 
+class="num">0</span>, SBB_SIZE/<span class="num">4</span>);
+
+    <span class="cmt">// init map text</span>
+    txt_init_std();
+    txt_init_se(<span class="num">0</span>, BG_SBB(<span 
+class="num">7</span>), <span class="num">0</span>, CLR_YELLOW, <span 
+class="num">0</span>);
+
+    <span class="cmt">// print results</span>
+    <span class="keyw">int</span> ii;
+    <span class="keyw">char</span> str[<span class="num">32</span>];
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">5</span>; ii++)
+    {
+        siprintf(str, <span 
+class="str">&quot;%12s %6d&quot;</span>, strs[ii], gtimes[ii]);
+        se_puts(<span class="num">8</span>, <span 
+class="num">8</span>+<span class="num">8</span>*ii, str, <span 
+class="num">0</span>);
+    }
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+        VBlankIntrWait();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}</pre>
+
+<p>
+The code should be self-explanatory. I have five functions 
+for the things I want to profile. I chose separate functions because
+then I know optimisation will not interfere (it sometimes moves code 
+around). After running these functions, I set-up my text functions and 
+print out the results.
+</p>
+<p>
+The profiling itself uses two macros, <code>profile_start()</code> and 
+<code>profile_stop()</code>. These can be found in <tt>core.h</tt> of 
+tonclib. What the macros do is start and stop timers 2 and 3, 
+and then return the time in between the calls. This does mean that the 
+code you're profiling cannot use those timers.
+</p>
+
+<pre class="proglist">
+INLINE <span class="keyw">void</span> profile_start()
+{
+    REG_TM2D= <span class="num">0</span>;    REG_TM3D= <span 
+class="num">0</span>;
+    REG_TM2CNT= <span class="num">0</span>;  REG_TM3CNT= <span 
+class="num">0</span>;
+    REG_TM3CNT= TM_ENABLE | TM_CASCADE;
+    REG_TM2CNT= TM_ENABLE;
+}
+
+INLINE u32 profile_stop()
+{
+   REG_TM2CNT= <span class="num">0</span>;
+   <span class="keyw">return</span> (REG_TM3D&lt;&lt;<span 
+class="num">16</span>)|REG_TM2D;
+}
+</pre>
+
+<div class="lblock">
+<table id="img-txt-se2">
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="../img/demo/txt_se2_vba.png" alt="txt_se2 on vba"><br>
+  <b>Fig 19.6a</b>: <tt>txt_se2</tt> on VBA.
+  </div>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="../img/demo/txt_se2_nocash.png" alt="txt_se2 on no$gba"><br>
+  <b>Fig 19.6b</b>: <tt>txt_se2</tt> on no$gba.
+  </div>
+</table>
+</div>
+
+<div class="lblock">
+<table id="tbl-txt-se2"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 19.3</b>: timing results for hardware, 
+  vba and no$gba.
+</caption>
+<tbody align="right">
+<tr>
+  <th>&nbsp;
+  <th> hardware	<th> vba	<th> no$gba		<th> vba err	<th> no$ err
+<tr>
+  <th>u16 array
+  <td> 614571	<td> 499440	<td> 614571	<td> -18.73	<td> 0.00
+<tr>
+  <th>u32 array
+  <td> 289825	<td> 230383	<td> 288098	<td> -20.51	<td> -0.60
+<tr>
+  <th>memcpy
+  <td> 195156	<td> 161119	<td> 194519	<td> -17.44	<td> -0.33
+<tr>
+  <th>memcpy32
+  <td> 86816	<td> 79336	<td> 85329	<td> -8.62	<td> -1.71
+<tr>
+  <th>DMA32
+  <td> 76889	<td> 250	<td> 76888	<td> -99.67	<td> 0.00
+
+<!--<tr>
+  <th>u16 array
+  <td> 674978	<td> 557081	<td> 672162		<td> 17.5%		<td> 0.4%
+<tr>
+  <th>u32 array
+  <td> 260299	<td> 192183	<td> 259309		<td> 26.2%		<td> 0.4%
+<tr>
+  <th>memcpy
+  <td> 195171	<td> 160367	<td> 194608		<td> 17.8%		<td> 0.3%
+<tr>
+  <th>memcpy32
+  <td> 86846	<td> 80049	<td> 85283		<td> 7.8%		<td> 1.8%
+<tr>
+  <th>DMA32
+  <td> 76902	<td> 222	<td> 76901		<td> 99.7%		<td> 0.0%
+-->
+</tbody>
+</table>
+</div>
+
+<!--
+  <td> 729774	<td> 614080	<td> 729771	<td> -15.85	<td> 0.00
+-->
+
+<p>
+Fig 19.6 shows the timing results, as run 
+in VisualBoy Advance and no$gba. Note that they are not quite the 
+same. So you do what you should always do when two opinions differ: 
+get a third one. In this case, I'll use the only one that really 
+matters, namely hardware. You can see a comparison of the three in 
+table 19.3, which will tell you that no$gba 
+is very accurate in its timing, but VBA not so much. I guess you can 
+still use it to get an estimate or relative timings, but true accuracy 
+will not be found there. For that you need hardware or no$gba.
+</p>
+<p>
+About the numbers themselves. The spread is about a factor 9, which 
+is quite a lot. None of the techniques shown here are particularly 
+hard to understand, and data copying is something that you 
+could spend a lot of time doing, so might as well take advantage of 
+the faster ones from the get go.
+</p>
+<p>
+Most of the tutorial code and probably a lot of demo code you can 
+find out there uses the u16-array method of copying; presumably 
+because byte-copies are unavailable for certain sections. But as you 
+can see, <b>u16 copies are more than twice as slow as u32 copies</b>! 
+Granted, it is not the slowest method of copying data, but not by 
+much (using u16 loop variables &ndash;also a common occurence&ndash; 
+would be slower by about 20%; try it and you'll see). The GBA is a 
+32-bit machine. It <i>likes</i> 32-bit data, and its instruction 
+sets are better at dealing with 32-bit chunks. Let go of the u16 
+fetish you may have picked up elsewhere. Use word-sized data if 
+you can, the others only if you have to. That said, do watch your
+<a href="bitmaps.htm#ssec-data-align">data alignment</a>! u8 or u16
+arrays aren't always word-aligned, which will cause trouble with
+casting.
+</p>
+
+<div class="note">
+<div class="nhcare">GCC and waitstates vs timing results</div>
+<p>
+Giving exact timing results is tricky due to a number of factors. 
+First, on the hardware side there are different memory sections 
+with different wait states that complicate things unless you sit 
+down, read the assembly and add up the cycle-counts of the 
+instructions. This is a horrible job, trust me. The second problem 
+is that GCC hasn't reached the theoretical optimum for this code yet, 
+so the results tend to vary with new releases. What you see above is 
+a good indication, but your mileage may vary.
+</p>
+</div>
+
+<!--
+<hr>
+
+<p>
+For the u32-array copy I'm using a (<code>u32*</code>) cast, 
+although technically I don't have to because my data is already in 
+words-sized chunks. Most graphics converters will export to byte 
+or halfword arrays, in which case the cast will be necessary. Now, 
+let me remind you of a problem this can bring, which applies to all 
+the faster copiers: <dfn>data alignment</dfn>. The primary data-types 
+should always be on their proper boundaries: word addresses 
+must be divisible by 4, and halfword addresses must be 
+divisible by 2. This is taken care of by the linker and generally 
+invisible to your program, <i>until</i> you start casting. Then you 
+might find that the u16-array you casted to a u32-pointer suddenly 
+might not be word-aligned, and you get garbage at the destination.
+</p>
+<p>
+Note that this <i>might</i> happen. Or it might not: there's no 
+way to be sure unless you align it yourself. As separate object 
+files are always properly aligned, the easiest way would 
+be to compile data-files separately rather than #include them into 
+your main file. This is how compilation is supposed to be done 
+<i>anyway</i>, but putting data and code in (header) files and 
+including them is still pandemic, so it bears repeating.
+</p>
+<p>
+Other ways of ensuring correct alignment include the following. 
+Export to u32-arrays in the first place (duh). You can use assembly 
+files where alignment is easy, or you can use the GCC alignment 
+attribute, <code>__attribute__(( aligned(4) ))</code>, often #defined 
+as <code>ALIGN4</code> or something of the sort. Or you can use a 
+file system like <a href="http://www.pineight.com/gba/#gbfs" target="_blank">GBFS</a>. 
+For those who think mis-alignment of data is something that 
+happens to other people or that u16-arrays are good enough: 
+well, maybe. But it's not too much trouble to get it right the 
+first time, so that you never even have to think twice about it 
+ever again.
+</p>
+
+<hr>
+-->
+
+<p>
+There are a number of fast ways of copying large chunks of data. 
+Faster than writing your own simple loop that is. Common ones are 
+the standard <code>memcpy()</code>, which is available for any 
+platform, and two methods that are GBA specific: the 
+<code>CpuFastSet()</code> BIOS call (or my own version 
+<code>memcpy32()</code> and DMA. The first two <i>require</i> 
+word-alignment; DMA merely works better with it. The 
+performance of <code>memcpy()</code> is actually not too shabby, 
+and the fact that it's available everywhere means that it's a good 
+place to start. The others are faster, but come at a cost:
+<code>memcpy32()</code> is hand written assembly; 
+<code>CpuFastSet()</code> requires a word-count divisible by 8, 
+and DMA locks up the CPU, which can interfere with interrupts. 
+You would do well to remember these things when you find you need 
+a little more speed.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-misc">19.7.
+  Other considerations</h2>
+<p>
+These couple of functions barely scratch the surface as far as text 
+systems are concerned. You can have larger fonts, colored fonts, 
+proper shading, variable character widths, and more. Each of these 
+can apply to each of the modes, with extra formatting for text 
+justification and alignment, updating tile-memory in conjunction 
+with map/OAM changes to cut down on VRAM use, etc, etc. 
+To take an in-depth 
+look at all the variations would take an entire site by itself, 
+so I'll leave it at this. I just hope you've picked up on some 
+of the basics that go into text systems. What you do with that 
+knowledge I leave up to you.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Sep 11, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="sndsqr.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="mode7.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Sound intro</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Mode 7</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

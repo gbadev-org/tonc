@@ -1,0 +1,2419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031003">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Bitmap Modes</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="video.htm">Video intro</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="keys.htm">Keys</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">5.
+  The Bitmap modes (mode 3, 4, 5)</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>.
+  <li><a href="#sec-modes">GBA bitmap modes, for real</a>
+  <li><a href="#sec-page">Page flipping</a>.
+  <li><a href="#sec-data">On data and how to use it</a>.
+  <li><a href="ssec-conc">Conclusions</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">5.1.
+  Introduction</h2>
+
+<p>
+In this chapter, we'll look at the bitmap modes. Bitmap modes are a 
+good place to start because there is a one to one relation between 
+the contents of memory and the pixels on the screen. The essentials 
+of all the bitmap modes will be discussed briefly, with a closer look 
+at what you can do in mode 3 as an example. We'll also see a bit of 
+page flipping (mode 4), which allows for smoother animation.
+</p>
+<p>
+The chapter will close with a section on how to deal with data and 
+computer memory in general. Because GBA programming is very close to 
+the hardware, you <i>need</i> to know these things. If you've been 
+programming (in C or assembly) for a long time and have already gained 
+a good understanding on data, datatypes and memory you can probably 
+skip it; for the rest of you, I would strongly urge to read it, 
+because it is very important for all the chapters to come. 
+</p>
+
+<h3 id="ssec-intro-101">5.1.1.
+  Bitmap 101</h3>
+
+<div class="cpt_fr" style="width:96px">
+  <img src="../img/bitmaps/link_lttp_sm.png" width=72 id="img-link-sm" 
+    alt="a 24x24 bitmap of Link."><br>
+  <b>Fig 5.1</b>: Link (24x24 bitmap).
+</div>
+
+<p>
+In fig&nbsp;5.1 you can find a bitmap of one of 
+the game characters that made Nintendo great. This is probably how 
+most people think of bitmaps: a grid of colored pixels. In order to 
+use bitmaps in a program we need to know how they're arranged in 
+memory. For that we use fig&nbsp;5.2 (below); 
+this is a zoomed out version of fig&nbsp;5.1, 
+with a pixel grid imposed over it and some numbers.
+<p>
+A bitmap is little more than a <i>w</i>&times;<i>h</i> matrix of colors 
+(or color-indices), where <i>w</i> is the number of columns (the width) 
+and <i>h</i> the number of rows (the height).
+A particular pixel can be referred to with a coordinate pair:
+(<i>x</i>,&nbsp;<i>y</i>). By the way, the y-axis of the GBA points 
+<i>down</i>, not up. So pixel (0,&nbsp;0) is in the top-left
+corner. In memory, the lines of the bitmap are laid out sequentially, 
+so that the following rule holds: in a <i>w&times;h</i> bitmap,
+the pixel (<i>x,&nbsp;y</i>) is the 
+(<i>w&times;y&nbsp;+&nbsp;x</i>)-th pixel. This is true for all C 
+matrices, by the way.
+
+<!--
+Remember that in C you can have two dimensional matrices,
+which are basically arrays of arrays, so that the following rule holds:
+</p>
+
+
+<pre class="proglist">
+<span class="keyw">int</span> mat[h][w];    <span 
+  class="cmt">// matrix, w wide, h height</span>
+<span class="keyw">int</span> *arr= &amp;mat;   <span
+class="cmt">// matrix in array form</span>
+
+mat[ix][iy]= color;       <span class="cmt">// pixel(ix, iy) = color</span>
+arr[ix + w*iy]= color;    <span class="cmt">// ditto</span>
+</pre>
+-->
+<p>
+Fig 5.2 shows how this works. This is a 
+<i>w</i>=24 by <i>h</i>=24 bitmap, at 8bpp (8 <u>B</u>its 
+<u>P</u>er <u>P</u>ixel (=1 byte)). The numbers in yellow indicate 
+the memory locations; you can count them for yourself if you don't 
+believe me. The first pixel, (0,&nbsp;0), can be found at location 0. 
+The <i>last</i> pixel of the <i>first</i> row (23,&nbsp;0) is at 
+<i>w</i>&minus;1 (=23 in this case). The first pixel of the second 
+row (0,&nbsp;1) is at <i>w</i> (=24) etc, etc, till 
+the last pixel at <i>w&times;h</i>&minus;1. 
+</p>
+
+<div class="cblock">
+<table id="img-link-big">
+<tr><td>
+  <div class="cpt" style="width:310px">
+  <img src="../img/bitmaps/link_lttp.png"
+    alt="zoom out of Fig 1">
+    <b>Fig 5.2a</b>: zoom out of 
+    fig&nbsp;5.1, with pixel offsets.
+  </div>
+  </td>
+  <td>
+  <div class="cpt" style="width:348px">
+  <img src="../img/bitmaps/link_lttp_mem.png"
+    alt="zoom out of Fig 1, with pixel values.">
+    <b>Fig 5.2b</b>: zoom out of 
+    fig&nbsp;5.1, with pixel values. 
+	Zero omitted for clarity. Palette on the lefthand side.
+  </div>
+  </td>
+</tr>
+</table>
+</div>
+
+
+Note, however, that when you use another bitdepth, the addresses change 
+too. For example, at 16bpp (2 bytes per pixel), you'd
+need to multiply the pixel-number by 2. Or use another datatype for 
+your array. The general formula is left as an exercise for the reader.
+
+<p>
+Usually it's not actually the width (i.e., the number of pixels in a 
+row) that's important, but the <dfn>pitch</dfn>. The pitch is defined 
+as the number of bytes in a scanline. For 8bpp images the pitch and 
+width will usually be the same, but for, say, 16bpp images (2 bytes 
+per pixel) the pitch is the width times two. There's another catch: 
+memory alignment. Alignment will be covered in 
+a <a href="#ssec-data-align">later section</a>, but the upshot is that
+systems generally have a &lsquo;preferred&rsquo; type size and can 
+better deal with data if the addresses are a multiple of that 
+type size. This is why windows BMPs' scanlines are always aligned to 
+32bit boundaries. 
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-modes">5.2.
+  The GBA bitmap modes</h2>
+<p>
+Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4
+or 5 in the lowest bits of 
+<a href="video.htm#tbl-reg-dispcnt">REG_DISPCNT</a> and 
+enable <code>BG2</code>. You may wonder why we start with mode 3, 
+rather than mode 0. The reason for this is that bitmaps are a lot 
+easier to come to terms with than tilemaps. And this is the 
+<i>only</i> reason. The truth of the matter is that the bitmap 
+modes are just too slow to be used for most conventional GBA games. 
+I can't give an exact figure, but if someone told me 90% or more 
+of GBA games used tilemodes and not bitmap modes, I wouldn't be 
+surprised. The only time when bitmap modes would be beneficial 
+would be either for very static screens (introductory demos) or 
+very dynamic screens (3D games like Starfox or Doom).
+</p>
+<p>
+The bitmap modes have the following characteristics:
+</p>
+
+<div class="lblock">
+<table id="tbl-bm-types"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 5.1</b>: Bitmap mode 
+  characteristics
+</caption>
+<tr>
+  <th>mode<th>width<th>height<th>bpp<th>size     <th>page-flip
+<tr>
+  <td>3   <td>240  <td>160   <td>16 <td>1x 12C00h <td>No
+<tr>
+  <td>4   <td>240  <td>160   <td>8  <td>2x 9600h <td>Yes
+<tr>
+  <td>5   <td>160  <td>128   <td>16 <td>2x A000h <td>Yes
+</table>
+</div>
+
+<p>
+What width, height and bpp mean should be clear by now; the size
+that the bitmap requires is simply <i>width &times; height
+&times; bpp/8</i>. Page flipping may need some more explanation, 
+but first we'll look at some examples of mode 3 graphics.
+</p>
+
+<h3 id="ssec-modes-m3">5.2.1.
+  Drawing primitives in mode 3</h3>
+<p>
+We've already seen how to plot pixels, now it's time for some lines 
+and rectangles. Horizontal lines are piss-easy: because the pixels 
+are in adjacent memory, all you need is a simple loop from the 
+starting <i>x</i> to the final <i>x</i>. Vertical lines are 
+nearly as easy: while the pixels aren't right next to each other, 
+they do have a fixed offset between them, namely the pitch. So again
+a simple loop is all you need. Rectangles are essentially multiple 
+horizontal lines, so those are easy as well.
+</p>
+<p>
+Diagonal lines are a little trickier, for a number of reasons. 
+Diagonal lines have a slope that indicates how many horizontal steps 
+you need to take before moving to the next scanline. That would only 
+work if the absolute value were lower than one, otherwise you'd get 
+gaps between pixels. For higher slopes, you need to increment 
+vertically, and plot horizontally.
+</p>
+<p>
+Another point is how to make the 
+routine fast enough to be of real use. Fortunately, these things 
+have all been figured out in the past already, so we'll just use the 
+results here. In this case, we'll use a 
+<a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm" target="_blank">Bresenham 
+Midpoint</a> algorithm for the line drawing, modified to deal with 
+horizontal and vertical lines separately. While I could explain what 
+the routine does exactly, it is out of the scope of the chapter, 
+really.
+</p>
+<p>
+Two points I have ignored here are normalization and clipping. 
+<dfn>Normalization</dfn> means making sure the routine runs in the 
+right direction. For example, when implementing a line drawing 
+routine that runs from <code>x1</code> to <code>x2</code> via an 
+incrementing for loop, you'd best be sure that <code>x2</code> is 
+actually higher than <code>x1</code> in the first place. 
+<dfn>Clipping</dfn> means cutting the primitive down to fit inside 
+the viewport. While this is a good thing to do, we will omit it 
+because it can get really hairy to do it well.
+</p><br>
+
+<p>
+The code below is an excerpt from <tt>toolbox.c</tt> from the 
+<tt>m3_demo</tt> and contains functions for drawing lines, rectangles 
+and frames on a 16bpp canvas, like in mode 3 and mode 5. 
+<code>dstBase</code> is the base-pointer to the canvas and 
+<code>dstPitch</code> is the pitch. The rest of the parameters should be 
+obvious.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#include</span> <span class="str">&quot;toolbox.h&quot;</span>
+
+<span class="cmt">//! Draw a line on a 16bpp canvas</span>
+<span class="keyw">void</span> bmp16_line(<span 
+class="keyw">int</span> x1, <span class="keyw">int</span> y1, <span 
+class="keyw">int</span> x2, <span class="keyw">int</span> y2, u32 clr,
+    <span class="keyw">void</span> *dstBase, uint dstPitch)
+{
+    <span class="keyw">int</span> ii, dx, dy, xstep, ystep, dd;
+    u16 *dst= (u16*)(dstBase + y1*dstPitch + x1*<span class="num">2</span>);
+    dstPitch /= <span class="num">2</span>;
+
+    <span class="cmt">// --- Normalization ---</span>
+    <span class="keyw">if</span>(x1&gt;x2)
+    {   xstep= -<span class="num">1</span>;  dx= x1-x2;  }
+    <span class="keyw">else</span>
+    {   xstep= +<span class="num">1</span>;  dx= x2-x1;  }
+
+    <span class="keyw">if</span>(y1&gt;y2)
+    {   ystep= -dstPitch;   dy= y1-y2;  }
+    <span class="keyw">else</span>
+    {   ystep= +dstPitch;   dy= y2-y1;  }
+
+
+    <span class="cmt">// --- Drawing ---
+</span>
+    <span class="keyw">if</span>(dy == <span 
+class="num">0</span>)         <span class="cmt">// Horizontal</span>
+    {
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=dx; ii++)
+            dst[ii*xstep]= clr;
+    }
+    <span class="keyw">else</span> <span 
+class="keyw">if</span>(dx == <span class="num">0</span>)    <span 
+class="cmt">// Vertical</span>
+    {
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=dy; ii++)
+            dst[ii*ystep]= clr;
+    }
+    <span class="keyw">else</span> <span 
+class="keyw">if</span>(dx&gt;=dy)     <span 
+class="cmt">// Diagonal, slope &lt;= 1</span>
+    {
+        dd= <span class="num">2</span>*dy - dx;
+
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=dx; ii++)
+        {
+            *dst= clr;
+            <span class="keyw">if</span>(dd &gt;= <span class="num">0</span>)
+            {   dd -= <span class="num">2</span>*dx; dst += ystep;  }
+
+            dd += <span class="num">2</span>*dy;
+            dst += xstep;
+        }               
+    }
+    <span class="keyw">else</span>                <span 
+class="cmt">// Diagonal, slope &gt; 1</span>
+    {
+        dd= <span class="num">2</span>*dx - dy;
+
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=dy; ii++)
+        {
+            *dst= clr;
+            <span class="keyw">if</span>(dd &gt;= <span class="num">0</span>)
+            {   dd -= <span class="num">2</span>*dy; dst += xstep;  }
+
+            dd += <span class="num">2</span>*dx;
+            dst += ystep;
+        }       
+    }
+}
+
+<span class="cmt">//! Draw a rectangle on a 16bpp canvas</span>
+<span class="keyw">void</span> bmp16_rect(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, u32 clr,
+    <span class="keyw">void</span> *dstBase, uint dstPitch)
+{
+    <span class="keyw">int</span> ix, iy;
+
+    uint width= right-left, height= bottom-top;
+    u16 *dst= (u16*)(dstBase+top*dstPitch + left*<span class="num">2</span>);
+    dstPitch /= <span class="num">2</span>;
+
+    <span class="cmt">// --- Draw ---</span>
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;height; iy++)
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;width; ix++)
+            dst[iy*dstPitch + ix]= clr;
+}
+
+<span class="cmt">//! Draw a frame on a 16bpp canvas</span>
+<span class="keyw">void</span> bmp16_frame(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, u32 clr,
+    <span class="keyw">void</span> *dstBase, uint dstPitch)
+{
+    <span class="cmt">// Frame is RB exclusive</span>
+    right--;
+    bottom--;
+
+    bmp16_line(left,  top,   right,  top,    clr, dstBase, dstPitch);
+    bmp16_line(left,  bottom, right, bottom, clr, dstBase, dstPitch);
+
+    bmp16_line(left,  top,   left,   bottom, clr, dstBase, dstPitch);
+    bmp16_line(right, top,   right,  bottom, clr, dstBase, dstPitch);
+}
+</pre>
+
+<p>
+These functions are very general: they will work for anything that 
+has 16bit colors. That said, it may be annoying to have to add the 
+canvas pointer and pitch all the time, so you could create an 
+<dfn>interface layer</dfn> specifically for mode 3 and mode 5. 
+The ones for mode 3 would look something like this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef</span> u16 COLOR;
+
+<span class="keyw">#define</span> vid_mem         ((COLOR*)MEM_VRAM)
+
+<span class="keyw">#define</span> M3_WIDTH        <span class="num">240</span>
+
+
+<span class="cmt">// === PROTOTYPES =====================================================</span>
+
+INLINE <span class="keyw">void</span> m3_plot(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, COLOR clr);
+INLINE <span class="keyw">void</span> m3_line(<span 
+class="keyw">int</span> x1, <span class="keyw">int</span> y1, <span 
+class="keyw">int</span> x2, <span class="keyw">int</span> y2, COLOR clr);
+INLINE <span class="keyw">void</span> m3_rect(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, COLOR clr);
+INLINE <span class="keyw">void</span> m3_frame(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, COLOR clr);
+
+
+<span class="cmt">// === INLINES ========================================================</span>
+
+<span class="cmt">//! Plot a single \a clr colored pixel in mode 3 at (\a x, \a y).</span>
+INLINE <span class="keyw">void</span> m3_plot(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, COLOR clr)
+{
+    vid_mem[y*M3_WIDTH+x]= clr; 
+}
+
+<span class="cmt">//! Draw a \a clr colored line in mode 3.</span>
+INLINE <span class="keyw">void</span> m3_line(<span 
+class="keyw">int</span> x1, <span class="keyw">int</span> y1, <span 
+class="keyw">int</span> x2, <span class="keyw">int</span> y2, COLOR clr)
+{
+    bmp16_line(x1, y1, x2, y2, clr, vid_mem, M3_WIDTH*<span 
+class="num">2</span>);
+}
+
+<span class="cmt">//! Draw a \a clr colored rectangle in mode 3.</span>
+INLINE <span class="keyw">void</span> m3_rect(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, COLOR clr)
+{
+    bmp16_rect(left, top, right, bottom, clr, vid_mem, M3_WIDTH*<span 
+class="num">2</span>);
+}
+
+<span class="cmt">//! Draw a \a clr colored frame in mode 3.</span>
+INLINE <span class="keyw">void</span> m3_frame(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, COLOR clr)
+{
+    bmp16_frame(left, top, right, bottom, clr, vid_mem, M3_WIDTH*<span 
+class="num">2</span>);
+}
+</pre>
+
+<p>
+Finally, there is a <code>m3_fill()</code> function, that fills the 
+entire mode 3 canvas with a single color.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Fill the mode 3 background with color \a clr.</span>
+<span class="keyw">void</span> m3_fill(COLOR clr) 
+{   
+    <span class="keyw">int</span> ii;
+    u32 *dst= (u32*)vid_mem;
+    u32 wd= (clr&lt;&lt;<span class="num">16</span>) | clr;
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;M3_SIZE/<span class="num">4</span>; ii++)
+        *dst++= wd;
+}
+</pre>
+
+<div class="cpt_fr" style="width:240px">
+  <img src="../img/demo/m3_demo.png" id="img-m3-demo"
+    alt="mode3 screen">
+  <b>Fig 5.3a</b>: drawing in mode 3.
+</div>
+
+<p>
+Now, note what I'm doing here: instead of treating VRAM as an 
+array of 16bit values which are appropriate for 16bpp colors, 
+I'm using a 32bit pointer and filling VRAM with a 32bit variable 
+containing two colors.
+When filling large chunks of memory, it makes no difference if I fill 
+it in <i>N</i> 16bit chunks, or &frac12;<i>N</i> 32bit chunks. 
+However, because you only use half the number of iterations in the 
+latter case, it's roughly twice as fast. In C, it's perfectly 
+legal to do something like this and often actually useful. 
+This is why it's important to know the principles of 
+<a href="#sec-data">data and memory</a>. Also note that I'm using
+pointer arithmetic here instead of array indices. While the compiler 
+generally make the conversion itself, doing it manually is still often 
+a little faster.
+</p>
+<p>
+While this method is already twice as fast as the &lsquo;normal&rsquo; 
+method, there are actually much faster methods as well. We will meet 
+these later, when we stop using separate <tt>toolkit</tt> files 
+and start using <tt>tonclib</tt>, the code library for tonc. Tonclib 
+contains the functions described above (only faster), as well 
+as 8bpp variations of the <code>bmp16_</code> routines and interfaces 
+for mode 4 and mode 5.
+</p><br>
+
+<p>
+Below you can find the main code for <tt>m3_demo</tt>, which uses 
+the <code>m3_</code> functions to draw some items on the screen. 
+Technically, it's bad form to use this many magic numbers, but 
+for demonstration purposes it should be okay. The result can be seen 
+in fig&nbsp;5.3.
+</p>
+
+<pre class="proglist">
+
+<span class="keyw">#include</span> <span class="str">"toolbox.h"</span>
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> ii, jj;
+
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    <span class="cmt">// Fill screen with grey color</span>
+    m3_fill(RGB15(<span class="num">12</span>, <span 
+class="num">12</span>, <span class="num">14</span>));
+
+    <span class="cmt">// Rectangles:</span>
+    m3_rect( <span class="num">12</span>,  <span 
+class="num">8</span>, <span class="num">108</span>,  <span 
+class="num">72</span>, CLR_RED);
+    m3_rect(<span class="num">108</span>, <span 
+class="num">72</span>, <span class="num">132</span>,  <span 
+class="num">88</span>, CLR_LIME);
+    m3_rect(<span class="num">132</span>, <span 
+class="num">88</span>, <span class="num">228</span>, <span 
+class="num">152</span>, CLR_BLUE);
+
+    <span class="cmt">// Rectangle frames</span>
+    m3_frame(<span class="num">132</span>,  <span 
+class="num">8</span>, <span class="num">228</span>,  <span 
+class="num">72</span>, CLR_CYAN);
+    m3_frame(<span class="num">109</span>, <span 
+class="num">73</span>, <span class="num">131</span>,  <span 
+class="num">87</span>, CLR_BLACK);
+    m3_frame( <span class="num">12</span>, <span 
+class="num">88</span>, <span class="num">108</span>, <span 
+class="num">152</span>, CLR_YELLOW);
+
+    <span class="cmt">// Lines in top right frame</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=<span class="num">8</span>; ii++)
+    {
+        jj= <span class="num">3</span>*ii+<span class="num">7</span>;
+        m3_line(<span class="num">132</span>+<span 
+class="num">11</span>*ii, <span class="num">9</span>, <span 
+class="num">226</span>, <span class="num">12</span>+<span 
+class="num">7</span>*ii, RGB15(jj, <span class="num">0</span>, jj));
+        m3_line(<span class="num">226</span>-<span 
+class="num">11</span>*ii,<span class="num">70</span>, <span 
+class="num">133</span>, <span class="num">69</span>-<span 
+class="num">7</span>*ii, RGB15(jj, <span class="num">0</span>, jj));
+    }
+
+    <span class="cmt">// Lines in bottom left frame</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;=<span class="num">8</span>; ii++)
+    {
+        jj= <span class="num">3</span>*ii+<span class="num">7</span>;
+        m3_line(<span class="num">15</span>+<span 
+class="num">11</span>*ii, <span class="num">88</span>, <span 
+class="num">104</span>-<span class="num">11</span>*ii, <span 
+class="num">150</span>, RGB15(<span class="num">0</span>, jj, jj));
+    }
+
+    <span class="keyw">while</span>(<span class="num">1</span>);
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<h3 id="ssec-modes-m4">A dash of mode 4</h3>
+<p>
+Mode 4 is another bitmap mode. It also has a 240&times;160 
+frame-buffer, but instead of 16bpp pixels it uses 8bpp pixels. These 
+8 bits are a <dfn>palette index</dfn> to the background palette 
+located at <code>0500:0000</code>. The color you'll see on screen 
+is the color found in the palette at that location. 
+</p>
+<p>
+Pixels of a bitdepth of 8 mean you can only have 256 colors at a time 
+(instead of 32678 in the case of 15bpp), but there are benefits as 
+well. For one, you can manipulate the colors of many pixels by simply 
+changing the color in the palette. An 8bpp frame-buffer also takes up 
+half as much memory as a 16bpp buffer. Not only is it faster to fill 
+(well, in principle anyway), but there is now also room for a second 
+buffer to allow <a href="#sec-page">page flipping</a>. Why that's 
+useful will be covered in a minute.
+</p>
+<p>
+There is, however, one major downsize to using mode 4, which stems 
+from a hardware limitation. With 8bit pixels, it'd make sense to 
+map VRAM as an array of bytes. This would be fine if it weren't for 
+the rather annoying fact that VRAM does not allow 
+byte-writes! Now, because this is a very important point, let 
+me repeat that: <b><span class="rem">You cannot write to VRAM in 
+byte-sized chunks!!!</span></b>. Byte-reads are ok, but writes have 
+to be done in 16-bit or 32-bit bit chunks. If you <i>do</i> write 
+in bytes to VRAM, the halfword you're accessing will end up with that 
+byte in both its bytes: you're setting two pixels at once. 
+Note that this no-byte-write rule also extends to PALRAM and OAM, 
+but there it doesn't cause trouble because you won't be using that 
+as bytes anyway.
+</p>
+
+<p>
+So how to plot single-pixels then? Well, you have to read the whole 
+halfword you're trying to access, mask off the bits you don't want to 
+overwrite, insert your pixels and then write it back. In code:
+</p>
+
+
+<pre class="proglist">
+<span class="keyw">#define</span> M4_WIDTH    <span 
+class="num">240</span>     <span class="cmt">// Width in mode 4</span>
+u16 *vid_page= vid_mem;     <span 
+class="cmt">// Point to current frame buffer
+</span>
+INLINE <span class="keyw">void</span> m4_plot(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, u8 clrid)
+{
+    u16 *dst= &amp;vid_page[(y*M4_WIDTH+x)/<span class="num">2</span>];  <span 
+class="cmt">// Division by 2 due to u8/u16 pointer mismatch!</span>
+    <span class="keyw">if</span>(x&amp;<span class="num">1</span>)
+        *dst= (*dst&amp; <span 
+class="num">0xFF</span>) | (clrid&lt;&lt;<span class="num">8</span>);    <span 
+class="cmt">// odd pixel</span>
+    <span class="keyw">else</span>
+        *dst= (*dst&amp;~<span class="num">0xFF</span>) |  clrid;        <span 
+class="cmt">// even pixel</span>
+}
+</pre>
+
+<p>
+As you can see, it's a little more complicated than 
+<code>m3_plot()</code>. It takes a lot longer to run as well.
+Still, once you have a pixel plotter, you can create other rendering 
+routines with ease. The basic code for drawing lines, rectangles, 
+circles and the like are pretty much independent of how pixels are 
+formatted. For example, drawing a rectangle is basically plotting 
+pixels in a double loop.
+</p>
+
+<pre class="proglist">
+<span class="keyw">void</span> generic_rect(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, COLOR clr)
+{
+    <span class="keyw">int</span> ix, iy;
+    <span class="keyw">for</span>(iy=top; iy&lt;bottom; iy++)
+        <span class="keyw">for</span>(ix=left; ix&lt;right; ix++)
+            generic_plot(ix, iy, clr);
+}
+</pre>
+
+<p>
+This is the generic template for a rectangle drawing routine. As long
+as you have a functional pixel plotter, you're in business. However, 
+business will be <i>very</i> slow in mode 4, because of the complicated 
+form of the plotter. In all likelihood, it'll be so slow to make it 
+useless for games. There is a way out, though. The reason 
+<code>m4_plot()</code> is slow is because you have to take care not to 
+overwrite the other pixel. However, when you're drawing a horizontal 
+line (basically the <code>ix</code> loop here), chances are that you'll 
+have to give that other pixel the same color anyway, so you needn't 
+bother with read-mask-write stuff except at the edges. The 
+implementation of this faster (<i>much</i> faster) line algorithm 
+and subsequently rectangle drawer is left as an exercise for the 
+reader. Or you can seek out <tt>tonc_bmp8.c</tt> in tonclib.
+</p>
+
+<div class="note">
+<div class="nhcare">VRAM vs byte writes</div>
+<p>
+You cannot write individual bytes into VRAM (or PALRAM or OAM for 
+that matter). Halfwords or words only, please. If you want to 
+write single bytes, you have to read the full (half)word, insert 
+the byte, and put it back.
+</p><br>
+<p>
+Please don't skip this note, and make yourself aware of the full 
+ramifications of this. Errors due to pointer-type mismatches are 
+very easy to make, and <a href="#ssec-data-memcpy">you may be writing 
+to VRAM as bytes more often than you think</a>.
+</p>
+</div>
+
+<div class="note">
+<div class="nhcare">Generic vs specific rendering routines</div>
+<p>
+Every kind of graphics surface needs its own pixel plottet.
+In principle, more complicated (multi-pixel) shapes are surface 
+independent. For example, a line routine follows the same
+algorithm, but simply uses a different plotter for drawing pixels. 
+These generic forms are great in terms of re-usability and
+maintainability, but can be <i>disastrous</i> when it comes to 
+speed. Creating surface-specific renderers may be extra work, 
+but can on occasion save you up to a factor 100 in speed.
+</p>
+</div>
+
+<h3 id="ssec-modes-details">5.2.3.
+  Complications of bitmap modes</h3>
+<p>
+While I could go on to discuss more complicated matters, such as 
+drawing rectangles and blits and text, there's very little reason to 
+do so at this junction. As I said before, the bitmap modes are
+useful to learn some basic functionality, but for most practical
+purposes, you're better off with tiled modes. 
+</p>
+<p>
+The primary issue is speed. Even simple primitives 
+such as the ones shown here can take a lot of time, especially 
+if you're not careful in your implementation. For example, a full 
+mode 3 screen-wipe would take about 60% of a VBlank <b>at best</b>! 
+In bad implementations of a screen-wipe, 
+like doing it with a rectangle drawer that calls a non-inline 
+pixel-plotting function, could take as much as 10 frames. And 
+<i>then</i> you still have to draw all your backgrounds and 
+sprites and do the game logic. The phrase &lsquo;crawling horror&rsquo; 
+somehow springs to mind at the thought of this.
+</p>
+<p>
+Aside from that, bitmap modes can use only one background and have no 
+hardware scrolling to speak of. Also, though this is jumping the
+gun a bit, it overlaps the memory that contains the sprite
+<a href="objbg.htm#sec-img"> tiles</a>, 
+which starts at <code>0601:0000h</code>. For that reason, you will 
+only be able to use sprite-tiles 512 to 1023 when in modes 3-5.
+</p>
+<p>
+Page flipping can alleviate some of these items, but that's not 
+available in mode 3. It is in mode 5, but that uses only a small 
+portion of the screen, so gaming with only that looks awkward.
+As for mode 4, well, that's one of those places where you will
+<i>really</i> see what programming close to the hardware means: 
+it doesn't allow you to write to VRAM in byte-sized chunks! 
+The only way to have a single-pixel resolution is to combine 2 
+adjacent pixels and write those, which costs a lot of extra time.
+</p>
+<p>
+So basically, use the bitmap modes for testing and/or static images, 
+but not much else unless you know the tilemodes can't do what you 
+want.
+</p>
+
+
+<div class="note">
+<div class="nhbad">Bitmap modes are not for gaming</div>
+<p>
+Do not get too comfortable with bitmap modes. They're nice for 
+gbadev introductory sections because they are easier to work with 
+than tile modes, they are <i>not</i> suitable for most types of 
+games because the GBA simply can't push pixels fast enough. 
+Tinker with them to get a feel for IO registers and the like, 
+then move on.
+</p>
+</div>
+
+
+<h2 id="sec-page">5.3.
+  Page flipping</h2>
+
+<div class="cpt_fr" style="width:216px;">
+  <img src="../img/bitmaps/pageflip.png" id="img-flip" 
+    alt="Page flipping procedure"><br>
+  <b>Fig 5.4</b>: Page flipping procedure. 
+  No data is copied, only the &lsquo;display&rsquo; and 
+  &lsquo;write&rsquo; pointers are swapped.
+</div>
+
+<p>
+Page flipping is a technique that eliminates nasty artifacts
+like tearing in animation. There are two things going on at the same 
+time in an animation: placing the pixels on bitmap (writing), and
+drawing the bitmap on screen (displaying). Software takes care of 
+writing, updating the positions of characters etc; hardware does the 
+displaying: it simply takes the bitmap and copies it to the screen. The 
+problem is that both these processes take time. What's worse, they 
+happen at the same time. And when the game state changes in mid draw, 
+the bottom section will be of the current state, while the top section 
+will represent the previous state. Needless to say, this is bad.
+</p>
+<p>
+Enter page flipping. Instead of using one single bitmap to write 
+and display, you use two. While one bitmap is displayed, you write 
+all you need onto a second bitmap (the back-buffer). Then, when you're 
+finished, you tell the hardware to display that second bitmap and you
+can prepare the next frame on the first. No artifacts whatsoever.
+</p>
+<p>
+While the procedure works great, there are some snares. For the 
+first, consider this. Given are the pointers to the two pages 
+<code>page1</code> and <code>page2</code>. Right now, 
+<code>page1</code> is displayed and
+<code>page2</code> is being prepared; so far so good. But when you 
+switch to the second page, this only makes <code>page2</code> the 
+display-page; you have to make <code>page1</code> the write-page 
+yourself! The solution to this problem is simple: use a write-buffer 
+pointer, but it can catch you off-guard if you're new to this stuff.
+</p>
+<p>
+The second problem concerns a little nasty in the age-old method of 
+animation. The canonical animation does this. Frame1: draw object. 
+Frame2: erase old object, draw object in new state. This doesn't work 
+for page flipping since Frame2 is written on an entirely different 
+bitmap than Frame1, so trying to erase Frame1's old object doesn't. 
+What you need to erase is the object from 2 frames ago. Again, easy 
+solution, but you have be aware of the problem. (Of course, erasing 
+the entire frame each time would work too, but who's got the time?)
+</p>
+
+<div class="note">
+<div class="nhgood">Pageflipping, not double buffering</div>
+<p>
+Another method of smoother animation is double buffering: draw on 
+a secondary buffer (the backbuffer) and copy it to the screen when 
+finished. This is a fundamentally different technique than page 
+flipping! Even though both use two buffers, in page flipping you 
+don't copy the backbuffer to the display buffer, you <i>make</i> 
+backbuffer the display buffer.
+</p>
+<p>
+What the GBA does is page flipping, so refer to it as such.
+</p>
+</div>
+
+<h3 id="ssec-page-gba">5.3.1.
+  GBA page flipping</h3>
+<p>
+The second page of the GBA is located at location <code>0600:A000h</code>.
+If you look at the size required for mode 3, you'll see why it doesn't
+have page-flipping capabilities: there's no room for a second page. To set 
+the GBA to display the second page, set 
+<a href="video.htm#tbl-reg-dispcnt"><code>REG_DISPCNT</code></a>{4}. 
+My page flipping function looks a little like this:
+</p>
+
+<pre class="proglist" id="cd-vid-flip">
+u16 *vid_flip()
+{
+    <span class="cmt">// toggle the write_buffer's page</span>
+    vid_page= (u16*)((u32)vid_page ^ VID_FLIP);
+    REG_DISPCNT ^= DCNT_PAGE;            <span 
+class="cmt">// update control register</span>
+    <span class="keyw">return</span> vid_page;
+}
+</pre>
+
+<p>
+The code is relatively straightforward. <code>vid_page</code> is the
+pointer that always points to the write-page. I had to pull a little 
+casting trickery to get the <code>XOR</code> to work (C doesn't like it 
+when you try it on pointers). On the GBA, the steps for page flipping 
+are perfectly xorrable operations. Sure, you <i>could</i> just put the 
+equivalent in an <code>if-else</code> block, but where's the fun in 
+that <tt>:P</tt>?
+</p>
+
+
+<h3 id="ssec-page-demo">5.3.2.
+  Page flipping demo</h3>
+<p>
+What follows is the code (sans data) for the <tt>pageflip</tt> demo. 
+The actual part concerned with page flipping is very small. In 
+fact, the actual flip is merely a call to <code>vid_flip()</code> 
+once every 60 frames = 1 second (point 3). We'll also have to set the 
+video mode to something that actually has pages to flip, which in this 
+case is mode 4.
+</p>
+<p>
+What we'll have to do as well is load the data that will be displayed 
+on these two pages. I'm using the standard C routine 
+<code>memcpy()</code> for the copy, because that's the standard way of 
+copying things in C. While it's faster than manual loops, it does come 
+with a <a href="#ssec-data-memcpy">few snares</a> that you need to 
+be aware of before using it everywhere. Tonclib comes with faster 
+and safer routines, but we'll get to those when it's time.
+</p>
+<p>
+Loading a bitmap is very simple in theory, but the bitmap(s) 
+I'm using are only 144x16 in size, while the VRAM page's pitch is 240 
+pixels wide. This means that we'll have to copy each scanline 
+separately, which is done at point (1). Note that I'm copying 
+<code>frontBitmap</code> to <code>vid_mem_front</code> and 
+<code>backBitmap</code> to <code>vid_mem_back</code>, because those 
+are the starting locations of the two pages. 
+</p>
+<p>
+Since these are mode 4 bitmaps, they'll also need a palette. Both 
+palettes use <code>frontPal</code>, but instead of using 
+<code>memcpy()</code> to copy it to the background palette memory, 
+I'm using a u32-array because &hellip; well, just because I guess.
+</p>
+<p>
+Lastly, you can pause and unpause the demo by holding down start. 
+</p>
+
+<pre class="proglist" id="cd-pageflip">
+<span class="keyw">#include</span> <span 
+class="str">&lt;string.h&gt;</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;toolbox.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&quot;page_pic.h&quot;</span>
+
+<span class="keyw">void</span> load_gfx()
+{
+    <span class="keyw">int</span> ii;
+    <span class="cmt">// (1) Because my bitmaps here don't fit the <!-- 
+--> screen size, 
+    // I'll have to load them one scanlline at a time</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">16</span>; ii++)
+    {
+        memcpy(&amp;vid_mem_front[ii*<span 
+class="num">120</span>], &amp;frontBitmap[ii*<span 
+class="num">144</span>/<span class="num">4</span>], <span 
+class="num">144</span>);
+        memcpy(&amp;vid_mem_back[ii*<span 
+class="num">120</span>], &amp;backBitmap[ii*<span 
+class="num">144</span>/<span class="num">4</span>], <span 
+class="num">144</span>);
+    }
+
+    <span class="cmt">// (2) You don't have to do everything with memcpy.
+    // In fact, for small blocks it might be better if you didn't.
+    // Just mind your types, though. No sense in copying from a 32bit 
+    // array to a 16bit one.</span>
+    u32 *dst= (u32*)pal_bg_mem;
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">8</span>; ii++)
+        dst[ii]= frontPal[ii];
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> ii=<span class="num">0</span>;
+
+    load_gfx();
+    <span class="cmt">// Set video mode to 4 (8bpp, 2 pages)</span>
+    REG_DISPCNT= DCNT_MODE4 | DCNT_BG2;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        <span class="keyw">while</span>(KEY_DOWN_NOW(KEY_START)); <span 
+class="cmt">// pause with start</span>
+        vid_vsync();
+
+        <span class="cmt">// (3) Count 60 frames, then flip pages</span>
+        <span class="keyw">if</span>(++ii == <span class="num">60</span>)
+        {   
+            ii=<span class="num">0</span>;   
+            vid_flip(); 
+        }
+    }
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="lblock">
+<div class="cpt" style="width:352px" id="img-flipdemo">
+<center>
+<img src="../img/demo/flip_front.png" alt="Flip A">
+&nbsp;&nbsp;
+<img src="../img/demo/flip_back.png" alt="Flip B"><br>
+</center>
+<b>Fig 5.5</b>: the page flipping demo switches 
+between these two blocks.
+</div></div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-data">5.4.
+  On data and how to use it</h2>
+<p>
+This section is a little boring (ok, very boring) but it needs to 
+be said. While books and tutorials on C may use data for whatever 
+purpose, they often gloss over what data actually <i>is</i> at the 
+lowest level, and how to deal with it correctly. As you'll be dealing 
+directly with hardware and memory here, it is important that you 
+are aware of these items, preferably even understand them, so that 
+they don't bite you in the ass at some later point.
+</p>
+<p>
+The first two subsections are about how to get graphics into your 
+game, something that you'll really need to know. After that I'll 
+discuss a few nasty and highly technical things that may or may not 
+cause problems later on. These are optional and you can 
+skip to the <a href="#ssec-data-demo">data-loading/interpreting demo</a> 
+at any time. That said, I urge you to read them anyway because they 
+may save you a lot of debugging time.
+</p>
+
+<div class="note">
+<div class="nhgood">Relax, it's only 1s and 0s</div>
+<p>
+When you get right down to it, everything on computers is merely a 
+big mess of bits without any purpose by itself. It is the 
+interaction between hardware and software that makes sequences of 
+bits appear as valid executable code, a bitmap, music or whatever.
+</p>
+</div>
+
+<h3 id="ssec-data-files">5.4.1.
+  Yes, we have no files</h3>
+<p>
+This may be a good point to say a few words on data. 
+Strictly speaking, <i>everything</i> is data, but in this case I'm 
+referring to data that on PC games would be separate
+from the executable: graphics, music, maybe scripts and text-files 
+and what not. This all works fine on a PC, but not so fine on the 
+GBA because there <i>is no file system</i>. This means that you 
+cannot use the standard file I/O routines (<code>fscanf()</code>,
+<code>fread()</code>, etc) to read the data, because there are no 
+files to read them from.
+</p>
+<p>
+All the game's data has to be added directly to the binary. There are 
+a number of ways to do this. The most common way is to convert the 
+raw binary files to C-arrays, then compile those and link them to the 
+project. Well, the most common among homebrewers is probably 
+converting to C-arrays and #including them, but that's something 
+that you should <i>never</i> do. Also popular are assembly arrays. 
+These are a useful alternative to C arrays because a) they 
+<i>can't</i> be #included and b) because they bypass the compilation 
+step and compilation of arrays is very intensive. Of course, you would  
+have to know how to work with the assembler. Another nice thing about 
+the assembler is that you can include binary files directly into them,
+eliminating the need for a converter. Lastly, while the GBA doesn't 
+have a native file system, you can always write your own. A common 
+one is <a href="http://www.pineight.com/gba/#gbfs" target="_blank">GBFS</a> by 
+the gbadev forum FAQ maintainer, tepples. Using a file system is
+actually the recommended method, but for now, I'll stick to
+C-arrays because they are the easiest to use.
+</p><br>
+
+<div class="note">
+<div class="nh">Ahem. Actually, we <i>do</i> have files</div>
+<p>
+There <i>were</i> no files in the past, but in July of 2006,
+<a href="http://chishm.drunkencoders.com/" target="_blank">Chishm</a> gave us 
+<tt>libfat</tt>, which is a FAT-like file system for GBA and NDS.
+It is distributed via DKP as well, so chances are you have it already.
+</p>
+</div>
+
+<h4>Where do my arrays go?</h4>
+<p>
+By default, arrays go into IWRAM. You know, the one that's only 32 kb
+long. Now, a mode 3 bitmap is 240x160x2 = 77 kb. Obviously,  
+trying to put a 77 kb object into a 32kb section would fit nicely
+into the bad things category. To avoid this, put it in the read-only 
+section (ROM), which is much larger. All you have to do for this is 
+add the &lsquo;<code>const</code>&rsquo; keyword to the definition 
+if you're using C, or the &lsquo;<code>.rodata</code>&rsquo; 
+directive in assembly. Note that for multiboot programs ROM actually 
+means EWRAM, which is only 256 kb long. The latter would fit three 
+mode 3 bitmaps; more would again be bad unless you use compression.
+</p>
+<p>
+Note that what I said about arrays is true for <i>all</i> arrays, 
+not just data arrays: if you want any kind of large array (like a 
+backbuffer for mode 3), it would also default to and <i>kill</i> 
+IWRAM. But you can't make it const because then you'd not be able to 
+write on it. GCC has attributes that lets you choose where things are 
+put &ndash; in EWRAM for instance. Here are the commonly seen #defines 
+for the attributes that can be used for specific section placement.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> EWRAM_DATA <!--
+-->__attribute__((section(<span class="str">".ewram"</span>)))
+<span class="keyw">#define</span> IWRAM_DATA <!--
+-->__attribute__((section(<span class="str">".iwram"</span>)))
+<span class="keyw">#define</span>  EWRAM_BSS <!--
+-->__attribute__((section(<span class="str">".sbss"</span>)))
+
+<span class="keyw">#define</span> EWRAM_CODE <!--
+-->__attribute__((section(<span class="str">".ewram"</span>), long_call))
+<span class="keyw">#define</span> IWRAM_CODE <!--
+-->__attribute__((section("<span class="str">.iwram"</span>), long_call))
+</pre>
+
+<div class="note">
+<div class="nhgood">Const is good</div>
+<p>
+Data that you don't expect to change in your game should be defined 
+as constant data using the &lsquo;<code>const</code>&rsquo; keyword, 
+lest it trashes your IWRAM.
+</p>
+</div>
+
+<h4>Converted and const arrays in C++</h4>
+<p>
+There are two little snags that you can trip on if you're using 
+(converted) data arrays in C++. The first is that tools that generate 
+the arrays will output C-files, not C++-files. This is not a problem 
+in itself because those files will be compiled just the same. What 
+<i>is</i> a problem is that C++ uses something known as 
+<a href="http://en.wikipedia.org/wiki/Name_mangling" target="_blank">Name mangling</a> 
+to allow overloading and stuff like that. C doesn't and as a result, 
+the name that the C++ file looks for isn't the same one as in the 
+C file and you get undefined references. To fix this, use 
+`<code>extern "C"</code>' in front or around the declarations of the 
+stuff in the C files.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// This:</span>
+
+<span class="keyw">extern</span> <span class="str">"C"</span> <span 
+class="keyw">const unsigned char</span> C_array[];
+
+<span class="cmt">// Or this:</span>
+<span class="keyw">extern</span> <span class="str">"C"</span>
+{
+<span class="keyw">const unsigned char</span> C_array1[];
+<span class="keyw">const unsigned char</span> C_array2[];
+}
+</pre>
+
+<p>
+Another problem with C++ is that const-arrays are considered static 
+(local to the file that contains it) unless you add an external 
+declaration to it. So if you just have 
+`<code>const u8 foo[]= { etc }</code>' in a file, the array will be 
+invisible to other files.The solution here would be to add the 
+declaration inside the file itself as well.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// foo.cpp. Always have an external declaration 
+// inside the file as well.</span>
+
+<span class="keyw">extern const unsigned char</span> foo[];
+
+<span class="keyw">const unsigned char</span> foo[]=
+{
+    <span class="cmt">// data</span>
+};
+</pre>
+
+
+<br>
+
+<h3 id="ssec-data-format">5.4.2.
+  Data conversion</h3>
+<p>
+It's rather easy to write a tool that converts a binary file to 
+a C or asm array. In fact, devkitARM comes with two that do just 
+that: <tt>raw2c.exe</tt> and <tt>bin2s.exe</tt>. It also comes 
+with the basic tools for gbfs by the way. But being able to attach
+binary files to your game is only part of the story. Consider a
+bitmap, for example. In principle, a bitmap is a binary file just 
+like any other. There's nothing inherently graphical about it, 
+and it doesn't magically appear as a bitmap whenever you use it by 
+itself. Yes, when you double-click on it, an image viewer may pop 
+up and display it, but that's only because there's some serious work 
+by the OS going on underneath. Which we don't have here.
+</p>
+<p>
+Most files will follow a certain format to tell it what it is, 
+and how to use it. For bitmaps, that usually means width, height, 
+bitdepths and a few other fields as well. The point is that they're 
+not directly usable. You can't just attach, say, a BMP file to your 
+project and copy it to VRAM and think that everything will work 
+out. No, you have to <i>convert</i> it to a GBA-usable format. 
+Now, you can do this internally (on the GBA itself), or externally 
+(on the PC and attach the converted data to the project). Because 
+the latter is a much more efficient use of GBA resources, that is 
+the usual procedure.
+</p>
+<p>
+There are many conversion tools, one might almost say too many. Some 
+are one-trick ponies: a single file-type to a single graphics mode 
+for example. Some are very powerful and can handle multiple file-types, 
+multiple files, different conversion modes with lots of options on the 
+side, and compression. It should be obvious which are of the most value.
+</p>
+<p>
+A good one is <a href="http://www.coranac.com/files/gba/gfx2gba.zip" target="_blank">gfx2gba</a>. 
+This is a command-line tool so that it can be used in a makefile, but 
+there is a GUI front-end for it as well. This tool has the Good Things 
+I mentioned earlier, plus some map-exporting options and palette 
+merging, but the input file must be 8bit and I hear that while it does 
+compress data, the array-size is still given as its uncompressed size 
+for some unfortunate reason. This tool comes with the HAM 
+installation, and is quite common, so definitely recommended. 
+Unfortunately, there seems to be another tool with the same name. 
+You'll want the v0.13 version by Markus, not the other one.
+</p>
+<p>
+Personally, I use 
+<a href="http://www.coranac.com/projects/#usenti" target="_blank">Usenti</a>, 
+but then I pretty much have to because its my own tool. This is actually 
+a bitmap editor with exporting options thrown in. It allows different 
+file-types, different bitdepths, different output files, all modes, 
+some map-exporting stuff, meta-tiling, compression and a few others. 
+It may not be as powerful as big photo-editing tools as PhotoShop, 
+Gimp and the like, but it gets the job done. If you're still drawing 
+your graphics with MS-Paint, please stop that and use this one instead. 
+The exporter is also available separately in the form of the open source 
+project called 
+<a href="http://www.coranac.com/projects/#grit" target="_blank">(win)grit</a>, 
+which comes in a command-line interface (grit) and a GUI (wingrit). 
+As of January 2007, it is also part of the devkitPro distribution.
+</p>
+
+<div class="note">
+<div class="nh">Bitmap conversion via CLI</div>
+<p>
+There are many command-line interfaces available for graphics 
+conversion, but to make them function you need the correct flags. 
+Here are examples for gfx2gba and grit, converting a bitmap 
+<tt>foo.bmp</tt> to a C array for modes 3, 4 and 5. This is just an 
+example, because this is not the place for a full discussion on them. 
+Look in their respective readme's for more details.
+</p>
+<pre class="proglist">
+<span class="cmt"># <b>gfx2gba</b>
+# mode 3, 5 (C array; u16 foo_Bitmap[]; foo.raw.c)</span>
+	gfx2gba -fsrc -c32k foo.bmp
+<span class="cmt"># mode 4 (C array u8 foo_Bitmap[], <!--
+-->u16 master_Palette[]; foo.raw.c, mastel.pal.c)</span>
+	gfx2gba -fsrc -c256 foo.bmp
+</pre>
+<pre class="proglist">
+<span class="cmt"># <b>grit</b>
+# mode 3, 5 (C array; u32 fooBitmap[]; foo.c foo.h)</span>
+	grit foo.bmp -gb -gB16
+<span class="cmt"># mode 4 (C array; u32 fooBitmap[], u16 fooPal[]; <!--
+-->foo.c foo.h)</span>
+	grit foo.bmp -gb -gB8
+</pre>
+</div>
+
+<div class="cpt_fr" style="width:222px;">
+<table id="tbl-endian"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 5.2</b>: Big endian vs little 
+  endian interpretation of byte-sequence 01h, 02h, 03h, 04h
+</caption>
+<tbody align="center">
+<tr>
+  <th>big u32     <td colspan=4> 0x01020304
+<tr>
+  <th>big u16     <td colspan=2> 0x0102 <td colspan=2> 0x0304
+<tr>
+  <th>u8          <th> 0x01 <th> 0x02   <th> 0x03 <th> 0x04
+<tr>
+  <th>little u16  <td colspan=2> 0x0201 <td colspan=2> 0x0403
+<tr>
+  <th>little u32  <td colspan=4> 0x04030201
+</tbody>
+</table>
+</div>
+
+<p>
+Below, you can see a partial listing of <tt>modes.c</tt>, which 
+contains the bitmap and the palette used in the <tt>bm_modes</tt> demo
+discussed at the end of this section, 
+as exported by Usenti. It is only a very small part of the file because 
+at over 2700 lines it is way too long to display here, which wouldn't 
+serve much of a purpose anyway. Note that both are u32-arrays, rather 
+than the u8 or u16-arrays you might encounter elsewhere. What you need 
+to remember is that <b>it doesn't matter</b> in what kind of an array 
+you put the data: in memory it'll come out the same anyway. 
+</p>
+<p>
+Well, that's not <i>quite</i> true. Only with u32-arrays is proper 
+<a href="#ssec-data-align">data alignment</a> guaranteed, which is 
+a good thing. More importantly, you have to be careful with the 
+byte-order of multi-byte types. This is called the <a 
+href="numbers.htm#ssec-bits-endian">endianness</a> of types. In 
+a <dfn>little endian</dfn> scheme, least significant bytes will go 
+first and in a <dfn>big endian</dfn>, most significant bytes will go 
+first. See table 2 for an example using <code>0x01</code>, 
+<code>0x02</code>, <code>0x03</code> and <code>0x04</code>. The GBA 
+is a little endian machine, so the first word of the 
+<code>modesBitmap</code> array, <code>0x7FE003E0</code> is the 
+halfwords <code>0x03E0</code> (green) followed by <code>0x7FE0</code> 
+(cyan). If you want more examples of this, open up VBA's memory 
+viewer and play around with the 8-bit, 16-bit and 32-bit settings.
+</p>
+<p>
+The key point here: the data itself doesn't change when you use 
+different data-types for the arrays, only the way you <i>represent</i> 
+it does. That was also the point of the <tt>bm_modes</tt> demo: 
+it's the same data in VRAM all the time; it's just used in a 
+different way. 
+</p>
+
+<div style="font-size:95%;">
+<pre class="proglist" id="cd-modes-bm">
+<span class="cmt">//======================================<!--
+-->================================
+//
+//  modes, 240x160@16, 
+//  + bitmap not compressed
+//  Total size: 76800 = 76800
+//
+//  Time-stamp: 2005-12-24, 18:13:22
+//  Exported by Cearn's Usenti v1.7.1
+//  (comments, kudos, flames to &quot;daytshen@hotmail.com&quot;)
+//
+//======================================================================
+</span>
+<span class="keyw">const unsigned int</span> modesBitmap[<span 
+class="num">19200</span>]=
+{
+    <span 
+class="num">0x7FE003E0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+<span class="cmt">// ...
+// over 2500 more lines like this
+// ...</span>
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+    <span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,<span 
+class="num">0x080F080F</span>,<span class="num">0x080F080F</span>,
+    <span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,<span 
+class="num">0x7FE07FE0</span>,<span class="num">0x7FE07FE0</span>,
+};
+
+<span class="keyw">const unsigned int</span> modesPal[<span 
+class="num">8</span>]=
+{
+    <span 
+class="num">0x7FE07C1F</span>,<span class="num">0x03FF0505</span>,<span 
+class="num">0x03E00505</span>,<span class="num">0x7C000000</span>,<span 
+class="num">0x0000080F</span>,<span class="num">0x00000000</span>,<span 
+class="num">0x00000000</span>,<span class="num">0x080F0000</span>,
+};
+</pre>
+</div>
+
+<p>
+Those 2700 lines represent a 77kb bitmap. One <i>single</i> bitmap. In 
+all likelihood, you'll need at least a couple of them to make anything 
+worthwhile. Most games have lots of data in them, not only graphics 
+but maps and sound and music as well. All this adds up to a huge amount 
+of data, certainly too much for just EWRAM and maybe even for a full 
+cart. That is why <dfn>compression</dfn> is also important. The 
+<a href="swi.htm">GBA BIOS</a> has decompression routines for 
+bit-packing, run-length encoding, LZ77 and Huffman. Converters 
+sometimes have the appropriate compressors for these routines, 
+which can drastically shrink the amount of memory used. Usenti and 
+(win)grit support these compressors. So does gfx2gba, which even has 
+some more. A tool that just does compression on binary files (but does 
+it very well) is <a 
+href="http://www.coranac.com/files/gba/GBACrusher.zip" target="_blank">GBACrusher</a>. 
+I won't go into compression that much (or at all), but you can read up 
+on the subject 
+<a href="http://members.iinet.net.au/~freeaxs/gbacomp/" target="_blank">here</a>.
+</p>
+
+<div class="note">
+<div class="nhgood">Understanding data</div>
+<p>
+It is vital that you understand what data is, how the different 
+datatypes work. Preferably endianness and alignment too. Emulators and 
+hex editors can help you with this. Once you have compilation working, 
+just make a few random arrays and see what they look like in the VBA 
+memory viewer for a while.
+</p>
+</div>
+
+<h3 id="ssec-data-hdr">5.4.3.
+  #including code or data considered harmful</h3>
+
+<div class="cpt_fr" style="width:240px;">
+  <img src="../img/bitmaps/bart_data.png" id="img-bart-data" 
+    alt="Lines"><br>
+  <b>Fig 5.6</b>: even Bart knows &hellip;
+</div>
+
+<p>
+Most non-trivial projects will have multiple files with code and data.
+The standard way of dealing with these is to compile these separately 
+and then link the results to the final binary. This is the recommended 
+strategy.
+However, most other tutorials and many of the example code you can find
+on the web do something else: they #include everything into the main 
+source file and compile that. This is <i>not</i> a recommended practice 
+and should be avoided.
+</p>
+<p>
+&rdquo;But why not? It seems to work fine, and it's so easy!&rdquo;
+</p>
+<p>
+Yes, it is easy; and it does seem to work. The main problem is that
+it isn't <a href="http://en.wikipedia.org/wiki/Scalability" target="_blank">scalable</a>.
+For small projects (a handful of files) you probably won't notice, 
+but as projects grow to hundreds and perhaps thousands of files, 
+you will run into some very annoying problems.
+
+The main issue is what #include actually does. It copies the whole 
+included file into the includer to form a single larger file. This 
+leads to the following issues.
+</p>
+
+<ul>
+  <li>
+    <p>
+    <b>Massive files to compile</b>. So, #including creates one big file.
+    If you have a lot of stuff, you'll have one <i>very</i> big 
+	file. This will cost large amounts of memory and slows down
+	compilation. As the project grows, what starts as a compile time of 
+	a second can grow to several, then minutes and perhaps even hours. 
+
+	</p>
+	<p>
+	At some point, there was also the problem that the compiler couldn't
+	handle files exceeding 4MB, putting a limit on how much you 
+	could #include in a C file. I'm not sure if this is still an issue.
+	</p>
+  </li>
+  <li>
+    <b>Recompiling the world</b>. The main problem is that when you #include 
+	everything, you need to recompile everything as well. If you make one 
+	change <i>anywhere</i>, no matter how small, causes	<i>everything</i> 
+	to be compiled. For small projects (say, a handful of files), a full 
+	rebuild would take a few seconds so it's not a problem. But larger 
+	projects can have hundreds or thousands of files, and the time is not
+	measured in seconds, but in minutes or perhaps hours.
+	Sure it's a good excuse to go <a href="http://xkcd.com/303/" target="_blank">sword
+	fighting</a>, but terribly annoying if you want to do something
+	productive.
+  </li>
+  <li>
+    <b>Bloat</b>. Even if your own code and data are relatively small in
+    number, you're probably using some code library for API functions. 
+    Normally, these are pre-compiled and only the functions used are 
+	linked into your binary. But if those worked by #include as well 
+	(in other words, if their creators had followed the practice I'm 
+	warning against), every function in that library would be included
+	as well, including the ones you're not using. This increases the filesize,
+	<i>and</i> increases the problems mentioned above.
+  </li>
+  <li>
+    <p>
+    <b>Undeclared identifiers, multiple	definitions and circular 
+	dependencies</b>. In a nutshell, C requires that you declare an
+	identifier before it's referenced, and it can only be defined once.
+	The first point means that the order of inclusions starts to matter:
+	if, say, <tt>fileB.c</tt> needs something from <tt>fileA.c</tt>, the
+	latter needs to be included before the former to get a compile. The
+	second means that you could only #include a file once in the whole
+	project: if <tt>fileB.c</tt> and <tt>fileC.c</tt> both need stuff 
+	from <tt>fileA.c</tt>, you can't #include it in them both because 
+	when they're #included in <tt>main.c</tt>, <tt>fileA.c</tt> is 
+	effectively #included twice and the compiler will balk.
+	</p>
+	<p>
+	These points can technically be overcome by being careful. But, 
+	again, when projects grow, things can get increasingly more 
+	difficult to keep track of which comes before what and why. There 
+	is, however, one point at which it <i>will</i> go wrong, namely 
+	when there are circular dependencies: <tt>fileB.c</tt> needs 
+	<tt>fileA.c</tt> and vice versa. Each file would require the 
+	other to go first, which simply isn't possible because it'd cause 
+	multiple definitions.
+    </p>
+  </li>
+  <li>
+    <p>
+    <b>Data alignment</b>. I'll get to what this means in a minute, but
+    right now know that copy routines work better if the data is
+    aligned to 32-bit boundaries (even for byte and halfword arrays).
+	Some of them won't even work properly if this isn't the case.
+	This is usually guaranteed if you compile separately, but if the
+	arrays are #included and no steps have been taken to force alignment,
+	you simply never know.
+	</p>
+	<p>
+	It's not much of a problem nowadays because most graphics converters
+	force data-alignment, but you still need to know about it. Because
+	data alignment is a fairly esotheric concept, it's next to impossible 
+	to track down unless you're aware of the problems it can bring.
+	</p>
+  </li>
+</ul>
+
+<p>
+So please, do yourself a favor and do not #include every file you have 
+into <tt>main.c</tt> or its moral equivalent. Put function and variable
+definitions in separate source files to be compiled separately and 
+linked later. The #include directive is only to be used for files 
+with preprocessor directives and declaractions and type definitions.
+Oh, and inline functions. Those are okay there too.
+</p>
+
+<!--
+<hr>
+
+<p>
+Most other tutorials and a lot of demo code attach the converted data 
+by #including file with the data into the main source file. This is
+a bad practice, and should not be followed.
+</p>
+<p>
+&rdquo;Why not? It seems to work fine, and it's so easy!&rdquo;
+</p>
+<p>
+Yes, it is easy, it does seem to work (for small projects anyway), 
+and everybody else seems to use it. However, it is still very, very 
+wrong. Please resist the temptation to include files with data and 
+code, and compile and link them separately as Kernighan and Ritchie
+intended. Here are a few reasons why.
+</p>
+
+<ul>
+<li>
+  <b>Massive files to compile</b>. 
+  The <code>#include</code> directive includes the whole of a file 
+  into the includer. That means you've essentially created one big file. 
+  If you do this with lots of data, you'll have one <i>very</i> big 
+  file. This will cost huge amounts of memory, and slows down  
+  compilation. Doesn't mean much at first, but as projects get bigger, 
+  it will become annoying to say the least. There also seems to be a 
+  limit on the amount of memory the compiler can use anyway, which 
+  means there is a limit on the amount of data you <i>can</i> include.
+<li>
+  <b>Recompiling the world</b>.
+  Aside from that, #including everything means compiling everything 
+  again as well. Again, on bigger projects, this can mean a lot.<br>
+  With separate compilation, you only need to re-compile 
+  files that have actually changed. This is also how libraries work: 
+  you precompile code which you can just link to your project at no 
+  extra cost.
+<li><b>Code bloat</b>.
+   When using libraries, only the parts used will actually be linked; 
+   with #include, you include <i>everything</i>, which bloats the code 
+   to no end. 
+<li>
+  <b>Multiple definitions</b>.
+  Definitions can only happen once in a file. By including everything 
+  there is the definite possibility of including the same thing multiple 
+  times, which gives &lsquo;multiple definition&rsquo; errors.
+<li>
+  <b>Data alignment</b>. I'll get to what this means in a minute, but for 
+  now know that it's best if data is aligned to word boundaries. This 
+  is usually guaranteed if you compile separately, but with #include 
+  it will almost certainly not be the case.
+</ul>
+
+<p>
+So just do yourself a favor and don't #include every file into 
+<tt>main.c</tt> or whatever you're calling it. Header files are for 
+preprocessor directives and declarations, not actual code or data. 
+If it creates binary data, do not #include it.
+</p>
+
+<div class="note">
+<div class="nhbad">Header files should not contain code or data</div>
+<p>
+The point of header files is to have <dfn>metadata</dfn>: stuff that 
+isn't compiled itself, but that <i>helps</i> you in other files. When 
+you compile code or data, it'll create <dfn>symbols</dfn>, binary 
+data of actual substance that is used by the final program itself.
+</p>
+</div>
+
+<p>
+To see how it's done properly, look at tonc's demo code. There is 
+also a good (and technical) discussion of it 
+<a href="http://forum.gbadev.org/viewtopic.php?t=8299" target="_blank">here</a>.
+</p>
+<br>
+
+-->
+
+<h3 id="ssec-data-proc">5.4.4.
+  Proper build procedure</h3>
+
+<h4>Separate compilation</h4>
+<p>
+So what do you do instead? Well, for starters keep all the code 
+and data in separate source files. Compile these separately by 
+invoking gcc on each file. This gives you a list of object files. 
+These you then link together. In batch files, you'd need to 
+add extra commands for each file, but a properly setup makefile 
+uses a list of object files, and the makefile's rules will then 
+take care of the rest automatically. Using the makefile of the 
+<a href="first.htm#ssec-2nd-make">second demo</a> as a reference, 
+you'll get something like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt"># partial makefile for using multiple source files
+# some steps omitted for clarity</span>
+
+<span class="cmt"># 3 targets for compilation</span>
+OBJS    := foo.o bar.o boo.o
+
+<span class="cmt"># link step: .o -&gt; .elf</span>
+$(PROJ).elf : $(OBJS)
+	$(LD) $^ $(LDFLAGS) -o $@
+
+<span class="cmt"># compile step .c -&gt; .o</span>
+$(OBJS) : %.o : %.c
+	$(CC) -c $&lt; $(CFLAGS) -o $@
+</pre>
+<p>
+The <code>OBJS</code> variable contains the names of three object 
+files, which would be the targets of compiling <tt>foo.c</tt>, 
+<tt>bar.c</tt> and <tt>boo.c</tt>. Remember, makefiles list rules by 
+target, not by prerequisite. The compilation step uses a static 
+pattern rule, which for each &lsquo;.o&rsquo; file in 
+<code>OBJS</code> compiles the &lsquo;.c&rsquo; file with the same 
+title. This is what runs the compiler for our three source files. 
+In the linking step the automatic variable <code>$^</code> expands 
+to the prerequisites of the rule, which is the list of all object
+files, and this is how the files are all linked together. If you
+need more files, add them to the <code>OBJS</code> list.
+</p>
+<p>
+Note that the devkitPro and tonc template files take care of these
+things automatically. Just put the source files into the right directory 
+and you're good to go.
+</p>
+
+<h4>Symbols, declarations and definitions</h4>
+<p>
+If you have been doing everything via #include, you should consider 
+refactoring all of your stuff to separate source files. No, let me 
+rephrase that, you <i>need</i> to do this because you'll benefit 
+from it in the end. If you're already well in your project, this is 
+going to suck because it's boring and time consuming and most likely 
+it's not even going to <i>work</i> properly when you try the first 
+build afterwards. I expect you'll get a whole slew of errors, 
+particularly these three:
+</p>
+
+<ul>
+  <li>`foo' undeclared
+  <li>redefinition of `foo'
+  <li>multiple definition of `foo'
+</ul>
+
+<p>
+To understand what these mean, you need to know a little bit more about 
+how C (and indeed programs) actually works.
+</p><br>
+
+<p>
+As I said before, there aren't really things like programs, bitmaps, 
+sound on computers; it's all just bits. Bits, bits and more bits. What
+makes a sequence of bits work as a program is the way it is fed to 
+the CPU, VRAM, and other sections. Somewhere in the build process, 
+there has to be a translation of all the C code to data and 
+machine instructions. This, of course, is the compiler's job.
+</p>
+<p>
+But wait, there's more. C allows you to compile each file separately, 
+and then link them later into the actual program. This is a good 
+idea, because it allows you to save time by only compiling the 
+files that you have recently modified, as well as the use of code 
+<dfn>libraries</dfn>, which are little more than a bunch of 
+precompiled source files. If you're not convinced that this is a 
+good idea, consider what it would take without it. You'd have to have 
+<i>all</i> the source code that you wanted to use (including 
+for things like <code>printf()</code> and all the API code), and 
+compile all those megabytes of source files each time. Sounds like 
+fun? No, I didn't think so either.
+</p>
+<p>
+However, you need a little more bookkeeping to make this all work. 
+Because everything is just bits, you'd need a way to find out 
+where the function or data you want to use actually is. The 
+contents of the compiled files (the object files) isn't just raw 
+binary, it contains <dfn>symbols</dfn>. This is just a word for the 
+group of things that have actual binary information attached to 
+them. Among other things, the object file keeps track of 
+the symbol's name, section, size, and where its content 
+is in the object file. A function is a symbol, because it contains
+instructions. A variable is also a symbol, as is data for bitmaps, 
+sound, maps et cetera. Preprocessor #defines, typedefs and 
+struct/class declarations are <i>not</i> symbols, because they only 
+don't have actual content in them, but allow you to structure your 
+code better.
+</p>
+<p>
+The other bookkeeping note is that each source/object file is a 
+separate entity. In principle, it knows nothing about the outside 
+world. This makes sense because it limits the dependency on other 
+files, but it does create a little problem when you want to make 
+files work together. This is where <dfn>declarations</dfn> come in.
+</p>
+<p>
+You may have noticed that C is pretty strict when it comes to 
+names of stuff. Before you can use anything, it requires you to 
+mention what it is beforehand. For example, if you use a function 
+<code>foo()</code> in your code and you never defined its code, 
+or even if you put it after the call to <code>foo()</code>, the 
+compiler will complain that it doesn't know what you're talking 
+about. That is, it will say that &lsquo;`foo' is undeclared&rsquo;. 
+You have to admit it has a right to stop there: how would it know 
+how to use the thing if you never told it what it was? 
+</p>
+<p>
+The code snippet below gives an example of when a reference is and 
+is not declared, and why it's important to have a declaration. 
+Function <code>a()</code> calls <code>foo()</code>, which is not
+known at the time, so an error is produced. Function 
+<code>b()</code> also calls <code>foo()</code>, which <i>is</i> 
+known at that time, but still gives an error because 
+<code>foo()</code> just happens to require an integer as an argument. 
+If the declaration wasn't mandatory and the call in 
+<code>a()</code> was allowed, <code>foo()</code> would have been 
+processing the wrong kind of information at runtime. There are ways 
+around such problems, of course, languages like PHP, VB and others 
+work fine without mandatory declarations, but the cost for that is 
+speed and possibly a lot more runtime errors.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//# C requires identifiers to be declared or defined before first use.</span>
+
+<span class="cmt">// ERROR: `foo' is undefined.</span>
+<span class="keyw">void</span> a()
+{
+    foo();
+}
+
+<span class="cmt">// Definition of foo(). Now the system 'knows' what foo is.</span>
+<span class="keyw">void</span> foo(<span class="keyw">int</span> x)
+{
+   <span class="cmt">// code</span>
+}
+
+<span class="cmt">// foo is known and used correctly: no errors.</span>
+<span class="keyw">void</span> b()
+{
+    foo(<span class="num">42</span>);
+}
+
+<span class="cmt">// foo is known but used incorrectly. Compiler issues error.</span>
+<span class="keyw">void</span> c()
+{
+    foo();
+}
+</pre>
+
+<p>
+Now back to our separate files, and the difference between declarations 
+and definitions of symbols. A <dfn>definition</dfn> is something of 
+actual content: it is what actually forms the symbol. Examples are the 
+value(s) in variables, and the code in functions. A 
+<dfn>declaration</dfn> is just an empty reference. It just says that 
+there is <i>something</i> in the project with a particular name, and 
+indicates how that something is supposed to be used: whether it's a 
+function or variable, what datatype, which arguments, that sort of 
+things. This is how you can use symbols from other object files.
+</p>
+<p>
+You should be familiar with what a definition looks like. A declaration 
+looks very similar. The basic variable declaration is the variable name 
+and attributes (type, const, section) preceded by <code>extern</code>. 
+For functions, replace the code block by a semi-colon. 
+You can also add <code>extern</code> there, but it's not required.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// --------------------------------------------------------------------
+// DECLARATIONS. Put these in source (.c) or header (.h) files.
+// --------------------------------------------------------------------</span>
+<span class="keyw">extern int</span> var;
+<span class="keyw">extern const unsigned int</span> data[<span 
+class="num">256</span>];
+<span class="keyw">void</span> foo(<span class="keyw">int</span> x);
+
+
+<span class="cmt">// --------------------------------------------------------------------
+// DEFINITIONS. Put these in source (.c) only.
+// --------------------------------------------------------------------</span>
+
+<span class="cmt">// uninitialized definition</span>
+<span class="keyw">int</span> var;
+
+<span class="cmt">// initialized definition</span>
+<span class="keyw">const unsigned int</span> data[<span 
+class="num">256</span>]=
+{
+    <span class="cmt">// data</span>
+};
+
+<span class="keyw">void</span> foo(<span class="keyw">int</span> x)
+{
+    <span class="cmt">// code</span>
+}
+</pre>
+
+<p>
+Now, a definition is also a declaration, but this does <i>not</i> work 
+the other way. How can it, the declaration is supposed to be empty. 
+The distinction is subtle, but it's the reason you might get multiple 
+definition errors when linking the files together. Think of what would 
+happen if you have the definition of function <code>foo()</code> 
+in multiple files. Each file itself would know what <code>foo()</code> 
+is because definitions are also declarations, so it would pass the 
+compilation stage. So now you have multiple object files, each 
+containing a symbol called <code>foo</code>. But then you try to 
+link them into one file. The linker sees different versions of 
+<code>foo</code>, and stops because it doesn't know which one you are 
+actually trying to use. The moral here is that you can have as many 
+declarations as you want, but there can be only <i>one</i> definition.
+</p>
+<p>
+Another point I should raise is that the declaration 
+defines how a symbol is to be dealt with, as it is the only point of 
+reference if the definition is in another file. This means that, in 
+theory, you could have a variable <code>var</code> defined as an int, 
+but declared as a short, or even a function! While not exactly 
+recommended, but it is an interesting item.
+</p>
+<p>
+Lastly: the distinction of what should go in source files, and 
+what in headers. Source files can actually contain anything, so that's 
+an easy one. Remember that they will contain everything after the 
+preprocessor step anyway, because that's what #include really does. 
+So what matters is what you put in headers. The purpose of header 
+files is to have a place for all the <b>non-symbol</b> stuff that you 
+want to use in different source files. That means declarations, 
+#defines, macros, typedefs, struct/class descriptions. 
+It also means (static) inline functions, because these don't form 
+symbols either, but are integrated in the functions that call them. 
+</p>
+
+<h4>Summary</h4>
+<p>
+All this stuff about separate compilation, declarations, and 
+definitions is rather important for C programming, but the preceding 
+text may be a little much to take in at once. So here is a summary of 
+the most important points.
+</p>
+
+<ul>
+<li>
+  <b>Symbols</b>. Symbols are those parts of the code that form actual 
+  binary content in the final program. This includes functions, 
+  variables, data, but not preprocessor or type description stuff.
+<li>
+  <b>Declarations/definitions</b>. A definition of a symbol is where 
+  the actual content is. A declaration just says that something of 
+  a certain name exists, but will be added to the project later. 
+  Multiple (identical) declarations may exist, but there can be only 
+  one definition in the project. Definitions are also declarations.
+<li>
+  <b>Source/object files are selfcontained entities</b>. They contain 
+  the definitions of the symbols that are in the code, and a list of 
+  references to outside symbols, as indicated by the declarations.
+<li>
+  <b>Header files contain meta-data, not symbols</b>. Header files 
+  cannot be compiled, but are intended contain the &lsquo;glue&rsquo; 
+  that allow difference sources to work together (i.e., declarations) 
+  and stuff that makes writing the sources easier (like #defines and 
+  macros). They are meant to be included in multiple files, so they 
+  cannot create symbols because that would lead to multiple 
+  definitions.
+</ul>
+
+<p>
+Potential problems during compilation or linking:
+</p>
+
+<ul>
+<li>
+  <b>`foo' undeclared</b>. Compiler error. The identifier `foo' is not 
+  known at this point. Check the spelling, or add the appropriate 
+  declaration or header file containing the declaration.
+<li>
+  <b>redefinition of `foo'</b>. Compiler error. The identifier as a 
+  previous declaration or definition conflicting with the current one 
+  in the same file or included headers. Usually accompanied by a message 
+  of the previous definition.
+<li>
+  <b>multiple definition of 'foo'</b>. Linker error. The symbol 
+  name `foo' is shared by multiple object files. Replace all but one 
+  definitions of `foo' in the source files with the appropriate 
+  declarations. Usually accompanied with a message indicating the 
+  object file with the other definition(s).
+</ul>
+
+<h3 id="ssec-data-align">5.4.5.
+  Data alignment</h3>
+<p>
+Data alignment is about the &lsquo;natural&rsquo; memory addresses of 
+variables. It is often beneficial to have a variable of a certain 
+length to start at an address divisible by that length. For example, 
+a 32-bit variable likes to be put at addresses that are a multiple of 
+4. Processors themselves also have certain preferred alignments. 
+Addressing will work faster if you stick to their native types and 
+alignment (say, 32-bit everything for 32-bit CPUs). For PCs it is not 
+required to do any of this, it'll just run slower. For RISC systems, 
+however, things <i>must</i> be aligned properly or data gets mangled. 
+</p>
+<p>
+In most cases, the compiler will align things for you. It will put 
+all halfwords on even boundaries and words on quad-byte boundaries. 
+As long as you stick to the normal programming rules, you can remain 
+completely oblivious to this alignment stuff. Except that you 
+<i>won't</i> always stick to the rules. In fact, C is a language that 
+allows you to break the rules whenever you feel like it. It trusts you 
+to know what you're doing. Whether that trust is always justified is 
+another matter <kbd>:P</kbd>
+</p>
+<p>
+The best example of breaking the rules is pointer casting. For example, 
+most graphics converters will output the data as u16-arrays, so you 
+can copy it to VRAM with a simple for-loop. You can speed up copying 
+by roughly 160% if you copy by words (32-bit) rather than 
+halfwords (16-bit). Run the <a href="text.htm#ssec-demo-se2">txt_se2</a> 
+demo and see for yourself. All you have to do for this is one or two 
+pointer casts, as shown here.
+</p>
+
+<pre class="proglist" id="cd-array-cpy">
+<span class="keyw">#define</span> fooSize ...
+<span class="keyw">const</span> u16 fooData[]= { ... };
+
+<span class="cmt">// copy via u16 array (the de facto standard)</span>
+u16 *dst= (u16*)vid_mem, *src= (u16*)fooData;
+<span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;fooSize/<span class="num">2</span>; ii++)
+    dst[ii]= src[ii];
+
+<span class="cmt">// copy via u32 array (mooch faster)</span>
+u32 *dst= (u32*)vid_mem, *src= (u32*)fooData;
+<span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;fooSize/<span class="num">4</span>; ii++)
+     dst[ii]= src[ii];
+</pre>
+
+<p>
+Both these routines copy <code>fooSize</code> bytes from 
+<code>fooData</code> to VRAM. Only the second version is much faster 
+because there are half as many loop iterations and also because the 
+ARM CPU is just better at dealing with 32-bit chunks. The only danger 
+here is that while <code>fooData</code> will be halfword aligned, 
+it need <i>not</i> be word aligned, which is a requirement for the 
+second version. For those readers that think casts like this and 
+mis-alignment only happen to other people, think again: the 
+faster copy routines (<code>memcpy()</code>, <code>CpuFastSet()</code>, 
+and DMA too) cast to word-pointers implicitly. Use them (and you 
+should) and you run the risk of misalignment.
+</p>
+<p>
+There are many ways of ensuring proper alignment. The easiest way is 
+to not mix converted data with the rest of your stuff. That is, don't 
+#include data-files. This should suffice. Another method is to 
+convert to u32-arrays in the first place. In assembly files, you can 
+control alignment by using the &lsquo;.align <i>n</i>&rsquo; 
+directive, where <i>n</i> aligns to 2<sup>n</sup> bytes. C itself 
+doesn't allow manual alignment, but there is an extension for this 
+in GCC: &lsquo;<code>__attribute__(( aligned(4) ))</code>&rsquo;. Add 
+that to the definition and it'll be word aligned. This is often 
+#defined as <code>ALIGN4</code> in some headers. Files in GBFS are 
+also always correctly aligned.
+</p>
+
+<h4>Struct alignment</h4>
+<p>
+One other area where alignment can cause problems is in struct 
+definitions. Look at the following code. Here we have a struct 
+named <code>FOO</code> consisting of one byte, <i>b</i>, one word 
+<i>w</i> and one halfword <i>h</i>. So that's 1+4+2=7 bytes for the 
+struct right? Wrong. Because of the alignment requirement, <i>w</i>
+doesn't immediately follow <i>b</i> but leaves 3 bytes of padding. 
+When defining arrays of this type, you'll also see that there 
+are also two padding bytes after <i>h</i>, because otherwise later 
+array-entries would run into trouble. 
+</p>
+
+<pre class="proglist" id="cd-struct-align">
+<span class="cmt">// one byte, one word, one halfword. 7 byte struct? 
+// Well let's see ...</span>
+<span class="keyw">struct</span> FOO
+{
+     u8 b;
+    u32 w;
+    u16 h;
+};
+
+<span class="cmt">// Define a FOO array</span>
+<span class="keyw">struct</span> FOO foos[<span class="num">4</span>]= 
+{
+    { <span class="num">0x10</span>, <span 
+class="num">0x14131211</span>, <span class="num">0x1615</span> }, 
+    { <span class="num">0x20</span>, <span 
+class="num">0x24232221</span>, <span class="num">0x2625</span> }, 
+    { <span class="num">0x30</span>, <span 
+class="num">0x34333231</span>, <span class="num">0x3635</span> }, 
+    { <span class="num">0x40</span>, <span 
+class="num">0x44434241</span>, <span class="num">0x4645</span> }, 
+};
+
+<span class="cmt">// In memory. 4x12 bytes.
+// 10 00 00 00 | 11 12 13 14 | 15 16 00 00
+// 20 00 00 00 | 21 22 23 24 | 25 26 00 00
+// 30 00 00 00 | 31 32 33 34 | 35 36 00 00
+// 40 00 00 00 | 41 42 43 44 | 45 46 00 00</span>
+</pre>
+
+<p>
+The <i>real</i> size is actually 12 bytes. Not only is this almost 
+twice the size, if you ever try to copy the array using a hard-coded 7 
+rather than <code>sizeof(struct FOO)</code>, you completely mess it 
+up. Take this lesson to heart. It's a very easy mistake to make and 
+difficult to detect after the fact. If you were unaware of this fact 
+and you've already done some GBA coding, check your structs (or 
+classes) now; chances are there are gaps that shouldn't be there. 
+Simply rearranging some of the members should suffice to make them fit 
+better. Note that this is not specific to the GBA: structs on PCs 
+may behave the same way, as I noticed when I was writing my TGA 
+functions.
+</p>
+<p>
+There are ways of forcing packing, using the 
+&lsquo;<code>__attribute__((packed))</code>&rsquo; attribute. If the 
+<code>FOO</code> struct had that, it really would be 7 bytes long. 
+The downside of this is that the non-byte members could be 
+mis-aligned and have to be put together byte for byte (the compiler 
+does this for you). This is very much slower than the non-packed 
+version, so only use this attribute if you have no other choice.
+
+
+
+
+What 
+happens with mis-aligned (half)words then I can't tell you though, but 
+I'm sure it's not pretty.
+</p>
+
+<div class="note">
+<div class="nh">Forcing alignment and packing</div>
+<p>GCC has two attributes that allow you to force alignment of arrays, 
+and remove member-alignment in structs.
+<pre class="proglist">
+<span class="cmt">// Useful macros</span>
+<span class="keyw">#define</span> ALIGN(n)    __attribute__((aligned(n)))
+<span class="keyw">#define</span> PACKED      __attribute__((packed))
+
+<span class="cmt">// force word alignment</span>
+<span class="keyw">const </span> u8 array[<span
+class="num">256</span>] ALIGN(<span class="num">4</span>) = {...};
+<span class="keyw">typedef struct</span> FOO {...} ALIGN(<span 
+class="num">4</span>) FOO;
+
+
+<span class="cmt">// force struct packing</span>
+<span class="keyw">struct</span> FOO {...} PACKED;
+</pre>
+</div>
+
+<h4 id="sssec-devkit-align">Devkits and struct alignment</h4>
+<p>
+As far as I've been able to tell, structs have always had word 
+alignment. This was useful because it made copying structs 
+faster. C allows you to copy structs with a single assignment, 
+just like the standard data types. Because of the word-alignment, 
+these copies are fast because GCC will make use of ARM's block-copy 
+instructions, which are much faster than copying member by member.
+</p>
+<p>
+However, this does not seem to be true under devkitARM r19 (and 
+presumably higher) anymore. The new rule seems to be 
+&ldquo;structs are aligned to their largest member&rdquo;. This 
+does make more sense as a struct of two bytes would actually be 
+two bytes long. However, it does mean that GCC will now call 
+<code>memcpy()</code> for non-aligned structs. Apart from it 
+being a function with quite a bit of overhead (i.e., it's 
+<i>very</i> slow if you want to copy a single small struct), 
+it will actually <b>fail</b> to produce correct results in some 
+cases. The problem is that low-number copies it will copy by the 
+byte, which is something you cannot do for VRAM, PALRAM or OAM. 
+For example, objects that we'll see later use a struct of four 
+halfwords; using a struct-copy there, something I am very fond 
+of doing, screws up everything. The only way to make it work 
+properly is to force word-alignment on the struct.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// This doesn't work on devkitARM r19 anymore</span>
+<span class="keyw">typedef struct</span> OBJ_ATTR 
+{ 
+    u16 attr0, attr1, attr2;
+    s16 fill;
+} OBJ_ATTR;
+
+OBJ_ATTR a, b;
+b= a;   <span class="cmt">// Fails because of memcpy</span>
+
+<span class="cmt">// Forcing alignment: this works properly again</span>
+<span class="keyw">typedef struct</span> OBJ_ATTR 
+{ 
+    u16 attr0, attr1, attr2;
+    s16 fill;
+} <b>ALIGN(<span class="num">4</span>)</b> OBJ_ATTR;
+
+OBJ_ATTR a, b;
+b= a;   <span class="cmt">// No memcpy == no fail and over 10 <!--
+-->times faster</span>
+</pre>
+
+<div class="note">
+<div class="nhgood">Forcing struct-alignment on devkitARM r19 is 
+  a Good Thing</div>
+<p>
+The rules for struct alignment have changed since devkitARM r19.
+Instead of being always word-aligned, they are now aligned as 
+well as their members will allow. If this means they're not 
+necessarily word-aligned, then they will use 
+<code>memcpy()</code> for struct-copies, which is slow for 
+small structs, and may even be wrong (see 
+<a href="#ssec-data-memcpy">next section</a>). If you want to 
+be able to do struct copies fast and safe, either force 
+alignment or cast to other datatypes. 
+</p>
+</div>
+
+<h3 id="ssec-data-memcpy">5.4.6.
+  Copying, memcpy() and sizeof</h3>
+<p>
+There are many different ways of copying data on this platform. Arrays, 
+struct-copies, standard copiers like <code>memcpy()</code>, and GBA 
+specific routines like <code>CpuFastSet()</code> and DMA. All of these 
+have their own strengths and weaknesses. All of them can be affected by 
+misalignment and the no-byte-write rule. I discuss some of them in the
+<a href="text.htm#ssec-demo-se2">txt_se2</a> demo.
+</p>
+<p>
+I've chosen to use <code>memcpy()</code> in the early demos for 
+a number of reasons. The main one is that it is part of the standard 
+C library, meaning that C programmers should already be familiar with 
+it. Secondly, it is somewhat optimized (see the 
+<tt>txt_se2</tt> demo for details). However, there are two potential 
+pitfalls with the routine. The first is data alignment (yes, <i>that</i> 
+again). If <i>either</i> the source <i>or</i> the destination is not 
+word-aligned, you're in trouble. Secondly, if the number of bytes is 
+too small, you're in trouble too.
+</p>
+<p>
+Both of these have to do with the basic function of 
+<code>memcpy()</code>, namely to be a fast <i>byte</i> copier. But 
+as you know, you can't copy single bytes to VRAM directly. 
+Fortunately, it has an optimised mode that uses an unrolled 
+word-copy loop if two conditions are satisfied:
+</p>
+<ol>
+  <li>When both source and destinations are word aligned.
+  <li>When you are copying more than 16 bytes.
+</ol>
+<p>
+This is usually the case so I figured it'd be safe enough for the 
+demos. There are also look-alikes in tonclib that do the same thing 
+only better, namely <code>memcpy16()</code> and 
+<code>memcpy32()</code>, but these are in assembly so I thought I 
+wouldn't lay them on you so soon. Highly recommended for later 
+though. 
+</p>
+<p>
+On a related subject, there is also <code>memset()</code> for 
+memory fills. Be careful with that one, because that will <i>only</i> 
+work with bytes. Tonclib also includes 16- and 32-bit versions of 
+this routine, but also in assembly. 
+</p><br>
+
+<p>
+The last thing I want to discuss is the <code>sizeof()</code> 
+operator. In other tutorials you will see this being used to find 
+the size in bytes of arrays, which is then used in 
+<code>memcpy()</code>. It's a good procedure but will not always 
+work. First, <code>sizeof()</code> actually gives the size of the 
+<i>variable</i>, which need not always be the array itself. For 
+example, if you use it on a pointer to the array, it'll give the 
+size of the pointer and <i>not</i> of the array. The compiler 
+never complains, but you might when hardly anything is copied. 
+Secondly, <code>sizeof()</code> is an <i>operator</i>, not a 
+function. It is resolved at compile-time, so it needs to be able 
+to find the size at that time as well. To do this, either 
+the declaration (in the header) should indicate the size, or 
+the array definition (in the source file) should be visible.
+</p>
+<p>
+Bottom line: you can use <code>sizeof()</code>, just pay attention to 
+what you use it on.
+</p><br>
+
+<p>
+Okay, that was the long and boring &ndash;yet necessary&ndash; 
+section on data. Congratulations if you've managed to stay awake till
+this point, especially if you've actually understood all of it. 
+It's okay if you didn't though, in most cases you won't run into the 
+problems discussed here. But just remember this section for if you do 
+run into trouble when copying and you can't find it in the code; it 
+might save you a few hours of debugging.
+</p>
+
+<h3 id="ssec-data-demo">5.4.7.
+  Data interpretation demo</h3>
+<p>
+The <tt>bm_modes</tt> is an example of how the same data can result 
+in different results depending on interpretation (in this case, modes 3, 
+4 and 5). In the code below, I make <i>one</i> copy into VRAM, and 
+switch between the modes using Left and Right. The results can be seen 
+in figs 5.7a-c. 
+</p>
+<p>
+I've arranged the data of the bitmap in such a way that the name of 
+the current mode can be read clearly, as well as indicated the mode's 
+boundaries in memory. Because the data intended for the other modes 
+is still present, but not interpreted as intended, that part of the 
+bitmap will look a little shitty. And that's partly the point of the 
+demo: when filling VRAM, you need to know how the GBA will use the 
+data in it, and make sure it'll be used. If the bitmap ends up being 
+all garbled, this is the likely suspect; check the bitdepth, 
+dimensions and format (linear, tiled, compressed, etc) and if 
+something conflicts, fix it.
+</p>
+<p>
+Now, sometimes this is not as easy as it sounds. The general 
+procedure for graphics is to create it on the PC, then use an exporter 
+tool to convert it to a raw binary format, then copy it to VRAM. If 
+the exporter has been given the wrong options, or if it can't handle 
+the image in the first place, you'll get garbage. This can happen 
+with some of the older tools. In some cases, it's the bitmap editor 
+that is the culprit. For paletted images, a lot depends on the 
+exact layout of the palette, and therefore it is <b>vital</b> that 
+you have a bitmap editor that allows total control over the palette, 
+and leaves it intact when saving. MS-Paint for example does neither. 
+Even very expensive photo editing tools don't, so be careful.
+</p>
+<p>
+For this image, I used &lt;plug&gt;my own bitmap editor 
+<a href="http://www.coranac.com/projects/#usenti" target="_blank">Usenti</a>&lt;/plug&gt;, 
+which not only has some nice palette control options, and tiling 
+functions, but a built-in GBA graphics exporter as well. To make the 
+background be the same color in all modes, the two bytes of the 
+16bit background color of modes 3 and 5 had to serve as palette 
+entries for mode 4, both using that 16bit color again. In this case, 
+the color is <code>0x080F</code>, sort of a brownish color. The bytes 
+are 8 and 15, so that's the palette entries where the color goes too. 
+Normally you don't have to worry about switching bitdepths mid-game, 
+but knowing how to read data like this is a useful debugging skill.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#include</span> <span class="str">&lt;string.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&quot;toolbox.h&quot;</span>
+<span class="keyw">#include</span> <span class="str">&quot;modes.h&quot;</span>
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> mode= <span class="num">3</span>;
+    REG_DISPCNT= mode | DCNT_BG2;
+
+    <span class="cmt">// Copy the data and palette to the right</span>
+    <span class="cmt">// addresses</span>
+    memcpy(vid_mem, modesBitmap, modesBitmapLen);
+    memcpy(pal_bg_mem, modesPal, modesPalLen);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        <span class="cmt">// Wait till VBlank before doing anything</span>
+        vid_vsync();
+
+        <span class="cmt">// Check keys for mode change</span>
+        key_poll();
+        <span class="keyw">if</span>(key_hit(KEY_LEFT) &amp;&amp; mode&gt;<span 
+class="num">3</span>)
+            mode--;
+        <span class="keyw">else</span> <span 
+class="keyw">if</span>(key_hit(KEY_RIGHT) &amp;&amp; mode&lt;<span 
+class="num">5</span>)
+            mode++;
+
+        <span class="cmt">// Change the mode</span>
+        REG_DISPCNT= mode | DCNT_BG2;
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="lblock">
+<table id="img-bm-modes">
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="../img/demo/bm_modes_3.png" alt="mode3 screen">
+  <b>Fig 5.7a</b>: <tt>bm_modes</tt> in mode 3.
+  </div>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="../img/demo/bm_modes_4.png" alt="mode4 screen">
+  <b>Fig 5.7b</b>: <tt>bm_modes</tt> in mode 4.
+  </div>
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+<img src="../img/demo/bm_modes_5.png" alt="mode5 screen">
+  <b>Fig 5.7c</b>: <tt>bm_modes</tt> in mode 5.
+  </div>
+<td>&nbsp;
+</table>
+</div>
+
+
+<h2 id="sec-conc">Conclusions</h2>
+<p>
+Now we've seen some of the basics of the GBA bitmap modes: the 
+properties of modes 3, 4 and 5, page flipping, rudimentary drawing 
+for mode 3 and one of the most important rules of VRAM interactions: 
+you cannot write to VRAM in bytes. There is much more that can be 
+said, of course. Bitmap graphics is a rich subject, but going into 
+more detail right now may not be the best idea. For one, the bitmap 
+modes are very rarely used in games anyway, but also because there 
+are other things to talk about as well. Things like button input, 
+which is what the next chapter is about.
+</p>
+<p>
+This chapter also discussed a few things about handling data, a very 
+important topic when you're this close to the hardware. Datatypes 
+matter, especially when accessing memory through pointers, and you 
+need to be aware of the differences between them, and the 
+opportunities and dangers of each. Even if you don't remember every 
+little detail in the data section, at least remember where to look 
+when things go screwy.
+</p>
+<p>
+Before continuing with further chapters, this may be a good time to 
+do some experimenting with data: try changing the data arrays and see
+what happens. Look at the different data interpretations, different 
+casts, and maybe some intentional errors as well, just to see what 
+kinds of problems you might face at some point. It's better to make 
+mistakes early, while programs are still short and simple and you 
+have less potential problems.
+</p><br>
+
+<p>
+Or not, of course <kbd>:P</kbd>. Maybe it's worth waiting a little 
+longer with that; or at least until we've covered basic input, which 
+allows for much more interesting things than just passive images.
+</p>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Dec 12, 2012</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="video.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="keys.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Video intro</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Keys</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

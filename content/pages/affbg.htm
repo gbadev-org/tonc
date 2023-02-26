@@ -1,0 +1,762 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+    <meta name="Author" content="Cearn">
+    <meta name="Created" content="20040307">
+    <meta name="Modified" content="20130324">
+
+    <title>Tonc: affine backgrounds</title>
+    <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="affobj.htm">Affine objects</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="gfx.htm">Graphic effects</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">12.
+  Affine backgrounds</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>.
+  <li><a href="#sec-regs">Affine background registers</a>.
+  <li><a href="#sec-aff-ofs">Positioning and transforming affine 
+    backgrounds</a>.
+  <li><a href="#sec-map">Mapping format</a>.
+  <li><a href="#sec-demo"><tt>sbb_aff</tt> demo</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">12.1.
+  Introduction</h2>
+<p>
+This section covers <dfn>affine backgrounds</dfn>: the ones on
+which you can perform an affine transformation via the <b>P</b> matrix. 
+And that's all it does. If you haven't read &ndash; and understood! &ndash; 
+the <a href="objbg.htm">sprite/bg overview</a> and the sections on
+<a href="regbg.htm">regular backgrounds</a> and the 
+<a href="affine.htm">affine transformation matrix</a>, do so before 
+continuing.
+</p><br>
+
+<p>
+If you know how to build a regular background and have understood the 
+concepts behind the affine matrix, you should have little problems 
+here. The theory behind an affine backgrounds are the same as for 
+regular ones, the practice can be different at a number of very 
+crucial points. For example, you use different registers for
+positioning and both the map-layout and their format are different.
+</p>
+<p>
+Of the four backgrounds the GBA has, only the last two can 
+be used as affine backgrounds, and only in specific video modes (see 
+table 12.1). The sizes are also different for 
+affine backgrounds. You can find a list of sizes in 
+table 12.2.
+</p>
+
+<div class="cblock">
+<table>
+<tr><td>
+  <table id="tbl-bg-types"
+    border=1 cellpadding=2 cellspacing=0 width=128>
+  <caption align="bottom">
+    <b>Table 12.1</b>: video modes and 
+	background type
+  </caption>
+  <tbody align="center">
+    <tr><th>mode	<th> 0	<th> 1	<th> 2
+    <tr><th>bg0		<td>reg	<td>reg	<td>-
+    <tr><th>bg1		<td>reg	<td>reg	<td>-
+    <tr><th>bg2		<td>reg	<td>aff	<td>aff
+    <tr><th>bg3		<td>reg	<td>-	<td>aff
+  </tbody>
+  </table>
+<td width="10%">
+<td>
+  <table id="tbl-bga-size" 
+    border=1 cellpadding=2 cellspacing=0 width=144>
+  <caption align="bottom">
+    <b>Table 12.2</b>: affine bg sizes
+  </caption>
+  <col><col class="def">
+  <tbody align="center">
+    <tr><th>Sz	  <th>define    <th>(tiles) <th>(pixels)
+    <tr><td> 00   <td>BG_AFF_16x16  <td> 16x16  <td> 128x128 
+    <tr><td> 01   <td>BG_AFF_32x32  <td> 32x32  <td> 256x256 
+    <tr><td> 10   <td>BG_AFF_64x64  <td> 64x64  <td> 512x512 
+    <tr><td> 11   <td>BG_AFF_128x128 <td>128x128 <td>1024x1024
+  </tbody>
+  </table>
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-regs">12.2.
+  Affine background registers</h2>
+<p>
+Like their regular counterparts, the primary control for affine 
+backgrounds is <code>REG_BGxCNT</code>. If you've forgotten what it
+does, you can read a description 
+<a href="regbg.htm#tbl-reg-bgxcnt">here</a>. The differences with 
+regular backgrounds are the sizes, and that <code>BG_WRAP</code> 
+actually does something now. The other important
+registers are the <dfn>displacement vector</dfn> <b>dx</b>
+(<code>REG_BGxX</code> and <code>REG_BGxY</code>), and the <dfn>affine
+matrix</dfn> <b>P</b> (<code>REG_BGxPA</code>-<code>REG_BGxPD</code>).
+You can find their addresses in table 12.3.
+</p>
+
+<div class="lblock">
+<table id="tbl-aff-regs"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 12.3</b>: Affine background 
+  register addresses. Note that <i>x</i> is 2 or 3 only!
+</caption>
+<col span=2 align="right">
+  <tr><th>Register      <th>length  <th>address
+  <tr><th>REG_BGxCNT    <td>2       <td>0400:0008h + 2·x
+
+  <tr><th>REG_BGxPA-PD  <td>2       <td>0400:0020h + 10h·(x-2)
+  <tr><th>REG_BGxX      <td>4       <td>0400:0028h + 10h·(x-2)
+  <tr><th>REG_BGxY      <td>4       <td>0400:002ch + 10h·(x-2)
+</table>
+</div>
+
+<p>
+There are a couple of things to take note of when it comes to 
+displacement and transformation of affine backgrounds. First, the 
+displacement <i>dx</i> uses different registers than regular 
+backgrounds: <code>REG_BGxX</code> and <code>REG_BGxY</code> 
+instead of <code>REG_BGxHOFS</code> and <code>REG_BGxVOFS</code>. 
+A second point here is that they are 24.8 fixed numbers rather 
+than pixel offsets. (Actually, they are 20.8 fixed numbers 
+but that's not important right now.) 
+</p>
+<p>
+I usually use the affine parameters via BG_AFFINE struct instead 
+of <code>REG_BGxPA</code>, etc. The memory map in 
+<tt>tonc_memmap.h</tt> contains a <code>REG_BG_AFFINE</code> for 
+this purpose. Setting the registers this way is advantageous at 
+times because you'll usually have a BG_AFFINE struct set up 
+already, which you can then copy to the registers with a 
+single assignment. An example of this is given below.
+</p>
+<p>
+The elements of the affine transformation matrix 
+<b>P</b> works exactly like they do for affine sprites:
+8.8 fixed point numbers that describe the transformation from 
+screen to texture space. However for affine backgrounds they 
+are stored consecutively (2 byte offset), whereas those of 
+sprites are at an 8 byte offset. You can use the 
+<code>bg_aff_foo</code> functions from 
+<tt>tonc_bg_affine.c</tt> to set them to the transformation 
+you want.
+</p>
+
+<pre class="proglist" id="cd-bga-types">
+<span class="keyw">typedef struct</span> tagBG_AFFINE
+{
+    s16 pa, pb;
+    s16 pc, pd;
+    s32 dx, dy
+} ALIGN4 BG_AFFINE;
+
+<span class="cmt">//! BG affine params array</span>
+<span class="keyw">#define</span> REG_BG_AFFINE   <!--
+-->((BG_AFFINE*)(REG_BASE+<span class="num">0x0000</span>))
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// Default BG_AFFINE data (tonc_core.c)</span>
+<span class="keyw">const</span> BG_AFFINE bg_aff_default= { <span 
+class="num">256</span>, <span class="num">0</span>, <span 
+class="num">0</span>, <span class="num">256</span>, <span 
+class="num">0</span>, <span class="num">0</span> };
+
+<span class="cmt">// Initialize affine registers for bg 2</span>
+REG_BG_AFFINE[<span class="num">2</span>] = bg_aff_default;
+</pre>
+
+<div class="note">
+<div class="nhcare">Regular vs affine tilemap scrolling</div>
+<p>
+Affine tilemaps use <b>different</b> scrolling registers! Instead of 
+REG_BG<i>x</i>HOFS and REG_BG<i>x</i>VOFS, they use REG_BG<i>x</i>X 
+and REG_BG<i>x</i>Y. Also, these are 32bit fixed point numbers, not 
+halfwords.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-aff-ofs">12.3.
+  Positioning and transforming affine backgrounds</h2>
+
+<p>
+Now that we know what the displacement and transformation registers 
+are, now let's look at what they do. This is actually a lot trickier
+subject that you might think, so pay attention. Warning: this is gonna 
+get mathematical again.
+</p><br>
+
+<p>
+The displacement vector <b>dx</b> works the same as for regular 
+backgrounds: <b>dx</b> contains the background-coordinates that are 
+mapped to the screen origin. (And <i>not</i> the other way around!)
+However, this time <b>dx</b> is in fixed number notation. Likewise, 
+the affine transformation 
+matrix <b>P</b> works the same as for affine sprites: <b>P</b> 
+describes the transformation from screen space to texture space. 
+To put it mathematically, if we define
+</p>
+
+<table id="eq-defs">
+<tr>
+  <td class="eqnrcell">(12.1a)
+  <td class="eqcell">
+    <i>T</i>(<b>dx</b>)<b>p</b> <b>:=</b> <b>p</b> + <b>dx</b><br>
+    <i>T</i><sup>&minus;1</sup>(<b>dx</b>) = <i>T</i>(&minus;<b>dx</b>)
+<tr>
+  <td class="eqnrcell">(12.1b)
+  <td class="eqcell">
+    <b>P = A</b><sup>&minus;1</sup>
+</table>
+
+<p>then</p>
+
+<table id="eq-aff-defs">
+<tr>
+  <td class="eqnrcell">(12.2a)
+  <td class="eqcell">
+    <i>T</i>(<b>dx</b>)<b>q</b> = <b>p</b>
+<tr>
+  <td class="eqnrcell">(12.2b)
+  <td class="eqcell">
+    <b>P &middot; q</b> = <b>p</b>
+</table>
+
+<p>where</p>
+
+<table cellpadding=1 cellspacing=0>
+<tr><th>p	<td>is a point in texture space,
+<tr><th>q	<td>is a point in screen space,
+<tr><th>dx	<td>is the displacement vector
+  (<code>REG_BGxX</code> and <code>REG_BGxY</code>).
+<tr><th>A	<td>is the transformation from texture to screen space,
+<tr><th>P	<td>is the transformation screen from to texture space,
+  (<code>REG_BGxPA</code>-<code>REG_BGxPD</code>).
+</table><br>
+
+<p>
+The problem with eq&nbsp;12.2 is that these only 
+describe what happens if 
+you use either a displacement or a transformation. So what happens 
+if you want to use both? This is an important question because the 
+order of transformation matters (like we have seen in the
+<a href="affobj.htm#sec-demo">affine sprite demo</a>), and this 
+is true for the order of transformation and displacement as well. 
+As it happens, translation goes first:
+</p>
+
+<table id="eq-ofs">
+<tr>
+  <td class="eqnrcell">(12.3)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>q</b>
+    <td>=
+    <td> <b>A</b> &middot; T(&minus;<b>dx</b>) <b>p</b>
+  <tr>
+    <td> T(<b>dx</b>) <b>P</b> &middot; <b>q</b>
+    <td>=
+    <td> <b>p</b>
+  <tr>
+    <td> <b>dx</b> + <b>P</b> &middot; <b>q</b>
+    <td>=
+    <td> <b>p</b>
+  </table>
+</table>
+
+<p>
+Another way to say this is that the transformation always uses the
+top left of the screen as its origin and the displacement tells which
+background pixels is put there. Of course, this arrangement
+doesn't help very much if you want to, say, rotate around some other
+point on the screen. To do that you'll have to pull a few tricks. 
+To cover them all in one swoop, we'll combine 
+eq&nbsp;12.3 and the general coordinate 
+transformation equation:
+</p>
+
+<table id="eq-aff-ofs">
+<tr>
+  <td class="eqnrcell">(12.4)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>dx + P &middot; q</b>
+	<td> =
+	<td> <b>p</b>
+  <tr>
+    <td class="bdrB"> <b>P</b> &middot; (<b>q &minus; q</b><sub>0</sub>)
+    <td class="bdrB">=
+	<td class="bdrB"> <b>p &minus; p</b><sub>0</sub>
+    <td class="bdrB">&minus;
+  <tr>
+    <td> <b>dx + P &middot; q</b><sub>0</sub>
+	<td> =
+	<td> <b>p</b><sub>0</sub>
+  <tr>
+    <td><b>dx</b>
+	<td> = 
+	<td> <b>p</b><sub>0</sub> &minus; <b>P &middot; q</b><sub>0</sub>
+  </table>
+</table>
+
+<p>
+So what the hell does <i>that</i> mean? It means that if you
+use this <b>dx</b> for your displacement vector, you perform your 
+transformation around texture point <b>p</b><sub>0</sub>, which
+then ends up at screen point <b>q</b><sub>0</sub>; 
+the <b>P</b>&middot;<b>q</b><sub>0</sub> term is the correction in 
+texture-space you have to perform to have the rotation point at 
+<b>q</b><sub>0</sub> instead of (0,0). So what the hell 
+does <i>that</i> mean? It means that before you try to use this stuff
+you should think about which effect you are actually trying to pull 
+off and that you have <i>two</i> coordinate systems to work with, 
+not one. When you do, the meaning of eq&nbsp;12.4 
+will become apparent. In any case, the function I use for this is 
+<code>bg_rotscale_ex()</code>, which basically looks like this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef struct</span> tagAFF_SRC_EX
+{
+    s32 tex_x, tex_y;	<span 
+class="cmt">// vector p0: origin in texture space (24.8f)</span>
+    s16 scr_x, scr_y;	<span 
+class="cmt">// vector q0: origin in screen space (16.0f)</span>
+    s16 sx, sy;	        <span 
+class="cmt">// scales (8.8f)</span>
+    u16 alpha;	        <span 
+class="cmt">// CCW angle ( integer in [0,0xFFFF] )</span>
+} ALIGN4 AFF_SRC_EX;
+
+<span class="keyw">void</span> bg_rotscale_ex(BG_AFFINE *bgaff, <span 
+class="keyw">const</span> AFF_SRC_EX *asx)
+{
+    <span class="keyw">int</span> sx= asx-&gt;sx, sy= asx-&gt;sy;
+    <span class="keyw">int</span> sina= lu_sin(asx-&gt;alpha), <!--
+-->cosa= lu_cos(asx-&gt;alpha);
+
+    FIXED pa, pb, pc, pd;
+    pa=  sx*cosa&gt;&gt;<span 
+class="num">12</span>;   pb=-sx*sina&gt;&gt;<span 
+class="num">12</span>;    <span class="cmt">// .8f</span>
+    pc=  sy*sina&gt;&gt;<span 
+class="num">12</span>;   pd= sy*cosa&gt;&gt;<span 
+class="num">12</span>;    <span class="cmt">// .8f</span>
+    
+    bgaff-&gt;pa= pa;  bgaff-&gt;pb= pb;
+    bgaff-&gt;pc= pc;  bgaff-&gt;pd= pd;
+
+    bgaff-&gt;dx= asx-&gt;tex_x - (pa*asx-&gt;scr_x + pb*asx-&gt;scr_y);
+    bgaff-&gt;dy= asx-&gt;tex_y - (pc*asx-&gt;scr_x + pd*asx-&gt;scr_y);
+}
+</pre>
+
+<p>
+This is very similar to the <code>obj_rotscale_ex()</code> function 
+covered in the <a href="affobj.htm#sec-combo">off-center object 
+transformation</a> section. The math is identical, but the 
+terms have been reshuffled a bit. The background version is actually 
+simpler because the affine offset correction can be done in texture 
+space instead of screen space, which means no messing about with 
+<b>P</b>'s inverse matrix. Or with sprite-size corrections, thank 
+IPU. For the record, yes you can apply the function directly to 
+<code>REG_BG_AFFINE</code>.
+</p>
+
+<h3 id="ssec-bga-refpts">12.3.1.
+  Internal reference point registers</h3>
+<p>
+There's one more important thing left to mention about the 
+displacement and transformation registers. Quoting directly from
+<a href="http://nocash.emubase.de/gbatek.htm#lcdiobgrotationscaling" target="_blank">
+GBA Tek</a> (except the bracketed parts):
+</p>
+
+<blockquote style="background:#e0e0e0;">
+The above reference points [the displacement registers] are 
+automatically copied to internal registers during each vblank,
+specifying the origin for the first scanline. The internal registers 
+are then incremented by dmx [<code>REG_BGxPB</code>] and dmy
+[<code>REG_BGxPD</code>] after each scanline. <br>
+Caution: Writing to a reference point register by software outside of 
+the Vblank period does immediately copy the new value to the
+corresponding internal register, that means: in the current frame, 
+the new value specifies the origin of the <i>current</i> scanline 
+(instead of the topmost scanline).
+</blockquote>
+
+<p>
+Normally this won't matter to you, but if you try to write to 
+<code>REG_BGxY</code> during an HBlank things, might not go as 
+expected. As I learned the hard way when I tried to get my 
+Mode 7 stuff working. This only affects affine backgrounds, though; 
+regular ones use other registers.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-map">12.4.
+  Mapping format</h2>
+<p>
+Both the map layout and screen entries for affine backgrounds are 
+very different from those of regular backgrounds. Ironically, 
+they are also a lot simpler. While regular backgrounds divide the 
+full map into quadrants (each using one full screenblock), the affine 
+backgrounds use a flat map, meaning that the normal equation for 
+getting a screenentry-number <i>n</i> works, making things a whole 
+lot easier. 
+</p>
+
+<table id="eq-aff-sid">
+<tr>
+  <td class="eqnrcell">(12.5)
+  <td class="eqcell">
+    <i>n</i> = <i>tx</i> + <i>ty</i>·<i>tw</i>
+</table>
+
+<p>
+The screen entries themselves are also different from those of regular 
+backgrounds as well. In affine maps, they are <i>1 byte long</i> and 
+only contain the index of the tile to use. Additionally, you can 
+<i>only</i> use 256 color tiles. This gives you access to all the tiles 
+in the base charblock, but not the one(s) after it.
+</p>
+<p>
+And that's about it, really. No, wait there's one more issue: you have
+to be careful when filling or changing the map because <i>VRAM can only
+be accessed 16 or 32 bits at a time</i>. So if you have your map stored 
+in an array of bytes, you'll have to cast it to <code>u16</code> or
+<code>u32</code> first. Or use <a href="dma.htm">DMA</a>. OK, now I'm 
+done.
+</p>
+
+<div class="note">
+<div class="nhcare">Regular vs affine tilemap mapping differences</div>
+<p>
+There are two important differences between regular and affine map 
+formats. First, affine screen entries are merely one-byte tile indices. 
+Secondly, the maps use a linear layout, rather than the division into 
+32x32t maps that bigger regular maps use.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">12.5.
+  <tt>sbb_aff</tt> demo</h2>
+
+<div class="cpt_fr" style="width:240px">
+<img src="../img/demo/sbb_aff.png" id="img-sbb-aff"
+  alt="sbb_aff demo">
+<b>Fig 12.1</b>: <tt>sbb_aff</tt> demo.
+</div>
+
+<p>
+<tt>sbb_aff</tt> is to affine backgrounds what
+<tt>sbb_reg</tt> was to regular ones, with a number of extras. The 
+demo uses a 64x64 tile affine background, shown in 
+fig&nbsp;12.1. This is 
+divided into 16 parts of 256 bytes, each of which is filled with tiles 
+of one color and the number of that part on it. Now, if the map-layout 
+for affine backgrounds was the same as regular ones, each part would
+form a 16x16t square. If it is a flat memory layout, each part would 
+be a 64x16t strip. As you can see in fig&nbsp;12.1, 
+it is the latter. You can also see that, unlike regular backgrounds, 
+this map doesn't wrap around automatically at the edges.
+</p>
+<p>
+The most interesting thing about the demo are the little black and white 
+crosshairs. The white crosshairs indicates the rotation point (the anchor).
+As I said earlier, you cannot 
+simply pick a map-point <b>p</b><sub>0</sub> and say that that is 
+&lsquo;the&rsquo; rotation point. Well you could, but it wouldn't give the 
+desired effect. Simply using a map-point will give you a rotating map around 
+that point, but on screen it'll always be in the top-left corner. To move 
+the map anchor to a specific location on the screen, you need an anchor 
+there as well. This is <b>q</b><sub>0</sub>. Fill both into 
+eq&nbsp;12.4 to find the displacement vector you 
+need: 
+<b>dx</b>&nbsp;=&nbsp;<b>p</b><sub>0</sub>&minus;<b>P·q</b><sub>0</sub>.
+This <b>dx</b> is going to be quite different from both 
+<b>p</b><sub>0</sub> and <b>q</b><sub>0</sub>. Its path is 
+indicated by the black crosshairs.
+</p>
+<p>
+The demo lets you control both <b>p</b><sub>0</sub> and 
+<b>q</b><sub>0</sub>. And rotation and scaling, of course. The full 
+list of controls is.
+</p>
+
+<div class="lblock">
+<table cellpadding=1 cellspacing=0>
+<tr><th>D-pad	<td>move map rotation point, <b>p</b><sub>0</sub>
+<tr><th>D-pad + A<td>move screen rotation point, <b>q</b><sub>0</sub>
+<tr><th>L,R		<td>rotate the background.
+<tr><th>B(+Se)	<td>scale up and down.
+<tr><th>St		<td>Toggle wrapping flag.
+<tr><th>St+Se	<td>Reset anchors and <b>P</b>
+</table>
+</div>
+
+
+<pre class="proglist" id="cd-sbb-aff">
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&quot;nums.h&quot;</span>
+
+<span class="keyw">#define</span> MAP_AFF_SIZE <span class="num">0x0100
+</span>
+<span class="cmt">// --------------------------------------------------------------------
+// GLOBALS
+// --------------------------------------------------------------------
+</span>
+OBJ_ATTR *obj_cross= &amp;oam_mem[<span class="num">0</span>];
+OBJ_ATTR *obj_disp= &amp;oam_mem[<span class="num">1</span>];
+
+BG_AFFINE bgaff;
+
+<span class="cmt">// --------------------------------------------------------------------
+// FUNCTIONS
+// --------------------------------------------------------------------
+</span>
+<span class="keyw">void</span> win_textbox(<span 
+class="keyw">int</span> bgnr, <span class="keyw">int</span> left, <span 
+class="keyw">int</span> top, <span class="keyw">int</span> right, <span 
+class="keyw">int</span> bottom, <span class="keyw">int</span> bldy)
+{
+    REG_WIN0H= left&lt;&lt;<span class="num">8</span> | right;
+    REG_WIN0V=  top&lt;&lt;<span class="num">8</span> | bottom;
+    REG_WIN0CNT= WIN_ALL | WIN_BLD;
+    REG_WINOUTCNT= WIN_ALL;
+    
+    REG_BLDCNT= (BLD_ALL&amp;~BIT(bgnr)) | BLD_BLACK;
+    REG_BLDY= bldy;
+
+    REG_DISPCNT |= DCNT_WIN0;
+
+    tte_set_margins(left, top, right, bottom);
+}
+
+<span class="keyw">void</span> init_cross()
+{
+    TILE cross= 
+    {{  
+        <span 
+class="num">0x00011100</span>, <span class="num">0x00100010</span>, <span 
+class="num">0x01022201</span>, <span class="num">0x01021201</span>, 
+        <span 
+class="num">0x01022201</span>, <span class="num">0x00100010</span>, <span 
+class="num">0x00011100</span>, <span class="num">0x00000000</span>,
+    }};
+    tile_mem[<span class="num">4</span>][<span class="num">1</span>]= cross;
+
+    pal_obj_mem[<span class="num">0x01</span>]= pal_obj_mem[<span 
+class="num">0x12</span>]= CLR_WHITE;
+    pal_obj_mem[<span class="num">0x02</span>]= pal_obj_mem[<span 
+class="num">0x11</span>]= CLR_BLACK;
+
+    obj_cross-&gt;attr2= <span class="num">0x0001</span>;
+    obj_disp-&gt;attr2= <span class="num">0x1001</span>;
+}
+
+<span class="keyw">void</span> init_map()
+{
+    <span class="keyw">int</span> ii;
+
+    memcpy32(&amp;tile8_mem[<span class="num">0</span>][<span 
+class="num">1</span>], nums8Tiles, nums8TilesLen/<span class="num">4</span>);
+    memcpy32(pal_bg_mem, numsPal, numsPalLen/<span class="num">4</span>);
+
+    REG_BG2CNT= BG_CBB(<span class="num">0</span>) | BG_SBB(<span 
+class="num">8</span>) | BG_AFF_64x64;
+    bgaff= bg_aff_default;
+
+    <span class="cmt">// fill per 256 screen entries (=32x4 bands)</span>
+    u32 *pse= (u32*)se_mem[<span class="num">8</span>];
+    u32 ses= <span class="num">0x01010101</span>;
+    <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;<span 
+class="num">16</span>; ii++)
+    {
+        memset32(pse, ses, MAP_AFF_SIZE/<span class="num">4</span>);
+        pse += MAP_AFF_SIZE/<span class="num">4</span>;
+        ses += <span class="num">0x01010101</span>;
+    }
+}
+
+<span class="keyw">void</span> sbb_aff()
+{
+    AFF_SRC_EX asx= 
+    {
+        <span class="num">32</span>&lt;&lt;<span class="num">8</span>, <span 
+class="num">64</span>&lt;&lt;<span class="num">8</span>,           <span 
+class="cmt">// Map coords.</span>
+        <span class="num">120</span>, <span class="num">80</span>,                <span 
+class="cmt">// Screen coords.</span>
+        <span class="num">0x0100</span>, <span class="num">0x0100</span>, <span 
+class="num">0</span>       <span class="cmt">// Scales and angle.</span>
+    };
+
+    <span class="keyw">const</span> <span 
+class="keyw">int</span> DX=<span class="num">256</span>;
+    FIXED ss= <span class="num">0x0100</span>;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        key_poll();
+
+        <span class="cmt">// dir + A : move map in screen coords</span>
+        <span class="keyw">if</span>(key_is_down(KEY_A))
+        {
+            asx.scr_x += key_tri_horz();
+            asx.scr_y += key_tri_vert();
+        }
+        <span class="keyw">else</span>    <span 
+class="cmt">// dir : move map in map coords</span>
+        {
+            asx.tex_x -= DX*key_tri_horz();
+            asx.tex_y -= DX*key_tri_vert();
+        }
+        <span class="cmt">// rotate</span>
+        asx.alpha -= <span class="num">128</span>*key_tri_shoulder();
+
+        
+        <span class="cmt">// B: scale up ; B+Se : scale down</span>
+        <span class="keyw">if</span>(key_is_down(KEY_B))
+            ss += (key_is_down(KEY_SELECT) ? -<span 
+class="num">1</span> : <span class="num">1</span>);
+
+        <span class="cmt">// St+Se : reset</span>
+        <span class="cmt">// St : toggle wrapping flag.</span>
+        <span class="keyw">if</span>(key_hit(KEY_START))
+        {
+            <span class="keyw">if</span>(key_is_down(KEY_SELECT))
+            {
+                asx.tex_x= asx.tex_y= <span class="num">0</span>;
+                asx.scr_x= asx.scr_y= <span class="num">0</span>;
+                asx.alpha= <span class="num">0</span>;
+                ss= <span class="num">1</span>&lt;&lt;<span class="num">8</span>;
+            }
+            <span class="keyw">else</span>                    
+                REG_BG2CNT ^= BG_WRAP;
+        }
+
+        asx.sx= asx.sy= (<span class="num">1</span>&lt;&lt;<span class="num">16</span>)/ss;
+
+        bg_rotscale_ex(&amp;bgaff, &amp;asx);
+        REG_BG_AFFINE[<span class="num">2</span>]= bgaff;
+
+        <span class="cmt">// the cross indicates the rotation point</span>
+        <span class="cmt">// (== p in map-space; q in screen-space)</span>
+        obj_set_pos(obj_cross, asx.scr_x-<span 
+class="num">3</span>, (asx.scr_y-<span class="num">3</span>));
+        obj_set_pos(obj_disp, (bgaff.dx&gt;&gt;<span 
+class="num">8</span>)-<span class="num">3</span>, (bgaff.dy&gt;&gt;<span 
+class="num">8</span>)-<span class="num">3</span>);
+
+        tte_printf(<span 
+class="str">&quot;#{es;P}p0\t: (%d, %d)\nq0\t: (%d, %d)\ndx\t: (%d, %d)&quot;</span>, 
+            asx.tex_x&gt;&gt;<span class="num">8</span>, asx.tex_y&gt;&gt;<span 
+class="num">8</span>, asx.scr_x, asx.scr_y, 
+            bgaff.dx&gt;&gt;<span class="num">8</span>, bgaff.dy&gt;&gt;<span 
+class="num">8</span>);
+    }   
+}
+
+<span class="keyw">int</span> main()
+{
+    init_map();
+    init_cross();
+
+    REG_DISPCNT= DCNT_MODE1 | DCNT_BG0 | DCNT_BG2 | DCNT_OBJ;
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">28</span>));
+    tte_init_con();
+    win_textbox(<span class="num">0</span>, <span 
+class="num">8</span>, <span class="num">120</span>, <span 
+class="num">232</span>, <span class="num">156</span>, <span class="num">8</span>);
+
+    sbb_aff();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Jul 17, 2009</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="affobj.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="gfx.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Affine objects</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Graphic effects</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

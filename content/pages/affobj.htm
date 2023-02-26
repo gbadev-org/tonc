@@ -1,0 +1,1458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20040301">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Affine Sprites</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="affine.htm">Affine matrix</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="affbg.htm">Affine bg</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">11.
+  Affine sprites</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Affine sprite introduction</a>.</li>
+  <li><a href="#sec-init">Affine sprite initialization</a>.</li>
+  <li><a href="#sec-artifact">Graphical artifacts</a>.</li>
+  <li><a href="#sec-demo">A very (af)fine demo</a>.</li>
+  <li><a href="#sec-combo">Off-center reference points and object 
+    combo's</a>.</li>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">11.1.
+  Affine sprite introduction</h2>
+<p>
+Essentially, <dfn>affine sprites</dfn> are still sprites. The
+difference with regular sprites is that you can perform an affine
+transformation (hence the name) on them before the rendering stage 
+by setting the right bits in the object attributes and 
+filling in the <b>P</b> matrix. You can read about affine
+transformations and the <b>P</b> matrix <a href="affine.htm">here</a>.
+It is required reading for this section, as are the
+<a href="objbg.htm">sprite and background overview</a> and the
+<a href="regobj.htm">regular sprite</a> page.
+</p>
+<p>
+You may wonder whether this is really worth a separate section. The
+short answer is yes. A longer answer is yes, because using affine 
+sprites involves a lot more math than regular sprites and I didn't 
+want to freak out the, erm, &lsquo;mathematically challenged&rsquo;.
+The section on <a href="regobj.htm">regular sprites</a> can stand on
+its own and you can use it in blissful ignorance of the nasty math 
+that it required for affine sprites.
+</p>
+
+<p>
+In this chapter we'll see how to set-up object to use affine 
+transformations. This in itself is rather easy. Also discussed are a 
+number of potential graphical problems you might run into sooner or 
+later &ndash;one of them almost immediately, actually&ndash; and how 
+to correct the sprite's position to make it seem like the 
+transformation's origin is at an arbitrary point. And, as usual, there 
+will be demo-code illustrating the various topics raised in this 
+chapter.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-init">11.2.
+  Affine sprite initialization</h2>
+<p>
+To turn a regular sprite into an affine sprite you need to do two
+things. First, set <code>OBJ_ATTR.attr0</code>{8} to indicate this is 
+a affine sprite. Second, put a number between 0 and 31 into
+<code>OBJ_ATTR.attr1</code>{8-C}. This number indicates which of 
+the 32 Object Affine Matrices (OBJ_AFFINE structures) should be 
+used. In case you've forgot, the <code>OBJ_AFFINE</code> looks like 
+this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef struct</span> OBJ_AFFINE
+{
+    u16 fill0[<span class="num">3</span>];
+    s16 pa;
+    u16 fill1[<span class="num">3</span>];
+    s16 pb;
+    u16 fill2[<span class="num">3</span>];
+    s16 pc;
+    u16 fill3[<span class="num">3</span>];
+    s16 pd;
+} ALIGN4 OBJ_AFFINE;
+</pre>
+
+<p>
+The <i>signed</i> 16bit members <code>pa, pb, pc</code> and
+<code>pd</code> are 8.8 fixed point numbers that form the actual
+matrix, which I will refer to as <b>P</b>, in correspondence with
+the elements' names. For more information about this matrix, go to the
+<a href="affine.htm">affine matrix</a> section.
+Do so now if you haven't already, because I'm not going to repeat
+it here. If all you are after is a simple scale-then-rotate
+matrix, try this: for a zoom by s<sub>x</sub> and s<sub>y</sub>
+followed by a counter-clockwise rotation by &alpha;, the correct 
+matrix is this:
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell"> <b>P</b> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>p</i><sub>a</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>b</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>p</i><sub>c</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>d</sub>
+  </tbody>
+  </table>
+  <td class="eqcell"> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>x</sub>
+    <td>&nbsp;
+    <td>&minus;sin(&alpha;) / <i>s</i><sub>x</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>sin(&alpha;) / <i>s</i><sub>y</sub>
+    <td>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>y</sub>
+  </tbody>
+  </table>
+</table>
+
+<p>
+Note that the origin of the transformation is <i>center</i> of the 
+sprite, not the top-left corner. This is worth remembering if you 
+want to align your sprite with other objects, which we'll do later.
+</p>
+
+<div class="note">
+<div class="nhgood">Essential affine sprite steps</div>
+
+<ul>
+<li>Set-up an object as usual: load graphics and palette, set 
+  REG_DISPCNT, set-up an OAM entry.
+<li>Set bit 8 of attribute 0 to enable affinity for that object, 
+  and choose an object affine matrix to use (attribute 1, bits 8-12).
+<li>Set that obj affine matrix to something other than all zeroes, 
+  for example the identity matrix.
+</ul>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-artifact">11.3.
+  Graphical artifacts</h2>
+
+
+<h3 id="ssec-clip">11.3.1.
+  The clipping and discretization artifacts</h3>
+<p>
+The procedure that the GBA uses for drawing sprites is as follows:
+the sprite forms a rectangle on the screen defined by its size. To 
+paint the screen pixels in that area (<b>q</b>) uses texture-pixel 
+<b>p</b>, which is calculated via:
+</p>
+
+<table id="eq-aff-ofs">
+<tr>
+  <td class="eqnrcell">(11.1)
+  <td class="eqcell">
+    <b>p &minus; p</b><sub>0</sub> =
+	<b>P</b> · (<b>q &minus; q</b><sub>0</sub>),
+</table>
+<p>
+where <b>p</b><sub>0</sub> and <b>q</b><sub>0</sub> are the centers
+of the sprite in texture and screen space, respectively. The code 
+below is essentially what the hardware does; it scans the 
+screen-rectangle between plus and minus the half-width and 
+half-height (half-sizes because the center is the reference point), 
+calculates the texture-pixel and plots that color.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// pseudocode for affine objects</span>
+hwidth= width/<span class="num">2</span>;   <span 
+class="cmt">// half-width of object screen canvas</span>
+hheight= hheight/<span class="num">2</span>;   <span 
+class="cmt">// half-height of object screen canvas</span>
+<span class="keyw">for</span>(iy=-hheight; iy&lt;hheight; iy++)
+{
+    <span class="keyw">for</span>(ix=-hwidth; ix&lt;hwidth; ix++)
+    {
+        px= (pa*ix + pb*iy)&gt;&gt;<span class="num">8</span>;    <span 
+class="cmt">// get x texture coordinate</span>
+        py= (pc*ix + pd*iy)&gt;&gt;<span class="num">8</span>;    <span 
+class="cmt">// get y texture coordinate</span>
+        color= GetPixel(px0+px, py0+py);   <span 
+class="cmt">// get color from (px,py)</span>
+        SetPixel(qx0+ix, qy0+iy, color);     <span 
+class="cmt">// set color to (qx, qy)</span>
+    }
+}
+</pre>
+
+<p>
+This has two main consequences, the clipping artifact and a 
+discretization artifact.
+</p><br>
+
+<div class="cpt_fr" style="width:160px;">
+<img src="../img/metr/aff_clipped.png" id="img-metr-clip" 
+  alt="defanged metroid"><br>
+<b>Fig 11.1</b>: a partially defanged metroid, 
+since the parts outside the blue square are clipped off.
+</div>
+
+<p>
+The <dfn>clipping artifact</dfn> is caused by scanning only over the 
+rectangle <b>on-screen</b>. But almost all transformations will cause 
+the texture pixels to exceed that rectangle, and the pixels outside 
+the rectangle will not be rendered. 
+Fig 11.1 shows the screen rect 
+(grey, blue border) and a rotated object (inside the red border). The 
+parts that extend the blue borderlines will not be cut off.
+</p>
+
+
+<p>
+As this is an obvious flaw, there is of course a way around it: set 
+the sprite's affine mode to <b>double-sized affine</b> 
+(<code>ATTR0_AFF_DBL</code>, <code>OBJ_ATTR.attr0</code>{8,9}). 
+This will double the screen range of valid <b>q</b> coordinates, 
+so you'd have + and &minus; the width and height to play with instead 
+of the half-sizes.
+This double (well quadruple, really) area means that you can safely 
+rotate a sprite as the maximum distance from the center is 
+&frac12;&radic;2 &asymp; 0.707. Of course, you can still get the 
+clipping artifact if you scale up beyond the doubled ranges. Also, 
+note that the sprites' origin is shifted to the center of this 
+rectangle, so that <b>q</b><sub>0</sub> is now one full 
+sprite-size away from the top-left corner. 
+</p>
+<p>
+The double-size flag also has a second use. Or perhaps I should say
+misuse. If you set it for a regular sprite, it will be hidden. This
+is an alternative way to hide unused sprites.
+</p><br>
+
+<p>
+The second artifact, if you can call it that, is a 
+<dfn>discretization</dfn> artifact. This is a more subtle point than 
+the clipping artifact and you might not even ever notice it. The 
+problem here is that the transformation doesn't actually take place 
+at the center of the object, but at the <b>center pixel</b>, rounded 
+up. As an example, look at fig&nbsp;11.2. 
+Here we have a number-line from 
+0 to 8; and in between them 8 pixels from 0 to 7. The number at the 
+center is 4, of course. The central pixel is 4 as well, however its 
+location is actually halfway between numbers 4 and 5. This creates an 
+unbalance between the number of pixels on the left and on the right.
+</p>
+<p>
+The center pixel is the reference point of the transformation 
+algorithm, which has indices (ix,&nbsp;iy) = (0,&nbsp;0). Fill that 
+into the equations and you'll see that this is invariant under the 
+transformation, even though mathematically it should not. This has 
+consequences for the offsets, which are calculated from the pixel, 
+not the position. In fig&nbsp;11.2, 
+there are 4 pixels on the left, but only 3 on the right. A mirroring 
+operation that would center on pixel 4 would effectively move 
+the sprite one pixel to the right. 
+</p>
+<p>
+Fig 11.3 shows how this affects rotations. 
+It displays lines every grey gridlines every 8 pixels and a 16x16 
+sprite of a box. Note that at the start the right and left sides do 
+not lie on the gridlines, because the sprite's width and height is 
+16, not 17. The other figures are rotations in increments of 90&deg;, 
+which gives nice round numbers in the matrix. When rotating, the 
+center pixel (the red dot in the middle) stays in the same position, 
+and the rest rotate around it, and this process will carry the edges 
+out of the designated 16x16 box of the sprite (the dashed lines).
+</p>
+
+<div class="cblock">
+<table>
+<tbody valign="top">
+<tr>
+  <td>
+  <div class="cpt_fr" style="width:288px;">
+  <img src="../img/affine/numline.png" id="img-numline" width="288"
+    alt="Numbers vs pixels"><br>
+  <b>Fig 11.2</b>: pixels are between, 
+    not on, coordinates.
+  </div></td>
+  <td>
+  <div class="cpt_fr" style="width:320px;">
+  <img src="../img/affine/numalgor.png" id="img-aff-algor" width="320"
+    alt="Rotations"><br>
+  <b>Fig 11.3</b>: Rotations in 90&deg; 
+    increments.
+  </div></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+<div class="nhcare">The offsets measure distance from the center pixel, not 
+center position.</div>
+<p>
+The offsets that are calculated from the affine matrix use the 
+distances from the center pixel (<i>w</i>/2, <i>h</i>/2), not the 
+center point. As such, there is a half a pixel deviation from the 
+mathematical transformation, which may result in a &plusmn;pixel offset 
+for the sprite as a whole and lost texture edges.
+</p>
+</div>
+
+
+<h3 id="ssec-wrap">11.3.2.
+  The wrapping artifact</h3>
+<p>
+Apart from the clipping artifact, there seems to be another; one that
+I have actually never seen mentioned anywhere. It's what I call the
+wrapping artifact. As you know, the position for sprites is given in
+a 9bit <i>x</i>-value and an 8bit <i>y</i>-value, which values wrap
+around the screen. For <i>x</i>, you can just interpret this as
+having the [-256, 255] range. For <i>y</i> values, you can't really
+do that because the top value for a signed 8bit integer is 127, which
+would mean that you'd never be able to put a sprite at the bottom
+32 lines. But since the values wrap around, it all works out in the
+end anyway. With one exception.
+</p>
+<p>
+There's never any trouble with regular sprites, and hardly any for
+affine sprites; the one exception is when you have a 64x64 or 32x64
+affine sprite with the double size flag switched on. Such a sprite
+has a bounding box of 128x128. Now there are three different ways of
+interpreting the meaning of <i>y</i> &gt; 128:
+</p>
+
+<ol>
+  <li>Full-wrap: the top of the sprite would show at the bottom of
+    the screen, and vice versa.
+  <li>Positive precedence: consider the [128, 159] range as indicative
+    of the bottom of the screen, and forget the wrap.
+  <li>Negative precedence: if <i>y</i> value would make the sprite appear
+    partially at the top, consider it to be negative, again neglecting
+    the wrap.
+</ol>
+
+<p>
+As it happens, the GBA uses the third interpretation. In other words, it
+uses
+</p>
+
+<pre class="proglist">
+<span class="cmt">// pseudo code</span>
+if(oam.y + bbox_height &gt; 256)
+    oam.y -= 256;
+</pre>
+
+<p>
+Note, by the way, that VBA and BoycottAdvance both use interpretation #2,
+which may seem more logical, but is incorrect. As you can tell, it can
+only happen with a 32x64 or 64x64, double-sized sprite, and even then
+you'll only notice it under very specific conditions, namely if the
+transformed sprite has visible pixels inside the top 32 lines of the
+bounding box. In the case that you have this problem, as far as I can
+tell the only way to get the sprite showing at the bottom of the
+screen is if you reduce the height to 32 for the time being.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">11.4.
+  A very (af)fine demo</h2>
+
+<p>
+I have a really interesting demo for you this time called 
+<tt>obj_aff</tt>. It features a normal (boxed) metroid, which 
+can be scaled, rotated and scaled. Because these transformations 
+are applied to the <i>current</i> state of the matrix, you can 
+end up with every kind of affine matrix possible by concatenating 
+the different matrices. The controls are as follows:
+</p>
+
+<div class="lblock">
+<table cellspacing=0>
+<col valign="top">
+<tr><th>L,R<td>Rotates the sprite CCW and CW, respectively.
+<tr><th>D-pad<td>Shears the sprite.
+<tr><th>D-pad+Sel<td>Moves sprite around.
+<tr><th>A,B<td>Expands horizontally or vertically, respectively.
+<tr><th>A,B+Sel<td>Shrinks horizontally or vertically, respectively.
+	(I ran out of buttons, so had to do it like this).
+<tr><th>Start<td>Toggles double-size flag. Note that a) the corners
+  of a rotated sprite are no longer clipped and b) the position shifts
+	by 1/2 sprite size.
+<tr><th>Start+Sel<td>Resets <b>P</b> to normal.
+<tr><th>Select<td>Control button (see A, B and Start).
+</table>
+</div>
+
+<p>
+The interesting point of seeing the transformations back to back is 
+that you can actually see the difference between, for example, 
+a scaling followed by a rotation (<b>A</b>=<b>S</b>&middot;<b>R</b>), 
+and a rotate-then-scale (<b>A</b>=<b>R</b>&middot;<b>S</b>). 
+Figs 11.4 and 11.5
+show this difference for a 45&deg; rotation and a 2&times; vertical 
+scale. Also, note that the corners are cut off here: the 
+clipping artifact at work &ndash; even though I've already set the 
+double-size flag here.
+</p>
+
+<div class="cblock">
+<table>
+<tr>
+<td>
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/obj_aff_rs.png" id="img-obj-aff-rs" 
+  alt="R*S affine object."><br>
+<b>Fig 11.4</b>: 
+  <tt>obj_aff</tt>, via <b>S</b>(1,2), then <b>R</b>(45&deg;)
+</div>
+<td>
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/obj_aff_sr.png" id="img-obj-aff-sr"
+  alt="S*R affine object."><br>
+<b>Fig 11.5</b>: 
+  <tt>obj_aff</tt>, via <b>R</b>(45&deg;), then <b>S</b>(1,2)
+</div>
+</table>
+</div>
+
+<p>
+The full source code for the <tt>obj_aff</tt> demo is given below. 
+It's quite long, mostly because of the amount of code necessary for 
+managing the different affine states that can be applied. The 
+functions that actually deal with affine sprites are 
+<code>init_metr()</code>, <code>get_aff_new()</code> and part of 
+the game loop in <code>objaff_test()</code>; the rest is essentially 
+fluff required to making the whole thing work.
+</p>
+
+<pre class="proglist" id="cd-obj-aff">
+<span class="cmt">// obj_aff.c</span>
+
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+
+<span class="keyw">#include</span> <span class="str">&quot;metr.h&quot;</span>
+
+OBJ_ATTR obj_buffer[<span class="num">128</span>];
+OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
+
+
+<span class="cmt">// affine transformation constants and variables</span>
+<span class="keyw">enum</span> eAffState
+{
+    AFF_NULL=<span 
+class="num">0</span>, AFF_ROTATE, AFF_SCALE_X, AFF_SCALE_Y, 
+    AFF_SHEAR_X, AFF_SHEAR_Y, AFF_COUNT
+};
+
+<span class="cmt">// 'speeds' of transformations</span>
+<span class="keyw">const</span> <span 
+class="keyw">int</span> aff_diffs[AFF_COUNT]= { <span 
+class="num">0</span>, <span class="num">128</span>, <span 
+class="num">4</span>, <span class="num">4</span>, <span 
+class="num">4</span>, <span class="num">4</span> };
+<span class="cmt">// keys for transformation direction</span>
+<span class="keyw">const</span> <span 
+class="keyw">int</span> aff_keys[AFF_COUNT]=
+{ <span 
+class="num">0</span>, KEY_L, KEY_SELECT, KEY_SELECT, KEY_RIGHT, KEY_UP };
+<span class="keyw">int</span> aff_state= AFF_NULL, aff_value= <span 
+class="num">0</span>;
+
+
+<span class="keyw">void</span> init_metr()
+{
+    <span class="cmt">// Places the tiles of a <!--
+-->4bpp metroid sprite into LOW obj VRAM</span>
+    memcpy32(tile_mem[<span 
+class="num">4</span>], metr_boxTiles, metr_boxTilesLen/<span 
+class="num">4</span>);
+    memcpy32(pal_obj_mem, metrPal, metrPalLen/<span class="num">4</span>);
+
+    <span class="cmt">// Set up main metroid</span>
+    obj_set_attr(obj_buffer, 
+        ATTR0_SQUARE | <b>ATTR0_AFF</b>,          <span 
+class="cmt">// Square affine sprite</span>
+        ATTR1_SIZE_64 | <b>ATTR1_AFF_ID(<span 
+class="num">0</span>)</b>,   <span 
+class="cmt">// 64x64, using obj_aff[0]</span>
+        <span class="num">0</span> | <span 
+class="num">0</span>);                            <span 
+class="cmt">// palbank 0, tile 0</span>
+    obj_set_pos(obj_buffer, <span class="num">96</span>, <span 
+class="num">32</span>);
+    <b>obj_aff_identity(&amp;obj_aff_buffer[<span class="num">0</span>])</b>;
+
+    <span class="cmt">// Set up shadow metroid</span>
+    obj_set_attr(&amp;obj_buffer[<span class="num">1</span>], 
+        ATTR0_SQUARE | ATTR0_AFF,           <span 
+class="cmt">// Square affine sprite</span>
+        ATTR1_SIZE_64 | ATTR1_AFF_ID(<span class="num">31</span>),   <span 
+class="cmt">// 64x64, using obj_aff[0]</span>
+        ATTR2_PALBANK(<span class="num">1</span>) | <span 
+class="num">0</span>);              <span 
+class="cmt">// palbank 1, tile 0</span>
+    obj_set_pos(&amp;obj_buffer[<span class="num">1</span>], <span 
+class="num">96</span>, <span class="num">32</span>);
+    obj_aff_identity(&amp;obj_aff_buffer[<span class="num">31</span>]);
+
+    oam_update_all();
+}
+
+<span class="keyw">int</span> get_aff_state()
+{
+    <span class="keyw">if</span>(key_is_down(KEY_L | KEY_R))
+        <span class="keyw">return</span> AFF_ROTATE;
+    <span class="keyw">if</span>(key_is_down(KEY_A))
+        <span class="keyw">return</span> AFF_SCALE_X;
+    <span class="keyw">if</span>(key_is_down(KEY_B))
+        <span class="keyw">return</span> AFF_SCALE_Y;
+    <span class="keyw">if</span>(key_is_down(KEY_LEFT | KEY_RIGHT))
+        <span class="keyw">return</span> AFF_SHEAR_X;
+    <span class="keyw">if</span>(key_is_down(KEY_UP | KEY_DOWN))
+        <span class="keyw">return</span> AFF_SHEAR_Y;
+    <span class="keyw">return</span> AFF_NULL;
+}
+
+<span class="keyw">void</span> get_aff_new(OBJ_AFFINE *oa)
+{
+    <span class="keyw">int</span> diff= aff_diffs[aff_state];
+    aff_value += (key_is_down(aff_keys[aff_state]) ? diff : -diff);
+
+    <span class="keyw">switch</span>(aff_state)
+    {
+    <span class="keyw">case</span> AFF_ROTATE:    <span 
+class="cmt">// L rotates left, R rotates right</span>
+        aff_value &amp;= SIN_MASK;
+        obj_aff_rotate(oa, aff_value);
+        <span class="keyw">break</span>;
+    <span class="keyw">case</span> AFF_SCALE_X:   <span 
+class="cmt">// A scales x, +SELECT scales down</span>
+        obj_aff_scale_inv(oa, (<span class="num">1</span>&lt;&lt;<span 
+class="num">8</span>)-aff_value, <span class="num">1</span>&lt;&lt;<span 
+class="num">8</span>);
+        <span class="keyw">break</span>;
+    <span class="keyw">case</span> AFF_SCALE_Y:   <span 
+class="cmt">// B scales y, +SELECT scales down</span>
+        obj_aff_scale_inv(oa, <span class="num">1</span>&lt;&lt;<span 
+class="num">8</span>, (<span class="num">1</span>&lt;&lt;<span 
+class="num">8</span>)-aff_value);
+        <span class="keyw">break</span>;
+    <span class="keyw">case</span> AFF_SHEAR_X:   <span 
+class="cmt">// shear left and right</span>
+        obj_aff_shearx(oa, aff_value);
+        <span class="keyw">break</span>;
+    <span class="keyw">case</span> AFF_SHEAR_Y:   <span 
+class="cmt">// shear up and down</span>
+        obj_aff_sheary(oa, aff_value);
+        <span class="keyw">break</span>;
+    <span class="keyw">default</span>:            <span 
+class="cmt">// shouldn't happen</span>
+        obj_aff_identity(oa);
+    }
+}
+
+<span class="keyw">void</span> objaff_test()
+{
+    OBJ_ATTR *metr= &amp;obj_buffer[<span 
+class="num">0</span>], *shadow= &amp;obj_buffer[<span class="num">1</span>];
+    OBJ_AFFINE *oaff_curr= &amp;obj_aff_buffer[<span class="num">0</span>]; 
+    OBJ_AFFINE *oaff_base= &amp;obj_aff_buffer[<span class="num">1</span>]; 
+    OBJ_AFFINE *oaff_new=  &amp;obj_aff_buffer[<span class="num">2</span>];
+
+    <span class="keyw">int</span> x=<span 
+class="num">96</span>, y=<span class="num">32</span>;
+    <span class="keyw">int</span> new_state;
+    
+    <span class="cmt">// oaff_curr = oaff_base * oaff_new</span>
+    <span class="cmt">// oaff_base changes when the aff-state changes</span>
+    <span class="cmt">// oaff_new is updated when it doesn't</span>
+    obj_aff_identity(oaff_curr);
+    obj_aff_identity(oaff_base);
+    obj_aff_identity(oaff_new);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        key_poll();
+
+        <span class="cmt">// move sprite around</span>
+        <span class="keyw">if</span>( <!--
+-->key_is_down(KEY_SELECT) &amp;&amp; key_is_down(KEY_DIR) )
+        {
+            <span class="cmt">// move</span>
+            x += <span class="num">2</span>*key_tri_horz();
+            y += <span class="num">2</span>*key_tri_vert();
+
+            obj_set_pos(metr, x, y);
+            obj_set_pos(shadow, x, y);
+            new_state= AFF_NULL;
+        }
+        <span class="keyw">else</span>    <span 
+class="cmt">// or do an affine transformation</span>
+            new_state= get_aff_state();
+        
+        <span class="keyw">if</span>(new_state != AFF_NULL)   <span 
+class="cmt">// no change</span>
+        {
+            <span class="keyw">if</span>(new_state == aff_state)  <span 
+class="cmt">// increase current transformation</span>
+            {
+                get_aff_new(oaff_new);
+                obj_aff_copy(oaff_curr, obj_aff_base, <span 
+	class="num">1</span>);
+                obj_aff_postmul(oaff_curr, oaff_new);
+            }
+            <span class="keyw">else</span>        <span 
+class="cmt">// switch to different transformation type</span>
+            {
+                obj_aff_copy(oaff_base, oaff_curr, <span 
+class="num">1</span>);
+                obj_aff_identity(oaff_new);
+                aff_value= <span class="num">0</span>;
+            }
+            aff_state= new_state;
+        }
+        
+        <span class="cmt">// START: toggles double-size flag</span>
+        <span 
+class="cmt">// START+SELECT: resets obj_aff to identity</span>
+        <span class="keyw">if</span>(key_hit(KEY_START))
+        {
+            <span class="keyw">if</span>(key_is_down(KEY_SELECT))
+            {
+                obj_aff_identity(oaff_curr);
+                obj_aff_identity(oaff_base);
+                obj_aff_identity(oaff_new);
+                aff_value= <span class="num">0</span>;
+            }
+            <span class="keyw">else</span>
+            {
+                metr-&gt;attr0 ^= ATTR0_DBL_BIT;
+                shadow-&gt;attr0 ^= ATTR0_DBL_BIT;
+            }
+        }
+        
+        vid_vsync();
+
+        <span class="cmt">// we only have one OBJ_ATTR, so update that</span>
+        obj_copy(obj_mem, obj_buffer, <span class="num">2</span>);
+
+        <span class="cmt">// we have 3 OBJ_AFFINEs, update these separately</span>
+        obj_aff_copy(obj_aff_mem, obj_aff_buffer, <span class="num">3</span>);
+
+        <span class="cmt">// Display the current matrix</span>
+        tte_printf(<span class="str">"#{es;P:8,136}P =  "
+            "#{y:-7;Ps}| %04X\t%04X#{Pr;x:72}|"
+            "#{Pr;y:12}| %04X\t%04X#{Pr;p:72,12}|"</span>, 
+            (u16)oaff_curr-&gt;pa, (u16)oaff_curr-&gt;pb, 
+            (u16)oaff_curr-&gt;pc, (u16)oaff_curr-&gt;pd);
+    }
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+    oam_init(obj_buffer, <span class="num">128</span>);
+    init_metr();
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">28</span>));
+    tte_init_con();
+    tte_set_margins(<span class="num">8</span>, <span 
+class="num">128</span>, <span class="num">232</span>, <span class="num">160</span>);
+
+    objaff_test();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+Making the metroid an affine sprite is all done inside 
+<code>init_metr()</code>. As you've seen how bits are set a number of 
+times by now, it should be understandable. That said, do note that 
+I am filling the first OBJ_AFFINE (the one that the sprite uses) 
+to the identity matrix <b>I</b>. If you keep this fully zeroed-out, 
+you'll just end up with a 64x64-pixel rectangle of uniform color. 
+Remember that <b>P</b> contains pixel offsets; if they're all zero, 
+there is no offset and the origin's color is used for the whole 
+thing. In essence, the sprite is scaled up to infinity. 
+</p>
+<p>
+To be frank though, calling <code>obj_aff_identity()</code> isn't 
+necessary after a call to <code>oam_init()</code>, as that 
+initializes the matrices as well. Still, you need to be aware of 
+potential problems.
+</p><br>
+
+<p>
+That's the set-up, now for how the demo does what it does. At any 
+given time, you will have some transformation matrix, <b>P</b>. By 
+pressing a button (or not), a small transformation of the current 
+state will be performed, via matrix multiplication. 
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    <b>P</b><sub>new</sub> =
+    <b>P</b><sub>old</sub> · <b>D</b><sup>&minus;1</sup>,
+</table>
+
+<p>
+where <b>D</b> is either a small rotation (<b>R</b>), scaling (<b>S</b>)
+or shear (<b>H</b>). Or a no-op (<b>I</b>). However, there is a little 
+hitch here. This would work nice in theory, but in <i>practice</i>, it 
+won't work well because the fixed point matrix multiplications will 
+result in unacceptable round-off errors very very quickly. Fortunately, 
+all these transformations have the convenient property that
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    <b>D</b>(a)·<b>D</b>(b) = <b>D</b>(c).
+</table>
+
+<p>
+That is to say, multiple small transformations work as one big one. All 
+you have to do is keep track of the current chosen transformation 
+(the variable <code>aff_state</code>, in <code>get_aff_state()</code>), 
+modify the state variable (<code>aff_value</code>), then calculate full 
+transformation matrix (<code>get_aff_new()</code>) and apply that (with 
+<code>obj_aff_postmul()</code>). When a different transformation type 
+is chosen, the current matrix is saved, the state value is reset and 
+the whole thing continues with that state until yet another is picked.
+The majority of the code is for keeping track of these changes; it's not 
+pretty, but it gets the job done.
+</p><br>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-combo">11.5.
+  Off-center reference points and object combos</h2>
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/metr/rot_ofs.png" id="img-rot-ofs" 
+  alt="Rotation around off-center point"><br>
+<b>Fig 11.6</b>: rotation of object around an 
+  off-center point.
+</div>
+<p>
+As mentioned earlier, affine sprites always use their centers as
+affine origins, but there are times when one might want to use 
+something else to rotate around &ndash; to use another point as the 
+reference point. Now, you can't actually do this, but you can make 
+it <i>look</i> as if you can. To do this, I need to explain a few 
+things about what I like to call anchoring. The <dfn>anchor</dfn> is 
+the position that is supposed to remain &lsquo;fixed&rsquo;; the 
+spot where the texture (in this case the object) is anchored 
+to the screen. 
+</p>
+<p>
+For anchoring, you actually need one set of coordinates for each 
+coordinate-space you're using. In this case, that's two: the texture 
+space and the screen space. Let's call these points 
+<b>p</b><sub>0</sub> and <b>q</b><sub>0</sub>, respectively. Where 
+these actually point <i>from</i> is largely immaterial, but for 
+convenience' sake let's use the screen and texture origins for 
+this.
+These points are only the start. In total, there are 
+<i>seven</i> vectors that we need to take into account for the full 
+procedure, and they are all depicted in 
+fig&nbsp;11.6. Their meanings are explained in 
+the table below.
+</p>
+
+<div class="lblock">
+
+<table border=0 cellpadding=1 cellspacing=0>
+<tbody valign="top">
+<tr align="left"> <th width=48>point</th>		<th>description</th> </tr>
+<tr>
+  <td> <b>p</b><sub>0</sub>, <b>q</b><sub>0</sub> </td>
+  <td> Anchors in texture and screen space. </td>
+</tr>
+<tr>
+  <td> <b>c</b><sub>p</sub>, <b>c</b><sub>q</sub> </td>
+  <td> 
+    Object centers in texture and screen space. With the 
+    object sizes, <b>s</b>=(w,h), we have
+    <b>c</b><sub>p</sub>=&frac12;<b>s</b> and 
+	<b>c</b><sub>q</sub>=<i>m</i><b>s</b>, where <i>m</i> is 
+	  &frac12; or 1, depending on the double-size flag.
+  </td>
+</tr>
+<tr>
+  <td> <b>r</b><sub>p</sub>, <b>r</b><sub>q</sub> </td>
+  <td> Distances between object centers and anchors. By definition, 
+	<b>r</b><sub>p</sub> = <b>P</b>·<b>r</b><sub>q</sub></td>
+</tr>
+<tr>
+  <td> <b>x</b> </td>	<td>Desired object coordinates.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+Yes, it is a whole lot of vectors, but funnily enough, most are 
+already known. The center points 
+(<b>c</b><sub>p</sub> and <b>c</b><sub>q</sub>) can be derived from 
+the objects size and double-size status, the anchors are known in 
+advance because those are the input values, and 
+<b>r</b><sub>p</sub> and <b>r</b><sub>q</sub> fit the general 
+equation for the affine transformation, eq&nbsp;1, so this links the two 
+spaces. All that's left now is to write down and solve the set of 
+equations.
+</p>
+
+<table id="eq-aff-ex-base">
+<tr>
+  <td class="eqnrcell">(11.2)</td>
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>x</b> + <b>c</b><sub>q</sub> + <b>r</b><sub>q</sub> </td>
+    <td> = </td>
+    <td> <b>q</b><sub>0</sub> </td>
+  </tr>
+  <tr>
+    <td> <b>c</b><sub>p</sub> + <b>r</b><sub>p</sub> </td>
+    <td> = </td>
+    <td> <b>p</b><sub>0</sub> </td>
+  </tr>
+  <tr>
+    <td> <b>r</b><sub>p</sub> </td>
+    <td> = </td>
+    <td> <b>P</b>·<b>r</b><sub>q</sub> </td>
+  </tr>
+  </table>
+  </td>
+</tr>
+</table>
+
+<p>
+Three equations with three unknowns, means it is solvable. I won't 
+post the entire derivation because that's not all that difficult; 
+what you see in eq&nbsp;11.3 is the end result 
+in the most usable form.
+</p>
+
+<table id="eq-aff-ex">
+<tr>
+  <td class="eqnrcell">(11.3)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tbody valign="middle">
+  <tr>
+    <td> <b>x</b>
+    <td>=
+    <td> <b>q</b><sub>0</sub> &minus; <i>m</i><b>s</b> &minus; 
+	  <b>P</b><sup>&minus;1</sup>·
+	  (<b>p</b><sub>0</sub> &minus; &frac12;<b>s</b>)
+  </tbody>
+  </table>
+</table>
+
+<p>
+The right-hand side here has three separate vectors, two of which 
+are part of the input, a scaling flag for the double-size mode, and 
+the inverted affine matrix. Yes, I did say inverted. This is here 
+because the translations to position the object correctly mostly 
+take place in screen-space. The whole term using it is merely 
+<b>r</b><sub>q</sub>, the transformed difference between anchor and 
+center in texture space, which you need for the final correction.
+</p>
+<p>
+Now, this matrix inversion means two things. First, that you will 
+likely have to set-up <i>two</i> matrices: the affine matrix itself, 
+and its inverse. For general matrices, this might take a while, 
+especially when considering that if you want scaling, you will have 
+to do a division somewhere. Secondly, because you only have 16bits 
+for the matrix elements, the inverse won't be the <i>exact</i> 
+inverse, meaning that aligning the objects exactly will be difficult, 
+if not actually impossible. This is pretty much guaranteed by 
+the hardware itself and I'll return to this point later on. For now, 
+let's look at a function implementing 
+eq&nbsp;11.3 in the case of a 2-way scaling 
+followed by a rotation.
+</p>
+
+<pre class="proglist" id="cd-oe-rs-ex">
+<span class="cmt">// === in tonc_types.h ===</span>
+
+<span class="cmt">// This is the same struct that's used in BgAffineSet, 
+// where it is called <i>BGAffineSource</i>, even though its uses go 
+// beyond just backgrounds.</span>
+<span class="keyw">typedef struct</span> tagAFF_SRC_EX
+{
+    s32 tex_x, tex_y;   <span 
+class="cmt">// vector p0: anchor in texture space (.8f)</span>
+    s16 scr_x, src_y;   <span 
+class="cmt">// vector q0: anchor in screen space (.0f)</span>
+    s16 sx, sy;         <span 
+class="cmt">// scales (Q.8)</span>
+    u16 alpha;          <span 
+class="cmt">// CCW angle ( integer in [0,0xFFFF] )</span>
+} AFF_SRC_EX;
+
+<span class="cmt">// === in tonc_core.c === </span>
+<span class="cmt">// Usage: oam_sizes[shape][size] is (w,h)</span>
+<span class="keyw">const</span> u8 oam_sizes[<span 
+class="num">3</span>][<span class="num">4</span>][<span 
+class="num">2</span>]=
+{
+    { { <span class="num">8</span>, <span class="num">8</span>}, {<span 
+class="num">16</span>,<span class="num">16</span>}, {<span 
+class="num">32</span>,<span class="num">32</span>}, {<span 
+class="num">64</span>,<span class="num">64</span>} }, 
+    { {<span class="num">16</span>, <span class="num">8</span>}, {<span 
+class="num">32</span>, <span class="num">8</span>}, {<span 
+class="num">32</span>,<span class="num">16</span>}, {<span 
+class="num">64</span>,<span class="num">32</span>} },
+    { { <span class="num">8</span>,<span class="num">16</span>}, { <span 
+class="num">8</span>,<span class="num">32</span>}, {<span 
+class="num">16</span>,<span class="num">32</span>}, {<span 
+class="num">32</span>,<span class="num">64</span>} },
+};
+
+<span class="cmt">// === in tonc_obj_affine.c ===</span>
+<span class="keyw">void</span> obj_rotscale_ex(OBJ_ATTR *obj, <!--
+-->OBJ_AFFINE *oa, AFF_SRC_EX *asx)
+{
+    <span 
+class="keyw">int</span> sx= asx-&gt;sx, sy= asx-&gt;sy;
+    <span class="keyw">int</span> sina= lu_sin(asx->alpha)&gt;&gt;<span 
+class="num">4</span>, cosa= lu_cos(asx->alpha)&gt;&gt;<span 
+class="num">4</span>;
+
+    <span class="cmt">// <b>(1)</b> calculate P</span>
+    oa-&gt;pa= sx*cosa&gt;&gt;<span class="num">8</span>;     <!--
+-->oa-&gt;pb= -sx*sina&gt;&gt;<span class="num">8</span>;
+    oa-&gt;pc= sy*sina&gt;&gt;<span class="num">8</span>;     <!--
+-->oa-&gt;pd=  sy*cosa&gt;&gt;<span class="num">8</span>;
+
+    <span class="cmt">// <b>(2)</b> set-up and calculate A= P^-1</span>
+    <span class="cmt">// sx = 1/sx, sy = 1/sy (.12f)</span>
+    sx= Div(<span class="num">1</span>&lt;&lt;<span 
+class="num">20</span>, sx);
+    <span class="keyw">if</span>(sx != sy)
+        sy= Div(<span class="num">1</span>&lt;&lt;<span 
+class="num">20</span>, sy);
+    <span class="keyw">else</span>
+        sy= sx;
+    FIXED aa, ab, ac, ad;   <span class="cmt">// .8f</span>
+    aa=  sx*cosa&gt;&gt;<span class="num">12</span>;   <!--
+-->ab= sy*sina&gt;&gt;<span class="num">12</span>;
+    ac= -sx*sina&gt;&gt;<span class="num">12</span>;   <!--
+-->ad= sy*cosa&gt;&gt;<span class="num">12</span>;
+
+    <span class="cmt">// <b>(3)</b> get object size</span>
+    sx= oam_sizes[obj-&gt;attr0&gt;&gt;<span 
+class="num">14</span>][obj-&gt;attr1&gt;&gt;<span 
+class="num">14</span>][<span class="num">0</span>];
+    sy= oam_sizes[obj-&gt;attr0&gt;&gt;<span 
+class="num">14</span>][obj-&gt;attr1&gt;&gt;<span 
+class="num">14</span>][<span class="num">1</span>];
+
+    <span class="cmt">// <b>(4)</b> calculate dx = <!--
+--> q0 - ms - A*(p0-s/2)</span>
+    <span class="keyw">int</span> dx= asx-&gt;src_x, <!--
+-->dy= asx-&gt;src_y;   <span class="cmt">// .0f</span>
+    <span class="keyw">if</span>(obj-&gt;attr0&amp;ATTR0_DBL_BIT)
+    {   dx -= sx;       dy -=sy;        }
+    <span class="keyw">else</span>
+    {   dx -= sx&gt;&gt;<span class="num">1</span>;    <!--
+-->dy -= sy&gt;&gt;<span class="num">1</span>;    }
+
+    sx= asx-&gt;tex_x - (sx&lt;&lt;<span class="num">7</span>);      <span 
+class="cmt">// .8f</span>
+    sy= asx-&gt;tex_y - (sy&lt;&lt;<span class="num">7</span>);      <span 
+class="cmt">// .8f</span>
+    dx -= (aa*sx + ab*sy)&gt;&gt;<span class="num">16</span>;      <span 
+class="cmt">// .0 - (.8f*.8f/.16f)</span>
+    dy -= (ac*sx + ad*sy)&gt;&gt;<span class="num">16</span>;      <span 
+class="cmt">// .0 - (.8f*.8f/.16f)</span>
+
+    <span class="cmt">// <b>(5)</b> update OBJ_ATTR</span>
+    obj_set_pos(obj, dx, dy);
+}
+</pre>
+
+<p>
+The <code>AFF_SRC_EX</code> struct and <code>oam_sizes</code> arrays
+are supporting entities of the function that does the positioning, 
+which is <code>obj_rotscale_ex()</code>. This creates the affine matrix 
+(<code>pa-pd</code>), and carries out all the necessary steps for 
+eq&nbsp;11.3, namely create the inverse matrix 
+<b>A</b> (<code>aa-ad</code>), calculate all the offsets and 
+correcting for the sizes, and finally updating the OBJ_ATTR. Note 
+that the fixed point accuracy varies a lot, so it is important to 
+comment often on this 
+</p>
+<p>
+As I said, this is not a particularly fast function; it takes roughly 
+a scanline worth of cycles. If you need more speed, I also have a 
+thumb-asm version which is about 40% faster. 
+</p>
+
+<h3 id="ssec-combo-demo">11.5.1.
+  Affine object combo demo</h3>
+<div class="cpt_fr" style="width:64px;">
+<img src="../img/demo/oac_orb.png" id="img-oac-orb"
+  width=64 alt=""><br>
+<b>Fig 11.7</b>: object for <tt>oacombo</tt>.
+</div>
+<p>
+The demo for this section, <tt>oacombo</tt>, will display three 
+versions of essentially the same object, namely the circle of 
+11.7. The difference between them is in how 
+they are constructed
+</p> 
+
+<ol start=0>
+  <li> 1 32x32p object, full circle.
+  <li> 2 32x16p objects, two semi-circles.
+  <li> 4 16x16p objects, four quarter-circles.
+</ol>
+
+<p>
+The point of this demo will be to rotate them and position the 
+components of the combined sprites (<dfn>object combos</dfn>) 
+as if they were a single sprite. This requires off-center anchors 
+and therefore ties in nicely with the subject of this section. To 
+manage the combos, I make use of the following struct.
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef struct</span> OACOMBO
+{
+    OBJ_ATTR *sub_obj; <span 
+class="cmt">// obj pointer for sub-objects</span>
+    POINT *sub_pos;     <span 
+class="cmt">// Local sub-object coords (.8f)</span>
+    <span class="keyw">int</span> sub_count;      <span 
+class="cmt">// Number of sub-objects</span>
+    POINT pos;          <span 
+class="cmt">// Global position (.8f)</span>
+    POINT anchor;       <span class="cmt">// Local anchor (.8f)</span>
+    s16 sx, sy;         <span class="cmt">// scales (.8f)</span>
+    u16 alpha;          <span class="cmt">// CCW angle</span>
+} OACOMBO;
+</pre>
+
+<p>
+Each combo is composed of <code>sub_count</code> objects; 
+<code>sub_oe</code> is a pointer to the array storing these objects, 
+and <code>sub_pos</code> is a pointer to the list of (top-left) 
+coordinates of these objects, relative to the top-left of the full 
+sprite. This global position is in <code>pos</code>. The 
+anchor (in <code>anchor</code>) is also relative to this position. 
+The global screen-anchor would be at <code>pos+anchor</code>, and 
+the texture-anchor of sub-object <i>ii</i> at 
+<code>anchor-sub_pos[ii]</code>.
+</p>
+<p>
+The rotation will take place around the center of the circle, so 
+that's an anchor of (16,16). Or, rather (16,16)*256 because they're 
+.8 fixed point numbers, but that's not important right now. For the 
+full circle, this will be the center of the object, but it'll still 
+need to be corrected for the double-size flag. For the other combos, 
+the anchor will <i>not</i> be at the center of their sub-objects.
+</p>
+<p>
+Because the sub-objects share the same <b>P</b> matrix, it'd be a 
+waste to recalculate it the whole time, so I'm using a modified 
+version of it especially tailored to <code>OACOMBO</code> structs 
+called <code>oac_rotscale()</code>. The code is basically the same 
+though. The <code>oacs[]</code> array forms the three combos, which 
+are initialized at definition because that makes things so much 
+easier. The full circle is at (16,20), the semis at (80,20) and 
+the one composed of quarter circles is at (48,60). The 
+<code>obj_data[]</code> array contains the data for our seven 
+objects, and is copied to <code>obj_buffer</code> in the initialization
+function. While it is generally true that magic numbers (such as 
+using hex for OAM attributes) are evil, it is also true that 
+they really aren't central to this story and to spend a lot of 
+space on initializing all of them in the &lsquo;proper&rsquo; 
+fashion may actually do more harm than good &hellip; this time. 
+I am still using #defines for the anchor and a reference point 
+though, because they appear multiple times in the rest 
+of the code.
+</p>
+
+<pre class="proglist" id="cd-oacombo">
+<span class="cmt">// oacombo.c</span>
+
+<span class="keyw">#include</span> <span 
+class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;ton.h&gt;</span>
+
+
+<span class="keyw">#include</span> <span 
+class="str">&quot;oac_gfx.h&quot;</span>
+
+<span class="keyw">#define</span> AX   (<span 
+class="num">16</span>&lt;&lt;<span class="num">8</span>)     <span 
+class="cmt">// X-anchor</span>
+<span class="keyw">#define</span> AY   (<span 
+class="num">16</span>&lt;&lt;<span class="num">8</span>)     <span 
+class="cmt">// Y-anchor</span>
+<span class="keyw">#define</span> X0    <span 
+class="num">120</span>        <span class="cmt">// base X</span>
+<span class="keyw">#define</span> Y0    <span 
+class="num">36</span>         <span class="cmt">// base Y
+
+<span class="cmt">// === GLOBALS ========================================================</span>
+
+OBJ_ATTR obj_buffer[<span class="num">128</span>];
+OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
+
+// Obj templates</span>
+<span class="keyw">const</span> OBJ_ATTR obj_data[<span 
+class="num">7</span>]=
+{
+    <span 
+class="cmt">// obj[0]  , oaff[0]: 1 full 32x32p double-affine circle</span>
+    { <span class="num">0x0300</span>, <span 
+class="num">0x8200</span>, <span class="num">0x0000</span>, <span 
+class="num">0x0000</span> }, 
+    <span 
+class="cmt">// obj[1-2], oaff[1]: 2 32x16p double-affine semi-circles </span>
+    { <span class="num">0x4300</span>, <span 
+class="num">0x8200</span>, <span class="num">0x0000</span>, <span 
+class="num">0x0000</span> }, 
+    { <span class="num">0x4300</span>, <span 
+class="num">0x8200</span>, <span class="num">0x0008</span>, <span 
+class="num">0x0000</span> }, 
+    <span 
+class="cmt">// obj[3-7], oaff[1]: 4 16x16p double-affine quarter-circles</span>
+    { <span class="num">0x0300</span>, <span 
+class="num">0x4400</span>, <span class="num">0x0010</span>, <span 
+class="num">0x0000</span> }, 
+    { <span class="num">0x0300</span>, <span 
+class="num">0x4400</span>, <span class="num">0x0014</span>, <span 
+class="num">0x0000</span> }, 
+    { <span class="num">0x0300</span>, <span 
+class="num">0x4400</span>, <span class="num">0x0018</span>, <span 
+class="num">0x0000</span> }, 
+    { <span class="num">0x0300</span>, <span 
+class="num">0x4400</span>, <span class="num">0x001C</span>, <span 
+class="num">0x0000</span> }, 
+};
+
+POINT sub_pos[<span class="num">7</span>]=
+{
+    {<span class="num">0</span>,<span class="num">0</span>},
+    {<span class="num">0</span>,<span class="num">0</span>},{<span 
+class="num">0</span>,AY}, 
+    {<span class="num">0</span>,<span class="num">0</span>},{AX,<span 
+class="num">0</span>}, {<span class="num">0</span>,AY},{AX,AY}, 
+};
+
+OACOMBO oacs[<span class="num">3</span>]=
+{
+    <span class="cmt">// full 32x32p double-affine circle</span>
+    { &amp;obj_buffer[<span class="num">0</span>], &amp;sub_pos[<span 
+class="num">0</span>], <span class="num">1</span>, 
+        {(X0-<span class="num">48</span>)&lt;&lt;<span 
+class="num">8</span>, Y0&lt;&lt;<span class="num">8</span>}, {AX, AY}, <span 
+class="num">256</span>, <span class="num">256</span>, <span 
+class="num">0</span> },
+    <span class="cmt">// 2 32x16p double-affine semi-circles</span>
+    { &amp;obj_buffer[<span class="num">1</span>], &amp;sub_pos[<span 
+class="num">1</span>], <span class="num">2</span>, 
+        {(X0+<span class="num">16</span>)&lt;&lt;<span 
+class="num">8</span>, Y0&lt;&lt;<span class="num">8</span>}, {AX, AY}, <span 
+class="num">256</span>, <span class="num">256</span>, <span 
+class="num">0</span> },
+    <span class="cmt">// 4 16x16p double-affine quarter-circles</span>
+    { &amp;obj_buffer[<span class="num">3</span>], &amp;sub_pos[<span 
+class="num">3</span>], <span class="num">4</span>, 
+        {(X0-<span class="num">16</span>)&lt;&lt;<span 
+class="num">8</span>, (Y0+<span class="num">40</span>)&lt;&lt;<span 
+class="num">8</span>}, {AX, AY}, <span class="num">256</span>, <span 
+class="num">256</span>, <span class="num">0</span> },
+};
+
+<span class="keyw">void</span> oac_rotscale(OACOMBO *oac)
+{
+    <span class="keyw">int</span> alpha= oac-&gt;alpha;
+    <span class="keyw">int</span> sx= oac-&gt;sx, sy= oac-&gt;sy;
+    <span class="keyw">int</span> sina= lu_sin(alpha)&gt;&gt;<span 
+class="num">4</span>, cosa= lu_cos(alpha)&gt;&gt;<span 
+class="num">4</span>;
+    
+    <span class="cmt">// --- create P ---</span>
+    OBJ_AFFINE *oaff= 
+        &amp;obj_aff_buffer[BF_GET(oac-&gt;sub_obj-&gt;attr1, ATTR1_AFF_ID)];
+    oaff-&gt;pa=  cosa*sx&gt;&gt;<span class="num">8</span>;    <!--
+-->oaff-&gt;pb= -sina*sx&gt;&gt;<span class="num">8</span>;
+    oaff-&gt;pc=  sina*sy&gt;&gt;<span class="num">8</span>;    <!--
+-->oaff-&gt;pd=  cosa*sy&gt;&gt;<span class="num">8</span>;
+
+    <span class="cmt">// --- create A ---</span>
+    <span class="cmt">// sx = 1/sx, sy = 1/sy (.12f)</span>
+    sx= Div(<span class="num">1</span>&lt;&lt;<span 
+class="num">20</span>, sx);
+    <span class="keyw">if</span>(sx != sy)
+        sy= Div(<span class="num">1</span>&lt;&lt;<span 
+class="num">20</span>, sy);
+    <span class="keyw">else</span>
+        sy= sx;
+    FIXED aa, ab, ac, ad;
+    aa=  sx*cosa&gt;&gt;<span class="num">12</span>;   <!--
+-->ab= sy*sina&gt;&gt;<span class="num">12</span>;    <span 
+class="cmt">// .8f</span>
+    ac= -sx*sina&gt;&gt;<span class="num">12</span>;   <!--
+-->ad= sy*cosa&gt;&gt;<span class="num">12</span>;    <span 
+class="cmt">// .8f</span>
+
+    <span class="keyw">int</span> ii;
+    OBJ_ATTR *obj= oac-&gt;sub_obj;
+    POINT *pt= oac-&gt;sub_pos;
+    <span class="cmt">// --- place each sub-object ---</span>
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;oac-&gt;sub_count; ii++)
+    {
+        <span class="keyw">int</span> dx, dy;     <span 
+class="cmt">// all .8f</span>
+        sx= oam_sizes[obj-&gt;attr0&gt;&gt;<span 
+class="num">14</span>][obj-&gt;attr1&gt;&gt;<span 
+class="num">14</span>][<span class="num">0</span>]&lt;&lt;<span 
+class="num">7</span>;
+        sy= oam_sizes[obj-&gt;attr0&gt;&gt;<span 
+class="num">14</span>][obj-&gt;attr1&gt;&gt;<span 
+class="num">14</span>][<span class="num">1</span>]&lt;&lt;<span 
+class="num">7</span>;
+        
+        dx= oac-&gt;pos.x+oac-&gt;anchor.x - sx;  <span 
+class="cmt">// .8f</span>
+        dy= oac-&gt;pos.y+oac-&gt;anchor.y - sy;  <span 
+class="cmt">// .8f</span>
+        
+        <span class="keyw">if</span>(obj-&gt;attr0&amp;ATTR0_DBL_BIT)
+        {   dx -= sx;   dy -= sy;   }
+
+        sx= oac-&gt;anchor.x - pt-&gt;x - sx;
+        sy= oac-&gt;anchor.y - pt-&gt;y - sy;
+
+        dx -= (aa*sx + ab*sy)&gt;&gt;<span 
+class="num">8</span>;       <span class="cmt">// .8f</span>
+        dy -= (ac*sx + ad*sy)&gt;&gt;<span 
+class="num">8</span>;       <span class="cmt">// .8f      </span>
+        BF_SET(obj-&gt;attr0, dy&gt;&gt;<span 
+class="num">8</span>, ATTR0_Y);
+        BF_SET(obj-&gt;attr1, dx&gt;&gt;<span 
+class="num">8</span>, ATTR1_X);
+
+        obj++;   pt++;
+    }
+}
+
+<span class="keyw">void</span> init_main()
+{
+    memcpy32(pal_obj_mem, oac_gfxPal, oac_gfxPalLen/<span 
+class="num">4</span>);
+    memcpy32(tile_mem[<span class="num">4</span>], oac_gfxTiles, <!--
+-->oac_gfxTilesLen/<span class="num">4</span>);
+
+    <span class="cmt">// init objs and obj combos</span>
+    oam_init();
+    memcpy32(obj_buffer, obj_data, <span 
+class="keyw">sizeof</span>(obj_data)/<span class="num">4</span>);
+
+    REG_DISPCNT= DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">28</span>));
+    tte_init_con();
+
+    <span class="cmt">// Some labels</span>
+    tte_printf(<span 
+class="str">"#{P:%d,%d}1 full #{P:%d,%d}2 semi #{P:%d,%d}4 quarts"</span>, 
+        X0-<span class="num">48</span>, Y0-<span 
+class="num">16</span>, X0+<span class="num">20</span>, Y0-<span 
+class="num">16</span>, X0-<span class="num">20</span>, Y0+<span class="num">74</span>);
+}
+
+<span class="keyw">int</span> main()
+{
+    init_main();
+
+    <span class="keyw">int</span> ii, alpha=<span class="num">0</span>;
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        key_poll();
+        alpha -= <span class="num">128</span>*key_tri_shoulder();
+
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">3</span>; ii++)
+        {
+            oacs[ii].alpha= alpha;
+            oac_rotscale(&amp;oacs[ii]);
+        }
+        oam_copy(oam_mem, obj_buffer, <span class="num">128</span>);
+    }
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<div class="cpt_fr" style="width:272px;">
+<img src="../img/demo/oacombo.png" id="img-oacombo" width=272
+  alt=""><br>
+<b>Fig 11.8</b>: <tt>oacombo</tt> in action. 
+Note the gaps.
+</div>
+
+<p>
+Fig 11.8 on the right shows a screenshot of 
+the demo. There are three main things to point out here. First, 
+all three objects are indeed roughly the same shape, meaning that 
+the function(s) work. But this was never really much in doubt 
+anyway, since it just follows the math. The second point is that 
+there appear to be gaps in the semi- and quarter-circle combos. 
+If you play with the demo yourself for a while, you'll see these 
+gaps appear and disappear seemingly at random. Meanwhile, the 
+full-circle object looks fine throughout. Well mostly anyway.
+</p>
+<p>
+The cause of this is related to the third point. Compare the pixel 
+clusters of all three circles, in particular the smaller circles 
+within each of them. Note that even though they use the <b>exact</b> 
+same <b>P</b> matrix, their formations are different! The 
+reason for this is that while we may have positioned the sub-objects 
+to make them form a bigger object, the pixel-mapping for each 
+of them <i>still</i> starts at their centers. This means that the 
+cumulative offsets that determine which source pixel is used for 
+a given screen pixel will be different and hence you'll get a 
+different picture, which is especially visible at the seams. 
+</p>
+<p>
+If this is a little hard to visualize, try this: open a bitmap editor 
+and draw a single-width diagonal line. Now duplicate this with a 
+(1,&nbsp;1) pixel offset. Instead of a single thick line, you'll 
+have two thin ones with a slit in between. The same thing happens 
+here.
+</p><br>
+
+<p>
+The point is that getting affine objects to align perfectly at the 
+seams will be pretty much impossible. Alright, I suppose in some 
+simple cases you might get away with it, and you could spend time 
+writing code that corrects the textures to align properly, but 
+generally speaking you should expect a hardware-caused uncertainty 
+of about a pixel. This will be a noticeable effect at the off-center 
+reference point, which will tend to wobble a bit, or at the seams of 
+affine object combos, where you'll see gaps. A simple solution 
+to the former would be to rearrange the object's tiles so that 
+the ref-point is not off-center (sounds cheap I know, but works 
+beautifully), or to have transparent pixels there &ndash; you can't 
+notice something wobbling if it's invisible, after all.  This would 
+also work for the combo, which might also benefit from having the 
+objects overlap slightly, although I haven't tried that yet. It 
+<i>may</i> be possible to gain some accuracy by adding rounding 
+terms to the calculations, but I have a hunch that it won't do that 
+much. Feel free to try though.
+</p><br>
+
+<p>
+Don't let all this talk of the pitfalls of affine objects get to 
+you too much, I'm just pointing out that it might not be quite as 
+simple as you might have hoped. So they come with a few strings, 
+they're still pretty cool effects. When designing a game that uses 
+them, take the issues raised in this chapter to heart and make sure 
+your math is in order, it might save you a lot of work later on.
+</p>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Nov 19, 2011</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="affine.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="affbg.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Affine matrix</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Affine bg</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

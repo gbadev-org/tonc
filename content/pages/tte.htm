@@ -1,0 +1,3913 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20080301">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Tonc's Text Engine</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="mode7ex.htm">More mode 7</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="asm.htm">Assembly</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">22.
+  Tonc's Text Engine</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a></li>
+  <li><a href="#sec-design">Basic design</a></li>
+  <li><a href="#sec-map">Tilemapped text</a></li>
+  <li><a href="#sec-bmp">Bitmapped text</a></li>
+  <li><a href="#sec-obj">Object text</a></li>
+  <li><a href="#sec-chr">Rendering to tiles</a></li>
+  <li><a href="#sec-misc">Scripting, console IO and other niceties</a></li>
+  <li><a href="#sec-conc">Conclusions</a></li>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">22.1.
+  Introduction
+</h2>
+
+<p>
+The <a href="text.htm">other page on text</a> described how you 
+could get text on backgrounds and objects. It worked, but there were 
+several limitations. For instance, it was limited to 8&times;8 fonts, 
+didn't support all video modes and had no formatted text capabilities.
+</p>
+<p>
+Tonc's Text Engine (TTE) remedies many of these shortcomings. In this 
+chapter I'll describe the goals and basic design of the system and 
+some of the implementation details. In particular, I'll describe how
+to build writers for use of the different kinds of surfaces. In
+some cases, I'll optimize the living hell out of them because it is 
+possible for a glyph renderer to take multiple scanlines for a 
+single character if you don't pay attention. And yes, this will be 
+done in assembly.
+</p>
+<p>
+I'll also show how you can add some basic scripting to change cursor 
+positions, colors and even fonts dynamically. A few years ago, 
+Wintermute changed the standard C library in devkitARM to make the 
+stdio routines accessible for GBA and NDS. I'll also show 
+how you can make use of this.
+</p>
+<p>
+And, of course, there will be demos. Oh, will there be demos. There are 
+about 10 of them in fact, so I'm going to do things a little bit 
+differently than before: there will be one project containing a menu 
+with all the examples. Not all examples will be shown here because 
+that'd just be too much. 
+</p>
+<p>
+Lastly, it is expected that by now you have a decent knowledge of 
+GBA programming, so I'm going to keep the amount of GBA-specific 
+exposition to a minimum. When you see functions used that haven't 
+been covered already, turn to GBATek, the project's code or tonclib's 
+code for details.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-design">22.2.
+  Basic design
+</h2>
+
+<h3 id="ssec-design-goals">22.2.1.
+  TTE Goals
+</h3>
+
+<p>
+The following list has the things I most wanted in TTE:
+</p>
+
+<ul>
+  <li>
+    <b>A comprehensive and extensible set of glyph writers, usable for 
+	all occasions</b>. Well <i>almost</i> all occasions. The old system 
+	worked for regular backgrounds, bitmap modes and objects, I'm now 
+	extending that set to affine backgrounds and tile-rendering. If 
+	what you need isn't present in the standard set, you can easily 
+	create your own writer and use that one instead. The writer will 
+	accept <a href="http://en.wikipedia.org/wiki/UTF-8" target="_blank">UTF-8</a> 
+	strings, meaning you're not limited to 256 characters.
+  </li>
+  <li>
+    <b>Fonts: arbitrary widths and heights and variable width characters</b>. 
+	Instead of being limited to 8x8@1 glyphs; the standard writers in 
+	TTE are able to use fonts of any width and height (within reason: 
+	no screen-filling glyphs please) and variable width fonts 
+	(again, within reason: VWF for tilemaps makes little sense). In 
+	principle, there are possibilities to use arbitrary bitdepths 
+	as well, but the standard renderers are limited to 1bpp.
+  </li>
+  <li>
+    <b>A simple writer-interface independent of surface details</b>. 
+	For the old system I had <code>m3_puts()</code>, 
+	<code>se_puts()</code>, <code>obj_puts()</code> and such. This 
+	worked, but it meant you had to use something different for the 
+	different modes. In TTE, there are different initializers for 
+	the different modes to set up the system, and a single string 
+	writer <code>tte_write()</code> that just works.
+  </li>
+  <li>
+    <b>Scripting for text parameters</b>. 
+	By that I mean that you can 
+	control parameters like position and output color by the strings 
+	themselves. The functionality for this is pretty basic, but it 
+	works well enough. Note: this is <i>not</i> a full dialog system!
+	That said, it should be possible to build one around it.
+  </li>
+  <li>
+    <b><code>printf()</code> support</b>. For rather obvious reasons.
+  </li>
+</ul>
+
+
+<h3 id="ssec-design-items">22.2.2.
+  Structures and main components
+</h3>
+
+<p>
+All the relevant information for TTE is kept gathered in three structs:
+a <dfn>text context</dfn>, <code>TTC</code>; 
+a <dfn>font description</dfn>, <code>TFont</code>; 
+and a <dfn> graphic surface description</dfn>, <code>TSurface</code>.
+</p>
+<p>
+The <code>TTC</code> struct contains the main parameters for the 
+engine: information about the surface were rendering to, cursor 
+positions, font information, color attributes and a few other things. 
+It also contains two callbacks for drawing and erasing glyphs. 
+</p>
+<p>
+The <code>TFont</code> struct has a pointer to the glyph data, 
+glyph/cell dimensions and a few other things. There are also pointers 
+to width and height tables to allow variable width and height fonts.
+I've hacked a <code>TFont</code> creator into 
+<a href="http://www.coranac.com/projects/#usenti" target="_blank">usenti</a> a while 
+back so that I could easily create these things from standard fonts, 
+but you can also make your own from scratch.
+</p>
+<p>
+The <code>TSurface</code> struct actually has nothing to do with text.
+Instead, it's a struct describing the kind of surface we're rendering 
+on. This can be bitmaps, tiles, tilemaps or whatever. Tonclib has 
+basic pixel, line and rectangle routines for dealing with these
+surfaces, so I might as well use them.
+</p>
+
+<pre class="proglist" id="cd-tte-types">
+<span class="cmt">//# From tonc_tte.h : main TTE types.</span>
+
+<span class="keyw">typedef</span> <span class="keyw">struct</span> TFont
+{
+    <span class="keyw">const</span> <span 
+class="keyw">void</span>  *data;      <span class="cmt">//!&lt; Character data.</span>
+    <span class="keyw">const</span> u8    *widths;    <span 
+class="cmt">//!&lt; Width table for variable width font.</span>
+    <span class="keyw">const</span> u8    *heights;   <span 
+class="cmt">//!&lt; Height table for variable height font (mostly unused).</span>
+    u16 charOffset;         <span class="cmt">//!&lt; Character offset</span>
+    u16 charCount;          <span class="cmt">//!&lt; Number of characters in font.</span>
+    u8  charW;              <span class="cmt">//!&lt; Character width (fwf).</span>
+    u8  charH;              <span class="cmt">//!&lt; Character height.(fhf).</span>
+    u8  cellW;              <span class="cmt">//!&lt; Glyph cell width.</span>
+    u8  cellH;              <span class="cmt">//!&lt; Glyph cell height.</span>
+    u16 cellSize;           <span class="cmt">//!&lt; Cell-size (bytes).</span>
+    u8  bpp;                <span class="cmt">//!&lt; Font bitdepth;</span>
+    u8  extra;              <span class="cmt">//!&lt; Padding. Free to use.</span>
+} TFont;
+
+<span class="cmt">//! TTE context struct.</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> TTC
+{
+    <span class="cmt">// Members for renderers</span>
+    TSurface dst;           <span class="cmt">//!&lt; Destination surface.</span>
+    s16 cursorX;            <span class="cmt">//!&lt; Cursor X-coord.</span>
+    s16 cursorY;            <span class="cmt">//!&lt; Cursor Y-coord.</span>
+    TFont *font;            <span class="cmt">//!&lt; Current font.</span>
+    u8  *charLut;           <span class="cmt">//!&lt; Character mapping lut, if any.</span>
+    u16 cattr[<span class="num">4</span>];           <span 
+class="cmt">//!&lt; ink, shadow, paper and special color attributes.</span>
+    <span class="cmt">// Higher-up members</span>
+    u16 reserved;             
+    u16 ctrl;               <span 
+class="cmt">//!&lt; BG control flags.</span>
+    u16 marginLeft;
+    u16 marginTop;
+    u16 marginRight;
+    u16 marginBottom;
+    s16 savedX;
+    s16 savedY;
+    <span class="cmt">// Callbacks and table pointers</span>
+    fnDrawg  drawgProc;         <span class="cmt">//!&lt; Glyph render procedure.</span>
+    fnErase  eraseProc;         <span class="cmt">//!&lt; Text eraser procedure.</span>
+    <span class="keyw">const</span> TFont **fontTable;    <span 
+class="cmt">//!&lt; Pointer to font table for </span>
+    <span class="keyw">const</span> <span 
+class="keyw">char</span>  **stringTable;  <span 
+class="cmt">//!&lt; Pointer to string table for</span>
+} TTC;
+</pre>
+
+<pre class="proglist" id="cd-tte-types2">
+<span class="cmt">//# Supporting types</span>
+
+<span class="cmt">//! Glyph render function format.</span>
+<span class="keyw">typedef</span> <span 
+class="keyw">void</span> (*fnDrawg)(<span class="keyw">int</span>);
+
+<span class="cmt">//! Erase rectangle function format.</span>
+<span class="keyw">typedef</span> <span 
+class="keyw">void</span> (*fnErase)(<span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom);
+
+<span class="keyw">typedef</span> <span class="keyw">struct</span> TSurface
+{
+    u8  *data;          <span class="cmt">//!&lt; Surface data pointer.</span>
+    u32 pitch;          <span class="cmt">//!&lt; Scanline pitch in bytes.</span>
+    u16 width;          <span class="cmt">//!&lt; Image width in pixels. </span>
+    u16 height;         <span class="cmt">//!&lt; Image width in pixels.</span>
+    u8  bpp;            <span class="cmt">//!&lt; Bits per pixel.</span>
+    u8  type;           <span class="cmt">//!&lt; Surface type.</span>
+    u16 palSize;        <span class="cmt">//!&lt; Number of colors.</span>
+    u16 *palData;       <span class="cmt">//!&lt; Pointer to palette.</span>
+} TSurface;
+</pre>
+
+
+<h4>TFont details</h4>
+
+<!-- 
+[[ img; img-verdana9; tte/verdana9.png; 256; Verdana 9 glyph sheet]]
+-->
+
+<div class="cpt_fr" style="width:128px;">
+  <img src="../img/tte/verdana9.png" id="img-verdana9"
+    width="128" alt=""><br>
+  <b>Fig 22.1</b>: Verdana 9 character sheet
+</div>
+
+<p>
+Fig&nbsp;22.1 shows a character sheet 
+that <code>TFont</code> can use. The sheet is a matrix of 
+<dfn>cell</dfn>s and each cell contains a character. The <code>cellW/H</code> 
+members are the dimensions of these cells; <code>cellSize</code> is the 
+number of bytes per cell.
+</p>
+<p>
+Each cell has one glyph, but the actual glyphs can be smaller
+than the cells (white vs magenta parts). This does waste a bit of memory, 
+but it also has several benefits. One of the benefits is that 
+you can use <code>cellSize</code> to quickly find the address of any 
+given glyph. Second, because I want by fonts to be usable for both 
+bitmaps <i>and</i> tiles, my glyph boxes would have to be multiples of 
+8 anyway. Additionally, this particular font will be 1bpp, meaning that 
+even with the wasted parts I'll still have a very low memory footprint 
+(3.5kB).
+</p>
+<p>
+For fixed-width or fixed-height fonts, members <code>charW</code> 
+and <code>charH</code> denote the actual character width and height. 
+For fonts of variable widths, the <code>widths</code> member
+points to the a byte-array containing the widths of the glyphs and
+something similar is true for the <code>heights</code>. 
+<code>charOffset</code> is the (ASCII) character the data starts at. 
+Font sheets often start at a space (' '), so this tends to be 32. 
+<code>charCount</code> is the number of characters and can be used 
+if you need to copy the whole sheet to VRAM (like in the case of 
+tile-mapping).
+</p>
+<p>
+Please note that how the data in a <code>TFont</code> is used depends 
+almost entirely on the glyph renderer. Most renderers that come with 
+tonclib expect this format:
+</p>
+
+<ul>
+  <li>
+    Bitpacked to <b>1 bpp</b>, for size reasons. And for 
+    rendering speed too, actually, since memory loads are expensive.
+  </li>
+  <li>
+    Tiled-by-glyph. The data for each glyph is contingent with 
+    <code>cellSize</code> bytes between each glyph. This is similar to 
+	how 1D object work with one important difference:
+  </li>
+  <li>
+    the tiles in each glyph are <b>column-major</b> (tile 1 is 
+    under tile 0). This in contrast to objects, which tend to be 
+	<a href="http://en.wikipedia.org/wiki/Row-major_order" target="_blank">row-major</a> 
+	(tile 1 is to the right of tile 0). I will refer to 
+	this format as <b>tile-strips</b>. The reason behind this choice 
+	will be given later.
+  </li>
+</ul>
+
+<p>
+There are exceptions to this, but most renderers presented here 
+will use this format. If you want to make your own renderers, you're 
+free to use any format for the data you think is appropriate.
+</p>
+
+<h4>TTC details</h4>
+<p>
+The text context, <code>TTC</code>, contains the most important data 
+of the system. Starting at the top: the surface, <code>dst</code>. 
+This defines the surface we're rendering to. The most relevant items 
+there are its memory address, <b>pitch</b>: the number of bytes per 
+scanline. The pitch is a <i>very</i> important parameter for 
+rendering, more important than the width and height in fact. The 
+surface also has palette members, which can be used to access its 
+colors. Much like the <code>TFont</code> members, how this data is 
+used largely depends on the renderer.
+</p>
+<p>
+The members <code>cursorX/Y</code> are for the current cursor position. 
+The <code>margin</code> rectangle indicates which part of the screen 
+should be used for text. If the cursor exceeds the right margin, it 
+will be moved to the left margin and one line down. The margins are 
+also used for screen-clears and returning to the top of the page.
+</p>
+<p>
+The <code>cattr</code> table is something special. Its entries are
+<dfn>color attribute</dfn>s. Parameters for ink (foreground color), 
+shadow, paper (background color) are put here, along with a 
+&lsquo;special&rsquo; field which is very much context-specific. Note 
+that these color attributes do not necessarily represent colors. In 
+modes 3 and 5 they're colors, but for mode 4 and tile writers they're 
+color indices. There's probably a nicer name for this than 
+&lsquo;color attribute&rsquo;, but sodomy non sapiens.
+</p>
+<p>
+Rendering glyphs and erasing (parts of) the screen is done through
+the callbacks <code>drawgProc</code> and <code>eraseProc</code>. The 
+idea is that you initialize the system with the routines appropriate 
+for your text format and TTE uses them to do the actual writing. I 
+should point out that using callbacks for rendering a single glyph 
+can have a significant overhead, especially for the simpler kinds of 
+text like tilemaps. 
+</p>
+
+
+<h3 id="ssec-design-writer">22.2.3.
+  Main TTE variables and functions.
+</h3>
+
+<p>
+The state of the TTE system is kept in a <code>TTC</code> variable 
+accessible through <code>tte_get_context()</code>. All changes 
+to the system go through there. In <i>some</i> cases, it is 
+useful to have two sets of state and switch between them 
+when appropriate (like when you have two screens. Y hello thar, 
+NDS). For that you can use <code>tte_set_context)</code> to 
+redirect the pointer.
+</p>
+
+<pre class="proglist" id="cd-ttc-funcs">
+TTC __tte_main_context;
+TTC *gp_tte_context= &amp;__tte_main_context;
+
+<span class="cmt">//! Get the master text-system.</span>
+INLINE TTC *tte_get_context()
+{   <span class="keyw">return</span> gp_tte_context;                          }
+
+
+<span class="cmt">//! Set the master context pointer.</span>
+<span class="keyw">void</span> tte_set_context(TTC *tc)
+{
+    gp_tte_context= tc ? tc : &amp;__tte_main_context;
+}
+</pre>
+
+<p>
+To print characters, you can use <code>tte_putc()</code> and 
+<code>tte_write()</code>.
+</p>
+
+<pre class="proglist" id="cd-tte-putc">
+<span class="cmt">//! Get the glyph index of character \a ch.</span>
+INLINE uint tte_get_glyph_id(<span class="keyw">int</span> ch)
+{   
+    TTC *tc= tte_get_context();
+    ch -= tc-&gt;font-&gt;charOffset;
+    <span class="keyw">return</span> tc-&gt;charLut ? tc-&gt;charLut[ch] : ch;
+}
+
+<span class="cmt">//! Get the width of glyph \a id.</span>
+INLINE uint tte_get_glyph_width(uint gid)
+{
+    TFont *font= tte_get_context()-&gt;font;
+    <span class="keyw">return</span> font-&gt;widths ? <!--
+-->font-&gt;widths[gid] : font-&gt;charW;
+}
+
+<span class="cmt">//! Render a character.</span>
+<span class="keyw">int</span> tte_putc(<span class="keyw">int</span> ch)
+{
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+
+    <span class="cmt">// <b>(4)</b> translate from character to glyph index</span>
+    uint gid= tte_get_glyph_id(ch);
+
+    <span class="cmt">// <b>(5)</b> get width for cursor update </span>
+    <span class="keyw">int</span> charW= tte_get_glyph_width(gid);
+    
+    <span class="keyw">if</span>(tc-&gt;cursorX+charW &gt; tc-&gt;marginRight)
+        <i>[[ simulate newline ]]</i>
+
+    <span class="cmt">// <b>(6)</b> Draw and update position</span>
+    tc-&gt;drawgProc(gid);
+    tc-&gt;cursorX += charW;
+
+    <span class="keyw">return</span> charW;
+}
+</pre>
+
+<pre class="proglist" id="cd-tte-write">
+<span class="cmt">//! Render a string.
+/*! \param text String to parse and write.
+    \return     Number of parsed characters.
+*/</span>
+<span class="keyw">int</span> tte_write(<span class="keyw">const char</span> *text)
+{
+    <span class="keyw">int</span> ch;
+    uint gid, charW;
+    <span class="keyw">const</span> <span class="keyw">char</span> *str= text;
+    TTC *tc= tte_get_context();
+
+    <span class="keyw">while</span>( (ch= *str++) != <span class="str">'\0'</span> )
+    {
+        <span class="cmt">// <b>(1)</b> Act according to character type</span>
+        <span class="keyw">switch</span>(ch)
+        {
+        <span class="keyw">case</span> <span 
+class="str">'\n'</span>:  <i>[[ update cursorX/Y for newline ]]</i>;     <span 
+class="keyw">break</span>;
+        <span class="keyw">case</span> <span 
+class="str">'\t'</span>:  <i>[[ update cursorX for tab ]]</i>;           <span 
+class="keyw">break</span>;
+        <span class="keyw">default</span>:
+            <span class="cmt">// <b>(2)</b> more special thingies</span>
+            <span class="keyw">if</span>(ch==<span 
+class="str">'#'</span> &amp;&amp; str[<span class="num">0</span>]==<span 
+class="str">'{'</span>)          <span 
+class="cmt">// <b>(2a)</b> Command sequence</span>
+            {
+                str= tte_cmd_default(str+<span class="num">1</span>);
+                <span class="keyw">break</span>;
+            }
+            <span class="keyw">else</span> <span class="keyw">if</span>(ch==<span 
+class="str">'\\'</span> &amp;&amp; str[<span class="num">0</span>]==<span 
+class="str">'#'</span>)    <span 
+class="cmt">// <b>(2b)</b> Escaped command</span>
+                ch= *str++;
+            <span class="keyw">else</span> <span class="keyw">if</span>(ch&gt;=<span 
+class="num">0x80</span>)                   <span 
+class="cmt">// <b>(2c)</b> UTF8 character</span>
+                ch= utf8_decode_char(str-<span class="num">1</span>, &amp;str);
+            
+            <span class="cmt">// <b>(3)</b> draw character</span>
+            tte_putc(ch);
+        }
+    }
+
+    <span class="keyw">return</span> str - text;
+}
+</pre>
+
+
+<p>
+I've omitted the code for a few things here, the idea should be clear.
+First, read a character. Then, check whether it's a special character 
+(new line, tab, formatting command) and if so, act accordingly. Because 
+<code>tte_write()</code> supports UTF-8, we also check for that 
+and decode the string for a full UFT-8 character. After that's all done, 
+we pass the character on to <code>tte_putc()</code>, which translates it 
+to a glyph index, draws the glyph and advances the cursor.
+</p>
+<p>
+Note: the way described here is <i>a</i> method of doing things; it's not
+<i>the</i> method, because that doesn't actually exist. Several steps 
+done here may be overkill for the kind of text you had in mind. For 
+example, getting from the character to the glyph index is done
+by the font's character offset and a potential character look-up table, 
+neither of which is strictly necessary. Likewise, wrapping at the 
+edges may already be done in the string itself with newline characters. 
+On the other hand, you might like more complex wrapping, text alignment, 
+scrolling, and who knows what else. If you want these things, creating 
+your own routine shouldn't be too difficult.
+</p>
+
+<h3 id="ssec-design-names">22.2.4.
+  On nomenclature
+</h3>
+
+<p>
+Some terms I use in TTE have a very specific meaning. Because the 
+differences between terms can be subtle, it is important to define 
+the term explicitly. Additionally, TTE uses several acronyms and 
+abbreviations that need to be clarified.
+
+<ul>
+  <li>
+    <b>char(acter) vs glyph index</b>. &lsquo;Character&rsquo; refers 
+	to the ASCII character; the &lsquo;glyph index&rsquo; is the 
+    corresponding index in the font. For example, &lsquo;A&rsquo; 
+	is character 65, but if the font starts at a space (' ', ASCII 32) 
+	the &lsquo;A&rsquo; is glyph index 65&minus;32=33. 
+	As a rule, variables named <code>ch</code> are characters and 
+	<code>gid</code> means glyph index. The input of the renderers is 
+	the glyph index, and not the character.
+  </li>
+  <li>
+    <b>Surface</b>. Surface is the term I'm using to describe whatever 
+    I'm manipulating to show text. This is usually VRAM, but can be 
+	other things as well, like OBJ_ATTRs for object text.
+  </li>
+  <li>
+    <b>Pitch</b>. The pitch is actually a common term in graphics, 
+	but since graphics terms may not be so common, it's worth 
+	repeating. Technically, the <dfn>pitch</dfn> is the number of 
+	scanlines between rows. I'm extending it a little to mean the 
+	<i>characteristic major distance</i> for matrices. Matrices are 2D 
+	entities, and they'll have adjacent elements in one direction 
+	and a larger distance for the other. These usually 
+	are <i>x</i> and <i>y</i>, respectively, but not always.
+	The <i>minor</i> distance will be referred to as <dfn>stride</dfn>.
+  </li>
+  <li>
+    <b>Color vs color attribute</b>. The &lsquo;color&rsquo; is the 
+	real 5.5.5 BGR color; the &lsquo;color attribute&rsquo; is whatever 
+	the renderer will use on the surface. This can be a color, but it 
+	can also be a palette index or something else entirely. The 
+	interpretation is up to the renderer.
+  </li>
+  <li>
+    <b>Render/Text family</b>. This is a conceptual group-name for 
+	a specific kind of text. Table&nbsp;22.1 
+	gives an overview of the families available. This largely 
+	corresponds to the <code>TSurface</code> types.
+  </li>
+  <li>
+    <p>
+    <b>Renderer types</b>. Within each family there can be different 
+	renderers for different kinds of fonts and effects. For example, 
+	when rendering to an 8bpp bitmap (the bmp8 family), you can have 
+	different renderers for different font bitdepths (1bpp or 8bpp, 
+	for example) or glyph layouts (bitmapped or tiled). They can render 
+	some pixels transparently, or apply anti-aliasing. Or any combination 
+	of those. The point is there are a <i>lot</i> of options here.
+	</p>
+	<p>
+	Because 
+	I really don't like names that span a whole line, I will use 
+	abbreviations in the renderer's name to indicate what it does; see 
+	table&nbsp;22.2 for what they mean. For the 
+	most part, the renderers will be for fonts with arbitrary width
+	and height, with a 1bpp tile-stripped glyphs, with they will
+	draw them transparently and re-coloring of pixels. This is 
+	indicated by <code>*_b1cts</code>.
+	</p>
+  </li>
+</ul>
+
+<div class="lblock">
+<table id="tbl-tte-family"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 22.1</b>: TTE render family 
+  indicators and initializers. 4bpp Tiles can be row or column major 
+  (<code>crh4r</code> or <code>chr4c</code>).
+</caption>
+<tr>
+	<th width=25%>Family</th>	<th>prefix</th> <th>Initializer</th>		
+</tr>
+<tr>
+	<td>Regular tilemap (mode 0/1)</td>	<td>se</td>
+	<td>void tte_init_se(int bgnr, u16 bgcnt, SCR_ENTRY se0, u32 colors, u32 bupofs, 
+		const TFont *font, fnDrawg proc);</td>
+</tr>
+<tr>
+	<td>Affine tilemap (mode 1/2)</td>	<td>ase</td>
+	<td>void tte_init_ase(int bgnr, u16 bgcnt, u8 ase0, u32 colors, u32 bupofs, 
+		const TFont *font, fnDrawg proc);</td>
+</tr>
+<tr>
+	<td>4bpp Tiles (modes 0/1/obj)</td>	<td>chr4<i>(c/r)</i></td>
+	<td>void tte_init_chr4<i>(c/r)</i>(int bgnr, u16 bgcnt, u32 cattrs, 
+		u32 colors, const TFont *font, fnDrawg proc);</td>
+</tr>
+<tr>
+	<td>8bpp bitmap (mode 4)</td>		<td>bmp8</td>
+	<td>void tte_init_bmp(int vmode, const TFont *font, fnDrawg proc);</td>
+</tr>
+<tr>
+	<td>16bpp bitmap (mode3/5)</td>		<td>bmp16</td>
+	<td>void tte_init_bmp(int vmode, const TFont *font, fnDrawg proc);</td>
+</tr>
+<tr>
+	<td>objects</td>					<td>obj</td>
+	<td>void tte_init_obj(OBJ_ATTR *dst, u32 attr0, u32 attr1, u32 attr2, 
+		u32 colors, u32 bupofs, const TFont *font, fnDrawg proc);</td>
+</tr>
+</table>
+</div><br>
+
+<div class="lblock">
+<table id="tbl-tte-drawg"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 22.2</b>: Render type summary.
+</caption>
+<tr>
+  <th>Code</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>b<i>x</i></td>
+  <td><b>B</b>itdepth of source font. (<code>b1</code> = 1 bpp)</td>
+</tr>
+<tr>
+  <td>w<i>x</i></td>
+  <td>Specific <b>w</b>idth (<code>w8</code> = width 8)</td>
+</tr>
+<tr>
+  <td>h<i>x</i></td>
+  <td>Specific <b>h</b>eight (<code>h8</code> = height 8)</td>
+</tr>
+<tr>
+  <td>c</td>
+  <td>Re-<b>c</b>oloring. Color attributes are applied to the 
+	pixels in some way.</td>
+</tr>
+<tr>
+  <td>t/o</td>
+  <td><b>T</b>ransparent or <b>o</b>paque paper pixels.
+</tr>
+<tr>
+  <td>s</td>
+  <td>Glyphs are in tile-<b>s</b>trip format.
+</tr>
+</table>
+</div>
+
+<p>
+Lastly, a note on some of the abbreviations I use in the rendering 
+code. A number of terms come up again and again, and I've taken
+to use a shorthand notation for these items. The basic format is 
+<code>fooX</code> where <code>foo</code> is the relevant
+bitmap/surface and <code>X</code> is a one-letter code for things 
+like width, height, data and others. Yes, the use of single-letter 
+names is frowned upon and I don't advocate their use in general, 
+but I've found that in this particular case, if used judiciously,
+they have helped me read my own code.
+</p>
+
+<div class="lblock">
+<table id="tbl-tte-brevs"
+  border=1 cellpadding=4 cellspacing=0>
+<caption align="bottom">
+Table&nbsp;22.3. Abbreviations used in 
+rendering code.
+</caption>
+<tr> <th>Term</th> <th>Meaning</th> </tr>
+<tr> <td><code>fooW</code></td>	<td>Width of <code>foo</code></td> </tr>
+<tr> <td><code>fooH</code></td>	<td>Height of <code>foo</code></td> </tr>
+<tr> <td><code>fooB</code></td>	<td>Bitdepth of <code>foo</code></td> </tr>
+<tr> <td><code>fooP</code></td>	<td>Pitch of <code>foo</code></td> </tr>
+<tr> <td><code>fooD</code></td>	<td>Primary data-pointer for <code>foo</code></td> </tr>
+<tr> <td><code>fooL</code></td>	<td>Secondary data-pointer for <code>foo</code></td> </tr>
+<tr> <td><code>fooS</code></td>	<td>Size of <code>foo</code></td> </tr>
+<tr> <td><code>fooN</code></td>	<td>Number/count of <code>foo</code></td> </tr>
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-map">22.3.
+  Tilemapped text 
+</h2>
+
+<h3 id="ssec-map-reg">22.3.1.
+  Regular tilemap text
+</h3>
+
+<p>
+Tilemapped text is the easiest to implement, because you don't really 
+have to render anything at all. You simply load up all the font's 
+tiles into a charblock and place screen-entries for the actual text.
+</p>
+<p>
+The initializer for regular tilemaps is <code>tte_init_se()</code>. 
+It's identical to 
+<a href="text.htm#cd-txt-init-se"><code>txt_init_se()</code></a> 
+except for the two extra parameters at the end: <code>font</code> and 
+<code>proc</code>. These represent the font to use and the renderer 
+that does the surface manipulation. Every initializer in TTE has 
+those two parameters. It's safe to pass NULL to them if you're not 
+sure what to use; in that case, the default option for that family 
+will be used. 
+</p>
+<p>
+If <code>font</code> is NULL, you'll get the default font. This is 
+either <a href="text.htm#img-tonc-font"><code>system8Font</code></a> 
+for fixed-width occasions or <code>verdana9Font</code> 
+(fig&nbsp;22.1) when variable width is suitable. 
+These can also be referenced via <code>fwf_default</code> and 
+<code>vwf_default</code>, respectively.
+</p>
+<p>
+Each family also has a default renderer, #defined as 
+<code><i>foo</i>_drawg_default</code>, where <i>foo</i> is the family 
+prefix. The default renderers are the general routines, suitable for 
+all character widths and heights (fixed or variable fonts). Of course, 
+this does mean that they will be slower than routines written to work 
+with a specific glyph size. This is particularly true for 
+tilemapped text, and for that reasons specific 
+<code>_w8h8</code> and <code>_w8h16</code> versions are available there 
+as well.
+</p><br>
+
+<p>
+The initializers tend to be long and boring, so I won't waste too much 
+space on them here. Basically, they clear out the text context, assign 
+some sensible values to the margins and surface variables, set up 
+the font, the renderer and the eraser. They also fill some of the 
+palette and color attributes.
+</p>
+<p>
+The code I'll show in this chapter will mostly be about the renderers 
+themselves. Below you can see the code for the default screen-entry 
+writer, <code>se_drawg_s()</code>, and the one specific for 
+8&times;8 fonts, <code>se_drawg_w8h8</code>
+</p>
+
+
+<pre class="proglist" id="cd-se-drawg">
+<span class="cmt">//! Character-plot for reg BGs, any sized, vertically tiled font.</span>
+<span class="keyw">void</span> se_drawg_s(uint gid)
+{
+    <span class="keyw">int</span> ix, iy;
+
+    <span class="cmt">// <b>(1)</b> Get main variables.</span>
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+    uint charW= (font-&gt;cellW+<span class="num">7</span>)/<span 
+class="num">8</span>, charH= (font-&gt;cellH+<span 
+class="num">7</span>)/<span class="num">8</span>;
+
+    uint x0= tc-&gt;cursorX, y0= tc-&gt;cursorY;
+    uint dstP= tc-&gt;dst.pitch/<span class="num">2</span>;
+    u16 *dstD= (u16*)(tc-&gt;data + (y0*dstP+x0)*<span class="num">2</span>);
+
+    <span class="cmt">// <b>(2)</b> Get the base tile index.</span>
+    u32 se= tc-&gt;cattr[TTE_SPECIAL] + gid*charW*charH;
+
+    <span class="cmt">// <b>(3)</b> Loop over all tiles to draw glyph.</span>
+    <span class="keyw">for</span>(ix=<span class="num">0</span>; ix&lt;charW; ix++)
+    {
+        <span class="keyw">for</span>(iy=<span class="num">0</span>; iy&lt;charH; iy++)
+            dstD[iy*dstP]= se++;
+        dstD++;
+    }
+}
+
+<span class="cmt">//! Character-plot for reg BGs using an 8x8 font.</span>
+<span class="keyw">void</span> se_drawg_w8h8(uint gid)
+{
+    TTC *tc= tte_get_context();
+
+    uint x0= tc-&gt;cursorX, y0= tc-&gt;cursorY;
+    uint dstP= tc-&gt;dst.pitch/<span class="num">2</span>;
+    u16 *dstD= (u16*)(tc-&gt;data + (y0*dstP+x0)*<span class="num">2</span>);
+
+    dstD[<span class="num">0</span>]= tc-&gt;cattr[TTE_SPECIAL] + gid;
+}
+</pre>
+
+<p>
+Let's start with the simpler one: <code>se_drawg_w8h8()</code>. An 
+8&times;8 glyph on a GBA tilemap simply means write a single screen-entry 
+to the right place. The right place here is derived from the
+cursor position and the surface data (<code>tc-&gt;dst</code>). The 
+&lsquo;special&rsquo; color attribute is used as a modifier to the 
+glyph index for things like palette swapping.
+</p>
+<p>
+Note that the routine just handles plotting the glyph. Transforming 
+from ASCII to glyph index and repositioning the cursor is all done 
+elsewhere.
+</p><br>
+
+<p>
+The more generalized routine, <code>se_drawg_s()</code> is a little 
+more complex. It still starts by getting a pointer to the glyph's 
+destination, <code>dstD</code>, and pitch (the distance to the next 
+line), <code>dstP</code>. <b>All</b> renderers start with something like this. 
+All renderers also retrieve the character's width and height &ndash; 
+unless the sizes are specified in advance. The names I use for 
+rendering are always the same, so you should be able to tell what
+means what even when the formulas for initializing them can be a tad 
+icky.
+</p>
+<p>
+Anyway, after getting the pointer and pitch, the tile-index 
+for the top-left of the glyph is calculated and put this into 
+<code>se</code>. After that, we loop over the different tiles of the 
+glyph in both directions. Note that the order of the loop is 
+column-major, not row-major, because that's the way the default 
+fonts were ordered.</p>
+<p>
+As it happens, column-major rendering tends to be more efficient 
+for text, because glyphs are usually higher than they are wide.
+Also, for tilemap text <code>charW</code> and 
+<code>charH</code> tend to be small &ndash; often 1 or 2. This 
+means that it is extremely inefficient to use loops; we'll 
+see how inefficient in subsection 
+22.7.5.. Unrolling them, like 
+<code>se_drawg_w8h8()</code> and <code>se_drawg_w8h16()</code> 
+do, gives a much better performance.
+</p>
+
+
+<h3 id="ssec-test-se4">22.3.2.
+  Regular tilemap example
+</h3>
+
+<pre class="proglist" id="cd-test-se4">
+<span class="keyw">void</span> test_tte_se4()
+{
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    <span class="cmt">// --- <b>(1)</b> Base TTE init for tilemaps ---</span>
+    tte_init_se(
+        <span class="num">0</span>,                      <span 
+class="cmt">// Background number (BG 0)</span>
+        BG_CBB(<span class="num">0</span>)|BG_SBB(<span 
+class="num">31</span>),   <span class="cmt">// BG control (for REG_BGxCNT)</span>
+        <span class="num">0</span>,                      <span 
+class="cmt">// Tile offset (special cattr)</span>
+        CLR_YELLOW,             <span 
+class="cmt">// Ink color</span>
+        <span class="num">14</span>,                     <span 
+class="cmt">// BitUnpack offset (on-pixel = 15)</span>
+        NULL,                   <span 
+class="cmt">// Default font (sys8) </span>
+        NULL);                  <span 
+class="cmt">// Default renderer (se_drawg_s)</span>
+
+    <span class="cmt">// --- <b>(2)</b> Init some colors ---</span>
+    pal_bg_bank[<span class="num">1</span>][<span class="num">15</span>]= CLR_RED;
+    pal_bg_bank[<span class="num">2</span>][<span class="num">15</span>]= CLR_GREEN;
+    pal_bg_bank[<span class="num">3</span>][<span class="num">15</span>]= CLR_BLUE;
+    pal_bg_bank[<span class="num">4</span>][<span class="num">15</span>]= CLR_WHITE;
+    pal_bg_bank[<span class="num">5</span>][<span class="num">15</span>]= CLR_MAG;
+
+    pal_bg_bank[<span class="num">4</span>][<span class="num">14</span>]= CLR_GRAY;
+
+    <span class="cmt">// --- <b>(3)</b> Print some text ---
+</span>
+    <span class="cmt">// &quot;Hello world in different colors&quot;</span>
+    tte_write(<span class="str">&quot;\n Hello world! in yellow\n&quot;</span>);
+    tte_write(<span class="str">&quot; #{cx:0x1000}Hello world! in red\n&quot;</span>);
+    tte_write(<span class="str">&quot; #{cx:0x2000}Hello world! in green\n&quot;</span>);
+
+    <span class="cmt">// Color use explained</span>
+    tte_set_pos(<span class="num">8</span>, <span class="num">64</span>);
+    tte_write(<span class="str">&quot;#{cx:0x0000}C#{cx:0x1000}o#{cx:0x2000}l&quot;</span>);
+    tte_write(<span class="str">&quot;#{cx:0x3000}o#{cx:0x4000}r#{cx:0x5000}s&quot;</span>);
+    tte_write(<span class="str">&quot;#{cx:0} provided by \\#{cx:#}.&quot;</span>);
+
+
+    <span class="cmt">// --- <b>(4)</b> Init for 8x16 font and print something ---</span>
+    GRIT_CPY(&amp;tile_mem[<span class="num">0</span>][<span 
+class="num">256</span>], cyber16Glyphs); <span class="cmt">// Load tiles</span>
+    tte_set_font(&amp;cyber16Font);                 <span 
+class="cmt">// Attach font</span>
+    tte_set_special(<span class="num">0x4100</span>);                    <span 
+class="cmt">// Set special to tile 256, pal 4</span>
+    tte_set_drawg(se_drawg_w8h16);              <span 
+class="cmt">// Attach renderer</span>
+
+    tte_write(<span class="str">&quot;#{P:8,80}Also available in 8x16&quot;</span>);
+
+    key_wait_till_hit(KEY_ANY);
+}
+</pre>
+
+<p>
+The code above demonstrates a few of the things you can do with TTE 
+for tilemaps. The call to <code>tte_init_se()</code> initializes the 
+system to display text on BG 0, using charblock 0 and screenblock 31 
+and to use the default font and renderer. 
+Parameter five is the bit-unpack offset; by setting it to 14, 
+all the 1-valued pixels in the font move to 14+1=15, the last index in 
+a palette bank. I'm also setting a few other colors so that the palette 
+will look like fig&nbsp;22.3b.
+</p>
+<p>
+In step 3, I print some text with <code>tte_write()</code>. The 
+different colors are done by using <code>#{cx:<i>num</i>}</code> in 
+the string, which sets the special color-attribute to <i>num</i>. More 
+on these kinds of commands in section 22.7.. Since 
+the <code>se</code>-renderers add this value to the glyph index for 
+the final output, it can be used for palette swapping.
+</p>
+<p>
+Step 4 demonstrates how to load up and use a second font. 
+The <code>cyber16Font</code> is a rendition of the 8&times;16 font 
+used in ye olde SNES game, Cybernator (see 
+fig&nbsp;22.2). This font was exported as
+4bpp data so I can just copy it into VRAM directly, but I do need to 
+use an offset because I want to keep the old font as well. The 
+charblock now has two sets of glyphs 
+(see fig&nbsp;22.3c). 
+</p>
+
+
+<div class="cblock">
+<table width=60%>
+<tr valign="bottom">
+  <td>
+	<div class="cpt_fl" style="width:128px;">
+	  <img src="../img/tte/cyber16.png" id="img-cyber16"
+		alt="Cybernator font: 8&times;16."><br>
+	  <b>Fig 22.2</b>: Cybernator font: 8&times;16.
+	</div>
+  </td>
+  <td>
+	<div class="cpt" style="width:240px;">
+	  <img src="../img/tte/test_tte_se4.png" id="img-test-se4"
+		alt="test_tte_se4"><br>
+	  <b>Fig 22.3a</b>: <code>test_tte_se4</code> output.
+	</div>
+  </td>
+</tr>
+<tr valign="top">
+  <td>
+	<div class="cpt" style="width:128px;">
+	  <img src="../img/tte/tte_se4_pal.png"
+		alt="Palette for <code>test_tte_se4</code>."><br>
+	  <b>Fig 22.3b</b>: Palette.
+	</div>
+  </td>
+  <td>
+	<div class="cpt" style="width:256px;">
+	  <img src="../img/tte/tte_se4_tiles.png"
+		alt="VRAM Tiles for <code>test_tte_se4</code>."><br>
+	  <b>Fig 22.3c</b>: Tileset.
+	</div>
+  </td>
+ </tr>
+</table>
+</div>
+
+<p>
+In principle, all I need to do to use a different font is to select 
+it with <code>tte_set_font()</code>, but since the tiles are 
+at an offset, I also need to adjust the special color attribute. 
+The value of 0x4100 is used here to account for the offset (0x0100) 
+as well as the palette-bank (0x4000). I'm also selecting a different 
+renderer for the occasion, although that's mostly for show here 
+because the default renderer can handle 8&times;16 fonts just as well.
+After that, I just call <code>tte_write()</code> again to print a new 
+string in using the new font.
+</p>
+
+
+<h3 id="ssec-map-affine">22.3.3.
+  Affine tilemap text
+</h3>
+
+<p>
+Text for affine tilemaps works almost the same as for regular 
+tilemaps; you just have to remember the differences between the
+two kinds of backgrounds, like map size and available bitdepth.
+The functions' prototypes are the same, except that <code>se</code> 
+is replaced by <code>ase</code>.
+</p>
+<p>
+Internally, the only real difference is in what the renderers are 
+to output, namely bytes instead of halfwords. 
+And here we run into that quaint little fact 
+of VRAM again: you can't write single bytes to VRAM. This means that the 
+renderers will be a little more complicated. But only a little:
+simply call a byte-plotting routine for the screen-entry 
+placement. Because affine maps are essentially 8bpp bitmap surfaces, 
+I can use the standard plotter for 8bpp bitmap surfaces: 
+<code>_sbmp8_plot()</code>. Aside from this one difference, the 
+<code>ase_</code> renderers are identical to the <code>se_</code> 
+counterparts.
+</p>
+
+<pre class="proglist" id="cd-ase-drawg">
+
+<span class="cmt">//! Character-plot for affine BGs using an 8x8 font.</span>
+<span class="keyw">void</span> ase_drawg_w8h8(uint gid)
+{
+    TTC *tc= tte_get_context();
+    u8 se= tc-&gt;cattr[TTE_SPECIAL] + gid;
+
+    _sbmp8_plot(&amp;tc-&gt;dst, tc-&gt;cursorX/<span 
+class="num">8</span>, tc-&gt;cursorY/<span class="num">8</span>, se);
+}
+
+<span class="cmt">//! Character-plot for affine BGs, any sized, <!--
+-->vertically oriented font.</span>
+<span class="keyw">void</span> ase_drawg_s(<span 
+class="keyw">int</span> gid)
+{
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+    uint charW= (font-&gt;cellW+<span class="num">7</span>)/<span 
+class="num">8</span>, charH= (font-&gt;cellH+<span 
+class="num">7</span>)/<span class="num">8</span>;
+    uint x0= tc-&gt;cursorX/<span 
+class="num">8</span>, y0= tc-&gt;cursorY/<span class="num">8</span>;
+
+    u8 se= tc-&gt;cattr[TTE_SPECIAL] + gid*charW*charH;
+
+    <span class="keyw">int</span> ix, iy;
+    <span class="keyw">for</span>(ix=<span class="num">0</span>; ix&lt;charW; ix++)
+        <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;charH; iy++, se++)
+            _sbmp8_plot(&amp;tc-&gt;dst, ix+x0, iy+y0, se);
+}
+</pre>
+
+<p>
+The demo for affine map text is <code>text_tte_ase()</code>. The idea 
+is simple here: set up the text for a 256&times;256 pixel map, 
+write some text onto it and rotate the background to illustrate that 
+it is indeed an affine background. The center of rotation is the 
+&ldquo;o&rdquo; at the center of the screen. To place it there, I've 
+used the <code>#{P:x,y}</code> code; this sets the cursor to the 
+absolute position given by (x,&nbsp;y). The other string is also
+positioned on the map in this manner.
+</p>
+
+<pre class="proglist" id="cd-test-ase">
+<span class="keyw">void</span> test_tte_ase()
+{
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE1 | DCNT_BG2;
+
+    <span class="cmt">// Init affine text for 32x32t bg</span>
+    tte_init_ase(
+        <span class="num">2</span>,                      <span 
+class="cmt">// BG number</span>
+        BG_CBB(<span class="num">0</span>) | BG_SBB(<span 
+class="num">28</span>) | BG_AFF_32x32,  <span 
+class="cmt">// BG control</span>
+        <span class="num">0</span>,                      <span 
+class="cmt">// Tile offset (special cattr)</span>
+        CLR_YELLOW,             <span class="cmt">// Ink color</span>
+        <span class="num">0xFE</span>,                   <span 
+class="cmt">// BUP offset (on-pixel = 255)</span>
+        NULL,                   <span 
+class="cmt">// Default font (sys8)</span>
+        NULL);                  <span 
+class="cmt">// Default renderer (ase_drawg_s)
+</span>
+    <span class="cmt">// Write something</span>
+    tte_write(<span class="str">&quot;#{P:120,80}o&quot;</span>);
+    tte_write(<span 
+class="str">&quot;#{P:72,104}Round, round, #{P:80,112}round we go&quot;</span>);
+
+    <span class="cmt">// Rotate it</span>
+    AFF_SRC_EX asx= { <span class="num">124</span>&lt;&lt;<span 
+class="num">8</span>, <span class="num">84</span>&lt;&lt;<span 
+class="num">8</span>, <span class="num">120</span>, <span 
+class="num">80</span>, <span class="num">0x100</span>, <span 
+class="num">0x100</span>, <span class="num">0</span> };
+    bg_rotscale_ex(&amp;REG_BG_AFFINE[<span class="num">2</span>], &amp;asx);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        key_poll();
+
+        asx.alpha += <span class="num">0x111</span>;
+        bg_rotscale_ex(&amp;REG_BG_AFFINE[<span class="num">2</span>], &amp;asx);
+
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            <span class="keyw">break</span>;      
+    }
+}
+</pre>
+
+<div class="cpt" style="width:240px;">
+  <img src="../img/tte/test_tte_ase.png" id="img-test-ase"
+    alt="<code>test_tte_ase</code>."><br>
+  <b>Fig 22.4</b>: <code>test_tte_ase</code>.
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-bmp">22.4.
+  Bitmapped text
+</h2>
+
+<p>
+Bitmap text rendering is a little different from map text and can range 
+in difficulty from easy to insane, depending on your wishes. At its core, 
+though, it's always the same process: loop over all pixels and draw them 
+on the destination surface. For example, a generic glyph renderer that 
+draws pixels transparently could look something like this.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Pseudo code for a general glyph printer.</span>
+<span class="keyw">void</span> foo_drawg(uint gid)
+{
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+
+    <span class="cmt">// Drawing with color keying.
+    // Loop over all pixels. If the glyph's pixel is not zero, draw it.
+    // Other wise, nevermind.</span>
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;tte_get_glyph_height(gid); iy++)
+    {
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;tte_get_glyph_width(gid); ix++)
+        {
+            u16 color= font_get_pixel(font, gid, ix, iy);
+            if(color != <span class="num">0</span>)
+                foo_plot(&amp;tc-&gt;dst, tc-&gt;cursorX+ix, tc-&gt;cursorY+iy, color);
+        }
+    }
+}
+</pre>
+
+<p>
+Here, <code><i>foo</i></code> can mean any rendering family. 
+<code>foo_plot()</code> is a general pixel plotter and 
+<code>font_get_pixel()</code> a pixel retriever. The implementations 
+of those functions depend on the specifics of the font and surface, 
+but the glyph renderer doesn't need to know about that.
+</p>
+
+<h3 id="ssec-bmp16-base">22.4.1.
+  Basic bmp16 to bmp16 glyph printer
+</h3>
+<p>
+This next function is an example of a 16bpp font to 16bpp bitmap printer.
+</p>
+
+<pre class="proglist" id="cd-bmp16-drawg">
+<span class="cmt">//! Glyph renderer from bmp16 glyph to bmp16 destination.</span>
+<span class="keyw">void</span> bmp16_drawg(uint gid)
+{
+    <span class="cmt">// <b>(1a)</b> Basic variables</span>
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+
+    u16 *srcD= (u16*)(font-&gt;data+gid*font-&gt;cellSize), *srcL= srcD;
+    uint charW= tte_get_glyph_width(gid)
+    uint charH= tte_get_glyph_height(gid);
+
+    uint x0= tc-&gt;cursorX, y0= tc-&gt;cursorY;
+    uint srcP= font-&gt;cellW, dstP= tc-&gt;dst.pitch/<span class="num">2</span>;
+    u16 *dstD= (u16*)(tc-&gt;dst.data + (y0*dstP + x0)*<span class="num">2</span>);
+
+    <span class="cmt">// <b>(2)</b> The actual rendering</span>
+    uint ix, iy;
+    <span class="keyw">for</span>(iy=<span class="num">0</span>; iy&lt;charH; iy++)
+    {
+        <span class="keyw">for</span>(ix=<span class="num">0</span>; ix&lt;charW; ix++)
+            <span class="keyw">if</span>(srcD[ix] != <span class="num">0</span>)
+                dstD[ix]= srcD[ix];
+
+        srcD += srcP;
+        dstD += dstP; 
+    }
+}
+</pre>
+
+<p>
+Blocks 1a and 1b set up the main variables to use in the loop. The
+most important are the source and destination pointers, 
+<code>srcD</code> and <code>dstD</code>, and their pitches, 
+<code>srcP</code> and <code>dstP</code>. Notice that the source pitch, 
+<code>srcP</code>, is the not the character width, but the cell width, 
+because the fonts are organized on a cell-grid. The code at point 2 
+selectively copies pixels from the font to the surface. 
+</p>
+
+
+<h4>Intermezzo : considerations for performance</h4>
+
+<p>
+You may wonder why <code>bmp16_drawg()</code> doesn't follow the 
+pattern in the earlier <code>foo_drawg()</code> more closely. 
+The answer is, of course, performance. And before anyone quotes 
+Knuth on me: not every effort to make your code fast is premature 
+optimization. When you can improve the speed of the code without 
+spending too much effort of a loss of readability, there's not 
+much reason not to. 
+</p>
+<p>
+In this case, the optimizations I've applied here fall into two 
+categories: local variables and pointer arithmetic. These techniques 
+&ndash; that every C programmer <i>should</i> know &ndash; managed to 
+boost the speed by a factor of 5.
+</p><br>
+
+<p>
+Let's start with pointers. I'm using pointer to my advantage in 
+two places here. First, instead of using the font-data pointer
+and destination pointer directly, I create pointers 
+<code>srcD</code> and <code>dstD</code> and direct them the 
+top-lefts of the glyph and where it will be rendered to. Short-circuiting 
+the accesses like this means that I don't have to apply extra offsets 
+to get to where I want to go in the loop. This will be both faster and 
+in fact more readable as well, because the loops won't contain any 
+non-essential expressions.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//# Example of a more standard bitmap copier.</span>
+<span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy &lt; charH; iy++)
+    <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix &lt; charW; ix++)
+        dstD[iy*dstP + ix]= srcD[iy*srcP+ix];
+</pre>
+
+<p>
+A second point here is using incremental offsets instead of the 
+<code>y*pitch+x</code> form (see above). I suppose this is mostly a 
+matter of preference, but avoiding the wholly unnecessary 
+multiplications does matter.
+</p><br>
+
+<p>
+The second optimization is local variables. By this I mean loading 
+variables that reside in memory (globals and struct members) or 
+oft-used function results in local temporaries. This may seem like a 
+silly thing to point out, but the amount of time you can save with 
+this is actually quite high.
+</p>
+<p>
+Consider the use of <code>tte_get_glyph_width()</code> here. 
+I <i>know</i> the width of a glyph won't change during the loop, so 
+calling a function to get the width in the loop-condition itself 
+is just stupid. Another example of this would be calling 
+<code>strlen()</code> when looping over all characters in a string. 
+For those who do this: NO! Bad programmer, bad! Save the value 
+in a local variable and use that instead.
+</p>
+<p>
+The other point is to pre-load things like globals and struct/class 
+members if you use them more than once. Consider the following code. 
+It's the same as the one given before, only now I have not 
+loaded character height and the pitches into local temporaries.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//# Another bitmap-copy example. DO NOT USE THIS !!!</span>
+<span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy &lt; <b>font-&gt;</b>charH; iy++)
+    <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix &lt; charW; ix++)
+        dstD[iy*<b>tc-&gt;dst.pitch</b>/<span 
+class="num">2</span> + ix]= srcD[iy*<b>font-&gt;</b>cellW + ix];
+</pre>
+
+<p>
+The result: the speed of the function was <b>halved</b>! I expected 
+it to be slower, but that this innocuous-looking modification would 
+actually cost me a factor two was quite a surprise to me.
+</p>
+<p>
+So yes, spam your code width locals for loop-invariant, memory-based 
+quantities. This avoids them being loaded from memory every time. As a 
+bonus, the loops themselves win contain less text and be more 
+generalized, making it more reusable.
+</p><br>
+
+
+<p>
+Both the pointer work and pre-loading variables are actually the job 
+of the compiler's optimizer, but the current version of GCC doesn't 
+do these very well or at all. Also, sometimes it <i>can't</i> do this 
+optimization. When functions are called between memory dereferences, 
+the compiler has to reload the data because those functions may have 
+changed their contents. Obviously, this wouldn't happen for locals.
+</p>
+
+
+<div class="note" id="nt-local">
+<div class="nhgood">Use local variables for struct members and globals</div>
+<p>
+Struct members and global variables live in memory, not CPU registers.
+Before the CPU can use their data, they have to be loaded from memory 
+into registers first, and this often happen more times then 
+necessary. Since memory access (especially ROM access) is slower than 
+register access, this can really bog down an algorithm if the thing is 
+used more than once. You can avoid this needless work by creating 
+local variables for them.
+</p>
+<p>
+Aside from the speed-boost, local variables can use shorter names, 
+resulting in shorter and more readable code in the parts that actually 
+do the work. It's win-freakin'-win, baby.
+</p>
+</div>
+
+
+<h3 id="ssec-srf-format">22.4.2.
+  Glyph and surface formats
+</h3>
+
+<p>
+The renderer described above assumes that the glyphs are in formatted as 
+16-bpp bitmaps. However, TTE's default fonts are in a 1-bpp tilestrip 
+format, so I'll have to use something else. Before I go into the details 
+of that function, I'd like to discuss the different glyph formats and why 
+I'm using tile-strips instead of just plain bitmaps.
+</p>
+<p>
+When I say glyph formats, what I really mean is the order in which 
+pixels are accessed. Three key variations exist.
+</p>
+
+<ul>
+  <li><b>Linear</b> or <b>bitmap</b> layout. 
+    This is a simple, row-major matrix. This gives you two loops; 
+	one for <i>y</i> and one for <i>x</i>.
+  </li>
+  <li><b>Tiled</b>. 
+    In particular: 8&times;8 tiled. This is the standard GBA tile format 
+	where each group of 8&times;8 pixels form a row-major matrix, and 
+	then the tiles themselves are part of a larger row-major matrix 
+	again. Going through this required <b>four</b> loops: two for each 
+	matrix.
+  </li>
+  <li><b>Tile-strips</b>. 
+    This also uses 8&times;8 tiles, but this time the tiles ordered in a 
+	column-major order. In other words, tile 1 comes below tile 0 instead 
+	of to the right. This has the rather nice property that the rows 
+	in successive tiles are consecutive. It eliminates the break in the
+	<i>y</i> direction, resulting in only 3 loops and has simpler code to 
+	boot.
+  </li>
+</ul>
+
+<p>
+Fig&nbsp;22.5 shows these three layouts, 
+including the loop structure and the order in which the pixels are 
+traversed for 1bpp fonts. The case is a little bit different 
+because of the bit-packing: 1 bpp means 8 pixels per byte. As a result, 
+the bitmap-<i>x</i> loops have to be broken up into groups of 8, so 
+that the bitmap format now uses three nests of loops instead of just 
+two. There is no difference for the tiled formats, as those are grouped 
+by 8 pixels anyway. Not only that, if you were to calculate the total 
+loop-overhead for commonly used glyph sizes it turns out that this 
+arrangement actually works particularly well for tile-strips. This 
+is left as an exercise for the reader (hint: count the number of 
+comparisons).
+</p>
+
+<div class="cblock">
+<div class="cpt" style="width:600px;">
+  <img src="../img/tte/src_loops.png" id="img-src-loops" width=600
+    alt="Pixel traversal in glyphs for bitmap, tile and tile-strip formats. "><br>
+  <b>Fig 22.5</b>: 
+  Pixel traversal in glyphs for 1-bpp bitmap, tile and tile-strip formats. 
+  The numbers indicate the loops and their nestings.
+</div>
+</div>
+
+
+<h3 id="ssec-bmp16-std">22.4.3.
+  bmp16_drawg_b1cts : 1- to 16-bpp with transparency and coloring
+</h3>
+
+<p>
+The next routine takes 1-bpp tile-strip glyphs and turns them 
+into output suitable for 16-bpp bitmap backgrounds. The output will 
+use the ink attribute for color and it will only draw a pixel if the bit 
+was 1 in the source data, giving us transparency. The three macros at the 
+top declare and define the basic variables, comparable to step 1a 
+in <code>bmp16_drawg()</code>.
+</p>
+
+<pre class="proglist" id="cd-bmp16-drawg-b1cts">
+<span class="keyw">void</span> bmp16_drawg_b1cts(uint gid)
+{
+    <span class="cmt">// <b>(1)</b> Basic variables</span>
+    TTE_BASE_VARS(tc, font);
+    TTE_CHAR_VARS(font, gid, <b>u8</b>, srcD, srcL, charW, charH);
+    TTE_DST_VARS(tc, <b>u16</b>, dstD, dstL, dstP, x0, y0);
+    uint srcP= font-&gt;cellH;
+
+    dstD += x0;
+
+    u32 ink= tc-&gt;cattr[TTE_INK], raw;
+
+    <span class="cmt">// <b>(2)</b> Rendering loops.</span>
+    uint ix, iy, iw;
+    <span class="keyw">for</span>(iw=<span 
+class="num">0</span>; iw&lt;charW; iw += <span 
+class="num">8</span>)            <span class="cmt">// loop over tile-strips</span>
+    {
+        dstL= &amp;dstD[iw];
+        <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;charH; iy++)           <span 
+class="cmt">// loop over tile-lines</span>
+        {
+            raw= srcL[iy];
+            <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; raw&gt;<span class="num">0</span>; raw&gt;&gt;=<span 
+class="num">1</span>, ix++) <span 
+class="cmt">// loop over tile-scanline (8 pixels)</span>
+                <span class="keyw">if</span>(raw&amp;<span class="num">1</span>)
+                    dstL[ix]= ink;
+
+            dstL += dstP/<span class="num">2</span>;
+        }
+        srcL += srcP;
+    }
+}
+</pre>
+
+<p>
+The routine starts by calls to three macros: 
+<code>TTE_CHAR_VARS()</code>, <code>TTE_CHAR_VARS</CODE> and 
+<code>TTE_DST_VARS()</code>. These declare and define most of the 
+relevant local variables, similar to step 1a in 
+<code>bmp16_drawg()</code>. Note that two of the arguments here are 
+datatype identifiers for the source and destination pointers, 
+respectively. <code>srcD</code> and <code>srcL</code> will initially 
+point to the start of the source data. The other pointers, 
+<code>dstD</code> and <code>dstL</code>, point to the start 
+<i>of the scanline</i> in the destination area. They haven't been 
+corrected for the <i>x</i>-position just yet; that's done right 
+after it.
+</p>
+<p>
+The reason I'm using two pairs of pointers here (a main <i>data</i> 
+pointer, <code>fooD</code> and a <i>line</i> pointer 
+<code>fooL</code>) is because of the pointer arithmetic. The 
+data-pointer stays fixed and the line-pointer moves around in the 
+inner loop.
+</p>
+<p>
+The tile-strip portion of fig &nbsp;22.5
+illustrates how the routine moves over all the pixels. Because it's 
+for a 1-bpp bitpacked font and because there are 8 pixels per 
+tile-line, we can get an entire line's worth of pixels in one 
+byte-read. Rendering transparently gives us a nice chance for 
+optimization as well: if the tile-line is empty (i.e., 
+<code>raw</code>==0), we have no more visible pixels in that
+line and we can move on to the next. A glance at the verdana 9 
+font in fig&nbsp;22.1, will tell you 
+that you may be able to skip 50% of the pixels because of this.
+</p>
+
+
+<h3 id="ssec-bmp8-std">22.4.4.
+  bmp8_drawg_b1cts : 1 to 8 bpp with transparency and coloring
+</h3>
+
+<p>
+The 8 bpp counterpart of the previous function is called
+<code>bmp8_drawg_b1cts()</code>, and is given below. The code is very 
+similar to the 16 bpp function, but because the pixels are now bytes 
+there are a few differences in the details.
+</p>
+
+<pre class="proglist" id="cd-bmp8-drawg-b1cts">
+<span class="keyw">void</span> bmp8_drawg_b1cts(uint gid)
+{
+    <span class="cmt">// <b>(1)</b> Basic variables</span>
+    TTE_BASE_VARS(tc, font);
+    TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
+    TTE_DST_VARS(tc, u16, dstD, dstL, dstP, x0, y0);
+    uint srcP= font-&gt;cellH;
+
+    dstD += x0/<span class="num">2</span>;
+
+    u32 ink= tc-&gt;cattr[TTE_INK], raw, px;
+    uint odd= x0&amp;<span class="num">1</span>;                         <span 
+class="cmt">// <b>(2)</b> Source offset.</span>
+
+    uint ix, iy, iw;
+    <span class="keyw">for</span>(iw=<span 
+class="num">0</span>; iw&lt;charW; iw += <span 
+class="num">8</span>)            <span class="cmt">// Loop over strips.</span>
+    {
+        dstL= &amp;dstD[iw/<span class="num">2</span>];
+        <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;charH; iy++)           <span 
+class="cmt">// Loop over lines.</span>
+        {
+            raw= srcL[iy]&lt;&lt;odd;             <span 
+class="cmt">// <b>(3)</b> Apply source offset.</span>
+            <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; raw&gt;<span class="num">0</span>; raw&gt;&gt;=<span 
+class="num">2</span>, ix++) <span class="cmt">// Loop over pixels.</span>
+            {
+                <span 
+class="cmt">// <b>(4)</b> 2-bit -&gt; 2-byte unpack, then used as masks.</span>
+                px= ( (raw&amp;<span class="num">3</span>)&lt;&lt;<span 
+class="num">7</span> | (raw&amp;<span class="num">3</span>) ) &amp;~ <span 
+class="num">0xFE</span>;
+                dstL[ix]= (dstL[ix]&amp;~(px*<span 
+class="num">255</span>)) + ink*px;
+            }
+            dstL += dstP/<span class="num">2</span>;
+        }
+        srcL += srcP;
+    }
+}
+</pre>
+
+<p>
+The only real difference with <code>bmp16_drawg_b1cts</code> is in the 
+inner-most loop. The no-byte-write issue for VRAM means that we need 
+to write two pixels in one pass. To do this, I retrieve and unpack 
+two bits into two bytes and use them to create the new pixels and the 
+pixel masks. The first line in the inner loop does the unpacking. It 
+transforms the bit-pattern <code><i>ab</i></code> into 
+<code>0000&nbsp;000<i>a</i> 0000&nbsp;000<i>b</i></code>. Both bytes 
+in this halfword are now 0 or 1, depending on whether <i>a</i> 
+and <i>b</i> were on or off. By multiplying with <code>ink</code> 
+and 255, you can get the colored pixels and the appropriate mask 
+for insertion.
+</p>
+
+<pre class="proglist">
+<span class="cmt"># 2-bit to 2-byte unpacking.</span>
+0000 0000  hgfe dcb<b>a</b>    p  = raw (start)
+0000 0000  0000 00<span class="rem">b<b>a</b></span>    p &amp;= 3
+0000 000<span class="rem"><b>b</b>  a</span>000 00b<b>a</b>    p |= p&lt;&lt;7;
+0000 000<b>b</b>  0000 000<b>a</b>    p &amp;= ~0xFE;
+</pre>
+
+<p>
+Preparing the right halfword is only part of the work. If 
+<code>cursorX</code> (i.e., <code>x0</code>) is odd, then the glyph
+should be plotted to an odd starting location as well. However, 
+the destination pointer <code>dstL</code> is halfword pointer and 
+these must always be halfword aligned. To take care of this, note 
+that unpacking the pattern &lsquo;<code>abcd&nbsp;efgh</code>&rsquo; 
+to an odd boundary is equivalent to unpacking 
+&lsquo;<code>a&nbsp;bcde&nbsp;fgh<b>0</b></code>&rsquo; to an even 
+boundary. This is exactly what the extra shift by <code>odd</code> 
+is for.
+</p>
+
+<h3 id="ssec-bmp-demo">22.4.5.
+  Example : sub-pixel rendering
+</h3>
+
+<p>
+For the demo of this section, I'd like to use a technique called 
+<a href="http://en.wikipedia.org/wiki/Subpixel_rendering" target="_blank">
+<dfn>sub-pixel rendering</dfn></a>. This is a method for effectively 
+tripling the horizontal resolution for rendering by 
+&lsquo;borrowing&rsquo; colors from other pixels.
+</p>
+<p>
+Consider the letter &lsquo;A&rsquo; as shown in 
+fig&nbsp;22.6a. As you know, each pixel is
+composed of three colors: red, green and blue. These are the 
+sub-pixels. The letter on the sub-pixel grid looks like 
+fig&nbsp;22.6b. Notice how the colors are
+still grouped by pixels, which on the sub-pixel grid gives very
+jagged edges. The trick to sub-pixel rendering is to shift groups of 
+sub-pixels left or right, resulting in smoother edges
+(fig&nbsp;22.6c). Now combine the pixels to RGB
+colors again to get fig&nbsp;22.6d.
+Zoomed in as it is in fig&nbsp;22.6, sub-pixel
+rendering may not look like much, but when used in the proper size 
+the effects can be quite stunning.
+</p>
+
+<div class="cblock">
+<div class="cpt" style="width:576px;">
+  <img src="../img/tte/subpx.png" id="img-subpx"
+    alt="Subpixel rendering. Left: "><br>
+  <b>Fig&nbsp;22.6</b>: Subpixel rendering.
+  <b>a</b>: &lsquo;A&rsquo; on 8&times;8 grid.
+  <b>b</b>: as left, in R,G,B sub-grid.
+  <b>c</b>: shifting rows to distribute sub-pixels evenly.
+  <b>d</b>: new color distribution in pixels (black/white inverted).
+</div>
+</div>
+
+<p>
+Sub-pixel rendering isn't useful for everything. Because it muddles 
+the concept of pixel and color a little, it's only useful for
+gray-scale images. This does make it great for text, of course. 
+Secondly, the order in which the sub-pixels are ordered also matters. 
+The process shown in <b>fig&nbsp;22.6</b> will 
+work for RGB-ordered screens, but would fail quite spectacularly when 
+the pixels are BGR-ordered. Going into all the gritty details it too 
+much to do here, so I'll refer you to 
+<a href="http://www.grc.com/ctwhat.htm" target="_blank">http://www.grc.com/ctwhat.htm</a>, 
+which explains the concept in more detail and gives a few examples too.
+</p><br>
+
+<div class="cpt_fr" style="width:128px;">
+  <img src="../img/tte/yesh1.png" id="img-yesh" width=128
+    alt="4&times;8 subpixel font"><br>
+  <b>Fig 22.7</b>: 4&times;8 subpixel font
+</div>
+
+
+
+<p>
+JanoS (<a href="http://www.haluz.org/yesh/" target="_blank">http://www.haluz.org/yesh/</a>) 
+has created  nice 4&times;8 sub-pixel font for use on GBA and NDS
+(see fig&nbsp;22.7).
+A width of 4 is really tiny; it's impossible to have glyphs of that 
+size with normal rendering and still have readable text. With sub-pixel 
+rendering, however, it still looks good and now you can have many more 
+characters on the screen than usual.
+</p>
+<p>
+The output of the demo can be seen in 
+fig&nbsp;22.8. Because sub-pixel rendering is 
+so closely tied to the hardware you're viewing with, it will probably 
+look crummy on most screens or paper. You really have to see it on a 
+GBA screen for the full effect. 
+</p>
+<p>
+In this particular case, I've converted the font to work with 
+<code>bmp16_drawg()</code>: a 16bpp font in bitmap layout. Creating 
+an 8-bit version would not be very hard either. A 1-bpp bitpacked font 
+would of course be impossible because the font has more than two colors. 
+To make sub-pixel fonts look right, you'll actually need a lot of 
+colors: one for each combination of R,G,B, and with difference shades 
+of each. That said, JanoS has managed to reduce the amount of colors to 
+20 here without too much loss in quality. If anyone wants it, I also 
+have a 15-color version to use with 4bpp fonts.
+</p>
+
+
+<pre class="proglist" id="cd-tte-test-bmp16">
+<span class="cmt">//! Testing a bitmap renderer with JanoS' sub-pixel font.</span>
+<span class="keyw">void</span> test_tte_bmp16()
+{
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    tte_init_bmp(<span class="num">3</span>, &amp;yesh1Font, bmp16_drawg);
+    tte_init_con();
+
+    <span class="keyw">const</span> <span class="keyw">char</span> *str= 
+    <span class="str">&quot;http://en.wikipedia.org/wiki/Subpixel_rendering :\n&quot;</span>
+    <span class="str">&quot;Subpixel rendering is a way to increase the &quot;</span>
+    <span class="str">&quot;apparent \nresolution of a computer's liquid crystal &quot;</span>
+    <span class="str">&quot;display (LCD).\nIt takes advantage of the fact that &quot;</span>
+    <span class="str">&quot;each pixel on a color\nLCD is actually composed of &quot;</span>
+    <span class="str">&quot;individual red, green, and\nblue subpixel stripes to &quot;</span>
+    <span class="str">&quot;anti-alias text with greater\ndetail.\n\n&quot;</span>
+    <span class="str">&quot;  4x8 sub-pixel font by JanoS.\n&quot;</span>
+    <span class="str">&quot;  http://www.haluz.org/yesh/\n&quot;</span>;
+
+    tte_write(str);
+    key_wait_till_hit(KEY_ANY);
+}
+</pre>
+
+<div class="lblock">
+<div class="cpt" style="width:240px;">
+  <img src="../img/tte/test_tte_bmp16.png" id="img-test-bmp16"
+    alt="Sub-pixel rendering demo"><br>
+  <b>Fig 22.8</b>: Sub-pixel rendering demo
+</div>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-obj">22.5.
+  Object text
+</h2>
+
+<p>
+Object text is useful if you want the characters to move around a 
+bit, or if you simply don't have any room on a background. There 
+are a few possibilities for object text. The most obvious one is 
+to load all the characters into object VRAM and set the tile-indices 
+of the objects to use the right tiles. This is what the TTE object 
+system uses.
+</p>
+<p>
+In many ways, this kind of object text is similar to tilemap text. 
+The tiles are loaded up front and you change the relevant mapping 
+entries (in this case <code>attr2</code> of the objects) to the right 
+number. Of course, there are some notable differences as well. 
+</p>
+<p>
+For one thing, the positions of the characters must be written to the 
+objects. But not only that, the objects also need to know how 
+big they're supposed to be, and whether they have any other 
+interesting qualities like rotation and palettes. For that reason, 
+I've chosen to use the color attributes 0, 1 and 2 to store 
+the object attributes 0, 1 and 2.
+</p>
+<p>
+Another problem is which objects to use and how many. This last 
+one could present a big problem, actually, because you may 
+also want to use objects for normal sprites and it would be a 
+really bad idea if they were suddenly overridden by the text 
+system.
+</p>
+<p>
+For the latter issue, I use (or perhaps abuse) the <code>dst</code> 
+member of the context. Each glyph is represented by an object, so 
+I'll need an object array, but I'm doing it with a little twist. 
+I'm going to start at the <i>end</i> of the array, so that the 
+lower objects can still be used for sprites as normal. Essentially, 
+I'm using OAM as an empty-descending stack. In this arrangement, 
+<code>dst.data</code> points to the top of the stack (i.e., the last 
+element in the array), <code>dst.pitch</code> is the index 
+to the current object, and <code>dst.width</code> is the length 
+of the stack.
+</p>
+<p>
+The default plotter of objects is <code>obj_drawg</code>. Remember, 
+<code>dst.pitch</code> is used as an index here and <code>dst.data</code> 
+is the top of the stack, so a <i>negative</i> index is used to get 
+the current object. After that, the coordinates and the correct 
+glyph index are merged with the color attributes to create the 
+final object.
+</p>
+
+<pre class="proglist" id="cd-obj-drawg">
+<span class="cmt">//! Glyph-plotter using objects.</span>
+<span class="keyw">void</span> obj_drawg(uint gid)
+{
+    TTC *tc= tte_get_context();
+    TFont *font= tc-&gt;font;
+    uint x0= tc-&gt;cursorX, y0= tc-&gt;cursorY;
+
+    <span class="cmt">// <b>(1)</b> find the right object, and increment index.</span>
+    uint id= tc-&gt;dst.pitch;
+    OBJ_ATTR *obj= &amp;((OBJ_ATTR*)tc-&gt;dst.data)[-id];
+    tc-&gt;dst.pitch= (id+<span 
+class="num">1</span> &lt; tc-&gt;dst.width ? id+<span 
+class="num">1</span> : <span class="num">0</span>);
+
+    <span class="cmt">// <b>(2)</b> Set object attributes.</span>
+    obj-&gt;attr0= tc-&gt;cattr[<span 
+class="num">0</span>] + (y0 &amp; ATTR0_Y_MASK);
+    obj-&gt;attr1= tc-&gt;cattr[<span 
+class="num">1</span>] + (x0 &amp; ATTR1_X_MASK);
+    obj-&gt;attr2= tc-&gt;cattr[<span 
+class="num">2</span>] + gid*font-&gt;cellW*font-&gt;cellH/<span class="num">64</span>;
+}
+</pre>
+
+<p>
+And, yes, I know that this use of the <code>dst</code> member is 
+somewhat &hellip; unorthodox; but it wasn't used 
+here anyway so why not. I am considering using something more 
+proper, but not just yet. Also, remember that this system assumes 
+that the font is already loaded into VRAM and that this can take up 
+a <i>lot</i> of the available tiles. Using the verdana 9 font, 
+that'd be 2*240 = 480 tiles. That's nearly half of object VRAM. 
+A safer alternative would be to load the necessary tiles dynamically, 
+but that would require more resource management.
+</p>
+
+<div class="note">
+<div class="nhcare">TTE object text is ugly</div>
+<p>
+The way object text is handled in TTE works, but it the implementation 
+is not exactly pretty. The way I'm using <code>TTC.dst</code> here is, 
+well, bad. There is a good chance I'll clean it up a bit later, or at 
+the very least hide the implementation better.
+</p>
+</div>
+
+
+<h3 id="ssec-obj-demo">22.5.1.
+  Example: letters. Onna path
+</h3>
+
+<p>
+The defining characteristic of objects is that they're separate from 
+backgrounds; they can move around the screen independently. Object 
+text is most likely used for text that is dynamic or has to travel 
+along some sort of path. In this case, I'll make them fly on a 
+parameterized path called a 
+<a href="http://en.wikipedia.org/wiki/Lissajous_curve" target="_blank">Lissajous curve</a>
+(see fig&nbsp;22.9).
+</p>
+
+<div class="cpt_fr" style="width:240px;">
+  <img src="../img/tte/test_tte_obj.png" id="img-test-obj"
+    alt="Object text on a path."><br>
+  <b>Fig 22.9</b>: Object text on a path.
+</div>
+
+<p>
+The code is given below. After initializing the usual suspects, 
+<code>tte_init_obj()</code> is called. The object stack starts at 
+the back of OAM, which is also what the system defaults to if 
+<code>NULL</code> passed as the first parameter. The next three 
+are the object attributes. Because I want to use the default variable 
+width font, verdana 9, the attributes should be set to 8&times;16 
+objects. The bitdepth of the tiles will always be 4 to keep the 
+number of used tiles within limits. The rest of the initialization 
+should be easy to understand.
+</p>
+<p>
+Making the string itself is done at step 2. Note that the string 
+also set the paper color attribute (which corresponds to obj.attr2) 
+to 0x1000 to make the &ldquo;omg&rdquo; red. After these few lines, 
+the text handling itself is complete.
+</p>
+<p>
+In step 3, the coordinates on the path are calculated. The 
+<code>t</code> parameter indicates the how far along the path we are. 
+It is used to calculate the coordinates of each letter &ndash; the 
+first one using <code>t</code> itself, and the rest are essentially 
+time-delayed. Don't be distracted by the magic numbers: the only 
+reason for their values is to make the effect look alright. Try 
+tweaking them a little to see what they do exactly.
+</p>
+
+<pre class="proglist" id="cd-test-obj">
+<span class="cmt">// Object text demo</span>
+<span class="keyw">void</span> test_tte_obj()
+{
+    <span class="cmt">// Base inits</span>
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
+    oam_init(oam_mem, <span class="num">128</span>);
+    VBlankIntrWait();
+
+    <span 
+class="cmt">// <b>(1)</b> Init object text, using verdana 9 (8x16 objects)</span>
+    OBJ_ATTR *objs= &amp;oam_mem[<span class="num">127</span>];
+    tte_init_obj(
+        objs,               <span class="cmt">// Start at back of OAM</span>
+        ATTR0_TALL,         <span class="cmt">// attr0: 8x16 objects</span>
+        ATTR1_SIZE_8,       <span class="cmt">// attr1: 8x16 objects</span>
+        <span class="num">0</span>,                  <span 
+class="cmt">// attr2: nothing special</span>
+        CLR_YELLOW,         <span class="cmt">// Yellow ink</span>
+        <span class="num">0x0E</span>,               <span 
+class="cmt">// ink pixel 14+1 = 15</span>
+        &amp;vwf_default,          <span class="cmt">// Verdana 9 font </span>
+        NULL);              <span class="cmt">// Default renderer (obj_drawg)</span>
+
+    pal_obj_bank[<span class="num">1</span>][<span class="num">15</span>]= CLR_RED;
+
+    <span class="cmt">// <b>(2)</b> Write something (and prep for path)</span>
+    <span class="keyw">const</span> <span 
+class="keyw">char</span> *str= <span 
+class="str">&quot;Parametrized object text, omg!!!&quot;</span>;
+    <span class="keyw">const</span> <span 
+class="keyw">int</span> len= strlen(str);
+    tte_write(<span 
+class="str">&quot;Parametrized object text, #{cp:0x1000}omg#{cp:0}!!!&quot;</span>);
+
+    <span class="cmt">// Play with the objects</span>
+    <span class="keyw">int</span> ii, t= <span class="num">0x9000</span>;
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        key_poll();
+
+        <span class="cmt">// <b>(3)</b> Make lissajous figure</span>
+        <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;len; ii++)
+        {
+            <span class="keyw">int</span> ti= t-<span 
+class="num">0x380</span>*ii;             <span 
+class="cmt">// Get the path param for letter ii</span>
+            obj_set_pos(&amp;objs[-ii], 
+                (<span class="num">96</span>*lu_cos(  ti)&gt;&gt;<span 
+class="num">12</span>)+<span class="num">120</span>,  <span 
+class="cmt">// y= Ay*cos(  t) + y0</span>
+                (<span class="num">64</span>*lu_sin(<span 
+class="num">2</span>*ti)&gt;&gt;<span class="num">12</span>)+<span 
+class="num">80</span>);  <span class="cmt">// x= Ax*sin(2*t) + x0</span>
+        }
+        t += <span class="num">0x00A0</span>;
+
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            <span class="keyw">break</span>;      
+    }
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-chr">22.6.
+  Rendering to tiles
+</h2>
+
+<p>
+Using tilemaps for text is nice, but will only work if the dimensions 
+of the glyphs are multiples of 8. There are a few drawbacks in terms of 
+readability: narrow characters such as &lsquo;i&rsquo; will seem either 
+overly wide, or be surrounded by many empty pixels. Also, you can't 
+put many characters on a line because there are only so many tiles.
+</p>
+<p>
+Variable-width fonts (<dfn>vwf</dfn>; also known as proportional fonts) 
+solve this problem. Using variable-width fonts on bitmaps is quite 
+easy, as shown in section 22.4.. However, using it 
+in tilemap modes is a little trickier: how do you draw on a tilemap 
+where the tiles are 8&times;8 in size?
+</p>
+<p>
+Well, you don't. Not exactly. The key is not to draw to the map, but to 
+the tiles that the map shows.
+</p>
+
+
+
+<h3 id="ssec-chr-base">22.6.1.
+  Basic tile rendering
+</h3>
+
+<p>
+The usual way to work with tilemaps is that you load up a tileset, 
+and then select the ones you want to show up on the screen by 
+filling the tilemap. In those circumstances, the tileset is often 
+static, with the map being updated for things like scrolling. 
+Rendering to tiles reverses that procedure.
+</p>
+<p>
+First, you need to set up a map where each entry points to a 
+unique tile. This essentially forms a graphical surface out of the 
+tiles, which you can then draw to like any other. The most obvious 
+way to do this is to simply fill up the screenblock with consecutive 
+numbers (see fig&nbsp;22.10a). 
+However, a better way to map the tiles is by mapping tiles 
+in column-major order (see fig&nbsp;22.10b)
+, for the same reason I chose it for the glyph format: the words in 
+a column of tiles are consecutive.
+</p>
+
+<div class="cblock" id="img-chr4-map">
+<table border=0 cellpadding=4 cellspacing=0 width=70%>
+<tr>
+  <td>
+    <img src="../img/tte/chr4r_map.png" alt="">
+    <b>Fig&nbsp;22.10a</b>. Row-major tile indexing.
+
+  </td>
+  <td>
+    <img src="../img/tte/chr4c_map.png" alt="">
+    <b>Fig&nbsp;22.10b</b>. Column-major tile indexing.
+  </td>
+</tr>
+
+</table>
+</div>
+
+<p>
+Preparing the map is the easy part; the problem is knowing which part 
+of which tile to edit to plot a pixel. First, you need to split the 
+coordinates into tile coordinates and pixel-in-tile coordinates. This 
+comes down to division and modulo by 8, respectively. Note that 
+in column-major mode you only need to do this for the <i>x</i> 
+coordinate. With this information, you can find the right word. 
+The horizontal in-tile coordinate tells you which nybble in the 
+word to update and at that point it's the usual bitfield insertion.
+</p>
+<p>
+Tonclib has routines for drawing onto 4bpp, column-major tiles 
+(referred to as <dfn>chr4c</dfn> mode). The plotter and the map 
+preparation functions are given below, along with a demonstration 
+routine to explain their use.
+</p>
+
+<pre class="proglist" id="cd-chr4c-test">
+<span class="cmt">//# From tonc_schr4c.c</span>
+
+<span class="cmt">//! Plot a pixel on a 4bpp tiled, column-major surface.</span>
+<span class="keyw">void</span> schr4c_plot(<span 
+class="keyw">const</span> TSurface *dst, <span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, u32 clr)
+{
+    uint xx= x;     <span class="cmt">// fluff to make x unsigned.</span>
+    u32 *dstD= (u32*)(dst-&gt;data + xx/<span
+class="num">8</span>*dst-&gt;pitch);
+    uint shift= xx%<span class="num">8</span>*<span class="num">4</span>;
+
+    dstD[y] = (dstD[y] &amp;~ (<span 
+class="num">15</span>&lt;&lt;shift)) | (clr&amp;<span 
+class="num">15</span>)&lt;&lt;shift;
+}
+
+<span class="cmt">//! Prepare a screen-entry map for use with chr4c mode.</span>
+<span class="keyw">void</span> schr4c_prep_map(<span 
+class="keyw">const</span> TSurface *srf, u16 *map, u16 se0)
+{
+    uint ix, iy;
+    uint mapW= srf-&gt;width/<span 
+class="num">8</span>, mapH= srf-&gt;height/<span 
+class="num">8</span>, mapP= srf-&gt;pitch/<span class="num">32</span>;
+
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;mapH; iy++)
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;mapW; ix++)
+            map[iy*<span class="num">32</span>+ix]= ix*mapP + iy + se0;
+}
+
+<span class="cmt">//# --- Simple test ---------------------------------------------------</span>
+
+<span class="keyw">void</span> test_chr4()
+{
+    <span class="cmt">// <b>(1)</b> The usual</span>
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+    REG_BG0CNT= BG_CBB(<span class="num">0</span>) | BG_SBB(<span 
+class="num">31</span>);
+
+    pal_bg_mem[<span class="num">1</span>]= CLR_RED;
+    pal_bg_mem[<span class="num">2</span>]= CLR_GREEN;
+    pal_bg_mem[<span class="num">3</span>]= CLR_BLUE;
+    pal_bg_mem[<span class="num">4</span>]= CLR_WHITE;
+
+    <span class="cmt">// <b>(2)</b> Define a surface</span>
+    TSurface srf;
+    srf_init(&amp;srf, 
+        SRF_CHR4C,          <span class="cmt">// Surface type.</span>
+        tile_mem[<span class="num">0</span>],        <span 
+class="cmt">// Destination tiles.</span>
+        SCREEN_WIDTH,       <span class="cmt">// Surface width.</span>
+        SCREEN_HEIGHT,      <span class="cmt">// Surface height.</span>
+        <span class="num">4</span>,                  <span 
+class="cmt">// Bitdepth (ignored due to SRF_CHR4C).</span>
+        pal_bg_mem);        <span class="cmt">// Palette.</span>
+
+    <span class="cmt">// <b>(3)</b> Prepare the map</span>
+    schr4c_prep_map(&amp;srf, se_mem[<span class="num">31</span>], <span 
+class="num">0</span>);
+
+    <span class="cmt">// <b>(4)</b> Plot some things</span>
+    <span class="keyw">int</span> ii, ix, iy;
+    <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;<span class="num">20</span>; iy++)
+        <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; ix&lt;<span class="num">20</span>; ix++)
+            schr4c_plot(&amp;srf, ix+<span class="num">3</span>, iy+<span 
+class="num">11</span>, <span class="num">4</span>);
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">20</span>; ii++)
+    {
+        schr4c_plot(&amp;srf, ii+<span class="num">4</span>,    <span 
+class="num">12</span>, <span class="num">1</span>);  <span 
+class="cmt">// Red line</span>
+        schr4c_plot(&amp;srf, ii+<span class="num">4</span>, ii+<span 
+class="num">12</span>, <span class="num">2</span>);  <span 
+class="cmt">// Green line</span>
+        schr4c_plot(&amp;srf,    <span class="num">4</span>, ii+<span 
+class="num">12</span>, <span class="num">3</span>);  <span 
+class="cmt">// Blue line</span>
+    }
+}
+</pre>
+
+<p>
+The pixel plotter starts by finding the tile-column that the desired 
+pixel is in. The column-index is simply <i>x</i>/8; this is multiplied
+by the pitch to get a pointer to the top of the column. Note that 
+pitch is used a little different than usual. Normally, it denotes the 
+number of bytes to the next scanline, but in this case it's used as 
+the byte-offset to next tile-column. For a column-major mode, this 
+comes down to the <i>height</i>&times;<i>bpp</i>*8/8, but all that 
+is done in <code>srf_init()</code>. Once you have the right tile, 
+the pixel you want is in the <i>x</i>%8<sup>th</sup> nybble, meaning 
+the required shift for the insertion is <i>x</i>%8*4. After that, it's 
+just a matter of inserting the color. 
+<span class="mini">(For the curious: I'm casting 
+<i>x</i> to unsigned int first because division and modulo will then 
+be optimized to shifts/masks properly.)</span>
+</p>
+<p>
+The <code>schr4c_prep_map()</code> function just initializes the 
+map in the order given in fig&nbsp;22.10b. 
+Well, almost.I'm also adding a value to each screen-entry like I 
+usually do for palettes and tile-offsets. 
+</p><br>
+
+<p>
+The output of <code>test_chr4()</code> can be seen in 
+fig&nbsp;22.11a. It's a white rectangle 
+with red, green and blue lines, as expected. 
+Fig&nbsp;22.11b is a picture taken from 
+VBA's tile viewer, showing how the contents of the surface. Doesn't 
+quite look what's on the screen, does it? Still, if you look closely, 
+you can figure out how it works. Each set of 20 tiles forms one
+tile-column on the screen (indicated by yellow blocks). When you 
+place these tiles on top of each other, you'll see the picture of
+fig&nbsp;22.11a emerge.
+</p>
+
+<div class="cblock">
+<table width=60% id="img-chr4-test">
+<tr valign="top">
+  <td>
+	<div class="cpt" style="width:80px;">
+	  <img src="../img/tte/chr4_test.png"
+		alt="Output of chr4_test"><br>
+	  <b>Fig 22.11a</b>: chr4_test() output
+	</div>
+  </td>
+  <td>
+	<div class="cpt" style="width:289px;">
+	  <img src="../img/tte/chr4_test_tiles.png"
+		alt="Output of chr4_test"><br>
+	  <b>Fig 22.11b</b>: chr4_test() tiles. 
+	  The yellow blocks indicate tiles of a single column.
+	</div>
+  </td>
+</tr>
+</table>
+</div>
+
+
+<h3 id="ssec-chr-drawg">22.6.2.
+  Text rendering on tiles
+</h3>
+
+
+<h4>Version 1 : pixel by pixel</h4>
+<p>
+The easiest way to render glyphs to tiles is to follow the template 
+from section 22.4.. This is done in the function 
+below.
+</p>
+
+<pre class="proglist" id="cd-chr4-drawg-b1cts-a">
+<span class="cmt">//! Simple version of chr4 renderer.</span>
+<span class="keyw">void</span> chr4_drawg_b1cts_base(uint gid)
+{
+    TTE_BASE_VARS(tc, font);
+    TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
+    uint x0= tc-&gt;cursorX, y0= tc-&gt;cursorY;
+    uint srcP= font-&gt;cellH;
+
+    u32 ink= tc-&gt;cattr[TTE_INK], raw;
+
+    uint ix, iy, iw;
+    <span class="keyw">for</span>(iw=<span 
+class="num">0</span>; iw&lt;charW; iw += <span class="num">8</span>)
+    {   
+        <span class="keyw">for</span>(iy=<span
+class="num">0</span>; iy&lt;charH; iy++)
+        {
+            raw= srcD[iy];
+            <span class="keyw">for</span>(ix=<span 
+class="num">0</span>; raw&gt;<span class="num">0</span>; raw&gt;&gt;=<span 
+class="num">1</span>, ix++)
+                <span class="keyw">if</span>(raw&amp;<span class="num">1</span>)
+                    schr4c_plot(&amp;tc-&gt;dst, x0+ix, y0+iy, ink);
+        }
+        srcD += srcP;
+        x0 += <span class="num">8</span>;
+    }
+}
+</pre>
+
+<p>
+Now, you may think that this runs pretty slowly thanks to all the 
+recalculations in <code>schr4c_plot()</code>. And you'd be right, 
+but in truth, it's not as bad as I originally thought. It is possible 
+to speed it up by simply inlining things, but the real gain comes 
+from drawing pixels in parallel.
+</p>
+
+<h4>Version 2 : 8 pixels at once.</h4>
+<p>
+Instead of plotting pixel individually, you can also plot multiple 
+pixels simultaneously. The <code>bmp8_drawg_b1cts()</code> renderer 
+we saw earlier did this: it unpacked 2 pixels and drew together.
+In the case of 4bpp tiles, you can unpack the source byte into one 
+(32bit) word and plot <i>eight</i> pixels at once. The only downside 
+is that you'll probably have to split it over two tiles.
+</p>
+<p>
+The next function is TTE's main glyph renderer for tiles, and it is 
+a doozy. There are two stages for the rendering in the inner loop: 
+bit unpacking the source byte, <code>raw</code> and splitting the 
+prepared pixel <code>px</code> into two adjacent tiles. These 
+correspond to steps 3 and 4, respectively.
+</p>
+<p>
+Normally, the bitunpack is done in a loop, but sometimes it's 
+faster to do it in other ways. For details, see my document on 
+<a href="http://www.coranac.com/documents/bittrick/#sec-bup" target="_blank">bit 
+tricks</a>. The first five lines of step 3 do the unpacking. For 
+example, it turns a binary <code>0001&nbsp;1011</code> into a 
+hexadecimal <code>0x00011011</code>. This is then multiplied by 
+15 and <code>ink</code> to give the pixel mask <code>pxmask</code> 
+and the colored pixels <code>px</code>, respectively.
+</p>
+<p>
+Step 4 distributes the word with the pixels over two tiles if 
+necessary. In step 1, left and right shifts were prepared to supply 
+the bit offsets for this procedure. Now, for larger glyphs this 
+will mean that certain destination words are used twice, but 
+this can't be helped (actually it can, but the procedure is ugly 
+and possibly not worth it). An alternative to this is using
+the destination once and read (and unpack/color) the source twice; 
+however, as VRAM is considerably faster than ROM I doubt this 
+would be beneficial.
+</p>
+
+<pre class="proglist" id="cd-chr4c-drawg-b1cts">
+<span class="cmt">//! Render 1bpp fonts to 4bpp tiles; col-major order.</span>
+<span class="keyw">void</span> chr4c_drawg_b1cts(uint gid)
+{
+    <span class="cmt">// Base variables.</span>
+    TTE_BASE_VARS(tc, font);
+    TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
+    uint x= tc-&gt;cursorX, y= tc-&gt;cursorY, <!--
+-->dstP= tc-&gt;dst.pitch/<span class="num">4</span>;
+    uint srcP= font-&gt;cellH;
+
+    <span class="cmt">// <b>(1)</b> Prepare dst pointers and shifts.</span>
+    u32 *dstD= (u32*)(tc-&gt;dst.data + (y + x/<span 
+class="num">8</span>*dstP)*<span class="num">4</span>), *dstL;
+    x %= <span class="num">8</span>;
+    uint lsl= <span class="num">4</span>*x, lsr= <span 
+class="num">32</span>-<span class="num">4</span>*x, right= x+charW;
+
+    <span class="cmt">// Inner loop vars.</span>
+    u32 px, pxmask, raw;
+    u32 ink= tc-&gt;cattr[TTE_INK];
+    <span class="keyw">const</span> u32 mask= <span 
+class="num">0x01010101</span>;
+
+    uint iy, iw;
+    <span class="keyw">for</span>(iw=<span 
+class="num">0</span>; iw&lt;charW; iw += <span class="num">8</span>)    <span 
+class="cmt">// Loop over strips</span>
+    {
+        <span 
+class="cmt">// <b>(2)</b> Update and increment main data pointers.</span>
+        srcL= srcD;     srcD += srcP;
+        dstL= dstD;     dstD += dstP;
+
+        <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;charH; iy++)   <span 
+class="cmt">// Loop over scanlines</span>
+        {
+            raw= *srcL++;
+            <span class="keyw">if</span>(raw)
+            {
+                <span 
+class="cmt">// <b>(3)</b> Unpack 8 bits into 8 nybbles and create the mask</span>
+                raw |= raw&lt;&lt;<span class="num">12</span>;
+                raw |= raw&lt;&lt; <span class="num">6</span>;
+                px   = raw &amp; mask&lt;&lt;<span class="num">1</span>;
+                raw &amp;= mask;
+                px   = raw | px&lt;&lt;<span class="num">3</span>;
+
+                pxmask= px*<span class="num">15</span>;
+                px   *= ink;
+
+                <span class="cmt">// <b>(4a)</b> Write left tile:</span>
+                dstL[<span class="num">0</span>] = (dstL[<span 
+class="num">0</span>] &amp;~ (pxmask&lt;&lt;lsl) ) | (px&lt;&lt;lsl);
+
+                <span class="cmt">// <b>(4b)</b> Write right tile (if any)</span>
+                <span class="keyw">if</span>(right &gt; <span class="num">8</span>)
+                    dstL[dstP]= (dstL[dstP] &amp;~ <!--
+-->(pxmask&gt;&gt;lsr) ) | (px&gt;&gt;lsr);
+            }
+            dstL++;
+        }
+    }
+}
+</pre>
+
+<p>
+<code>chr4c_drawg_b1cts()</code> is pretty fast. It certainly is 
+faster than the earlier version by about 33%. It's actually even 
+faster than the bmp8 renderer, but only by a slim margin.
+</p>
+<p>
+Of course, you can always go one better. The various shifts and 
+conditionals make it perfect for ARM code, rather than Thumb.
+And to make sure it goes exactly according to plan, I'm 
+doing this in assembly. 
+</p>
+
+
+<h4>Version 3: ARM asm</h4>
+<p>
+The next function is <code>chr4_drawg_b1cts_fast()</code>, the 
+ARM assembly equivalent of version 2. There's an almost one-to-one 
+correspondence between the C and asm loops, so just loop to the 
+C version for the explanation.
+</p>
+<p>
+Speed-wise, the asm version is <i>much</i> better than 
+the C version. Even in ROM, which is <i>very</i> bad for 
+ARM code, it is still faster than the Thumb version.  There are one 
+or two tiny details by which you can speed this thing up, but by 
+and large this should be it for fonts of arbitrary dimensions.
+Of course, if you have fixed sizes for your font and do not require 
+recoloring or transparency, things will be a little different.
+</p>
+<pre class="proglist" id="cd-chr4c-drawg-b1cts-fast">
+<span class="cmt">// Include TTC/TFont member offsets plz.</span>
+<span class="keyw">#include</span> <span class="str">&quot;tte_types.s&quot;
+</span>
+<span class="cmt">/*
+IWRAM_CODE void chr4c_drawg_b1cts_fast(int gid);
+*/</span>
+    .<span class="keyw">section</span> .iwram, <span 
+class="str">&quot;ax&quot;</span>, %progbits
+    .<span class="keyw">arm</span>
+    .<span class="keyw">align</span>
+    .<span class="keyw">global</span> chr4c_drawg_b1cts_fast
+chr4c_drawg_b1cts_fast:
+    <span class="keyw">stmfd</span>   sp!, {r4-r11, lr}
+
+    <span class="keyw">ldr</span>     r5,=gp_tte_context
+    <span class="keyw">ldr</span>     r5, [r5]
+    
+    <span class="cmt">@ Preload dstBase (r4), dstPitch (ip), yx (r6), font (r7)</span>
+    <span class="keyw">ldmia</span>   r5, {r4, ip}
+    <span class="keyw">add</span>     r3, r5, #TTC_cursorX
+    <span class="keyw">ldmia</span>   r3, {r6, r7}
+
+    <span class="cmt">@ Get srcD (r1), width (r11), charH (r2)</span>
+    <span class="keyw">ldmia</span>   r7, {r1, r3}            <span 
+class="cmt">@ Load data, widths</span>
+    <span class="keyw">cmp</span>     r3, #<span class="num">0</span>
+    <span class="keyw">ldrneb</span>  r11, [r3, r0]           <span 
+class="cmt">@ Var charW</span>
+    <span class="keyw">ldreqb</span>  r11, [r7, #TF_charW]    <span 
+class="cmt">@ Fixed charW</span>
+    <span class="keyw">ldrh</span>    r3, [r7, #TF_cellS]
+    <span class="keyw">mla</span>     r1, r3, r0, r1          <span 
+class="cmt">@ srcL</span>
+    <span class="keyw">ldrb</span>    r2, [r7, #TF_charH]     <span 
+class="cmt">@ charH</span>
+    <span class="keyw">ldrb</span>    r10, [r7, #TF_cellH]    <span 
+class="cmt">@ cellH</span>
+
+    <span 
+class="cmt">@ Positional issues: dstD(r0), lsl(r8), lsr(r9), right(lr), cursorX </span>
+    <span class="keyw">mov</span>     r3, r6, <span 
+class="keyw">lsr</span> #<span class="num">16</span>         <span 
+class="cmt">@ y</span>
+    <span class="keyw">bic</span>     r6, r6, r3, <span 
+class="keyw">lsl</span> #<span class="num">16</span>     <span 
+class="cmt">@ x</span>
+
+    <span class="keyw">add</span>     r0, r4, r3, <span 
+class="keyw">lsl</span> #<span class="num">2</span>      <span 
+class="cmt">@ dstD= dstBase + y*4</span>
+    <span class="keyw">mov</span>     r3, r6, <span 
+class="keyw">lsr</span> #<span class="num">3</span>
+    <span class="keyw">mla</span>     r0, ip, r3, r0
+
+    <span class="keyw">and</span>     r6, r6, #<span 
+class="num">7</span>              <span class="cmt">@ x%7</span>
+    <span class="keyw">add</span>     lr, r11, r6             <span 
+class="cmt">@ right= width + x%8</span>
+    <span class="keyw">mov</span>     r8, r6, <span 
+class="keyw">lsl</span> #<span class="num">2</span>          <span 
+class="cmt">@ lsl = x%8*4</span>
+    <span class="keyw">rsb</span>     r9, r8, #<span 
+class="num">32</span>             <span class="cmt">@ lsr = 32-x%8*4</span>
+
+    <span class="keyw">ldr</span>     r6,=<span class="num">0x01010101</span>
+    <span class="keyw">ldrh</span>    r7, [r5, #TTC_ink]
+
+    <span class="cmt">@ --- Reg-list for strip/render loop ---</span>
+    <span class="cmt">@ r0    dstL</span>
+    <span class="cmt">@ r1    srcL</span>
+    <span class="cmt">@ r2    scanline looper</span>
+    <span class="cmt">@ r3    raw</span>
+    <span class="cmt">@ r4    px / tmp</span>
+    <span class="cmt">@ r5    pxmask</span>
+    <span class="cmt">@ r6    bitmask</span>
+    <span class="cmt">@ r7    ink</span>
+    <span class="cmt">@ r8    left shift</span>
+    <span class="cmt">@ r9    right shift</span>
+    <span class="cmt">@ r10   dstD</span>
+    <span class="cmt">@ r11   charW</span>
+    <span class="cmt">@ ip    dstP</span>
+    <span class="cmt">@ lr    split indicator (right edge)</span>
+    <span class="cmt">@ sp00  charH</span>
+    <span class="cmt">@ sp04  deltaS = cellH-charH     (delta srcL)
+</span>
+    <span class="keyw">cmp</span>     r11, #<span class="num">8</span>
+    <span class="cmt">@ Prep for single-strip render</span>
+    <span class="keyw">suble</span>   sp, sp, #<span class="num">8</span>
+    <span class="keyw">ble</span>     .Lyloop
+    <span class="cmt">@ Prep for multi-strip render</span>
+    <span class="keyw">sub</span>     r3, r10, r2
+    <span class="keyw">mov</span>     r10, r0
+    <span class="keyw">stmfd</span>   sp!, {r2, r3}           <span 
+class="cmt">@ Store charH, deltaS</span>
+    <span class="keyw">b</span>       .Lyloop
+
+    <span class="cmt">@ --- Strip loop ---</span>
+.Lsloop:
+        <span class="cmt">@ (2) Update and increment main data pointers.</span>
+        <span class="keyw">ldmia</span>   sp, {r2, r3}        <span 
+class="cmt">@ Reload charH and deltaS</span>
+        <span class="keyw">add</span>     r10, r10, ip        <span 
+class="cmt">@ (Re)set dstD/dstL</span>
+        <span class="keyw">mov</span>     r0, r10
+        <span class="keyw">add</span>     r1, r1, r3
+        <span class="keyw">sub</span>     lr, lr, #<span class="num">8</span>
+
+        <span class="cmt">@ --- Render loop ---</span>
+.Lyloop:
+            <span class="cmt">@ (3) Prep px and pxmask</span>
+            <span class="keyw">ldrb</span>    r3, [r1], #<span 
+class="num">1</span>
+            <span class="keyw">orrs</span>    r3, r3, r3, <span 
+class="keyw">lsl</span> #<span class="num">12</span>
+            <span class="keyw">beq</span>     .Lnopx              <span 
+class="cmt">@ Skip if no pixels</span>
+            <span class="keyw">orr</span>     r3, r3, r3, <span 
+class="keyw">lsl</span> #<span class="num">6</span>
+            <span class="keyw">and</span>     r4, r3, r6, <span 
+class="keyw">lsl</span> #<span class="num">1</span>
+            <span class="keyw">and</span>     r3, r3, r6
+            <span class="keyw">orr</span>     r3, r3, r4, <span
+class="keyw">lsl</span> #<span class="num">3</span>
+
+            <span class="keyw">rsb</span>     r5, r3, r3, <span 
+class="keyw">lsl</span> #<span class="num">4</span>
+            <span class="keyw">mul</span>     r4, r3, r7      
+
+            <span class="cmt">@ (4a) Render to left tile</span>
+            <span class="keyw">ldr</span>     r3, [r0]
+            <span class="keyw">bic</span>     r3, r3, r5, <span class="keyw">lsl</span> r8
+            <span class="keyw">orr</span>     r3, r3, r4, <span class="keyw">lsl</span> r8
+            <span class="keyw">str</span>     r3, [r0]
+
+            <span class="cmt">@ (4b) Render to right tile</span>
+            <span class="keyw">cmp</span>     lr, #<span class="num">8</span>
+            <span class="keyw">ldrgt</span>   r3, [r0, ip]
+            <span class="keyw">bicgt</span>   r3, r3, r5, <span class="keyw">lsr</span> r9
+            <span class="keyw">orrgt</span>   r3, r3, r4, <span class="keyw">lsr</span> r9
+            <span class="keyw">strgt</span>   r3, [r0, ip]
+.Lnopx:
+            <span class="keyw">add</span>     r0, r0, #<span class="num">4</span>
+            <span class="keyw">subs</span>    r2, r2, #<span class="num">1</span>
+            <span class="keyw">bne</span>     .Lyloop
+
+        <span class="cmt">@ Test for strip loop</span>
+        <span class="keyw">subs</span>    r11, r11, #<span class="num">8</span>
+        <span class="keyw">bgt</span>     .Lsloop
+    
+    <span class="keyw">add</span>     sp, sp, #<span class="num">8</span>
+    <span class="keyw">ldmfd</span>   sp!, {r4-r11, lr}
+    <span class="keyw">bx</span>      lr
+
+<span class="cmt">@ EOF</span>
+</pre>
+
+
+<h3 id="ssec-chr4-drawg-b4">22.6.3.
+  Multi-color and shaded fonts.
+</h3>
+
+<p>
+Bitpacked fonts will give you monochrome glyphs. If you want more 
+colors &ndash; for shading or anti-aliasing &ndash; you'll need to 
+use more bits. The code for this is nearly identical to the 1bpp 
+bitpacked version; the most important differences being a different 
+source datatype and an alternative method for finding the right 
+mask. Oh, and you won't have to unpack the bits anymore, of course.
+</p>
+<p>
+The following snippet shows how you can make a transparency mask out 
+of a word of 4bit pixels. Essentially, you mask all the bits of a 
+nybble together and mask out the other bits of that nybble. This gives 
+0 if the whole nybble was empty, or 1 is it wasn't. This can then 
+again be multiplied by 15 to give the proper mask.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Create pixel mask from 8x 4 bits</span>
+u32 *srcL= ...;         <span class="cmt">// Source is now 32bit.</span>
+
+raw     = *srcL++;      <span class="cmt">// Source word: 8x 4 bits</span>
+pxmask  = raw;
+pxmask |= pxmask&gt;&gt;<span class="num">2</span>;    <span 
+class="cmt">// bit0 = bit0 | bit2</span>
+pxmask |= pxmask&gt;&gt;<span class="num">1</span>;    <span 
+class="cmt">// bit0 = bit0 | bit1 | bit2 | bit3;</span>
+pxmask &amp;= <span class="num">0x11111111</span>;   <span 
+class="cmt">// bit0 is 0 only if bits 0-3 were all 0</span>
+pxmask *= <span class="num">15</span>;
+</pre>
+
+<div class="cpt_fr" style="width:128px;">
+  <img src="../img/tte/verdana9_b4.png" id="img-verdana9-b4"
+    width="128" alt=""><br>
+  <b>Fig 22.12</b>: Verdana 9, with shade.
+</div>
+
+<h4>Shaded characters</h4>
+
+<p>
+No, not shad<i>y</i> characters; shad<i>ed</i> characters. What 
+you'll often see in games is that the text has either an outline or
+a bit of shading on one side. While it is possible to create shading 
+with a 1bpp font, it's easier to simply build it into the font itself
+(see fig&nbsp;22.12).
+Because this means more colors than 1bpp can handle, you may be 
+tempted to use a 2bpp font here. However, unless you are <i>really</i> 
+stressed for memory, it's more convenient to use 4bpp here as well.
+</p>
+<p>
+At that point, you can follow the procedure described earlier. But by 
+cleverly using the bits that make up the shading, you can allow the 
+shadow color to be variable as well. For example, you can designate 
+bit 0 as the 'ink' bit, bit 1 as the 'shadow' bit and if necessary 
+bit 2 as the 'paper' bit. Then <code>raw&amp;0x11111111</code> gives 
+the 'ink' mask, and <code>(raw&gt;&gt;1)&amp;0x11111111</code> 
+gives the 'shadow' mask; these can then be used to apply colors and 
+to create the full mask. 
+The following is a demonstration of how this can be done. Note that 
+each line here corresponds exactly to one ARM instruction, so this 
+should be an efficient method. Well, in ARM code anyway.
+</p>
+
+
+<pre class="proglist">
+<span class="cmt">// Use bits 0 and 1 from each nybble to create masks and apply colors.</span>
+u32 *srcL= ...;
+
+raw     = *srcL++;              <span 
+class="cmt">// Source word: 8x 4 bits</span>
+px      = raw    &amp; <span class="num">0x11111111</span>;  <span 
+class="cmt">// Bit 0 for ink pixels</span>
+raw     = raw&gt;&gt;<span class="num">1</span> &amp; <span
+class="num">0x11111111</span>;  <span class="cmt">// Bit 1 for shadow pixels</span>
+pxmask  = px | raw;             <span 
+class="cmt">// Mask of ink and shadow bits</span>
+pxmask *= <span class="num">15</span>;
+
+px      = px * ink;             <span class="cmt">// Color with ink</span>
+px     += raw* shadow;          <span class="cmt">// Add shadow pixels</span>
+</pre>
+
+<p>
+The <code>chr4c_drawg_b4cts()</code> renderer uses this method to color 
+both the ink and shadow pixels. It's essentially 
+<code>chr4c_drawg_b4cts()</code> except for the things in bold and the 
+removal of the bit unpacking. Also note the &lsquo;no-pixel&rsquo; 
+condition here. If <code>pxmask</code> is zero, there's nothing to do; 
+and so we won't.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! 4bpp font, tilestrips with ink/shadow coloring.</span>
+<span class="keyw">void</span> chr4c_drawg_b4cts(uint gid)
+{
+    TTE_BASE_VARS(tc, font);
+    TTE_CHAR_VARS(font, gid, u32, srcD, srcL, charW, charH);
+    uint x= tc-&gt;cursorX, y= tc-&gt;cursorY;
+    uint srcP= font-&gt;cellH, dstP= <!--
+-->tc-&gt;dst.pitch/<span class="num">4</span>;
+
+    <span class="cmt">// <b>(1)</b> Prepare dst pointers and shifts.</span>
+    <b>u32 *dstD= (u32*)(tc-&gt;dst.data + (y+x/<span 
+class="num">8</span>*dstP)*<span class="num">4</span>), *dstL</b>;
+    x %= <span class="num">8</span>;
+    uint lsl= <span class="num">4</span>*x, lsr= <span 
+class="num">32</span>-<span class="num">4</span>*x, right= x+charW;
+
+    <span class="cmt">// Inner loop vars</span>
+    u32 amask= <span class="num">0x11111111</span>;
+    u32 px, pxmask, raw;
+    u32 ink=   tc-&gt;cattr[TTE_INK];
+    <b>u32 shade= tc-&gt;cattr[TTE_SHADOW];</b>
+
+    uint iy, iw;
+    <span class="keyw">for</span>(iw=<span 
+class="num">0</span>; iw&lt;charW; iw += <span class="num">8</span>)    <span 
+class="cmt">// Loop over strips</span>
+    {
+        srcL= srcD;     srcD += srcP;
+        dstL= dstD;     dstD += dstP;
+
+        <span class="keyw">for</span>(iy=<span 
+class="num">0</span>; iy&lt;charH; iy++)   <span
+class="cmt">// Loop over scanlines</span>
+        {
+            raw= *srcL++;
+
+            <span class="cmt">// <b>(3a)</b> Prepare pixel mask</span>
+            px    = (raw    &amp; amask);
+            raw   = (raw&gt;&gt;<span class="num">1</span> &amp; amask);
+            pxmask= px | raw;
+            <span class="keyw">if</span>(pxmask)
+            {
+                px *= ink;          <span 
+class="cmt">// <b>(3b)</b> Color ink pixels</span>
+                px += raw*shade;    <span 
+class="cmt">// <b>(3c)</b> Color shadow pixels</span>
+                pxmask *= <span class="num">15</span>;       <span 
+class="cmt">// <b>(3d)</b> Create mask</span>
+
+                <span class="cmt">// <b>(4a)</b> Write left tile:</span>
+                dstL[<span class="num">0</span>] = (dstL[<span 
+class="num">0</span>] &amp;~ (pxmask&lt;&lt;lsl) ) | (px&lt;&lt;lsl);
+
+                <span class="cmt">// <b>(4b)</b> Write right tile (if any)</span>
+                <span class="keyw">if</span>(right &gt; <span class="num">8</span>)
+                    dstL[dstP]= (dstL[dstP] <!--
+-->&amp;~ (pxmask&gt;&gt;lsr) ) | (px&gt;&gt;lsr);
+            }
+            dstL++;
+        }
+    }
+}
+</pre>
+
+
+<h3 id="ssec-chr4-tips">22.6.4.
+  Tips for fast tile rendering
+</h3>
+
+<p>
+I've done a fair bit of profiling for these tile renderers and think I 
+have a decent knowledge of which techniques will be efficient and 
+which won't. These are some of my observations.
+</p>
+
+<ul>
+  <li>
+    <b>Profile</b>. Before conjuring up tricky routines, make sure 
+	the original simple version warrants optimizing <i>and</i> that 
+	the clever routine is actually faster.
+  </li>
+  <li>
+    <b>Render transparently</b>. Now, you'd think that this would 
+	be slower, but it may not be. The thing about transparent text 
+	is that there are much less foreground pixels then there are 
+	background pixels, so the number of pixels to render is lower 
+	as well.
+  </li>
+  <li>
+    <b>Don't buffer</b>. My first trials had separate stages for 
+	unpacking/coloring and inserting into VRAM. It put the prepared 
+	pixels into an IWRAM buffer, then copied that to VRAM. If I 
+	recall correctly, combining the loops and tossing the buffer
+	saved me 30%.
+  </li>
+  <li>
+    <b>Parallelize</b>. The road to getting the right data is long. 
+	It helps if you don't have to travel it that much. That said, 
+	if you have many empty pixels, drawing 8 of them at 
+	once may be a waste of effort. This will depend on the font.
+  </li>
+  <li>
+    <b>ARM code is teh r0xx0rz</b>. There are lots of shifts, masks 
+	and quantities in these routines. This makes them particularly 
+	apt for ARM code instead of Thumb. In fact, even in ROM with its 
+	16-bit bus, the ARM versions beat out the Thumb-compiled ones. 
+	Having said that &hellip;
+  </li>
+  <li>
+    <b>Do not let GCC use constant masks in ARM</b>. There is an 
+	unfortunate bug in the ARM optimizer concerning ANDing 
+	literals (like 0x11111111). Instead of emitting a simple 
+	<code>ldr</code>+<code>and</code> pair, it will get clever and 
+	avoid the load by splitting the mask out over multiple 
+	byte-size masks. So instead of one instruction in the inner-loop, 
+	you now have four. Perhaps even more, depending on how many extra 
+	registers this takes. Note, this <i>only</i> happens for 
+	constants and only for ARM-compiled code. A work-around is to 
+	have the mask in a global variable to be loaded before the loops.
+	This is in part why I've hand-assembled some of the routines.
+  </li>
+  <li>
+    <b>Code for special case if you can</b>. If you only have one 
+	font and don't require things like coloring, you can code for 
+	that case only and potentially save much time. Using constants for 
+	source and destination dimensions instead of using the ones in 
+	memory will also help a little.
+  </li>
+  <li>
+    <b>Use column-major accessing</b>. The routines presented above 
+	require extra code to move from one tile-row to another. If you 
+	use the tiles in a column-major layout, you won't have to do this.
+  </li>
+</ul>
+
+<p>
+Please apply the standard disclaimer to this list. I've found these 
+techniques to work for my cases, but they won't apply to every case. 
+For example, other systems (*cough* NDS) will have different CPU 
+architectures and memory characteristics, and that would affect the 
+speed.
+</p>
+
+
+<h3 id="ssec-chr4-demo">22.6.5.
+  Colored text on a dialog window. 
+</h3>
+
+<div class="cpt_fr" style="width:240px;">
+  <img src="../img/tte/test_tte_chr4.png" id="img-test-chr4"
+    alt="Text on tiles."><br>
+  <b>Fig 22.13</b>: Text on tiles.
+</div>
+
+<p>
+The situation depicted in fig&nbsp;22.13 
+should be familiar. The key point here is that there is a background 
+map, and a dialog box with text in it. This text is static, but 
+the position in the top-left corner is continually updated as you 
+scroll along the map.
+</p><br>
+
+<p>
+The core function for this demo is <code>test_tte_chr4()</code>. 
+The first thing it does is call <code>tte_init_chr4c()</code> to 
+initialize the text system for chr4c-mode. The third argument is the 
+offset for map-entries: <code>0xF000</code> meaning it uses 
+sub-palette 15. The fourth is a word for the color attributes: 
+13 for the ink, 15 for the shadow and 0 for the others. For this 
+demonstration, I'm using the 4bpp version of verdana9 (see 
+fig&nbsp;22.12) and the fast assembly
+version to render the glyphs.
+</p>
+<p>
+Step 2 loads the background map and the dialog box. Note that the 
+dialog box is copied to the tiles that the text is rendered to. 
+When the text is printed, this will show that the glyphs indeed
+are rendered transparently. This does more or less mean that I can't 
+use the standard eraser, because that'd wipe the box as well.
+</p>
+<p>
+The dialog text is drawn in step 3. The <code>ci</code> and 
+<code>cs</code> tags set the ink and shadow color attributes, 
+respectively. This makes the string &ldquo;arrows&rdquo; use 
+colors 1 and 2 (well, 0xF1 and 0xF2), and so forth.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Set up a rectangle for text, with the <!--
+-->non-text layers darkened for contrast.</span>
+<span class="keyw">void</span> win_textbox(uint bgnr, <span 
+class="keyw">int</span> left, <span class="keyw">int</span> top, <span 
+class="keyw">int</span> right, <span class="keyw">int</span> bottom, uint bldy)
+{
+    REG_WIN0H= left&lt;&lt;<span class="num">8</span> | right;
+    REG_WIN0V=  top&lt;&lt;<span class="num">8</span> | bottom;
+    REG_WIN0CNT= WIN_ALL | WIN_BLD;
+    REG_WINOUTCNT= WIN_ALL;
+    
+    REG_BLDCNT= (BLD_ALL&amp;~BIT(bgnr)) | BLD_BLACK;
+    REG_BLDY= bldy;
+
+    REG_DISPCNT |= DCNT_WIN0;
+
+    tte_set_margins(left, top, right, bottom);
+}
+
+<span class="cmt">//! Test chr4 shaded text renderer</span>
+<span class="keyw">void</span> test_tte_chr4()
+{
+    irq_init(NULL);
+    irq_add(II_VBLANK, NULL);
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG2;
+
+    <span class="cmt">// <b>(1)</b> Init for text</span>
+    tte_init_chr4c(
+        <span class="num">0</span>,                              <span 
+class="cmt">// BG number.</span>
+        BG_CBB(<span class="num">0</span>)|BG_SBB(<span 
+class="num">10</span>),           <span class="cmt">// BG control.</span>
+        <b><span class="num">0xF000</span>,                         <span 
+class="cmt">// Screen-entry base</span>
+        bytes2word(<span class="num">13</span>,<span 
+class="num">15</span>,<span class="num">0</span>,<span 
+class="num">0</span>),          <span 
+class="cmt">// Color attributes.</span></b>
+        CLR_BLACK,                      <span class="cmt">// Ink color</span>
+        &amp;verdana9_b4Font,               <span 
+class="cmt">// Verdana 9, with shade.</span>
+        (fnDrawg)chr4c_drawg_b4cts_fast);    <span 
+class="cmt">// b4cts renderer, asm version</span>
+    tte_init_con();                     <span 
+class="cmt">// Initialize console I/O</span>
+
+    <span class="cmt">// <b>(2)</b> Load graphics</span>
+    LZ77UnCompVram(dungeon01Map, se_mem[<span class="num">12</span>]);
+    LZ77UnCompVram(dungeon01Tiles, tile_mem[<span class="num">2</span>]);
+    LZ77UnCompVram(dungeon01Pal, pal_bg_mem);
+
+    GRIT_CPY(&amp;tile_mem[<span class="num">0</span>][<span 
+class="num">16</span>*<span class="num">30</span>], dlgboxTiles);
+    GRIT_CPY(pal_bg_bank[<span class="num">15</span>], dlgboxPal);
+
+    <span class="cmt">// <b>(3)</b> Create and print to a text box.</span>
+    win_textbox(<span class="num">0</span>, <span class="num">8</span>, <span 
+class="num">160</span>-<span class="num">32</span>+<span 
+class="num">4</span>, <span class="num">232</span>, <span 
+class="num">160</span>-<span class="num">4</span>, <span class="num">8</span>);
+    CSTR text=
+        <span 
+class="str">&quot;#{P}Scroll with #{ci:1;cs:2}arrows#{ci:13;cs:15}, &quot;</span>
+        <span 
+class="str">&quot;quit with #{ci:1;cs:2}start#{ci:13;cs:15}\n&quot;</span>
+        <span 
+class="str">&quot;Box opacity with #{ci:3;cs:4}L/R#{ci:7;cs:9}&quot;</span>;
+    tte_write(text);
+
+    <span class="cmt">// Reset margins for coord-printing</span>
+    tte_set_margins(<span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">232</span>, <span class="num">20</span>);
+
+    <span class="keyw">int</span> x=<span class="num">128</span>, y= <span 
+class="num">32</span>, ey=<span class="num">8</span>&lt;&lt;<span class="num">3</span>;
+
+    REG_BG2HOFS= x;
+    REG_BG2VOFS= y;
+
+    <span class="cmt">// Invisible map buildup!</span>
+    REG_BG2CNT= BG_CBB(<span class="num">2</span>) | BG_SBB(<span 
+class="num">12</span>) | BG_REG_64x64;
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG2 | DCNT_WIN0;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        VBlankIntrWait();
+        key_poll();
+        
+        <span class="cmt">// <b>(4)</b> Scroll and blend</span>
+        x = clamp(x + key_tri_horz(), <span class="num">0</span>, <span 
+class="num">512</span>+<span class="num">1</span>-SCREEN_WIDTH);
+        y = clamp(y + key_tri_vert(), <span class="num">0</span>, <span 
+class="num">512</span>+<span class="num">1</span>-SCREEN_HEIGHT);
+        ey= clamp(ey+ key_tri_shoulder(), <span class="num">0</span>, <span 
+class="num">0x81</span>);
+
+        REG_BG2HOFS= x;
+        REG_BG2VOFS= y;
+        REG_BLDY= ey&gt;&gt;<span class="num">3</span>;
+
+        <span class="cmt">// <b>(5)</b> Erase and print new position.</span>
+        tte_printf(<span class="str">&quot;#{es;P}%d, %d&quot;</span>, x, y);
+        
+        <span class="keyw">if</span>(key_hit(KEY_START))
+            <span class="keyw">break</span>;      
+    }   
+}
+</pre>
+
+<p>
+I'll close off this section with a word on the text box. If you look 
+carefully, you'll see that it's semi-transparent. Or, to be precise, 
+the text and the box itself are at normal intensity, but the 
+background that it covers is darker than usual. Two things are 
+necessary for this nice, little effect.
+</p>
+
+<ul> 
+  <li>
+    An inside and outside window must be defined. Both windows should 
+    contain all layers, but the inner window must be set to use 
+    blending (WIN_BLD). This enables blending for the inside only.
+  </li>
+  <li>
+    The blending mode should be set to fade-to-black (BLD_BLACK) 
+    for all layers except the background with the text box.
+  </li>
+</ul>
+
+<p>
+This is what <code>win_textbox()</code> is for. The function also sets 
+the margins so that the text would wrap nicely inside the box.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-misc">22.7.
+  Scripting, console IO and other niceties
+</h2>
+
+<h3 id="ssec-misc-tags">22.7.1.
+  TTE formatting commands
+</h3>
+
+<p>
+The TTE context contains members that control positioning, colors, 
+fonts as well as a few other things. There are two approaches to 
+changing these parameters. The first is to hard code changes in the 
+state through direct member access or functions like 
+<code>tte_set_ink()</code>. This works nice and fast, but isn't 
+very flexible. The second is to use <dfn>formatting tags</dfn> in the 
+strings themselves &ndash; the system parses the string for these tags 
+and interprets them accordingly. This is basically a form of scripting.
+</p>
+<p>
+The tags that TTE uses look like this:
+</p>
+
+<blockquote>
+<code>#{<i>tag0</i>:<i>args</i>; <i>tag1</i>:<i>args</i>}</code>
+</blockquote>
+
+<p>
+The code itself is starts with `<code>#{</code>' and ends with 
+`<code>}</code>'. Each command consists of a tag, followed by a colon 
+and comma-separated arguments when appropriate. Multiple commands 
+can be separated by a semi-colon. For example, 
+`<code>#{es; P:10,16}</code>' would clear the screen and set the 
+cursor to (10,&nbsp;16).
+</p>
+<p>
+Now, I could show you how to parse this, but the parser currently in use 
+for this is, well, let's just say it's long and very ugly. Essentially, 
+it's a massive switch-block (sometimes a <i>double</i> switch-block) 
+with stuff like this:
+</p>
+
+<pre class="proglist" id="cd-tte-cmd-default">
+<span class="keyw">char</span> *tte_cmd_default(<span 
+class="keyw">const char</span> *str)
+{
+    <span class="keyw">int</span> ch, val;
+    <span class="keyw">char</span> *curr= (<span
+class="keyw">char</span>*)str, *next;
+
+    TTC *tc= tte_get_context();
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        ch= *curr;
+        next= curr+<span class="num">1</span>;
+
+        <span class="cmt">// <b>(1)</b> Check first character</span>
+        <span class="keyw">switch</span>(ch)
+        {
+        <span class="cmt">// <b>(2)</b> --- Absolute Positions ---</span>
+        <span class="keyw">case</span> <span class="str">'X'</span>:
+            tc-&gt;cursorX= curr[<span class="num">1</span>]==<span 
+class="str">':'</span>           <span 
+class="cmt">// If there's an argument ...</span>
+                ? strtol(curr+<span class="num">2</span>, &amp;next, <span 
+class="num">0</span>)     <span class="cmt">// set cursor X to arg</span>
+                : tc-&gt;marginLeft;               <span 
+class="cmt">// else move to start of line.</span>
+            <span class="keyw">break</span>;
+
+        ... more cases ...
+
+        <span class="cmt">// <b>(3)</b> Find EOS/EOC/token and act on it</span>
+        curr= tte_cmd_next(next);
+
+        <span class="keyw">if</span>(curr[<span class="num">0</span>] == <span 
+class="str">'\0'</span>)
+            <span class="keyw">return</span> curr;
+        <span class="keyw">else</span> <span class="keyw">if</span>(curr[<span 
+class="num">0</span>] == <span class="str">'}'</span>)
+            <span class="keyw">return</span> curr+<span class="num">1</span>;
+    }
+}
+</pre>
+
+<p>
+Like I said, ugly; but it'll have to do for now. The incoming pointer 
+points to the first character past the '<code>#{</code>'. The command 
+tags are all single or double-lettered; the switch looks for a 
+recognized letter and acts accordingly. 
+</p>
+<p>
+One of the tags is '<code>X</code>', which sets the absolute 
+X-coordinate of the cursor. The <code>tc-&gt;cursorX</code> will be 
+set to the argument if it is present, or to the left margin if it 
+is not. 
+
+Note the use of 
+<a href="http://www.cplusplus.com/reference/clibrary/cstdlib/strtol.html" target="_blank">
+<code>strtol()</code></a>
+ here. This is a very interesting 
+function. Not only does it work for both decimal and hex strings, 
+but through the second argument you can retrieve a pointer to right
+after the number in the string. Alternatives would be 
+<code>sscanf()</code> or <code>atoi()</code>, but 
+<code>strtol()</code> is nicer.
+</p>
+<p>
+After handling a tag, it'll look for more tags, or exit if the end 
+delimiter or end of string is found.
+</p><br>
+
+<p>
+Table&nbsp;22.4 shows the available tags. 
+Note that they are case-sensitive and some items can do more than one 
+thing, depending on the number of parameters.
+</p>
+
+<div class="cblock">
+<table id="tbl-tte-cmd"
+  border=1 cellpadding=2 cellspacing=0 width= 70%>
+<caption align="bottom">
+  <b>Table 22.4</b>: Available TTE formatting 
+  tags.
+</caption>
+<tr>
+  <th>Code</th> <th>Description</th>
+</tr>
+<tr>
+  <td>P </td>
+  <td>Reset position to top-left margin. </td>
+</tr>
+<tr>
+  <td>Pr </td>
+  <td>Restore cursor position (see also <code>Ps</code>). </td>
+</tr>
+<tr>
+  <td>Ps </td>
+  <td>Save cursor position. </td>
+</tr>
+<tr>
+  <td>P: <i>x</i>,<i>y</i> </td>
+  <td>Set cursor to coordinates (<i>x</i>,&nbsp;<i>y</i>). </td>
+</tr>
+<tr>
+  <td>X </td>
+  <td>Reset <code>cursorX</code> to left margin.</td>
+</tr>
+<tr>
+  <td>X: <i>x</i> </td>
+  <td>Set <code>cursorX</code> to <i>x</i>. </td>
+</tr>
+<tr>
+  <td>Y </td>
+  <td>Reset <code>cursorY</code> to top margin. </td>
+</tr>
+<tr>
+  <td>Y: <i>y</i> </td>
+  <td>Set <code>cursorY</code> to <i>y</i>. </td>
+</tr>
+<tr>
+  <td>c[ispx]:&nbsp;<i>cattr</i> </td>
+  <td>Set ink (<code>ci</code>), shadow (<code>cs</code>), paper 
+    (<code>cp</code>) or special (<code>cx</code>) color attribute to 
+	<i>cattr</i>.
+  </td>
+</tr>
+<tr>
+  <td>e[slbf] </td>
+  <td>Erase 
+    the screen between margins (<code>es</code>), 
+    the current line (<code>el</code>), 
+	the current line up to the cursor (<code>eb</code>; backwards), 
+	the current line from the cursor (<code>ef</code>; forwards).
+  </td>
+</tr>
+<tr>
+  <td>er: <i>l</i>,<i>t</i>,<i>r</i>,<i>b</i> </td>
+  <td>Erase a rectangle given by (<i>l</i>,<i>t</i>) to (<i>r</i>,<i>b</i>). </td>
+</tr>
+<tr>
+  <td>f: <i>idx</i> </td>
+  <td>Set <code>font</code> to <code>TTC.fontTable[<i>idx</i>]</code>. </td>
+</tr>
+<tr>
+  <td>m[ltrb]:&nbsp;<i>value</i> </td>
+  <td>Set left (<code>ml</code>), top (<code>mt</code>),
+    right (<code>mr</code>) or bottom (<code>mb</code>) margin to <i>value</i>. 
+  </td>
+</tr>
+<tr>
+  <td>m: <i>l</i>,<i>t</i>,<i>r</i>,<i>b</i> </td>
+  <td>Set margins to rectangle (<i>l</i>,<i>t</i>) - (<i>r</i>,<i>b</i>) </td>
+</tr>
+<tr>
+  <td>p: <i>dx</i>, <i>dy</i> </td>
+  <td>Move the cursor by (<i>dx</i>, <i>dy</i>). </td>
+</tr>
+<tr>
+  <td>s: <i>idx</i> </td>
+  <td>Print the <i>idx</i>'th string in <code>TTC.stringTable</code>. </td>
+</tr>
+<tr>
+  <td>w: <i>count</i> </td>
+  <td>Wait for <i>count</i> frames. </td>
+</tr>
+<tr>
+  <td>x: <i>dx</i> </td>
+  <td>Move the cursor to the right by <i>dx</i>. </td>
+</tr><tr>
+  <td>y: <i>dy</i> </td>
+  <td>Move the cursor down by <i>dy</i>. </td>
+</tr>
+</table>
+</div>
+
+<p>
+I should point out that at present the commands are still  
+fragile, so be careful with this stuff. For example, the positioning 
+commands will simply move the cursor, but not clip to the margins. 
+Also take care with the font and string commands (<code>f</code> 
+and <code>s</code>, respectively). <code>tte_cmd_default()</code> 
+doesn't test whether the index is out of the bounds of the arrays, 
+so you could end up with &hellip; odd things. At some point, I hope
+to fix these things, but it's not a priority right now. If anyone 
+has something more robust that I can use, please speak up.
+</p>
+
+
+<div class="note" id="nt-tte-cmd">
+<div class="nhcare">TTE formatting commands : caveat emptor.</div>
+<p>
+The current commands in TTE aren't exactly idiot-proof yet. If you 
+stick to sensible things, it should work quite nicely. But it is 
+still easy to shoot yourself in the foot if you're not careful.
+</p>
+</div>
+
+
+<h3 id="ssec-misc-conio">22.7.2.
+  Using console I/O
+</h3>
+
+<p>
+Something like <code>tte_write()</code> is nice for pure strings, 
+but what would really help is if you had something like 
+<code>printf()</code>. In the old days (pre-2006), 
+<code>printf()</code>, <code>putc</code> and other console output 
+functions were unavailable, but Wintermute added a mechanism to 
+devkitArm's standard C library that allows it on consoles as well.
+</p>
+<p>
+The key to this is the <code>devoptab_t</code> struct, defined in 
+<code>sys/iosupport.h</code>. This contains a table of function pointers 
+to device operations. The pointer we're interested in here is 
+<code>write_r</code>; this is the function that <code>printf()</code> 
+et al. call for the final output. 
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Partial devoptab_t definition</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> {
+    <span class="keyw">const</span> <span class="keyw">char</span> *name;
+    <span class="keyw">int</span> structSize;
+    <span class="keyw">int</span> (*open_r)(<span class="keyw">struct</span> _reent *r, <span 
+class="keyw">void</span> *fileStruct, <span class="keyw">const char</span> *path,
+        <span class="keyw">int</span> flags,<span class="keyw">int</span> mode);
+    <span class="keyw">int</span> (*close_r)(<span class="keyw">struct</span> _reent *r,<span 
+class="keyw">int</span> fd);
+    <span class="keyw">int</span> (*write_r)(<span class="keyw">struct</span> _reent *r,<span 
+class="keyw">int</span> fd,<span class="keyw">const char</span> *ptr,<span
+class="keyw">int</span> len);
+	...
+} devoptab_t;
+</pre>
+
+<p>
+The key to making the standard console routines work on a GBA is 
+to redirect the default <code>write_r</code> for console output 
+to one of our own making. Before explaining how this works, I want 
+you to understand that this comes very close to black magic. It 
+involves descending to the roots of the library and there is next 
+to no documentation about how this stuff works. This story is 
+the closest thing I could find to a full description: 
+<a href="http://www.embedded.com/story/OEG20020103S0073" target="_blank">
+http://www.embedded.com/story/OEG20020103S0073</a>, but this 
+isn't high on explanations either.
+</p>
+<p>
+To put it in other way: you're in a cave; it's pitch black and there are 
+<a href="http://en.wikipedia.org/wiki/Grue_(monster)" target="_blank">grues</a> about.
+</p><br>
+
+<p>
+Now that that's done, let's continue. The first step is creating our
+replacement writer. In TTE's case, this is 
+<code>tte_con_write()</code>. It is almost identical to 
+<code>tte_write()</code>, but has to fit in the format given by 
+<code>devoptab_t.write_r</code>. It comes down to this:
+</p>
+
+<pre class="proglist" id="cd-tte-con-write">
+<span class="cmt">//! internal output routine used by printf.
+/*! \param r    Reentrancy parameter.
+    \param fd   File handle (?).
+    \param text Text buffer containing the string prepared by printf.
+    \param len  Length of string.
+    \return     Number of output bytes (?)
+    \note       \a text is NOT zero-terminated!!!!one!
+*/</span>
+<span class="keyw">int</span> tte_con_write(<span 
+class="keyw">struct</span> _reent *r, <span 
+class="keyw">int</span> fd, <span 
+class="keyw">const char</span> *text, <span class="keyw">int</span> len)
+{
+    <span class="cmt">// <b>(1)</b> Safety checks</span>
+    <span class="keyw">if</span>(!sConInitialized || !text || len&lt;=<span 
+class="num">0</span>)
+        <span class="keyw">return</span> -<span class="num">1</span>;
+
+    <span class="keyw">int</span> ch, gid, charW;
+    <span class="keyw">const char</span> *str= text, *end= text+len;
+
+    <span class="cmt">// <b>(2)</b> check for end of text</span>
+    <span class="keyw">while</span>( (ch= *str) != <span 
+class="num">0</span> &amp;&amp; str &lt; end)
+    {
+        str++;
+        <span class="keyw">switch</span>(ch)
+        {
+
+        <span class="cmt">// <b>(3)</b> --- VT100 sequence ( ESC[foo; ) ---</span>
+        <span class="keyw">case</span> <span class="num">0x1B</span>:
+            <span class="keyw">if</span>(str[<span 
+class="num">0</span>] == <span class="str">'['</span>)
+                str += tte_cmd_vt100(str);
+            <span class="keyw">break</span>;
+
+        <span 
+class="cmt">//# <b>(4)</b> Other character cases. See tte_write()</span>
+        }
+    }
+
+    <span class="keyw">return</span> str - text;
+}
+</pre>
+
+<p>
+While I've added documentation for the arguments here, it's mostly 
+based on guesswork. The <code>r</code> parameter contains 
+<a href="http://en.wikipedia.org/wiki/Reentrant" target="_blank">re-entrancy</a> 
+information, useful if you have multiple threads. Since the GBA is 
+a single-thread system, this should not concern us. I believe 
+<code>fd</code> is a file handle of some sort, but since we're not 
+writing to files this again does not concern us.
+</p>
+<p>
+The real arguments of interest are <code>text</code> and 
+<code>len</code>. The <code>text</code> argument points to the buffer 
+with the string to render. In the case of <code>printf()</code>, it's 
+the string <i>after</i> formatting: all codes like <code>%d</code> 
+are already done. And now for the most important part: 
+<code>text</code> is <b>not</b> null-terminated. This is why there's 
+a length variable as well.
+</p>
+<p>
+As far as I can tell, <code>printf</code> uses a large buffer 
+(approximately 1300 bytes) on the stack to which it writes the 
+formatted numbers. This buffer isn't cleared you call it again, or 
+terminated by &lsquo;\0&rsquo; when sent to the writer. This has 
+the following consequences:
+</p>
+
+<ul>
+  <li>
+    1300 bytes is a fair bit of IWRAM. Make sure you have enough 
+    room for it. Do <i>not</i> call <code>printf()</code> from 
+	interrupts, as the routine is slow and the things can start to 
+	nest and clobber everything.
+  </li>
+  <li>
+    Don't forget the <code>len</code> parameter. As the buffer isn't 
+	zeroed, remnants of old data may still be there, and you get crap.
+  </li>
+  <li>
+    There's an additional potential danger with respect to parsing 
+	of formatting commands here. When strings exceed the buffer length, 
+	I imagine that it's broken up into smaller chunks. I don't know 
+	what will happen if the break occurs in the middle of a command, 
+	but I doubt it's good. Of course, you shouldn't have strings that 
+	long anyway, as the screen isn't big enough to fit them.
+  </li>
+</ul>
+
+<p>
+Aside from that, <code>tte_con_write()</code> is straightforward.
+As said, the contents of the loop are nearly identical to the one in 
+<code>tte_write()</code>. The only real difference is point 3. This is 
+a test for VT100 formatting strings, which will be covered in the next 
+subsection.
+</p><br>
+
+<p>
+To make use of the new writer, you have to hook it into the device list 
+somehow. First, create a <code>devoptab_t</code> instance which the 
+writer in the right place. There is a list of device operations called 
+<code>devoptab_list</code>. The devices of interest are the streams  
+<code>stdout</code> and <code>stderr</code>, which are entries 
+<code>STD_OUT</code> and <code>STD_ERR</code> in the list. Simply 
+point these entries to your own struct.
+</p>
+<p>
+A second item is to set the buffers for these streams. I'm not sure this 
+is really necessary, but that's how it's done in libgba and its author 
+knows this system best so I'm not going to argue here. The function for 
+this is <code>setvbuf()</code>. You find the required initialization 
+steps below.
+</p>
+
+<pre class="proglist" id="cd-tte-init-con">
+
+<span class="keyw">static int</span> sConInitialized= <span class="num">0</span>;
+
+<span class="keyw">const</span> devoptab_t tte_dotab_stdout=
+{
+    <span class="str">&quot;ttecon&quot;</span>,
+    <span class="num">0</span>,
+    NULL,
+    NULL,
+    tte_con_write,
+    NULL,
+    NULL,
+    NULL
+};
+
+<span class="cmt">//! Init stdio capabilities for TTE.</span>
+<span class="keyw">void</span> tte_init_con()
+{
+    <span class="cmt">// attach our operations to stdout and stderr.</span>
+    devoptab_list[STD_OUT] = &amp;tte_dotab_stdout;
+    devoptab_list[STD_ERR] = &amp;tte_dotab_stdout;
+
+    <span class="cmt">// Set buffers.</span>
+    setvbuf(stderr, NULL , _IONBF, <span class="num">0</span>);
+    setvbuf(stdout, NULL , _IONBF, <span class="num">0</span>);
+
+    sConInitialized = <span class="num">1</span>;
+}
+</pre>
+
+<p>
+Calling <code>tte_init_con()</code> activates stdio's functionality 
+so you can use <code>printf()</code> and such. Note that the raw 
+<code>printf()</code> is rather heavy and it also has floating point 
+options, which are rarely used in a GBA environment, if ever. For that 
+reason, you'll usually use its integer-only cousin, 
+<code>iprintf()</code>. Also note that TTE's implementation is 
+<b>different</b> from libgba's, and the two should not be confused. 
+For that reason, I've hidden the <code>iprintf()</code> name behind 
+a <code>tte_printf</code> macro.
+</p>
+<p>
+The following is a short example of its use. I'm using 
+<code>tte_printf()</code> here, but <code>printf()</code> or 
+<code>iprintf()</code> would have worked just as well.
+</p>
+
+<pre class="proglist" id="cd-hello">
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    <span class="cmt">// Init BG 0 for text on screen entries.</span>
+    tte_init_se_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>)|BG_SBB(<span class="num">31</span>));
+
+    <span class="cmt">// Enable TTE's console functionality</span>
+    <b>tte_init_con();</b>
+
+    tte_printf(<span class="str">&quot;#{P:72,64}&quot;</span>);        <span 
+class="cmt">// Goto (72, 64).</span>
+    tte_printf(<span class="str">&quot;Hello World!&quot;</span>);      <span 
+class="cmt">// Print &quot;Hello world!&quot;</span>
+
+    <span class="keyw">while</span>(<span class="num">1</span>);
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+
+<div class="note" id="nt-printf">
+<div class="nhcare">Printf bagage</div>
+<p>
+As wonderful as <code>printf()</code> is, there are some downsides 
+to it too. First, it's a very heavy function that calls quite a large 
+amount of functions which all have to be linked in. Second, it is 
+pretty damn slow. Because it can do so much, it has to check for all 
+these different cases. Also, for the string to decimal conversion it 
+uses divisions, which is really bad for the GBA.
+</p>
+<p>
+Be aware of how much <code>printf()</code> costs. If it turns out to 
+be a bottle-neck, try making your own slimmed down version. A decent 
+<code>sprintf()</code> alternative is <code>posprintf()</code>, 
+created by <a href="http://www.danposluns.com/gbadev/" target="_blank">Dan Posluns</a>.
+</p>
+</div>
+
+<h3 id="ssec-misc-vt100">22.7.3.
+  VT100 escape sequences
+</h3>
+
+<p>
+Every book on C will tell you that you can place text on a console 
+screen. What they usually don't tell you is that, in some environments, 
+you can control formatting as well. One such environment is the 
+<a href="http://en.wikipedia.org/wiki/VT100" target="_blank">VT100</a>, which used 
+<dfn>escape sequences</dfn> to indicate formatting. The libraries
+that devkitPro distributes for various systems use these
+sequences, so it's a good idea to support them as well.
+</p>
+<p>
+The general format for the codes is this:
+</p>
+
+<pre>
+   <i>CSI</i> n1;n2 ... <i>letter</i>
+</pre>
+
+<p>
+<i>CSI</i> here is the ASCII code for the <dfn>command sequence 
+indicator</dfn>, 
+which in this case is the escape character (27, 0x1B or 033) followed 
+by '['. The letter at the end denotes the kind of formatting code, and
+<i>n1</i>, <i>n2</i> &hellip; are the formatting parameters. 
+Wikipedia has a nice overview of the standard set 
+<a href="http://en.wikipedia.org/wiki/ANSI_escape_code" target="_blank">here</a> and 
+there's another one at 
+<a href="http://local.wasp.uwa.edu.au/~pbourke/dataformats/vt100/" target="_blank">
+http://local.wasp.uwa.edu.au/~pbourke/dataformats/vt100/</a>.
+Note that not all of the codes are supported in the devkitPro libraries. 
+The ones you'll encounter most are the following:
+</p>
+
+<div class="lblock">
+<table id="tbl-vt100"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 22.5</b>: Common VT100 sequences
+</caption>
+
+<tr>
+  <td>ESC[<i>dy</i>A</td>
+  <td>Move cursor up <i>dy</i> rows.</td>
+</tr>
+<tr>
+  <td>ESC[<i>dy</i>B</td>
+  <td>Move cursor down <i>dy</i> rows.</td>
+</tr>
+<tr>
+  <td>ESC[<i>dx</i>C</td>
+  <td>Move cursor right <i>dx</i> columns.</td>
+</tr>
+<tr>
+  <td>ESC[<i>dx</i>D</td>
+  <td>Move cursor left <i>dx</i> columns.</td>
+</tr>
+<tr>
+  <td>ESC[<i>y</i>;<i>x</i>H</td>
+  <td>Set cursor to column <i>x</i>, row <i>y</i>.</td>
+</tr>
+<tr>
+  <td>ESC[2J</td>
+  <td>Erase screen.</td></tr>
+<tr>
+  <td>ESC[<i>n</i>K</td>
+  <td>
+    <ol start=0>
+	  <li>Erase to end of line.</li>
+      <li>Erase to start of line.</li>
+	  <li>Erase whole line.</li>
+	</ol>
+  </td>
+</tr>
+<tr>
+  <td>ESC[<i>y</i>;<i>x</i>f</td>
+  <td>As ESC[<i>y</i>;<i>x</i>H</td>
+</tr>
+<tr>
+  <td>ESC[s</td>
+  <td>Save cursor position.</td>
+</tr>
+<tr>
+  <td>ESC[u</td>
+  <td>Restore cursor position.</td>
+</tr>
+</table>
+</div>
+
+<p>
+If you compare this list to table&nbsp;22.4, 
+you'll see that most of these codes have corresponding TTE commands.
+You can use either, but if you plan to make something that's 
+supposed to be cross-platform, use the VT100 codes.
+</p>
+
+<div class="note">
+<div class="nhcare">Deviations from the standard</div>
+<p>
+I'm trying to keep my implementation as close to the standard as 
+possible. This is mainly because TTE uses other things just 8x8 
+characters on a regular background. In particular, scrolling is 
+absent here and there are no color codes. Yet.
+</p>
+</div>
+
+
+
+<h3 id="ssec-misc-utf">22.7.4.
+  UTF-8
+</h3>
+
+<p>
+You may have heard of a little thing called 
+<a href="http://en.wikipedia.org/wiki/ASCII" target="_blank">ASCII</a>. This is (or 
+was; I'm not sure) the standard encoding for character strings. 
+Each character is 1 byte long, giving 256 numbers for letters, numbers 
+et cetera. Fig&nbsp;22.1 and 
+fig&nbsp;22.12 contain character 32 to 255, 
+as they usually appear on Windows. ASCII works fine for Western 
+languages but are completely inadequate for languages like Japanese, 
+which have thousands of characters. To remedy this, they came up with 
+Unicode, which has 16 bits per character.
+</p>
+<p>
+An intermediate between this is 
+<a href="http://en.wikipedia.org/wiki/UTF-8" target="_blank">UTF-8</a>. This still 
+uses 8-bit characters for the lower 128 ASCII codes, but bytes over 
+0x80 denote the start of a multi-byte code, where it and a few of the 
+following characters form a single, larger character of up to 21 bits.
+</p>
+<p>
+UTF-8 is a nice way of having your cake and eating it too: you can 
+still use normal characters for Latin characters, meaning it'll 
+still work with ASCII programs, but you also have a method of 
+representing bigger numbers.
+</p>
+
+<div class="cblock">
+<table id="tbl-utf8"
+  border=1 cellpadding=4 cellspacing=0>
+<caption align="bottom">
+Table&nbsp;22.6. UTF-8 to u32 conversion table.
+</caption>
+<tr> 
+  <th>String (binary)</th>
+  <th>Number (binary)</th>
+  <th>Range (hex)</th>
+</tr>
+<tbody style="font:85%, Courier New;">
+<tr>
+  <td>0zzzzzzz		</td>
+  <td>0zzzzzzz		</td>
+  <td>0x000000 - 0x00007F (7 bit)	</td>
+</tr>
+<tr>
+  <td>110yyyyy 10zzzzzz	</td>
+  <td>00000yyy yyzzzzzz	</td>
+  <td>0x000080 - 0x0007FF (11 bit)	</td>
+</tr>
+<tr>
+  <td>1110xxxx 10yyyyyy 10zzzzzz	</td>
+  <td>xxxxyyyy yyzzzzzz	</td>
+  <td>0x000800 - 0x00FFFF (16 bit)	</td>
+</tr>
+<tr>
+  <td>11110www 10xxxxxx 10yyyyyy 10zzzzzz	</td>
+  <td>000wwwxx xxxxyyyy yyzzzzzz	</td>
+  <td>0x010000 - 0x10FFFF (21 bit)	</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+Table&nbsp;22.6 shows the conversion works. 
+If a byte is lower than 128, it's a simple ASCII character. If 
+it's higher, it can fall into three classes of multi-byte numbers. 
+The range of the byte determines the number of bytes for the whole 
+thing; once you know that, you need to grab the appropriate 
+bit-patterns from these bytes and join them into a single number 
+as the table indicates. For more details, I will refer you to the 
+wikipedia page.
+</p>
+
+<p>
+Below you can find a routine that reads and decodes a single utf-8 
+character from a string. Yes, it's a cluster-f**k of conditions, 
+but that's necessary to check whether all the characters really 
+follow the format; and if it doesn't, it'll interpret the first byte
+of the range as an extended ASCII character. If you want, you can 
+omit all the `<code>if((*src>>6)!=2) break;</code>' statements.
+</p>
+
+<pre class="proglist" id="cd-utf8-decode">
+<span class="cmt">//! Retrieve a single multibyte utf8 character.</span>
+uint utf8_decode_char(<span class="keyw">const char</span> *ptr, <span 
+class="keyw">char</span> **endptr)
+{
+    uchar *src= (uchar*)ptr;
+    uint ch8, ch32;
+
+    <span class="cmt">// Poor man's try-catch.</span>
+    <span class="keyw">do</span>
+    {
+        ch8= *src;
+        <span class="keyw">if</span>(ch8 &lt; <span class="num">0x80</span>)                      <span class="cmt">// 7bit</span>
+        {
+            ch32= ch8;
+        }
+        <span class="keyw">else</span> <span class="keyw">if</span>(<span 
+class="num">0xC0</span>&lt;=ch8 &amp;&amp; ch8&lt;<span 
+class="num">0xE0</span>)      <span class="cmt">// 11bit</span>
+        {
+            ch32  = (*src++&amp;<span class="num">0x1F</span>)&lt;&lt; <span 
+class="num">6</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt; <span 
+class="num">0</span>;
+        }
+        <span class="keyw">else</span> <span class="keyw">if</span>(<span 
+class="num">0xE0</span>&lt;=ch8 &amp;&amp; ch8&lt;<span 
+class="num">0xF0</span>)      <span class="cmt">// 16bit</span>
+        {
+            ch32  = (*src++&amp;<span class="num">0x0F</span>)&lt;&lt;<span 
+class="num">12</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt; <span 
+class="num">6</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt; <span 
+class="num">0</span>;
+        }
+        <span class="keyw">else</span> <span class="keyw">if</span>(<span 
+class="num">0xF0</span>&lt;=ch8 &amp;&amp; ch8&lt;<span 
+class="num">0xF8</span>)      <span class="cmt">// 21bit</span>
+        {
+            ch32  = (*src++&amp;<span class="num">0x0F</span>)&lt;&lt;<span 
+class="num">18</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt;<span 
+class="num">12</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt; <span 
+class="num">6</span>;  <span class="keyw">if</span>((*src&gt;&gt;<span 
+class="num">6</span>)!=<span class="num">2</span>)    <span class="keyw">break</span>;
+            ch32 |= (*src++&amp;<span class="num">0x3F</span>)&lt;&lt; <span
+class="num">0</span>;
+        }
+        <span class="keyw">else</span>
+            <span class="keyw">break</span>;
+
+        <span class="cmt">// Proper UTF8 char: set endptr and return</span>
+        <span class="keyw">if</span>(endptr)
+            *endptr= (<span class="keyw">char</span>*)src;
+
+        <span class="keyw">return</span> ch32;
+    } <span class="keyw">while</span>(<span class="num">0</span>);
+
+    <span class="cmt">// Not really UTF: interpret as single byte.</span>
+    src= (uchar*)ptr;
+    ch32= *src++;
+    <span class="keyw">if</span>(endptr)
+        *endptr= (<span class="keyw">char</span>*)src;
+
+    <span class="keyw">return</span> ch32;
+}
+</pre>
+
+<p>
+Both <code>tte_write()</code> and <code>tte_write_con()</code> 
+use <code>utf_decode_char()</code> when the string requires it. The 
+larger characters can be used to access larger font sheets. You could 
+use the larger sheets for better language support, or perhaps to extend 
+the standard set of characters with arrows, and other types of symbols.
+</p>
+<p>
+There is, however, one catch to using UTF-8 with stdio. Internally, 
+stdio is really picky about what's acceptable. For example, the 
+copywrite symbol, &copy; is extended number 0xA9. In non-UTF-8, you 
+could use just 0xA9 in a string and it'd use the right symbol. 
+However, 0xA9 alone wouldn't fit any of the formats from 
+Table&nbsp;22.6, so it's an invalid code in 
+UTF-8. While <code>utf8_decode_char()</code> is forgiving in this 
+case, stdio isn't, an will interpret it as a terminator. In other 
+words, be careful with extended ASCII character; you <i>have</i> to 
+use the proper UTF-8 formats if you want to use the stdio functions.
+</p>
+
+<div class="note" id="nt-stdio-utf8">
+<div class="nhcare">Printf, UTF-8, and extended ASCII</div>
+<p>
+As of devkitArm r22, <code>printf()</code> and the other stdio 
+functions use the UTF-8 locale. This effectively means that you 
+cannot use characters like &lsquo;&copy;&rsquo; and 
+&lsquo;&egrave;&rsquo; directly like you used to in older versions. 
+You need to use the full multi-byte UTF-8 notations.
+</p>
+</div>
+
+
+
+<h3 id="ssec-misc-profile">22.7.5.
+  Profiling the renderers
+</h3>
+
+<p>
+It's always a good idea to see how fast the things you make are. 
+This is particularly true when the functions are complex, like most 
+of the bitmap and tile renderers are. 
+</p>
+<p>
+Table&nbsp;22.7 lists the cycles 
+per glyph for the majority of the available renderers. These have 
+been measured with the string (and library code) in ROM with the 
+default waitstates, under -O2 optimization. The font used was 
+verdana 9, with has a cell size of 8x16, meaning it can be used 
+for both fixed and variable widths with ease. The test string was 
+a 194 character line from 
+<a href="http://en.wikipedia.org/wiki/Portal_(video_game)" target="_blank">Portal</a>:
+</p>
+
+<blockquote>
+&ldquo;Please note that we have added a consequence for failure. 
+Any contact with the chamber floor will result in an 
+'unsatisfactory' mark on your official testing record 
+followed by death. Good luck!&rdquo;
+</blockquote>
+
+<div class="lblock">
+<table id="tbl-tte-profile"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 22.7</b>: 
+  Renderer times. Conditions: 194 chars, verdana 9, 
+  ROM code, default waits, -O2.
+</caption>
+
+<tr><th>Renderer</th>	<th>Cycles/char</th>
+<tr><td>null</td>					<td align="right"> 221	</td></tr>
+<tr><td>se_drawg</td>				<td align="right"> 595	</td></tr>
+<tr><td>se_drawg_w8h16</td>			<td align="right"> 370	</td></tr>
+<tr><td>ase_drawg</td>				<td align="right"> 773	</td></tr>
+<tr><td>ase_drawg_w8h16</td>		<td align="right"> 458	</td></tr>
+<tr><td>chr4_drawg_b1cts_base</td>	<td align="right">3049	</td></tr>
+<tr><td>chr4_drawg_b1cts</td>		<td align="right">2044	</td></tr>
+<tr><td>chr4_drawg_b1cts_fast</td>	<td align="right"> 631	</td></tr>
+<tr><td>bmp8_drawg_b1cts_base</td>	<td align="right">2875	</td></tr>
+<tr><td>bmp8_drawg_b1cts</td>		<td align="right">2078	</td></tr>
+<tr><td>bmp8_drawg_b1cts_fast</td>	<td align="right"> 619	</td></tr>
+<tr><td>bmp16_drawg_b1cts_base</td>	<td align="right">2456	</td></tr>
+<tr><td>bmp16_drawg_b1cts</td>		<td align="right">1503	</td></tr>
+<tr><td>obj_drawg</td>				<td align="right"> 423	</td></tr>
+
+</table>
+</div>
+
+<p>
+First, note the great differences in values: from hundreds for
+the tilemaps and objects to <i>thousands</i> in the case of bitmaps 
+and tile renderers. And this is per character, so writing large swats 
+of text can lead to significant slowdown.
+</p>
+<p>
+The <code>null()</code> renderer is a dummy renderer, used to 
+find the overhead of the TTE system. 200 isn't actually that bad, 
+all things considered (remember: ROM code). That said, now 
+compare this number to the regular tilemap time: the overhead is
+takes up a significant fraction of the time here. Also note the 
+difference between the standard and 8&times;16 versions of 
+<code>se_drawg</code>: this is purely due the loops
+</p>
+<p>
+Half of the TTE overhead actually comes from the wrapping code; 
+cursor setting and checking can be relatively slow. And I'm not even 
+considering clipping here. 
+</p>
+<p>
+For the bitmap and tile renderers, I've timed three versions. A 
+&lsquo;base&rsquo; version, using the template from 
+<code>chr4_drawg_b1cts_base()</code> in 
+section&nbsp;22.6.2.; C-optimized versions, 
+which are the default renderers; and a fast asm version.
+</p>
+<p>
+The <code>bmp16</code> variants are faster than the others because 
+you don't have to mask items into the surface. What's interesting,
+though, is that the difference between <code>bmp8</code> and 
+<code>chr4</code> is practically zero. This probably has something 
+to do with the layout of the font itself.
+</p>
+<p>
+Also note how the base, the normal and the fast versions compare. 
+<code>chr4_drawg_b1cts()</code> is 33% faster than the base version, 
+and <code>chr4_drawg_b1cts_fast</code> is three times faster still. 
+And remember, 200 of that 631 is TTE overhead, so it's actually 
+4.5 times faster. This is not just from the IWRAM benefit: it also 
+has to do with ARM vs Thumb, and hand-crafted assembly vs compiled 
+code.
+</p>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-conc">22.8.
+  Conclusions
+</h2>
+
+<p>
+As far as I'm concerned, this chapter is basically 
+<a href="text.htm">the earlier text chapter</a> done right. It's 
+covered all types of graphics:regular/affine tilemaps, 8bpp/16bpp bitmaps, 
+4bpp tiles and objects. Okay, so I left 8bpp tiles out, but that's an
+awful mode for tile-rendering anyway. The functions for glyph rendering 
+given here are work for arbitrary sizes, fixed and variable width fonts 
+and should be doing so efficiently as well.
+</p>
+<p>
+Furthermore, it has presented Tonc's Text Engine, a system for
+handling all these different text families with relative ease. After the 
+initial set-up, the surface-specific aspects are basically dealt with,
+making its functionality much more re-usable. I've also covered the most 
+basic aspects of processing strings for printing: how to translate from 
+a UTF-8 encoded character to a glyph-index in a font-sheet, and 
+how you can implement formatting tags to change positions, colors and 
+fonts dynamically. Lastly, I illustrated how you can build a callback 
+that the stdio routines can call for output, making 
+<code>printf()</code> and its friends available for general use.
+</p>
+<p>
+This whole chapter has been a showcase for TTE and what it can do. Even 
+though it's not in a fully finished state, I think that it can be a 
+valuable asset for dealing with text. If nothing else, the concepts 
+put forth here should help you design your own glyph renderers or text 
+systems.
+</p>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Sep 30, 2008</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="mode7ex.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="asm.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">More mode 7</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Assembly</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+

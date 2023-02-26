@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031223">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Timers</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="dma.htm">DMA</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="interrupts.htm">Interrupts</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">15.
+  Timers</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Timing is everything</a>
+  <li><a href="#sec-tmr">GBA Timers</a>
+  <li><a href="#sec-demo">Timer demo : like clockwork</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">15.1.
+  Timing is everything</h2>
+<p>
+Think of every time you've heard a joke ruined because the
+punch line came too late or too early; think of all the failed 
+jumps in Super Mario Bros (or any other platform game);all the
+occasions that you skidded at the start of a Mario Kart race for 
+revving too soon; that your invincibility wore off just <i>before</i> 
+you got a red shell up your a[censored]s; that you didn't quite dodge 
+that hail of bullets in old-skool shooters because of a sudden 
+slow-down. Think of all this and situations like them and you'll 
+agree that in games, as in life, Timing Is Everything.
+</p>
+<p>
+Ironically, tim<i>ers</i> are of less importance. Throughout 
+video-game history programmers have built their games around one 
+timing mechanism: the vertical refresh rate of the screen. In other 
+words, the VBlank. This is a machine-oriented timer (you count frames) 
+rather than a human-oriented one (where you'd count seconds). For 
+consoles, this works very well as the hardware is always the same. 
+(Except, of course, that some countries use NTSC televisions (@ 60 Hz) 
+and others use PAL TVs (@ 50 Hz). Everyone living in the latter 
+category and has access to both kinds knows the difference and 
+curses the fact that it's the NTSC countries that most games stem 
+from.) 
+While the VBlank timer is pervasive,  it is not the only one. The GBA 
+has four clock timers at your disposal. This section covers these 
+timers.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-tmr">15.2.
+  GBA Timers</h2>
+<p>
+All conceivable timers work in pretty much the same way. You have 
+something that oscillates with a certain fixed frequency (like a CPU 
+clock or the swing of a pendulum). After every full period, a counter 
+is incremented and you have yourself a timer. Easy, innit?
+</p>
+<p>
+The basic frequency of the GBA timers is the CPU frequency, which
+is 2<sup>24</sup> &asymp; 16.78 Mhz. In other words, one <dfn>clock 
+cycle</dfn> of the CPU takes 2<sup>&minus;24</sup> &asymp; 59.6 ns. 
+Since this is a very lousy timescale for us humans, the GBA allows 
+for 4 different frequencies (or, rather periods): 1, 64, 256 and 
+1024 cycles. Some details of these frequencies are shown in 
+table15.1. By clever use of the timer 
+registers, you can actually create timers of any frequency, but more 
+on that later. It should be noted that the screen refreshes every 
+280,896 cycles, exactly.
+</p>
+
+<div class="lblock">
+<table id="tbl-tmr-freq" 
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 15.1</b>: Timer frequencies
+</caption>
+<col span=4 align="right">
+<tr><th>#cycles<th>frequency<th>period
+<tr><td>  1 <td>16.78 MHz<td>59.59 ns
+<tr><td>  64 <td>262.21 kHz<td>3.815 &mu;s
+<tr><td> 256 <td>65.536 kHz<td>15.26 &mu;s
+<tr><td>1024 <td>16.384 kHz<td>61.04 &mu;s
+</table>
+</div>
+
+<h3 id="ssec-tmr-regs">15.2.1.
+  Timer registers</h3>
+<p>
+The GBA has four timers, timers 0 to 3. Each of these has two 
+registers: a data register (<code>REG_TMxD</CODE>) and a control 
+register (<code>REG_TMxCNT</code>). The addresses can be 
+found in table 15.2. 
+</p>
+
+<div class="lblock">
+<table id="tbl-tmr-reg">
+<caption align="bottom">
+  <b>Table 15.2</b>: Timer register addresses
+</caption>
+<tr><th>reg<th>function<th>address
+<tr><td><code>REG_TMxD</code><td>data
+	<td><code>0400:0100h  + 04h</code>·x
+<tr><td><code>REG_TMxCNT</code><td>control
+	<td><code>0400:0102h + 04h</code>·x
+</table>
+</div>
+
+<h3 id="ssec-reg-tmxcnt">15.2.2.
+  REG_TMxCNT</h3>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-tmxcnt"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_TMxCNT @ <code>0400:0102</code> + 4<i>x</i>
+</caption>
+<tr class="bits">
+	<td>F E D C B A 9 8 <td>7 <td>6 <td>5 4 3 <td>2 <td>1 0
+<tr class="bf">
+  <td>-
+  <td class="rclr0">En
+  <td class="rclr1">I
+  <td>-
+  <td class="rclr3">CM
+  <td class="rclr2">Fr
+</table>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-1<td class="rclr2">Fr
+  <td>TM_FREQ_y
+  <td>Timer <b>frequency</b>. 0-3 for 1, 64, 256, or 1024 cycles, 
+    respectively. <code>y</code> in the define is the number of 
+    cycles.
+<tr class="bg1">
+  <td> 2 <td class="rclr3">CM
+  <td>TM_CASCADE
+  <td><b>Cascade mode</b>. When the counter of the <i>preceding</i> 
+    (<code>x</code>&minus;1) timer overflows (<code>REG_TM(x-1)D= 
+    0xffff</code>), this one will be incremented too. A timer that 
+    has this bit set does <i>not</i> count on its own, though you 
+    still have to enable it. Obviously, this won't work for timer 0.
+    If you plan on using it make sure you understand exactly what I 
+    just said; this place is a death-trap for the unwary.
+<tr class="bg0">
+  <td> 6 <td class="rclr1">I
+  <td>TM_IRQ
+  <td>Raise an interrupt on overflow.
+<tr class="bg1">
+  <td> 7 <td class="rclr0">En
+  <td>TM_ENABLE
+  <td>Enable the timer.
+</tbody>
+</table>
+</div>
+
+<h3 id="ssec-reg-tmxd">15.2.3.
+  REG_TMxD</h3>
+<p>
+The data register <code>REG_TMxD</code> is a 16-bit number that 
+works a little bit differently than you might expect at first, but 
+in the end it makes sense. The number that you <b>read</b> from the 
+register  is the <b>current</b> timer-count. So far, so good. However, 
+the number that you <b>write</b> to <code>REG_TMxD</code>  is the 
+<b>initial value</b> that the counter begins at when the timer is 
+either enabled (via <code>TM_ENABLE</code>) or overflows. This has number 
+of &lsquo;interesting&rsquo; consequences. To make things a little 
+easier, define variables <i>n</i> of the initial value 
+(the write-number) and <i>c</i> for the current count (the read number).
+</p><br>
+
+<p>
+First of all, when you set an <i>n</i> (of, say, <code>c000h</code>)
+like this:
+</p>
+
+<pre class="proglist">
+    REG_TM2D= <span class="num">0xc000</span>;
+</pre>
+
+<p>
+you will <i>not</i> have set the current timer-count <i>c</i> to
+<i>n</i> (=<code>c000h</code>). In fact, if the timer is disabled, then
+<i>c</i>= 0. However, as soon as you do enable the counter, then
+<i>c = n</i> and proceeds from there. And when the timer overflows,
+it will reset to this value as well. By the way, because <i>n</i> is
+only the starting value it is important to set <i>n</i> first, and
+enable the timer afterwards.
+</p>
+<p>
+Secondly, ask yourself this: what happens when you disable the timer
+again? Well, the counter retains its current value. However, when you
+<i>enable</i> it afterwards, <i>c</i> will reset to <i>n</i> again.
+This is a bit of a drag if you want to disable the timer for a while
+(during a game-pause for instance) and then pick up where it left of.
+Well, yeah, but there is a way to make it happen. How? By turning it
+into a cascade timer via <code>TM_CASCADE</code>! Having that bit
+set in the <code>REG_TMxCNT</code> will cause the timer to be
+increased only when the preceding one overflows. If you prevent
+that from ever happening (if it's disabled for instance) then you
+will have effectively disabled your timer.
+</p>
+<p>
+Lastly, given a certain <i>n</i>, then the timer will overflow after
+<i>T</i>= <code>10000h</code>&minus;<i>n</i> increments. Or, thanks to 
+the wonders of two's complement, just <i>T</i>= &minus;<i>n</i>. 
+Combined with a cascade timer (or interrupts) you can build timers 
+of any frequency, which is what you want from a timer.
+</p>
+
+<div class="note">
+<div class="nhcare">Writing to REG_TMxD is weird</div>
+Writing into REG_TMxD may not do what you think it does. It does 
+<i>not</i> set the timer value. Rather, it sets the <i>initial</i> 
+value for the next timer run.
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">15.3.
+  Timer demo : like clockwork</h2>
+
+<p>
+In today's demo, I'm going to show how to make a simple digital clock 
+with the timers. To do this, we'll need a 1 Hz timer. As that's not 
+available directly, I'm going to set up a cascading timer system with 
+timers 2 and 3. Timer 3 will be set to cascade mode, which is updated 
+when timer 2 overflows. It is possible to set the overflow to happen 
+at a frequency of exactly one Hertz. The clock frequency is 
+2<sup>24</sup>, or 1024*0x4000. By setting timer 2 to 
+<code>TM_FREQ_1024</code> and to start at &minus;0x4000, the cascading 
+timer 3 will effectively be a 1 Hz counter.
+</p>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/tmr_demo.png" alt="Clock demo" 
+  id="img-tmr-demo"><br>
+  <b>Fig 15.1</b>: <tt>tmr_demo</tt>.
+</div>
+
+<p>
+Whenever timer 3 is updated, the demo turns the number of seconds 
+into hours, minutes and seconds and prints that on screen 
+(see fig&nbsp;15.1). 
+Yes, I am using divisions and moduli here because it is the simplest 
+procedure and I can spare the cycles in this particular demo.
+</p>
+<p>
+The demo can be (un)paused with Select and Start. Start disables 
+timer 2, and thus timer 3 too. Select turns timer 2 into 
+a cascade timer as well, and since timer 1 is disabled, doing this 
+also stops timer 2 (and 3). The difference is what happens when you 
+unpause. By disabling a timer, it will start again at the initial 
+value; but stopping it with a cascade actually keeps the timer 
+active and it will simply resume counting once the cascade is 
+removed. The difference is a subtle one, but the latter is more 
+appropriate.
+</p>
+
+
+<pre class="proglist" id="cd-tmr-demo">
+<span class="cmt">// Using a the "Berk" font from headspins font collection.</span>
+
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&quot;berk.h&quot;</span>
+
+<span class="keyw">void</span> tmr_test()
+{
+    <span class="cmt">// Overflow every ~1 second:</span>
+    <span class="cmt">// 0x4000 ticks @ FREQ_1024
+</span>
+    REG_TM2D= -<span class="num">0x4000</span>;          <span 
+class="cmt">// 0x4000 ticks till overflow</span>
+    REG_TM2CNT= TM_FREQ_1024;   <span 
+class="cmt">// we're using the 1024 cycle timer</span>
+
+    <span class="cmt">// cascade into tm3</span>
+    REG_TM3CNT= TM_ENABLE | TM_CASCADE;
+
+    u32 sec= -<span class="num">1</span>;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        key_poll();
+
+        <span class="keyw">if</span>(REG_TM3D != sec)
+        {
+            sec= REG_TM3D;
+            tte_printf(<span 
+class="str">&quot;#{es;P:24,60}%02d:%02d:%02d&quot;</span>, 
+                sec/<span class="num">3600</span>, (sec%<span 
+class="num">3600</span>)/<span class="num">60</span>, sec%<span class="num">60</span>);
+        }
+
+        <span class="keyw">if</span>(key_hit(KEY_START))  <span 
+class="cmt">// pause by disabling timer</span>
+            REG_TM2CNT ^= TM_ENABLE;
+
+        <span class="keyw">if</span>(key_hit(KEY_SELECT)) <span 
+class="cmt">// pause by enabling cascade</span>
+            REG_TM2CNT ^= TM_CASCADE;
+    }
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="cmt">// set-up berk font</span>
+    tte_init_se(<span class="num">0</span>, BG_CBB(<span 
+class="num">0</span>)|BG_SBB(<span class="num">31</span>), <span 
+class="num">1</span>, <span class="num">0</span>, <span 
+class="num">0</span>, &amp;berkFont, se_drawg);
+    tte_init_con();
+    memcpy16(pal_bg_mem, berkPal, berkPalLen/<span class="num">4</span>);
+
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    tmr_test();
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+This was a rather simple use of timers. Of course, I could have just 
+as easily used the VBlank to keep track of the seconds, which is how 
+it's usually done anyway. The hardware timers are usually reserved 
+for timed DMA's, which are used in 
+<a href="http://deku.gbadev.org" >sound mixers</a>, not for game timers. 
+There is one other use that comes to mind, though, namely
+profiling: examining how fast your functions are. One of the 
+<a href="text.htm#ssec-demo-se2">text system demos</a> uses that 
+to check the speeds of a few copying routines.
+</p><br>
+
+<div class="endtag">
+Modified <span class="time">Apr 16, 2008</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="dma.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="interrupts.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">DMA</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Interrupts</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

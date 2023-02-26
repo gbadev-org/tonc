@@ -1,0 +1,1268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031223">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Interrupts</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="timers.htm">Timers</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="swi.htm">BIOS calls</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">16.
+  Interrupts</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>
+  <li><a href="#sec-regs">Interrupts registers</a>
+  <li><a href="#sec-isr">Interrupt Service Routines</a>
+  <li><a href="#sec-switch">Creating an interrupt switchboard</a>
+  <li><a href="#sec-demo">Finally, an interrupt demo!</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">16.1.
+  Introduction</h2>
+<p>Under certain conditions, you can make the CPU drop whatever it's 
+doing, go run another function instead, and continue with the original 
+process afterwards. This process is known as an <dfn>interrupt</dfn> 
+(two &lsquo;r&rsquo;s, please). The function that handles the 
+interrupt is an <dfn>interrupt service routine</dfn>, or just 
+interrupt; triggering one is called <dfn>raising</dfn> an interrupt.
+</p>
+<p>
+Interrupts are often attached to certain hardware events: pressing a 
+key on a PC keyboard, for example, raises one. Another PC example is 
+the VBlank (yes, PCs have them too). The GBA has similar interrupts 
+and others for the HBlank, DMA and more. This last one in particular 
+can be used for a great deal of nifty effects. I'll give a full list of 
+interrupts shortly.
+</p>
+<p>
+Interrupts halt the current process, quickly do &lsquo;something&rsquo;, 
+and pass control back again. Stress the word &ldquo;quickly&rdquo;:
+interrupts are supposed to be short routines.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-regs">16.2.
+  Interrupts registers</h2>
+<p>
+There are three registers specifically for interrupts: 
+<code>REG_IE</code> (<code>0400:0200h</code>), <code>REG_IF</code> 
+(<code>0400:0202h</code>) and <code>REG_IME</code> 
+(<code>0400:0208h</code>). <code>REG_IME</code> is the master
+interrupt control; unless this is set to &lsquo;1&rsquo;, interrupts 
+will be ignored completely. 
+To enable a specific interrupt you need to set the appropriate bit in
+<code>REG_IE</code>. When an interrupt occurs, the corresponding bit 
+in <code>REG_IF</code> will be set. To acknowledge that you've 
+handled an interrupt, the bit needs to be cleared again, but the way 
+to do that is a little counter-intuitive to say the least. To 
+acknowledge the interrupt, you actually have to <i>set</i> the bit
+again. That's right, you have to write 1 to that bit 
+(which is already 1) in order to clear it.
+</p>
+
+<p>
+Apart from setting the bits in <code>REG_IE</code>, you also need to 
+set a bit in other registers that deal with the subject. For example, 
+the HBlank interrupt also requires a bit in <code>REG_DISPSTAT</code>. 
+I think (but please correct me if I'm wrong) that you need both 
+a sender and receiver of interrupts; <code>REG_IE</code> controls the 
+receiver and registers like <code>REG_DISPSTAT</code> control the 
+sender. With that in mind, let's check out the bit layout for 
+<code>REG_IE</code> and <code>REG_IF</code>.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-ie"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_IE @ <code>0400:0200</code> and REG_IF @ <code>0400:0202</code>
+</caption>
+<tr class="bits">
+  <td>F E<td>D<td>C<td>B A 9 8<td>7<td>6 5 4 3<td>2<td>1<td>0
+<tr class="bf">
+  <td>-
+  <td class="rclr7">C
+  <td class="rclr6">K
+  <td class="rclr5">Dma
+  <td class="rclr4">Com
+  <td class="rclr3">Tm
+  <td class="rclr2">Vct
+  <td class="rclr1">Hbl
+  <td class="rclr0">Vbl
+</table>
+<br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td> 0 <td class="rclr0">Vbl
+  <td>IRQ_VBLANK
+  <td><b>VBlank</b> interrupt. Also requires 
+    <code>REG_DISPSTAT</code>{3}
+<tr class="bg1">
+  <td> 1 <td class="rclr1">Hbl
+  <td>IRQ_HBLANK
+  <td><b>HBlank</b> interrupt. Also requires 
+    <code>REG_DISPSTAT</code>{4} Occurs <i>after</i> the HDraw, so that 
+    things done here take effect in the next line. 
+<tr class="bg0">
+  <td> 2 <td class="rclr2">Vct
+  <td>IRQ_VCOUNT
+  <td><b>VCount</b> interrupt. Also requires 
+    <code>REG_DISPSTAT</code>{5}. The high byte of 
+    <code>REG_DISPSTAT</code> gives the VCount at which to raise the 
+    interrupt. Occurs at the <i>beginning</i> of a scanline.
+<tr class="bg1">
+  <td>3-6<td class="rclr3">Tm
+  <td>IRQ_TIMER<i>x</i>
+  <td><b>Timer</b> interrupt, 1 bit per timer. Also requires 
+    <code>REG_TMxCNT</code>{6}. The interrupt will be raised 
+    when the timer overflows.
+<tr class="bg0">
+  <td> 7 <td class="rclr4">Com
+  <td>IRQ_COM
+  <td><b>Serial communication</b> interrupt. Apparently, also requires 
+    <code>REG_SCCNT</code>{E}. To be raised when the transfer
+    is complete. Or so I'm told, I really don't know squat about 
+    serial communication. 
+<tr class="bg1">
+  <td>8-B<td class="rclr5">Dma
+  <td>IRQ_DMA<i>x</i>
+  <td><b>DMA</b> interrupt, 1 bit per channel. Also requires 
+    <code>REG_DMAxCNT</code>{1E}. Interrupt will be raised 
+    when the full transfer is complete.
+<tr class="bg0">
+  <td>C <td class="rclr6">K
+  <td>IRQ_KEYPAD
+  <td><b>Keypad</b> interrupt. Also requires 
+    <code>REG_KEYCNT</code>{E}. Raised when any or all or the keys 
+    specified in <code>REG_KEYCNT</code> are down.
+<tr class="bg1">
+  <td> D <td class="rclr7">C
+  <td>IRQ_GAMEPAK
+  <td><b>Cartridge</b> interrupt. Raised when the cart is removed from 
+    the GBA.
+</tbody>
+</table>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-isr">16.3.
+  Interrupt Service Routines</h2>
+<p>
+You use the interrupt registers described above to indicate which 
+interrupts you want to use. The next step is writing an interrupt 
+service routine. This is just a typeless function
+(<code>void func(void)</code>); a C-function like many others. Here's 
+an example of an HBlank interrupt.
+</p>
+
+<pre class= proglist>
+<span class="keyw">void</span> hbl_pal_invert()
+{
+    pal_bg_mem[<span class="num">0</span>] ^= <!--
+--><span class="num">0x7FFF</span>;
+    REG_IF = IRQ_HBLANK;
+}
+</pre>
+
+<p>
+The first line inverts the color of the first entry of the palette 
+memory. The second line resets the HBlank bit of <code>REG_IF</code> 
+indicating the interrupt has been dealt with. Since this is an HBlank 
+interrupt, the end-result is that that the color changes every 
+scanline. This shouldn't be too hard to imagine.
+</p>
+<p>
+If you simply add this function to an existing program, nothing would 
+change. How come? Well, though you have an isr now, you still need to 
+tell the GBA where to find it. For that, we will need to take a closer 
+look at the interrupt process as a whole.
+</p>
+
+<div class="note">
+<div class="nhcare">On acknowledging interrupts correctly</div>
+<p>
+To acknowledge that an interrupt has been dealt with, you have to 
+<b>set</b> the bit of that interrupt in <code>REG_IF</code>, and 
+<i>only</i> that bit. That means that 
+&lsquo;<code>REG_IF <b>=</b> IRQ_<i>x</i></code>&rsquo; is usually the 
+correct course of action, and not 
+&lsquo;<code>REG_IF <b>|=</b> IRQ_<i>x</i></code>&rsquo;. 
+The |= version acknowledges all interrupts that have been raised, 
+even if you haven't dealt with them yet.
+</p>
+<p>
+Usually, these two result in the same thing, but if multiple interrupts 
+come in at the same time things will go bad. Just pay attention to 
+what you're doing.
+</p>
+</div>
+
+<h3 id="ssec-isr-proc">16.3.1.
+  The interrupt process</h3>
+<p>
+The complete interrupt process is kind of tricky and part of it
+is completely beyond your control. What follows now is a list of things 
+that you, the programmer, need to know. For the full story, see
+<a href="http://nocash.emubase.de/gbatek.htm#interruptcontrol" target="_blank">
+GBATek : irq control</a>.
+</p>
+
+<ol>
+  <li>Interrupt occurs. Some black magic deep within the deepest 
+    dungeons of 
+    BIOS happens and the CPU is switched to IRQ mode and ARM state. A number of 
+    registers (<code>r0-r3, r12, lr</code>) are pushed onto the stack.
+  <li>BIOS loads the address located at <code>0300:7FFC</code> and 
+	branches to that address.
+  <li>The code pointed to by <code>0300:7FFC</code> is run. Since we're 
+    in ARM-state now, this <i>must</i> to be ARM code!
+  <li>After the isr is done, acknowledge that the interrupt has 
+    been dealt with by writing to <code>REG_IF</code>, then return from 
+    the isr by issuing a <code>bx lr</code> instruction.
+  <li>The previously saved registers are popped from stack and program 
+    state is restored to normal.
+</ol>
+
+<p>
+Steps 1, 2 and 5 are done by BIOS; 3 and 4 are yours. Now, in principle 
+all you need to do is place the address of your isr into address 
+<code>0300:7FFC</code>. To make our job a little easier, we will first 
+create ourselves a function pointer type.
+
+<pre class="proglist">
+<span class="keyw">typedef void</span> (*fnptr)(<span 
+class="keyw">void</span>);
+<span class="keyw">#define</span> REG_ISR_MAIN *(fnptr*)(<span 
+class="num">0x03007FFC</span>)
+
+<span class="cmt">// Be careful when using it like this, see notes below</span>
+<span class="keyw">void</span> foo()
+{
+    REG_ISR_MAIN= hbl_pal_invert;  <span
+class= cmt>// tell the GBA where my isr is</span>
+    REG_DISPSTAT |= VID_HBL_IRQ;  <span
+class= cmt>// Tell the display to fire HBlank interrupts</span>
+    REG_IE |= IRQ_HBLANK;          <span
+class= cmt>// Tell the GBA to catch HBlank interrupts</span>
+    REG_IME= <span class= num>1</span>;                   <span
+class= cmt>// Tell the GBA to enable interrupts</span>;
+}
+</pre>
+
+<p>
+Now, this will probably work, but as usual there's more to the story.
+</p>
+
+<ul>
+<li>
+  First, the code that <code>REG_ISR_MAIN</code> jumps to <i>must</i> 
+  be ARM code! If you compile with the <code>-mthumb</code> flag, the 
+  whole thing comes to a screeching halt.
+</li>
+<li>
+  What happens when you're interrupted inside an interrupt? Well, that's 
+  not quite possible actually; not unless you do some fancy stuff we'll 
+  get to later. You see, <code>REG_IME</code> is not the only thing that 
+  allows interrupts, there's a bit for irqs in the <dfn>program status 
+  register</dfn> (PSR) as well. When an interrupt is raised, the 
+  CPU disables interrupts there until the whole thing is over and done 
+  with.
+</li>
+<li><code>hbl_pal_invert()</code> doesn't check whether it has been 
+  activated by an HBlank interrupt. Now, in this case it doesn't 
+  really matter because it's the only one enabled, but when you use 
+  different types of interrupts, sorting them out is essential. That's 
+  why we'll create an <a href="#sec-switch">interrupt switchboard</a> in 
+  the next section.
+</li>
+<li>
+  Lastly, when you use <a href="swi.htm">BIOS calls</a> that require 
+  interrupts, you also need to acknowledge them in 
+  <code>REG_IFBIOS</code> (== <code>0300:7FF8</code>). The use is the 
+  same as <code>REG_IF</code>.
+</li>
+</ul>
+
+<div class="note">
+<div class="nhcare">On section mirroring</div>
+<p>
+GBA's memory sections are mirrored ever so many bytes. For example 
+IWRAM (<code>0300:0000</code>) is mirrored every 8000h bytes, so that 
+<code>0300:7FFC</code> is also <code>03FF:FFFC</code>, or 
+<code>0400:0000</code>&minus;4. While this is faster, I'm not quite sure 
+if this should be taken advantage of. no$gba v2.2b marks it as an 
+error, even though this was apparently a small oversight and fixed in 
+v2.2c. Nevertheless, consider yourself warned.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-switch">16.4.
+  Creating an interrupt switchboard</h2>
+<p>
+The <code>hbl_pal_invert()</code> function is an example of a single 
+interrupt, but you may have to deal with multiple interrupts. You 
+may also want to be able to use different isr's depending on 
+circumstances, in which case stuffing it all into one function may 
+not be the best way to go. Instead, we'll create an interrupt 
+switchboard.
+</p>
+<p>
+An <dfn>interrupt switchboard</dfn> works a little like a telephone 
+switchboard: you 
+have a call (i.e., an interrupt, in <code>REG_IF</code>) coming in, 
+the operator checks if it is an active number (compares it with
+<code>REG_IE</code>) and if so, connects the call to the right receiver 
+(your isr).
+</p>
+<p>
+This particular switchboard will come with a number of additional 
+features as well. It will acknowledge the call in both 
+<code>REG_IF</code> and <code>REG_IFBIOS</code>), even when there's 
+no actual ISR attached to that interrupt. It will also allow nested 
+interrupts, although this requires a little extra work in the 
+ISR itself.
+</p>
+
+<h3 id="ssec-switch-design">16.4.1.
+  Design and interface considerations</h3>
+<p>
+The actual switchboard is only one part of the whole; I also need a
+couple of structs, variables and functions. The basic items I 
+require are these.
+</p>
+<ul>
+<li>
+  <b><code>__isr_table[]</code></b>.
+  An interrupt table. This is a table of function pointers to the 
+  different isr's. Because the interrupts should be prioritized, the 
+  table should also indicate which interrupt the pointers belong to. 
+  For this, we'll use an <code>IRQ_REC</code> struct.
+</li>
+<li>
+  <b><code>irq_init()</code></b> / 
+  <b><code>irq_set_master()</code></b>. 
+  Set master isr. <code>irq_init()</code> initializes the interrupt 
+  table and interrupts themselves as well.
+</li>
+<li>
+  <b><code>irq_enable()</code></b> / 
+  <b><code>irq_disable()</code></b>.
+  Functions to enable and disable interrupts. These will take care of 
+  both <code>REG_IE</code> and whatever register the sender bit is on. 
+  I'm keeping these bits in an internal table called 
+  <code>__irq_senders[]</code> and to be able to use these, the input 
+  parameter of these functions need to be the <i>index</i> of the 
+  interrupt, not the interrupt flag itself. Which is why I have 
+  <code>II_<i>foo</i></code> counterparts for the 
+  <code>IRQ_<i>foo</i></code> flags.
+</li>
+<li>
+  <b><code>irq_set()</code></b> / 
+  <b><code>irq_add()</code></b> / 
+  <b><code>irq_delete()</code></b>.
+  Function to add/delete interrupt service routines. The first allows 
+  full prioritization of isr's; <code>irq_add()</code> will replace 
+  the current irs for a given interrupt, or add one at the end of the 
+  list; <code>irq_delete()</code> will delete one and correct the 
+  list for the empty space.
+</li>
+</ul>
+
+<p>
+All of these functions do something like this: disable interrupts 
+(<code>REG_IME</code>=0), do their stuff and then re-enable 
+interrupts. It's a good idea to do this because being interrupted 
+while mucking about with interrupts is not pretty. The functions 
+concerned with service routines will also take a function pointer 
+(the <code>fnptr</code> type), and also return a function pointer 
+indicating the previous isr. This may be useful if you want to try to 
+chain them. 
+</p>
+<p>
+Below you can see the structs, tables, and the implementation of 
+<code>irq_enable()</code> and <code>irq_add()</code>. In both 
+functions, the <code>__irq_senders[]</code> array is used to 
+determine which bit to set in which register to make sure things 
+send interrupt requests.  The <code>irq_add()</code> function goes 
+on to finding either the requested interrupt in the current table 
+to replace, or an empty slot to fill. The other routines 
+are similar. If you need to see more, look in 
+<tt>tonc_irq.h/.c</tt> in tonclib.
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Interrups Indices</span>
+<span class="keyw">typedef</span> <span class="keyw">enum</span> eIrqIndex
+{
+    II_VBLANK=<span class="num">0</span>, II_HBLANK, II_VCOUNT, II_TIMER0,
+    II_TIMER1,   II_TIMER2, II_TIMER3, II_SERIAL,
+    II_DMA0,     II_DMA1,   II_DMA2,   II_DMA3,
+    II_KEYPAD,   II_GAMEPAK,II_MAX
+} eIrqIndex;
+
+<span class="cmt">//! Struct for prioritized irq table</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> IRQ_REC  
+{
+    u32 flag;   <span class="cmt">//!&lt; Flag for interrupt in REG_IF, etc</span>
+    fnptr isr;  <span class="cmt">//!&lt; Pointer to interrupt routine</span>
+} IRQ_REC;
+
+<span class="cmt">// === PROTOTYPES =====================================================
+</span>
+IWRAM_CODE <span class="keyw">void</span> isr_master_nest();
+
+<span class="keyw">void</span> irq_init(fnptr isr);
+fnptr irq_set_master(fnptr isr);
+
+fnptr irq_add(<span class="keyw">enum</span> eIrqIndex irq_id, fnptr isr);
+fnptr irq_delete(<span class="keyw">enum</span> eIrqIndex irq_id);
+
+fnptr irq_set(<span class="keyw">enum</span> eIrqIndex irq_id, fnptr isr, <span 
+class="keyw">int</span> prio);
+<span class="keyw">void</span> irq_enable(<span 
+class="keyw">enum</span> eIrqIndex irq_id);
+<span class="keyw">void</span> irq_disable(<span 
+class="keyw">enum</span> eIrqIndex irq_id);
+</pre>
+
+
+<pre class="proglist">
+<span class="cmt">// IRQ Sender information</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> IRQ_SENDER
+{
+    u16 reg_ofs;    <span class="cmt">//!&lt; sender reg - REG_BASE</span>
+    u16 flag;       <span class="cmt">//!&lt; irq-bit in sender reg</span>
+} ALIGN4 IRQ_SENDER;
+
+<span class="cmt">// === GLOBALS ========================================================
+
+// One extra entry for guaranteed zero</span>
+IRQ_REC __isr_table[II_MAX+<span class="num">1</span>];
+
+<span class="keyw">static</span> <span 
+class="keyw">const</span> IRQ_SENDER __irq_senders[] =
+{
+    { <span class="num">0x0004</span>, <span class="num">0x0008</span> },     <span 
+class="cmt">// REG_DISPSTAT,    DSTAT_VBL_IRQ</span>
+    { <span class="num">0x0004</span>, <span class="num">0x0010</span> },     <span 
+class="cmt">// REG_DISPSTAT,    DSTAT_VHB_IRQ</span>
+    { <span class="num">0x0004</span>, <span class="num">0x0020</span> },     <span 
+class="cmt">// REG_DISPSTAT,    DSTAT_VCT_IRQ</span>
+    { <span class="num">0x0102</span>, <span class="num">0x0040</span> },     <span 
+class="cmt">// REG_TM0CNT,      TM_IRQ</span>
+    { <span class="num">0x0106</span>, <span class="num">0x0040</span> },     <span 
+class="cmt">// REG_TM1CNT,      TM_IRQ</span>
+    { <span class="num">0x010A</span>, <span class="num">0x0040</span> },     <span 
+class="cmt">// REG_TM2CNT,      TM_IRQ</span>
+    { <span class="num">0x010E</span>, <span class="num">0x0040</span> },     <span 
+class="cmt">// REG_TM3CNT,      TM_IRQ</span>
+    { <span class="num">0x0128</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_SCCNT_L      BIT(14) // not sure</span>
+    { <span class="num">0x00BA</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_DMA0CNT_H,   DMA_IRQ&gt;&gt;16</span>
+    { <span class="num">0x00C6</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_DMA1CNT_H,   DMA_IRQ&gt;&gt;16</span>
+    { <span class="num">0x00D2</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_DMA2CNT_H,   DMA_IRQ&gt;&gt;16</span>
+    { <span class="num">0x00DE</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_DMA3CNT_H,   DMA_IRQ&gt;&gt;16</span>
+    { <span class="num">0x0132</span>, <span class="num">0x4000</span> },     <span 
+class="cmt">// REG_KEYCNT,      KCNT_IRQ</span>
+    { <span class="num">0x0000</span>, <span class="num">0x0000</span> },     <span 
+class="cmt">// cart: none</span>
+};
+
+
+<span 
+class="cmt">// === FUNCTIONS ======================================================</span>
+
+<span class="cmt">//! Enable irq bits in REG_IE and sender bits elsewhere</span>
+<span class="keyw">void</span> irq_enable(<span 
+class="keyw">enum</span> eIrqIndex irq_id)
+{
+    u16 ime= REG_IME;
+    REG_IME= <span class="num">0</span>;
+
+    <span 
+class="keyw">const</span> IRQ_SENDER *sender= &amp;__irq_senders[irq_id];
+    *(u16*)(REG_BASE+sender-&gt;reg_ofs) |= sender-&gt;flag;
+
+    REG_IE |= BIT(irq_id);
+    REG_IME= ime;
+}
+
+<span class="cmt">//! Add a specific isr</span>
+fnptr irq_add(<span class="keyw">enum</span> eIrqIndex irq_id, fnptr isr)
+{
+    u16 ime= REG_IME;
+    REG_IME= <span class="num">0</span>;
+
+    <span class="keyw">int</span> ii;
+    u16 irq_flag= BIT(irq_id);
+    fnptr old_isr;
+    IRQ_REC *pir= __isr_table;
+
+    <span class="cmt">// Enable irq</span>
+    <span 
+class="keyw">const</span> IRQ_SENDER *sender= &amp;__irq_senders[irq_id];
+    *(u16*)(REG_BASE+sender-&gt;reg_ofs) |= sender-&gt;flag;
+    REG_IE |= irq_flag;
+
+    <span 
+class="cmt">// Search for previous occurance, or empty slot</span>
+    <span 
+class="keyw">for</span>(ii=<span class="num">0</span>; pir[ii].flag; ii++)
+        <span class="keyw">if</span>(pir[ii].flag == irq_flag)
+            <span class="keyw">break</span>;
+    
+    old_isr= pir[ii].isr;
+    pir[ii].isr= isr;
+    pir[ii].flag= irq_flag;
+
+    REG_IME= ime;
+    <span class="keyw">return</span> old_isr;
+}
+</pre>
+
+<h3 id="ssec-switch-master">16.4.2.
+  The master interrupt service routine</h3>
+
+<p>
+The main task of the master ISR is to seek out the raised interrupt 
+in <code>___isr_table</code>, and acknowledge it in both 
+<code>REG_IF</code> and <code>REG_IFBIOS</code>. If there is an 
+irq-specific service routine, it should call it; otherwise, it should 
+just exit to BIOS again. In C, it would look something like this. 
+</p>
+
+<pre class="proglist" id="cd-isr-master-c">
+<span class="cmt">// This is mostly what tonclib's isr_master does, but
+// you really need asm for the full functionality</span>
+IWRAM_CODE <span class="keyw">void</span> isr_master_c()
+{
+    u32 ie= REG_IE;
+    u32 ieif= ie &amp; REG_IF;
+    IRQ_REC *pir;
+
+    <span class="cmt">// <b>(1)</b> Acknowledge IRQ for hardware and BIOS.</span>
+    REG_IF      = ieif;
+    REG_IFBIOS |= ieif;
+
+    <span class="cmt">// <b>(2)</b> Find raised irq </span>
+    <span class="keyw">for</span>(pir= __isr_table; pir-&gt;flag!=<span 
+class="num">0</span>; pir++)
+        <span class="keyw">if</span>(pir-&gt;flag &amp; ieif)
+            <span class="keyw">break</span>;
+
+    <span 
+class="cmt">// <b>(3)</b> Just return if irq not found in list or has no isr.</span>
+    <span class="keyw">if</span>(pir-&gt;flag == <span 
+class="num">0</span> || pir-&gt;isr == NULL)
+        <span class="keyw">return</span>;
+
+    <span class="cmt">// --- If we're here have an interrupt routine ---</span>
+    <span class="cmt">// <b>(4a)</b> Disable IME and clear the current IRQ in IE</span>
+    u32 ime= REG_IME;
+    REG_IME= <span class="num">0</span>;
+    REG_IE &amp;= ~ieif;
+
+    <span class="cmt">// <b>(5a)</b> CPU back to system mode </span>
+    <span class="cmt">//&gt; *(--sp_irq)= lr_irq;</span>
+    <span class="cmt">//&gt; *(--sp_irq)= spsr</span>
+    <span class="cmt">//&gt; cpsr &amp;= ~(CPU_MODE_MASK | CPU_IRQ_OFF);</span>
+    <span class="cmt">//&gt; cpsr |= CPU_MODE_SYS;</span>
+    <span class="cmt">//&gt; *(--sp_sys) = lr_sys;
+</span>
+    pir-&gt;isr();             <span class="cmt">// <b>(6)</b> Run the ISR</span>
+
+    REG_IME= <span class="num">0</span>;             <span 
+class="cmt">// Clear IME again (safety)</span>
+
+    <span class="cmt">// <b>(5b)</b> Back to irq mode</span>
+    <span class="cmt">//&gt; lr_sys = *sp_sys++;</span>
+    <span class="cmt">//&gt; cpsr &amp;= ~(CPU_MODE_MASK | CPU_IRQ_OFF);</span>
+    <span class="cmt">//&gt; cpsr |= CPU_MODE_IRQ | CPU_IRQ_OFF;</span>
+    <span class="cmt">//&gt; spsr = *sp_irq++</span>
+    <span class="cmt">//&gt; lr_irq = *sp_irq++;
+</span>
+    <span class="cmt">// <b>(4b)</b> Restore original ie and ime </span>
+    REG_IE= ie;
+    REG_IME= ime;
+}
+</pre>
+
+<p>
+Most of these points have been discussed already, so I won't repeat 
+them again. Do note the difference is acknowledging 
+<code>REG_IF</code> and <code>REG_IFBIOS</code>: the former uses 
+a simple assignment and the latter an |=. Steps 4, 5 and 6 only execute if 
+the current IRQ has its own service routine. Steps 4a and 5a work as 
+initialization steps  to ensure that the ISR (step 6) can work in 
+CPU mode and that it can't be interrupted unless it asks for it. Steps 
+4b and 5b unwind 4a and 5a.
+</p>
+<p>
+This routine would work fine in C, were it not for items 5a and 5b. 
+These are the code to set/restore the CPU mode to system/irq mode, but 
+the instructions necesasry for that aren't available in C. Another 
+problem is that the link registers (these are used to hold the return 
+addresses of functions) have to be saved somehow, and these 
+<i>definitely</i> aren't available in C.
+</p>
+<p>
+Note: I said register<b>s</b>, plural! Each CPU mode has its own stack 
+and link register, and even though the names are the same
+(<code>lr</code> and <code>sp</code>), they really aren't identical.
+Usually a C routine will save <code>lr</code> on its own, but since 
+you need it twice now it's very unsafe to leave this up to the 
+compiler. Aside from that, you need to save the saved program status 
+register <code>spsr</code>, which indicates the program status when 
+the interrupt occurred. This is another thing that C can't really do. 
+As such, assembly is required for the master ISR.
+</p><br>
+
+<p>
+So, assembly it is then. The function below is the assembly equivalent 
+of <code>irs_master_c()</code>. It is almost a line by line 
+translation, although I am making use of a few features of the 
+instruction set the compiler wont't or can't.
+I don't expect you to really understand everything written 
+here, but with some imagination you should be able to follow most of 
+it. Teaching assembly is <i>way</i> beyond the scope of this chapter, 
+but worth the effort in my view. Tonc's 
+<a href="asm.htm">assembly chapter</a> should give you the necessary 
+information to understand most of it and shows where to go to learn 
+more.
+</p>
+
+<pre class="proglist" id="cd-isr-master">
+    .file   <span class="str">&quot;tonc_isr_master.s&quot;</span>
+    .<span class="keyw">extern</span> __isr_table;
+
+<span class="cmt">/*! \fn IWRAM_CODE void isr_master()
+    \brief  Default irq dispatcher (no automatic nesting)
+*/</span>
+    .<span class="keyw">section</span> .iwram, <span 
+class="str">&quot;ax&quot;</span>, %progbits
+    .<span class="keyw">arm</span>
+    .<span class="keyw">align</span>
+    .<span class="keyw">global</span> isr_master
+
+    <span class="cmt">@ --- Register list ---</span>
+    <span class="cmt">@ r0 : &amp;REG_IE</span>
+    <span class="cmt">@ r1 : __isr_table / isr</span>
+    <span class="cmt">@ r2 : IF &amp; IE</span>
+    <span class="cmt">@ r3 : tmp</span>
+    <span class="cmt">@ ip : (IF&lt;&lt;16 | IE)
+</span>
+isr_master:
+    <span class="cmt">@ Read IF/IE </span>
+    <span class="keyw">mov</span>     r0, #<span class="num">0x04000000</span>
+    <span class="keyw">ldr</span>     ip, [r0, #<span class="num">0x200</span>]!
+    <span class="keyw">and</span>     r2, ip, ip, <span 
+class="keyw">lsr</span> #<span class="num">16</span>     <span 
+class="cmt">@ irq= IE &amp; IF</span>
+
+    <span class="cmt">@ <b>(1)</b> Acknowledge irq in IF and for BIOS</span>
+    <span class="keyw">strh</span>    r2, [r0, #<span class="num">2</span>]
+    <span class="keyw">ldr</span>     r3, [r0, #-<span class="num">0x208</span>]
+    <span class="keyw">orr</span>     r3, r3, r2
+    <span class="keyw">str</span>     r3, [r0, #-<span class="num">0x208</span>]
+
+    <span class="cmt">@ <b>(2)</b> Search for irq.</span>
+    <span class="keyw">ldr</span>     r1, =__isr_table
+.Lirq_search:
+        <span class="keyw">ldr</span>     r3, [r1], #<span class="num">8</span> 
+        <span class="keyw">tst</span>     r3, r2
+        <span class="keyw">bne</span>     .Lpost_search       <span 
+class="cmt">@ Found one, break off search</span>
+        <span class="keyw">cmp</span>     r3, #<span class="num">0</span>
+        <span class="keyw">bne</span>     .Lirq_search        <span 
+class="cmt">@ Not here; try next irq</span>
+
+    <span class="cmt">@ <b>(3)</b> Search over : return if no isr, <!--
+-->otherwise continue.</span>
+.Lpost_search:
+    <span class="keyw">ldrne</span>   r1, [r1, #-<span 
+class="num">4</span>]           <span class="cmt">@ isr= __isr_table[ii-1].isr</span>
+    <span class="keyw">cmpne</span>   r1, #<span class="num">0</span>
+    <span class="keyw">bxeq</span>    lr                      <span 
+class="cmt">@ If no isr: quit</span>
+
+    <span class="cmt">@ --- If we're here, we have an isr ---</span>
+
+    <span class="cmt">@ <b>(4a)</b> Disable IME and clear the current IRQ in IE</span>
+    <span class="keyw">ldr</span>     r3, [r0, #<span 
+class="num">8</span>]            <span class="cmt">@ Read IME </span>
+    <span class="keyw">strb</span>    r0, [r0, #<span 
+class="num">8</span>]            <span class="cmt">@ Clear IME</span>
+    <span class="keyw">bic</span>     r2, ip, r2
+    <span class="keyw">strh</span>    r2, [r0]                <span 
+class="cmt">@ Clear current irq in IE</span>
+    
+    <span class="keyw">mrs</span>     r2, spsr
+    <span class="keyw">stmfd</span>   sp!, {r2-r3, ip, lr}    <span 
+class="cmt">@ sprs, IME, (IE,IF), lr_irq</span>
+
+    <span class="cmt">@ <b>(5a)</b> Set mode to sys</span>
+    <span class="keyw">mrs</span>     r3, cpsr
+    <span class="keyw">bic</span>     r3, r3, #<span class="num">0xDF</span>
+    <span class="keyw">orr</span>     r3, r3, #<span class="num">0x1F</span>
+    <span class="keyw">msr</span>     cpsr, r3
+
+    <span class="cmt">@ <b>(6)</b> Call isr</span>
+    <span class="keyw">stmfd</span>   sp!, {r0,lr}            <span 
+class="cmt">@ &amp;REG_IE, lr_sys</span>
+    <span class="keyw">mov</span>     lr, pc
+    <span class="keyw">bx</span>      r1
+    <span class="keyw">ldmfd</span>   sp!, {r0,lr}            <span 
+class="cmt">@ &amp;REG_IE, lr_sys</span>
+
+    <span class="cmt">@ --- Unwind ---</span>
+    <span class="keyw">strb</span>    r0, [r0, #<span 
+class="num">8</span>]            <span 
+class="cmt">@ Clear IME again (safety)</span>
+    <span class="cmt">@ <b>(5b)</b> Reset mode to irq</span>
+    <span class="keyw">mrs</span>     r3, cpsr
+    <span class="keyw">bic</span>     r3, r3, #<span class="num">0xDF</span>
+    <span class="keyw">orr</span>     r3, r3, #<span class="num">0x92</span>
+    <span class="keyw">msr</span>     cpsr, r3
+
+    <span class="cmt">@ <b>(4b)</b> Restore original spsr, IME, IE, lr_irq</span>
+    <span class="keyw">ldmfd</span>   sp!, {r2-r3, ip, lr}    <span 
+class="cmt">@ sprs, IME, (IE,IF), lr_irq</span>
+    <span class="keyw">msr</span>     spsr, r2
+    <span class="keyw">strh</span>    ip, [r0]
+    <span class="keyw">str</span>     r3, [r0, #<span class="num">8</span>]
+    
+    <span class="keyw">bx</span>      lr
+</pre>
+
+<div class="note">
+<div class="nhcare">Nested irqs are nasty</div>
+<p>
+Making a nested interrupt routine work is not a pleasant exercise when 
+you only partially know what you're doing. For example, that different 
+CPU modes used different stacks took me a while to figure out, and 
+it took me quite a while to realize that the reason my nested isrs 
+didn't work was because there are different link registers too. 
+</p>
+<p>
+The <code>isr_master_nest</code> is largely based on libgba's 
+interrupt dispatcher, but also borrows information from GBATek and 
+A. Bilyk and DekuTree's analysis of the whole thing as described in 
+<a href="http://forum.gbadev.org/viewtopic.php?t=4063" target="_blank">forum:4063</a>. 
+Also invaluable was the home-use debugger version of no$gba, hurray 
+for breakpoints. 
+</p>
+<p>
+If you want to develop your own interrupt routine, these sources 
+will help you immensely and will keep the loss of sanity down 
+to somewhat acceptable levels.  
+</p>
+</div>
+
+<div class="note">
+<div class="nh">Deprecation notice</div>
+<p>
+I used to have a different master service routine that took care of 
+nesting and prioritizing interrupts automatically. Because it was 
+deemed too complicated, it has been replaced with this one.
+</p>
+<p>
+Nested interrupts are still possible, but you have to indicate 
+interruptability inside the isr yourself now.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">16.5.
+  Nested interrupt demo</h2>
+
+<p>
+Today's demo shows a little bit of everything described above:
+</p>
+<ul>
+<li>
+  It'll display a color gradient on the screen through the 
+  use of an HBlank interrupt.
+</li>
+<li>
+  It will allow you to toggle between two different master isrs: 
+  The switchboard <code>isr_master</code> which routes 
+  the program flow to an HBlank isr, and an isr in C that 
+  handles the HBlank interrupt directly. For the latter to work, we'll 
+  need to use ARM-compiled code, of course, and I'll also show you 
+  how in a minute.
+</li>
+<li>
+  Finally, having a nested isr switchboard doesn't mean much unless 
+  you can actually see nested interrupts in action. In this case, we'll 
+  use two interrupts: VCount and HBlank. The HBlank isr creates a vertical 
+  color gradient. The VCount isr will reset the color and tie up the 
+  CPU for several scanlines. If interrupts don't nest, you'll see 
+  the gradient stop for a while; if they do nest, it'll continue as 
+  normal.
+<li>
+  And just for the hell of it, you can toggle the HBlank and VCount 
+  irqs on and off.
+</li>
+</ul>
+
+<p>
+The controls are as follows:
+</p>
+<table>
+<tbody valign="top">
+<tr>
+  <th>A</th>
+  <td>Toggles between asm switchboard and C direct isr.</td>
+</tr>
+<tr>
+  <th>B</th>
+  <td>Toggles HBlank and VCount priorities.</td>
+</tr>
+<tr>
+  <th>L,R</th>
+  <td>Toggles VCount and HBlank irqs on and off.</td>
+</tr>
+</tbody>
+</table>
+
+<pre class="proglist" id="cd-irq-demo">
+<span class="keyw">#include</span> &lt;stdio.h&gt;
+<span class="keyw">#include</span> &lt;tonc.h&gt;
+
+IWRAM_CODE <span class="keyw">void</span> isr_master();
+IWRAM_CODE <span class="keyw">void</span> hbl_grad_direct();
+
+<span class="keyw">void</span> vct_wait();
+<span class="keyw">void</span> vct_wait_nest();
+
+
+CSTR strings[]= 
+{
+    <span class="str">&quot;asm/nested&quot;</span>,   <span 
+class="str">&quot;c/direct&quot;</span>, 
+    <span class="str">&quot;HBlank&quot;</span>,       <span 
+class="str">&quot;VCount&quot;</span>
+};
+
+<span class="cmt">// Function pointers to master isrs.</span>
+<span class="keyw">const</span> fnptr master_isrs[<span class="num">2</span>]= 
+{
+    (fnptr)isr_master,
+    (fnptr)hbl_grad_direct 
+};
+
+<span class="cmt">// VCount interrupt routines.</span>
+<span class="keyw">const</span> fnptr vct_isrs[<span class="num">2</span>]= 
+{
+    vct_wait, 
+    vct_wait_nest
+};
+
+
+<span class="cmt">// <b>(1)</b> Uses tonc_isr_master.s' <!--
+-->isr_master() as a switchboard</span>
+<span class="keyw">void</span> hbl_grad_routed()
+{
+    u32 clr= REG_VCOUNT/<span class="num">8</span>;
+    pal_bg_mem[<span class="num">0</span>]= RGB15(clr, <span 
+class="num">0</span>, <span class="num">31</span>-clr);
+}
+
+<span class="cmt">// <b>(2a)</b> VCT is triggered at line 80; this waits 40 scanlines</span>
+<span class="keyw">void</span> vct_wait()
+{
+    pal_bg_mem[<span class="num">0</span>]= CLR_RED;
+    <span class="keyw">while</span>(REG_VCOUNT&lt;<span class="num">120</span>);
+}
+
+<span class="cmt">// <b>(2b)</b> As vct_wait(), but interruptable by HBlank</span>
+<span class="keyw">void</span> vct_wait_nest()
+{
+    pal_bg_mem[<span class="num">0</span>]= CLR_RED;
+    REG_IE= IRQ_HBLANK;     <span class="cmt">// Allow nested hblanks</span>
+    REG_IME= <span class="num">1</span>;
+    <span class="keyw">while</span>(REG_VCOUNT&lt;<span class="num">120</span>);
+}
+
+
+<span class="keyw">int</span> main()
+{
+    u32 bDirect=<span class="num">0</span>, bVctPrio= <span class="num">0</span>;
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">28</span>));
+    tte_set_drawg((fnDrawg)chr4_drawg_b4cts_fast);
+    tte_init_con();
+    tte_set_margins(<span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">128</span>, <span class="num">64</span>);
+
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+
+    <span class="cmt">// <b>(3)</b> Initialize irqs; add HBL and VCT isrs </span>
+    <span class="cmt">// and set VCT to trigger at 80</span>
+    irq_init(master_isrs[<span class="num">0</span>]);
+    irq_add(II_HBLANK, hbl_grad_routed);
+    BFN_SET(REG_DISPSTAT, <span class="num">80</span>, DSTAT_VCT);
+    irq_add(II_VCOUNT, vct_wait);
+    irq_add(II_VBLANK, NULL);
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        <span class="cmt">//vid_vsync();</span>
+        VBlankIntrWait();
+        key_poll();
+
+        <span class="cmt">// Toggle HBlank irq</span>
+        <span class="keyw">if</span>(key_hit(KEY_R))
+            REG_IE ^= IRQ_HBLANK;
+
+        <span class="cmt">// Toggle Vcount irq</span>
+        <span class="keyw">if</span>(key_hit(KEY_L))
+            REG_IE ^= IRQ_VCOUNT;
+
+        <span class="cmt">// <b>(4)</b> Toggle between </span>
+        <span class="cmt">// asm switchblock + hbl_gradient (red, descending)</span>
+        <span class="cmt">// or purely hbl_isr_in_c (green, ascending)</span>
+        <span class="keyw">if</span>(key_hit(KEY_A))
+        {
+            bDirect ^= <span class="num">1</span>;
+            irq_set_master(master_isrs[bDirect]);
+        }
+
+        <span class="cmt">// <b>(5)</b> Switch priorities of HBlank and VCount</span>
+        <span class="keyw">if</span>(key_hit(KEY_B))
+        {
+            <span class="cmt">//irq_set(II_VCOUNT, vct_wait, bVctPrio);</span>
+            bVctPrio ^= <span class="num">1</span>;
+            irq_add(II_VCOUNT, vct_isrs[bVctPrio]);
+        }
+
+        tte_printf(<span 
+class="str">&quot;#{es;P}IRS#{X:32}: %s\nPrio#{X:32}: %s\nIE#{X:32}: %04X&quot;</span>, 
+            strings[bDirect], strings[<span class="num">2</span>+bVctPrio], REG_IE);
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+
+<p>
+The code listing above contains the main demo code, the HBlank, and 
+VCount isrs that will be routed and some sundry items for convenience.
+The C master isr called <code>hbl_grad_direct()</code> is in another 
+file, which will be discussed later.
+</p>
+<p>
+First, the contents of the interrupt service routines (points 1 and 2). 
+Both routines are pretty simple: the HBlank routine 
+(<code>hbl_grad_routed()</code>) uses the value of the scanline 
+counter to set a color for the backdrop. At the top, 
+<code>REG_VCOUNT</code> is 0, so the color will be blue; at the bottom,
+it'll be 160/8=20, so it's somewhere between blue and red: purple. 
+Now, you may notice that the first scanline is actually red and not 
+blue: this is because a) the HBlank interrupt occurs <i>after</i> 
+the scanline (which has caused trouble before in the 
+<a href="dma.htm#sec-demo">DMA demo</a>) and b) because HBlanks 
+happen during the VBlank as well, so that the color for line 0 is 
+set at <code>REG_VCOUNT</code>=227, which will give a bright red color.
+<p>
+The VCount routines activate at scanline 80. They set the color to red 
+and then waits until scanline 120. The difference between the two 
+is that <code>vct_wait()</code> just waits, but 
+<code>vct_wait_nest()</code> enables the HBlank interrupt. Remember 
+that <code>isr_master</code> disables 
+interrupts before calling an service routine, so the latter Vcount 
+routine should be interrupted by <code>hbl_grad_routed()</code>, 
+but the former would not. As you can see from 
+fig&nbsp;16.1a and 
+fig&nbsp;16.1b, this is exactly what happens.
+</p>
+<p>
+Point 3 is where the interrupts are set up in the first place. 
+The call to <code>irq_init()</code> clears the isr table and 
+sets up the master isr. Its argument can be NULL, in which case the 
+tonc's default master isr is used. The calls to 
+<code>irq_add()</code> initialize the HBlank and VCount interrupts 
+and their service routines. If you don't supply a service routine, 
+the switchboard will just acknowledge the interrupt and return. 
+There are times when this is useful, as we'll see in the next 
+chapter. <code>irq_add()</code> already takes care of both 
+<code>REG_IE</code> and the IRQ bits in <code>REG_DISPSTAT</code>; 
+what it doesn't do yet is set the VCount at which the interrupt 
+should be triggered, so this is done separately. The order of 
+<code>irq_add()</code> doesn't really matter, but lower orders 
+are searched first so it makes sense to put more frequent 
+interrupts first.
+</p>
+<p>
+You can switch between master service routines with 
+<code>irq_set_master()</code>, as is done at point 4. Point 5 
+chooses between the nested and non-nested VCount routine.
+</p>
+
+<div class="cblock">
+<table id="img-irq-demo">
+<tbody align="center"><tr>
+<td>
+<div class="cpt" style="width:192px;">
+  <img src="../img/demo/irq_demo_hbl.png"
+    alt="Gradient hbl&gt;vct"><br>
+  <b>Fig 16.1a</b>: Gradient; nested 
+  <code>vct_wait_nested</code>.
+</div>
+</td>
+<td>
+<div class="cpt" style="width:192px;">
+  <img src="../img/demo/irq_demo_vct.png"
+    alt="Gradient vct&gt;hbl"><br>
+  <b>Fig 16.1b</b>: Gradient; non-nested 
+  <code>vct_wait</code>.
+</div>
+</td>
+<td>
+<div class="cpt" style="width:192px;">
+  <img src="../img/demo/irq_demo_c.png"
+    alt="Gradient hbl in C"><br>
+  <b>Fig 16.1c</b>: Gradient; HBlank in 
+  master ISR in C.
+</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+
+
+<p>
+This explains most of what the demo can show. For Real Life use, 
+<code>irq_init()</code> and <code>irq_add()</code> are pretty much 
+all you need, but the demo shows some other interesting things as 
+well. Also interesting is that the result is actually a little 
+different for VBA, no$gba and hardware, which brings up another 
+point: interrupts are time-critical routines, and emulating timing 
+is rather tricky. If something works on an emulator but not 
+hardware, interrupts are a good place to start looking.
+</p>
+<p>
+This almost concludes demo section, except for one thing: the 
+direct HBlank isr in C. But to do that, we need it in ARM code 
+and to make it efficient, it should be in IWRAM as well. And here's 
+how we do that.
+</p>
+
+<h3 id="ssec-demo-iwram">16.5.1.
+  Using ARM + IWRAM code</h3>
+<p>
+The master interrupt routines have to be ARM code. As we've always 
+compiled to THUMB code, this would be something new. The reason 
+that we've always compiled to THUMB code is that the 16bit buses 
+of the normal code sections make ARM-code slow there. However, what 
+we could do is put the ARM code in IWRAM, which has a 32bit bus 
+(and no waitstates) so that it's actually beneficial to use ARM 
+code there.  
+</p>
+<p>
+Compiling as ARM code is actually quite simple: use <tt>-marm</tt> 
+instead of <tt>-mthumb</tt>. The IWRAM part is what causes the most 
+problems. There are GCC extensions that let you specify which 
+section a function should be in. Tonclib has the following macros for 
+them:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> EWRAM_DATA <!--
+-->__attribute__((section(<span class="str">".ewram"</span>)))
+<span class="keyw">#define</span> IWRAM_DATA <!--
+-->__attribute__((section(<span class="str">".iwram"</span>)))
+<span class="keyw">#define</span>  EWRAM_BSS <!--
+-->__attribute__((section(<span class="str">".sbss"</span>)))
+
+<span class="keyw">#define</span> EWRAM_CODE <!--
+-->__attribute__((section(<span class="str">".ewram"</span>), long_call))
+<span class="keyw">#define</span> IWRAM_CODE <!--
+-->__attribute__((section("<span class="str">.iwram"</span>), long_call))
+
+
+<span class="cmt">// --- Examples of use: ---</span>
+<span class="cmt">// Declarations</span>
+<span class="keyw">extern</span> EWRAM_DATA u8 data[];
+IWRAM_CODE void foo();
+
+
+<span class="cmt">// Definitions</span>
+EWRAM_DATA u8 data[<span class="num">8</span>]= { ... };
+
+IWRAM_CODE void foo()
+{
+    ....
+}
+</pre>
+
+<p>
+The EWRAM/IWRAM things should be self-explanatory. The 
+<code>DATA_IN_<i>x</i></code> things allow global data to be put 
+in those sections. Note that the default section for data is IWRAM 
+anyway, so that may be a little redundant. <code>EWRAM_BSS</code> 
+concerns uninitialized globals. The difference with initialized 
+globals is that they don't have to take up space in ROM: all you 
+need to know is how much space you need to reserve in RAM for the 
+array.
+</p>
+<p>
+The function variants also need the <code>long_call</code> 
+attribute. Code branches have a limited range and section branches 
+are usually too far to happen by normal means and this is what makes 
+it work. You can compare them with &lsquo;far&rsquo; and 
+&lsquo;near&rsquo; that used to be present in PC programming.
+</p>
+<p>
+It should be noted that these extensions can be somewhat fickle. 
+For one thing, the placement of the attributes in the declarations 
+and definitions seems to matter. I think the examples given work, but 
+if they don't try to move them around a bit and see if that helps. 
+A bigger problem is that the long_call attribute doesn't always want 
+to work. Previous experience has led me to believe that the 
+<code>long_call</code> is ignored <i>unless</i> the definition of 
+the function is in another file. If it's in the same file as the 
+calling function, you'll get a &lsquo;relocation error&rsquo;, 
+which basically means that the jump is too far. The upshot of this 
+is that you have to separate your code depending on section as far 
+as functions are concerned. Which works out nicely, as you'll want 
+to separate ARM code anyway.
+</p>
+<p>
+So, for ARM/IWRAM code, you need to have a separate file with the 
+routines, use the <code>IWRAM_CODE</code> macro to indicate the 
+section, and use <tt>-marm</tt> in compilation. It is also a good 
+idea to add <tt>-mlong-calls</tt> too, in case you ever want 
+to call ROM functions from IWRAM. This option makes every call a 
+long call. Some toolchains (including DKP) have set up their 
+linkscripts so that files with the extension <tt>.iwram.c</tt> 
+automatically go into IWRAM, so that <code>IWRAM_CODE</code> is 
+only needed for the declaration.
+</p><br>
+
+<p>
+In this case, that'd be the file called <tt>isr.iwram.c</tt>. 
+This contains a simple master isr in C, and only takes care of 
+the HBlank and acknowledging the interrupts.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+
+IWRAM_CODE <span class="keyw">void</span> hbl_grad_direct();
+
+<span class="cmt">// an interrupt routine purely in C
+// (make SURE you compile in ARM mode!!)</span>
+<span class="keyw">void</span> hbl_grad_direct()
+{
+    u32 irqs= REG_IF &amp; REG_IE;
+
+    REG_IFBIOS |= irqs;
+    <span class="keyw">if</span>(irqs &amp; IRQ_HBLANK)
+    {
+        u32 clr= REG_VCOUNT/<span class="num">8</span>;
+        pal_bg_mem[<span class="num">0</span>]= RGB15(<span 
+class="num">0</span>, clr, <span class="num">0</span>);
+    }
+
+    REG_IF= irqs;
+}
+</pre>
+
+<div class="note">
+<div class="nhgood">Flags for ARM+IWRAM compilation</div>
+<p>
+Replace the &lsquo;-mthumb&rsquo; in your compilation flags by 
+&lsquo;-marm -mlong-calls&rsquo;. For example:
+</p>
+<pre class="proglist">
+CBASE   := $(INCDIR) -O2 -Wall
+
+<span class="cmt"># ROM flags</span>
+RCFLAGS := $(CBASE) -mthumb-interwork -mthumb
+<span class="cmt"># IWRAM flags</span>
+ICFLAGS := $(CBASE) -mthumb-interwork -marm -mlong-calls
+</pre> 
+<p>
+For more details, look at the makefile for this project.
+</p>
+</div>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Apr 5, 2008</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="timers.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="swi.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Timers</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">BIOS calls</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

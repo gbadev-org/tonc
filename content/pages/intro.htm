@@ -1,0 +1,582 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20030901">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Introduction</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="hardware.htm">Hardware</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">ii.
+  Introduction to Tonc</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-org">Organisation</a>
+  <li><a href="#sec-nota">Terminology and Notation</a>
+  <li><a href="#sec-cnd">Prerequisites</a>
+  <li><a href="#sec-feedback">On errors, suggestions</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-org">ii.1.
+  Organisation</h2>
+
+<div class="cpt_fr" style="width:120px;">
+<img src="../img/toncdirs.png" id="img-toncdirs"
+  alt="Tonc directory structure"><br>
+<b>Fig ii.1</b>: directories.
+</div>
+
+<p>
+TONC consists of three parts: a <dfn>text</dfn> section, the actual
+tutorial, a <dfn>code</dfn> section, which contains all the source
+code and makefiles of the various demos, and a <dfn>bin</dfn> section
+that contains binaries of the demo. Though they are separate zip
+files, they work best when used together. You can find the zip 
+files further down this page. If you unzip them in one directory, 
+say <tt>tonc</tt>, you'll get the structure depicted in 
+fig&nbsp;ii.1.
+</p>
+
+<h3 id="ssec-org-text">ii.1.1.
+  Tonc text</h3>
+<p>
+The text section covers the principles of GBA programming in detail. 
+The focus here is not so much on how to get something done, but how
+things actually <i>work</i>, and why it's done the way it's done. After 
+that the how often comes naturally. Every chapter has one of more 
+demonstrations of the covered theory, and a brief discussion of the 
+demo itself. Please, do not make the mistake of only reading the 
+demo discussion: to properly understand how things work you need to 
+read the text in full. 
+While there are optional parts, and whole pages of boring text that 
+seem to have little to do with actual GBA coding, they are there for 
+a reason, usually there's extra conceptual information or gotchas. 
+</p>
+<p>
+At first, the text part had only very little code in it, because 
+I figured the demo code would be at hand and flicking between them 
+would not be annoying. Well, I've realized that I figured wrong and 
+am in the process of including more of the code into these pages; maybe 
+not quite enough to copy-paste and get a clean compile, but enough 
+to go with the explanations of the demos.
+</p>
+<p>
+The main language will be C, and a smidgeon of assembly. These are 
+the two main languages used in GBA programming even though there 
+are others around. Since the basics of programming are independent 
+of language, it should be possible to adapt them for your chosen 
+language easily.
+</p>
+<p>
+GBA programming is done close to the hardware, so I hope you 
+know your pointers, 
+<a href="numbers.htm#sec-num">hexadecimal numbers</a> and 
+<a href="numbers.htm#sec-bitops">boolean algebra/bit-operations</a>. 
+There's also a fair amount of math here, mostly 
+<a href="matrix.htm">vector and matrix</a> stuff so I hope your linear 
+algebra is up to speed. Lastly, I am assuming your intellectual 
+capacities exceed those of a random lab monkey<!-- 
+mind you, my lab monkeys are pretty smart ;) -->, so I won't elaborate 
+on what I consider trivial matters too much. <!--This is a personal 
+flaw, I am well aware of that, so if I'm going too fast let me know.-->
+</p>
+
+<p>
+Aside from the introduction and appendices, the text is divided into 
+3 parts. First there's &lsquo;basics&rsquo;, which explains the 
+absolute essentials for getting anything done. This includes setting 
+up the development environment, basic use of graphics and buttons. 
+It also contains text on what it means to do low level programming 
+and programming efficiently; items that in my view you'd better learn 
+sooner rather than later. The second part covers most of the other 
+items of the GBA like special graphic effects, timers and interrupts. 
+The final section covers more advanced items that uses elements from 
+all chapters.This includes writing text (yes, that's an advanced 
+topic on the GBA), mode 7 graphics and a chapter on ARM assembly. 
+</p><br>
+
+<p>
+Individual html: 
+<a href="http://www.coranac.com/files/tonc-text.zip" target="_blank">tonc-text.zip</a> (663 kb) <br>
+Compiled html (CHM, v1.4 version): 
+<a href="http://www.coranac.com/files/tonc.chm" target="_blank">tonc.chm</a> (1.2 MB).<br>
+PDF: 
+<a href="http://www.coranac.com/files/tonc.pdf" target="_blank">tonc.pdf</a> (3.1 MB)
+</p>
+
+<h3 id="ssec-org-code">ii.1.2.
+  Tonc code</h3>
+<p>
+The source code to all the demos mentioned in the text can be found 
+in the <tt>code</tt> directory. Like the text, the code is divided 
+into 3 main parts: basic, extended and advanced. The basic projects 
+are (hopefully) pretty newbie friendly. They're completely 
+self-contained so you can toy with them and not worry about screwing 
+up other parts. The extended projects take their GBA-related code from
+<dfn>tonclib</dfn>, a library with all my #defines and important 
+functions. The advanced demos also use <tt>tonclib</tt> liberally
+and will use some assembly files, even if it is just for data.
+There is also a <tt>lab</tt> directory with a few interesting projects, 
+but which might not be quite ready. Still interesting to look at, 
+though.
+</p>
+<p>
+Unlike most GBA tutorials, tonc uses <b>makefiles</b> rather than 
+batchfiles to build the projects, because they're just Plain Better 
+than batchfiles. However, as a lot of you will probably never seen 
+them before, these also come in three stages of difficulty. There 
+is a master makefile, <tt>tonc.mak</tt>, in the code root directory 
+that can drive the projects, and the <tt>vc6</tt> directory has a 
+Visual C++ project that you can use if you're on Windows and have 
+Visual Studio version.
+</p>
+<p>
+Pretty much all of the general functions used in tonc can be found in 
+<tt>tonclib</tt>. This includes text writers for all modes, BIOS 
+routines, a pretty advanced interrupt dispatcher, safe and fast 
+memory copy and fill routines and much more. It's well worth stealing 
+from.
+</p><br>
+
+<p>
+Download <a href="http://www.coranac.com/files/tonc-code.zip" target="_blank">tonc-code.zip</a> (198 kb).
+</p>
+
+<h3 id="ssec-org-bin">ii.1.3.
+  Tonc binaries</h3>
+<p>
+The <tt><b>bin</b></tt> directory contains the binaries of the demos.
+Each of them has been tested on a number of emulators, and on hardware 
+using a homemade Xboo communication cable (see 
+<a href="http://www.devkitpro.org" target="_blank">www.devkitpro.org</a> for instructions on 
+how to make one). In most instances they behave exactly the same. 
+The readme <tt>tonc_bins.txt</tt> indicates when and where hardware and 
+emulators disagree.
+</p><br>
+
+<p>
+Download <a href="http://www.coranac.com/files/tonc-bin.zip" target="_blank">tonc-bin.zip</a> (167 kb).
+</p>
+
+<h3 id="ssec-org-sop">ii.1.4.
+  Statement of Purpose</h3>
+<p>
+I wrote Tonc for two reasons. Firstly, as a way to organize my own
+thoughts. You often see things in a different light when you write 
+things down and learn from that experience. Secondly, there is a lot 
+of <i>very bad</i> information in other tutorials out there (the only 
+exceptions I know of are the 
+<a href="http://www.drunkencoders.com/index.php?system_id=2&amp;page=Tutorials" target="_blank">new PERN</a> 
+and <a href="http://deku.gbadev.org" target="_blank">Deku's sound tutorial</a><em>[b0rked]</em>). Yes, 
+I am aware of how that sounds, but unfortunately it happens to be 
+true. A number of examples: 
+</p>
+<ul>
+  <li>Only very basic information given, sometimes even 
+    <a href="affine.htm">incorrect info</a>.
+  <li>Strong focus on bitmap modes, which are hardly ever used for 
+    serious GBA programming.
+  <li><a href="first.htm#ssec-notes-bad">Bad programming habits</a>. 
+    Adding code/data to projects by 
+	<a href="bitmaps.htm#ssec-data-hdr">#including the files</a>, 
+	Using ancient <a href="setup.htm#sec-env">toolchains</a>, 
+	non-optimal	compiler settings and data-types, and inefficient 
+	(sometimes <i>very</i> inefficient) code. 
+</ul>
+<p>
+If you are new and have followed the other tutorials, everything will 
+seem to work fine, so what's the problem? Well, that's part of the 
+problem actually. Everything will <i>seem</i> fine, until you start 
+bigger projects, at which time you'll find hidden errors and that slow  
+code really bogs things down and you'll have unlearn all the bad habits 
+you picked up and redo everything from the start. The GBA is one of the 
+few platforms where efficient coding still means something, and sometimes 
+all it takes is a change of datatype or compiler switch. These things 
+are better done right from the start. 
+</p><br>
+
+<p>
+I've tried to go for completeness first, simplicity second. As a 
+certain wild-haired scientist once said: &ldquo;Make things as simple
+as possible, but no simpler.&rdquo;
+<!-- (by the way, &quot;simple&quot; is defined as &quot;having few 
+parts or features&quot;. it is the opposite of &quot;complex&quot;, 
+not of &quot;difficult&quot;). -->
+This means things can seem a little technical at times, but that's 
+only because things <i>are</i> pretty technical at times, and there's
+no sense in pretending they're not.
+</p>
+<p>
+In short, Tonc is <i>not</i> &ldquo;GBA Programming for Dummies&rdquo;,
+never was, never will be. There's far too much of stuff for Dummies
+already anyway. If you consider yourself a dummy (and I do mean dummy,
+not newbie), maybe Tonc isn't the right place. If you're serious about 
+learning GBA programming, however, accept no substitute.
+</p>
+<!-- And I must admit that my writing style doesn't exactly not
+instill panic into people's hearts. -->
+
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-nota">ii.2.
+  Terminology and Notation</h2>
+<p>
+I'm a physicist by training which means that I know my math and its
+notational conventions. I use both quite often in Tonc, as well as a 
+number of html-tag conventions. To make sure we're all on the same 
+page here's a list:
+</p>
+<div class="lblock">
+<table border=1 cellpadding=2 cellspacing=0>
+<tr><th>Type	<th>notation	<th>example
+<tr><td>bit n in a <code>foo</code>		<td><code>foo</code>{n}	
+  <td><code>REG_DISPCNT{4}</code> (active page bit)
+<tr><td>code	<td>&lt;code&gt; tag	<td> <code>sx</code>
+<tr><td>command/file <td>&lt;tt&gt; tag <td> <tt>vid.h</tt>
+<tr><td>matrix	<td>bold, uppercase		<td> <b>P</b>
+<tr><td>memory  <td>hex + code			<td> <code>0400:002eh</code>
+<tr><td>new term <td>bold, italic		<td> <dfn>charblock</dfn>
+<tr><td>variable <td>italics			<td> <i>x</i>
+<tr><td>vector	<td>bold, lowercase		<td> <b>v</b>
+</table>
+</div>
+
+<p>
+I also use some non-ASCII symbols that may not show up properly 
+depending on how old your browser is. These are:
+</p>
+
+<div class="lblock">
+<table border=1 cellpadding=2 cellspacing=0>
+<tr><th>symbol<th>description
+<tr><td>&alpha;, &beta;, &gamma;	<td>Greek letters
+<tr><td>&asymp;		<td>approximately
+<tr><td>&frac12;	<td>one half
+<tr><td>&frac14;	<td>one quarter
+<tr><td>&frac34;	<td>three quarters
+<tr><td>&ge;		<td>greater or equal
+<tr><td>&harr;		<td>double-sided arrow
+<tr><td>&isin;		<td>is in (an interval)
+<tr><td>&lang; &rang;		<td>&lsquo;bra&rsquo; &amp; &lsquo;ket&rsquo;
+<tr><td>&rarr;		<td>right arrow
+<tr><td>&sup2;		<td>superscript 2
+<tr><td>&times;		<td>times
+</table>
+</div>
+
+<p>
+I also make liberal use of shorthand for primitive C types 
+like <code>char</code> and <code>int</code> and such. These are 
+typedefs that better indicate the size of the variable that's used.
+Since this is very important in console programming, they're
+quite common. Anyway, here's a list.
+</p>
+
+<div class="lblock">
+<table border=1 cellpadding=2 cellspacing=0>
+<tr><th>base type	<th>alt name <th>unsigned	<th>signed	<th>volatile
+<tr><th>char		<td>byte	 <td>u8			<td>s8		<td>vu8 / vs8
+<tr><th>short		<td>halfword <td>u16		<td>s16		<td>vu16 / vs16
+<tr><th>int			<td>word	 <td>u32		<td>s32		<td>vu32 / vs32
+</table>
+</div>
+
+<p>
+Finally, there are a number of different notations for hex that I 
+will switch between, depending on the situation. The C notation 
+(&lsquo;0x&rsquo; prefix, 0x0400) is common for normal numbers, but I'll 
+also use the assembly affix at times (&lsquo;h&rsquo;, 0400:0000h). 
+The colon here is merely for ease of reading. It's hard to tell the 
+number of zeros without it.
+</p>
+
+<h3 id="ssec-note-reg">ii.2.1.
+  Register names and descriptions</h3>
+<p>
+Getting the GBA to do things often involves the use of the so-called 
+<dfn>IO registers</dfn>. Certain bits at certain addresses of memory 
+can be used as switches for the various effects that the GBA is 
+capable of. Each register is aliased as a normal variable, and you 
+need to set/clear bits using bit operations. We'll get to where these 
+registers are and what bit does what later; right now I want to show 
+you how I will <i>present</i> these, and refer to them in the text.
+</p>
+<p>
+Each register (or register-like address) is mapped to a dereferenced 
+pointer, usually 16bits long. For example, the display status register 
+is
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span>  REG_DISPSTAT *(u16*)<span 
+class="num">0x04000004</span>     
+</pre>
+
+<p>
+Every time I introduce a register I will give an overview of the bits 
+like this:
+</p>
+
+<div class="reg">
+<table class="reg"
+  border=1 frame=void cellPadding=4 cellSpacing=0>
+<caption class="reg">
+  REG_DISPSTAT @ <code>0400:0004h</code>
+</caption>
+<tr class="bits">
+  <td>F E D C B A 9 8
+  <td>7 6<td>5<td>4<td>3<td class="rof">2<td class="rof">1<td class="rof">0
+<tr class="bf">
+  <td class="rclr3">VcT
+  <td>-
+  <td class="rclr2">VcI
+  <td class="rclr1">HbI
+  <td class="rclr0">VbI
+  <td class="rclr2">VcS
+  <td class="rclr1">HbS
+  <td class="rclr0">VbS
+</table>
+</div>
+
+<p>
+The table lists the register's name (<code>REG_DISPSTAT</code>, its 
+address (0400:0000h) and the individual bits or bitfields. Sometimes, 
+bits or entire registers are read- or write-only. <b>Read-only</b> 
+is indicated with a red overbar (as used here). <b>Write-only</b> uses 
+a blue underbar. After it will be a list that describes the various bits, 
+and also gives the #define or #defines I use for that bit:
+</p>
+
+<div class="reg">
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="15%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0 <td class="rclr0">VbS
+  <td>DSTAT_IN_VBL
+  <td>VBlank status, read only. Will be set inside VBlank, clear in VDraw.
+<tr class="bg1">
+  <td colspan=4 align="center"><i>other fields</i>
+<tr class="bg0">
+  <td>8-F <td class="rclr3">VcT
+  <td><i>DSTAT_VCT#</i>
+  <td>VCount trigger value. If the current scanline is at this value, 
+    bit 2 is set and an interrupt is fired if requested.
+</tbody>
+</table>
+</div>
+
+<p>
+The full list of REG_DISPSTAT can be found 
+<a href="video.htm#tbl-reg-dispstat">here</a>. 
+The #defines are usually specific to tonc, by the way. Each site and 
+API has its own terminology here. This is possible because it's not 
+the names that are important, but the numbers they stand for. That 
+goes for the names of the registers themselves too, of course. 
+One last point on the #defines: some of the ones listed have a 
+hash (&lsquo;#&rsquo;) affix. This is a shorthand notation to indicate 
+that that field has <i>foo</i><code>_SHIFT</code> and 
+<i>foo</i><code>_MASK</code> #defines, and a <i>foo</i><code>()</code> 
+macro. For example, the display register has an 8-bit trigger VCount 
+field, which has &lsquo;<i>DSTAT_VCT#</i>&rsquo; listed in the define 
+column. This means that the following three things exist in the tonc 
+headers:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> DSTAT_VCT_MASK      <span 
+class="num">0xFF00</span>
+<span class="keyw">#define</span> DSTAT_VCT_SHIFT          <span 
+class="num">8</span>
+<span class="keyw">#define</span> DSTAT_VCT(_n)       <!--
+-->((_n)&lt;&lt;DSTAT_VCT_SHIFT)
+</pre>
+
+<p>
+Lastly, as shorthand for a specific bit in a register, I will use 
+accolades. The number will be a hexadecimal number. For example, 
+REG_DISPCNT{0} is the VBlank status bit (VbS above), and 
+REG_DISPCNT{8-F} would be the whole byte for the VCount trigger.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-cnd">ii.3.
+  Prerequisites</h2>
+<p>
+The text and code have been created and found to work under the 
+following conditions. If you find you have a problem, show me yours 
+and maybe we can find and fix it.
+</p>
+
+<ul>
+  <li><b>Programming language</b>. The language we'll be using is <b>C</b>
+    with a dash of assembly (but <i>not</i> C++). I am working under
+    the assumption that you are familiar with this language. If 
+	not, go learn it first because I'm not going to show you; this is 
+	not a C course. I do have some links to C tutorials in the 
+	<a href="refs.htm#ssec-tut">references</a>.
+  <li><b>Compiler</b>. Obviously, you need a compiler that can turn C 
+    code into a GBA binary. I'm using the 
+    completely <b>free</b> <a href="http://www.devkitpro.org" target="_blank">devkitARM</a> 
+    (dkARM) toolchain, which is based on the 
+    <a href="http://www.gnu.org" target="_blank">GNU compiler collection (GCC)</a>.
+    Setup instructions and samples can be found on the site, and in my 
+    <a href="setup.htm">setup</a> section, of course. dkARM has become 
+    the standard over the past year or so; if you are still using the 
+    older DevKit Advance, you might think about switching. 
+    I can't say how difficult it would be to get
+    <a href="http://www.ngine.de" target="_blank">HAM</a><em>b0rked</em> to accept my code/makefiles, 
+    but it shouldn't be too hard. If you use the official Arm ADS, sorry 
+    but you're on your own there.
+    <p>To write and manage my code I use Visual C++ 6.0, but I am not 
+    using its native make tool (<tt>NMAKE</tt>), because it's not
+    very portable and seems to be pretty weak as well. Instead, I use
+    <tt>GNU make</tt>, which usually comes with any of the devkits. 
+    </p>
+  <li><b>Binaries</b>. You'll also need something that can run the
+    binaries. On the emu side, I use either
+    <a href="http://vba.ngemu.com" target="_blank">VisualBoy Advance </a> (VBA) v1.7 or
+    higher, and <a href="http://nocash.emubase.de/gba.htm" target="_blank">no$gba</a>, 
+    freeware edition. But as nice as  these emulators are, you 
+	<i>must</i> be able to test on a real GBA 
+    too if you're serious about this stuff. Get yourself a flash card 
+    or, if you're on a budget, you can always build a multiboot cable 
+    like Xboo yourself. If you shop around you should be able to get 
+    the components for about $5.
+  <li><b>OS</b>. I use the Windows operation system (Win 98 and WinXP)
+    and when referring to commands or programs I'm more or less 
+    assuming you are too. The GBA and devkits couldn't care less. 
+    However, a Linux user, for example, would have little use for a 
+    Visual C project and wouldn't be able 
+    to use <a href="http://www.coranac.com/projects/#usenti" target="_blank">Usenti</a> (my bitmap
+    editor) or <a href="http://www.coranac.com/projects/#excellut" target="_blank">excellut</a> (my
+    Excel LUT builder). 
+  <li><b>Browser</b>. I've tested these pages with MSIE 6 and 7, Firefox, 
+    and sometimes Opera too. With one or two exceptions,
+    (&lt;nobr&gt;), everything is valid HTML 4.01 and CSS 2. 
+    However, IE isn't a compliant browser so there are one or two minor
+    glitches. Firefox on the other hand is <i>too</i> compliant 
+    and pretty much ignores column-based layout in tables (CSS and HTML 
+    standards conflict on this issue). But again, these situations 
+    aren't too significant. 
+    In case you want a print-out, it'll come out as if the browser 
+    window was roughly 640 pixels wide. Personally, I prefer setting
+    the font to &lsquo;smaller&rsquo;; I feel that I lose the 
+    perspective in the &lsquo;normal&rsquo; font-size. Note that the 
+    entire text is roughly 300 pages long, so consider shrinking the 
+	pages and don't forget to fill the tray when you're done.
+</ul>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-feedback">ii.4.
+  On errors, suggestions</h2>
+<p>
+As much as I've tried to weed out things like spelling/grammar 
+errors and broken links, I'm sure some have slipped by. If you find
+some, mail <a href="mailto:cearn@coranac.com">me</a> about it.
+That's right, I'm actually asking for spell-flames. Currently, I'm 
+refitting the pages to fit my HTML auto-numbering tool, but it's a 
+lot stuff to go through (over 1M in plain text), and I may miss 
+something; if you see things like <em>[[ref:foo]]</em> in 
+unfinished sections, those probably shouldn't be there. Of course, 
+if things are unclear or *gasp* incorrect, or if you have
+suggestions, I'd like to know that as well.
+</p>
+<p>
+20130324, ADDENDUM. Since it's now been over half a decade since all of this was written, 
+I'm fairly certain many of the links are dead by now. I'll try to clean them up when I can, 
+but I'm not sure it's worth the trouble. You have been warned.
+<p>
+
+<p>
+And, of course:
+</p>
+
+<blockquote>
+This distribution is provided as is, without warranty of any kind. I
+cannot be held liable for any damage arising out of the use or 
+inability to use this distribution. Code has been tested on 
+emulator and real hardware as well as I could, but I can't guarantee 
+100% correctness.<br>
+The code may be used and/or modified as you see fit. The text and code
+were intended to go together; if you have to separate the text from 
+the code, at least provide a link to where both originated (i.e., 
+this site).<br>
+Both text and code can be modified by me at any time. Check in 
+once in a while to see if anything's changed. Time stamps are at the 
+bottom of every page, and at the top of all source-files. There is 
+also a <a href="log.htm">log</a> in the appendices.
+</blockquote>
+
+<p>
+OK that's it. Have fun.
+</p><br>
+
+<div style="margin-left:1.2cm;">
+- Jasper Vijn (cearn at coranac dot com)<br>
+(Mar 24, 2013)
+</div>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Mar 24, 2013</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="toc.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="hardware.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Contents</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Hardware</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+

@@ -1,0 +1,820 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031219">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: DMA</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="gfx.htm">Graphic effects</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="timers.htm">Timers</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">14.
+  Direct Memory Access</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">DMA &hellip; que?</a>.
+  <li><a href="#sec-regs">DMA registers</a>.
+  <li><a href="#sec-func">Some DMA routines</a>.
+  <li><a href="#sec-demo">DMA demo : circular windows</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">14.1.
+  DMA &hellip; que?</h2>
+<p>
+<dfn>Direct Memory Access</dfn> (DMA) is fast way of copying 
+data from one place to another. Or, rather, a way of 
+<i>transferring</i> data fast; as it can be used for copying data, but 
+also filling memory. When you activate DMA the so-called
+<dfn>DMA controller</dfn> takes over the hardware (the CPU is 
+actually halted), does the desired transfer and hands control back to 
+the CPU before you even knew it was missing.
+</p>
+<p>
+There are four DMA channels. Channel 0 has the highest priority; it is 
+used for time-critical operations and can only be used with internal 
+RAM. Channels 1 and 2 are used to transfer sound data to the 
+right sound buffers for playback. The lowest priority channel, 
+channel 3, is for general-purpose copies. One of the primary uses for 
+this channel is loading in new bitmap or tile data.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-regs">14.2.
+  DMA registers</h2>
+<p>
+Every kind of transfer routine needs 3 things: a source, a destination and 
+the amount of data to copy. The <i>whence</i>, <i>whither</i> and 
+<i>how much</i>. For DMA, the source address is put into 
+<code>REG_DMAxSAD</code> and destination address into 
+<code>REG_DMAxDAD</code>. A third register, <code>REG_DMAxCNT</code>, not 
+only indicates the amount to transfer, but also controls other features 
+possible for DMA, like when it should start the transfer, chunk-size, and 
+how the source and destination addresses should be updated after each 
+individual chunk of data. All the DMA registers are 32bits in length, though 
+they can be divided into two 16bit registers if so desired. Those of 
+channel 0 start at<code>0400:00B0h</code>; subsequent channels start at an 
+offset of 12 (see table&nbsp;1).
+</p>
+
+<div class="lblock">
+<table id="tbl-dma-regs">
+<caption align="bottom">
+  <b>Table 14.1</b>: DMA register addresses
+</caption>
+<tr><th>reg<th>function<th>address
+<tr><td><code>REG_DMAxSAD</code><td>source
+	<td><code>0400:00B0h  + 0Ch</code>·x
+<tr><td><code>REG_DMAxDAD</code><td>destination
+	<td><code>0400:00B4h + 0Ch</code>·x
+<tr><td><code>REG_DMAxCNT</code><td>control
+	<td><code>0400:00B8h + 0Ch</code>·x
+</table>
+</div>
+
+<h3 id="ssec-reg-cnt">14.2.1.
+  DMA controls</h3>
+<p>The use of the source and destination registers should be obvious.
+The control register needs some explaining. Although the 
+<code>REG_DMAxCNT</code> registers themselves are 32bits, they are 
+often split into two separate registers: one for the count, and 
+one for the actual control bits.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-dmaxcnt"
+  border=1 frame=void cellPadding=4 cellSpacing=0>
+<caption class="reg">
+  REG_DMAxCNT @ <code>0400:00B8</code>+12<i>x</i>
+</caption>
+<tr class="bits">
+	<td>1F<td>1E<td>1D 1C<td>1B<td>1A<td>19<td>18 17
+	<td>16 15<td>14 13 12 11 10
+	<td>F E D C B A 9 8 7 6 5 4 3 2 1 0
+<tr class="bf">
+  <td class="rclr1">En
+  <td class="rclr6">I
+  <td class="rclr5">TM
+  <td>-
+  <td class="rclr2">CS
+  <td class="rclr7">R
+  <td class="rclr3">SA
+  <td class="rclr4">DA
+  <td>-
+  <td class="rclr0">N
+</table>
+<br>
+
+<table>
+  <col class="bits" width=56>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>00-0F<td class="rclr0">N
+  <td> 
+  <td><b>Number</b> of transfers.
+<tr class="bg1">
+  <td>15-16<td class="rclr4">DA
+  <td>DMA_DST_INC, DMA_DST_DEC, DMA_DST_FIXED, DMA_DST_RELOAD
+  <td><b>Destination adjustment</b>.
+    <ul>
+      <li><b>00</b>: increment after each transfer (default)
+      <li><b>01</b>: decrement after each transfer
+      <li><b>10</b>: none; address is fixed
+      <li><b>11</b>: increment the destination during the transfer, 
+	    and reset it so that repeat DMA will always start at the 
+		same destination.
+    </ul>
+<tr class="bg0">
+  <td>17-18<td class="rclr3">SA
+  <td>DMA_SRC_INC, DMA_SRC_DEC, DMA_SRC_FIXED,
+  <td><b>Source Adjustment</b>. Works just like the two bits for the 
+    destination. Note that there is no <code>DMA_SRC_RESET</code>; 
+    code 3 for source is forbidden.
+<tr class="bg1">
+  <td> 19  <td class="rclr7">R
+  <td>DMA_REPEAT
+  <td>Repeats the copy at each VBlank or HBlank if the DMA timing 
+    has been set to those modes.
+<tr class="bg0">
+  <td> 1A  <td class="rclr2">CS
+  <td>DMA_16, DMA_32
+  <td><b>Chunk Size</b>. Sets DMA to copy by halfword (if clear) 
+    or word (if set).
+<tr class="bg1">
+  <td>1C-1D<td class="rclr5">TM
+  <td>DMA_NOW, DMA_AT_VBLANK, DMA_AT_HBLANK, DMA_AT_REFRESH
+  <td><b>Timing Mode</b>. Specifies when the transfer should start.
+      <ul>
+        <li><b>00</b>: start immediately.
+        <li><b>01</b>: start at VBlank.
+        <li><b>10</b>: start at HBlank. 
+        <li><b>11</b>: Never used it so far, but here's how I gather it 
+          works. For DMA1 and DMA2 it'll refill the FIFO when it has 
+          been emptied. Count and size are forced to 1 and 32bit, 
+          respectively. For DMA3 it will start the copy at the start of 
+          each rendering line, but with a 2 scanline delay.
+      </ul>
+<tr class="bg0">
+  <td> 1E  <td class="rclr6">I
+  <td>DMA_IRQ
+  <td><b>Interrupt request</b>. Raise an interrupt when finished.
+<tr class="bg1">
+  <td> 1F  <td class="rclr1">En
+  <td>DMA_ENABLE
+  <td><b>Enable</b> the DMA transfer for this channel.
+</tbody>
+</table>
+</div>
+
+<h3 id="ssec-reg-adr">14.2.2.
+  Source and destination addresses</h3>
+<p>
+The registers for source and destination addresses work just as you'd 
+expect: just put in the proper addresses. Oh, I should tell you that 
+the sizes for the source and destination addresses are 28 and 27 bits 
+wide, respectively, and not the full 32. This is nothing to worry 
+about though, you can't access addresses above
+<code>1000:0000h</code> anyway. For destination addresses, you can't 
+use the section above <code>0800:0000h</code>. But then, being able 
+to copy to ROM would be kind of strange, wouldn't it?
+</p>
+
+<h3 id="ssec-reg-flags">14.2.3.
+  DMA flags</h3>
+<p>
+The <code>REG_DMAxCNT</code> registers can be split in two parts: 
+one with actual flags, and one for the number of copies to do. Either 
+way will work but you must be careful how the flags are defined: 
+using 32-bit #defines for 16-bit registers or vice versa is not a 
+good idea.
+</p>
+<p>
+There are options to control what will be the next source and 
+destination addresses when one chunk has been transferred. By default, 
+both will increment so that it works as a copier. But you could also 
+keep the source constant so that it'd work more as a memory fill. 
+</p>
+<p>
+What goes into the lower half of <code>REG_DMAxCNT</code> is the 
+number of transfers. This is the number of <i>chunks</i>, not bytes! 
+Best be careful when using <code>sizeof()</code> or something similar 
+here, missing a factor 2 or 4 is very easy. A chunk can be either 
+16 or 32 bit, depending on bit 26.
+</p>
+
+<h3 id="ssec-reg-timing">14.2.4.
+  More on DMA timing</h3>
+<p>
+What the immediate DMA does is easy to imagine, it works as soon as 
+you enable the DMA. Well <i>actually</i> it takes 2 cycles before it'll 
+set in, but it's close enough. The other timing settings aren't 
+that more difficult conceptually, but there is one point of confusion.
+</p>
+<p>
+Consider the following situation: you want to do something cool to 
+your otherwise standard backgrounds; specifically, you want to do
+something that requires the background registers to be updated every 
+scanline. I just said that you can copy data at every HBlank 
+(via the <code>DMA_AT_HBLANK</code> timing flag), which seems perfect
+for the job. If you think about it for a minute, however, you may
+ask yourself the following question:
+</p>
+
+<blockquote>
+When you set the timing to, say, <code>DMA_AT_HBLANK</code>, does it 
+do <i>all</i> the <i>N</i> copies at the next HBlank, or one copy 
+at each HBlank until the list is done?
+</blockquote>
+
+<p>
+There is a crucial difference between the two. The first option seems
+pointless because all copied would be done at once; if your 
+destination is fixed (like they are for background registers), all 
+copies except the last would be lost. In the case of the second one, 
+how would you do more than one copy per HBlank? Clearly, something's 
+amiss here. There is, on two counts.
+</p>
+<p>
+For the record, I'm not 100% sure about what I'm going to say here, 
+but I think it's pretty close to what's actually going on. The main 
+thing to realize is that as long as the channel is not enabled 
+(<code>REG_DMAxCNT</code>{1f} is cleared), that channel won't do
+squat; only after <code>REG_DMAxCNT</code>{1f} has been set will the 
+DMA process be initiated. At the appropriate time (determined by 
+the timing bits), DMA will do all <i>N</i> copies and then shut itself
+off again.
+</p>
+<p>
+Unless, that is, the repeat-bit (<code>REG_DMAxCNT</code>{19}) is 
+set. In that case, it will keep doing the copies at the right time 
+until you disable the channel yourself.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-func">14.3.
+  Some DMA routines</h2>
+<p>
+While it's not that much trouble to set the three registers manually, 
+it is preferable to hide the direct interaction in subroutines. Now, in 
+older code, you might come across something like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Don't do this. Please.</span>
+<span class="keyw">void</span> dma_copy(<span class="keyw">int</span> <!--
+-->ch, <span class= keyw>void</span>* src, <!--
+--><span class="keyw">void</span>* dest, uint count, u32 mode)
+{
+    <span class="keyw">switch</span>(ch)
+    {
+    <span class="keyw">case</span> <span class="num">0</span>:
+        <span class="cmt">// set DMA 0</span>
+    <span class="keyw">case</span> <span class="num">1</span>:
+        <span class="cmt">// set DMA 1</span>
+... <span class="cmt">// etc</span>
+    }
+}
+</pre>
+
+<p>
+This will work, but it's not a nice way of doing things. If your 
+switch-cases differ by a single number, you can usually replace it 
+by a simpe lookup. There are a number of ways of fixing 
+this, but the easiest is by mapping a struct array over the DMA 
+registers, similar to what I did for tile memory. After that, you
+can just select the channel with the channel variable and simply 
+fill in the addresses and flags.
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef struct</span> DMA_REC
+{
+    <span class="keyw">const void</span> *src;
+    <span class="keyw">void</span> *dst;
+    u32 cnt;
+} DMA_REC;
+
+<span class="keyw">#define</span> REG_DMA ((<span
+  class="keyw">volatile</span> DMA_REC*)<span class="num">0x040000B0</span>)
+</pre>
+
+<p>
+The following are my three of my DMA routines. First the 
+<code>DMA_TRANSER()</code> macro, which is the overall macro that can 
+be used for anything. Then two routines for general memory copies and 
+fills using 32bit transfers with DMA 3.
+</p>
+
+<pre class="proglist" id="cd-dma">
+<span class="cmt">// in tonc_core.h</span>
+
+<span class="cmt">//! General DMA transfer macro</span>
+<span class="keyw">#define</span> DMA_TRANSFER(_dst, _src, count, <!--
+-->ch, mode)   \
+<span class="keyw">do</span> {                                            \
+    REG_DMA[ch].cnt= <span class="num">0</span>;                         \
+    REG_DMA[ch].src= (<span class="keyw">const</span> <span 
+class="keyw">void</span>*)(_src);       \
+    REG_DMA[ch].dst= (<span class="keyw">void</span>*)(_dst);             \
+    REG_DMA[ch].cnt= (count) | (mode);          \
+} <span class="keyw">while</span>(<span class="num">0</span>)
+
+<span class="cmt">//! General DMA copier</span>
+INLINE <span class="keyw">void</span> dma_cpy(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const</span> <span class="keyw">void</span> *src, <!--
+-->uint count, <span class="keyw">int</span> ch, u32 mode)
+{
+    REG_DMA[<span class="num">3</span>].cnt = <span 
+class="num">0</span>; <span 
+class="cmt">// shut off any previous transfer</span>
+    REG_DMA[<span class="num">3</span>].src = src;
+    REG_DMA[<span class="num">3</span>].dst = dst;
+    REG_DMA[<span class="num">3</span>].cnt = count;
+}
+
+<span class="cmt">//! General DMA full routine</span>
+INLINE <span class="keyw">void</span> dma_fill(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">volatile</span> u32 src, <!--
+-->uint count, <span class="keyw">int</span> ch, u32 mode)
+{
+    REG_DMA[<span class="num">3</span>].cnt = <span 
+class="num">0</span>; <span class="cmt">// shut off any previous transfer</span>
+    REG_DMA[<span class="num">3</span>].src = (<span 
+class="keyw">const</span> <span class="keyw">void</span>*)&amp;src;
+    REG_DMA[<span class="num">3</span>].dst = dst;
+    REG_DMA[<span class="num">3</span>].cnt = count | DMA_SRC_FIXED;
+}
+
+<span class="cmt">//! Word copy using DMA 3</span>
+INLINE <span class="keyw">void</span> dma3_cpy(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, u32 size)
+{   dma_cpy(dst, src, size/<span class="num">4</span>, <span 
+class="num">3</span>, DMA_CPY32);  }
+
+<span class="cmt">//! Word fill using DMA 3</span>
+INLINE <span class="keyw">void</span> dma3_fill(<span 
+class="keyw">void</span> *dst, <span class="keyw">const void</span> *src, u32 size)
+{   dma_fill(dst, src, size/<span class="num">4</span>, <span 
+class="num">3</span>, DMA_CPY32);  }
+</pre>
+
+<p>
+In all cases, I disable any previously operating transfers first. 
+This may seem redundant if DMA stops the CPU, but remember that DMA 
+transfers can be timed as well &ndash; you wouldn't want it to start 
+in the middle of setting the registers.
+After that, it's simply a matter of filling the registers. Now, 
+it so happens that there is a 2-cycle delay before any transfer 
+really begins. This means that you could lose a transfer if you 
+ask for transfers in immediate succession. I'm not sure if this 
+is very likely though: memory wait-states themselves already take 
+that much time so you <i>should</i> be safe.
+</p>
+<p>
+Other notes on these routines: the <code>DMA_TRANSFER()</code> 
+macro's code sits between a <code>do {} while(0);</code> loop. The 
+problem with macros is that when expanded multiple statements might 
+break nesting-blocks. For example, calling it in the body of an 
+<code>if</code> without braces around it would have the first line 
+as the body, but the rest fall outside it. This kind of loop is one 
+of the ways of preventing that. Another problem with macros is that 
+if the arguments' names may hide other parts of the macro's code. 
+Like the <code>src</code> and <code>dst</code> members of the 
+<code>DMA_REC</code> struct; which is why they're underscored. 
+The fill routines also have something remarkable going on, which 
+you can read about in the 
+<a href="#ssec-func-fill">next subsection</a>. Lastly, the 
+<code>dma3</code> inlines use word-transfers and take the 
+byte-size as their last arguments, making them very similar to 
+the standard <code>memcpy()</code> and <code>memset()</code>.
+</p><br>
+
+<p>
+I used to have the following macro for my transfers. It uses one of 
+the more exotic capabilities of the preprocessor: the 
+merging-operator &lsquo;##&rsquo;, which allows you to create symbol 
+names at compile-time. It's scary, totally unsafe and generally 
+unruly, but it does work. The other macro I gave is better, but I 
+still like this thing too.
+</p>
+
+<pre class="proglist" id="cd-dma-old">
+<span class="keyw">#define</span> <!--
+-->DMA_TRANSFER(_dst, _src, _count, _ch, _mode)  \
+    REG_DMA##_ch##SAD = (u32)(_src),                  \
+    REG_DMA##_ch##DAD = (u32)(_dst),                  \
+    REG_DMA##_ch##CNT = (_count) | (_mode)            \
+</pre>
+
+<p>
+As long as you are using a literal number for <code>_ch</code> it'll 
+form the correct register names. And yes, those comma operators 
+between the statements actually work. They keep the statements 
+separate, and also guard against wrongful nesting just like the 
+<code>do{} while(0)</code> construct does. 
+</p>
+
+<h3 id="ssec-func-fill">14.3.1.
+  On DMA fills</h3>
+<p>
+DMA can be used to fill memory, but there are two problems that you 
+need to be aware of before you try it. The first can be caught by 
+simply paying attention. DMA fills don't work <i>quite</i> in the 
+same way as <code>memset()</code> does. What you put into 
+<code>REG_DMAxSAD</code> isn't the value you want to fill with, but 
+its <i>address</i>! 
+</p>
+<p>
+&ldquo;Very well, I'll put the value in a variable and use its 
+address.&rdquo; Yes, and that brings us to our second problem, a 
+bug which is almost impossible to find. If you try this, you'll 
+find that it doesn't work. Well it fills with <i>something</i>, but 
+usually not what you wanted to fill with. The full explanation is 
+somewhat technical, but basically because you're probably only 
+using the variable's address and not its <i>value</i>, the optimizer 
+doesn't ever initialize it. There is a simple solution, one that 
+we've seen before, make it volatile. Or you can use a (inline) 
+function like <code>dma_fill()</code>, which has its source 
+argument set as volatile so you can just insert a number just as 
+you'd expect. Note that if you remove the volatile keyword there, 
+it'll fail again.
+</p><br>
+<p>
+In short: DMA fills need addresses, not direct values. Globals will 
+always work, but if you use local variables or arguments you'll need 
+to make them volatile. Note that the same thing holds true for 
+the BIOS call CpuFastSet().
+</p>
+
+<h3 id="ssec-func-use">14.3.2.
+  DMA; don't wear it out</h3>
+<p>
+DMA is fast, there's no question about that. It can be up to 
+<a href="text.htm#ssec-demo-se2">ten times as fast</a> as array 
+copies. However, think twice 
+about using it for every copy. While 
+it is fast, it doesn't quite blow every other transfer routine out of 
+the water. CpuFastSet() comes within 10% of it for copies and is 
+actually 10% faster for fills. The speed gain isn't that big a deal. 
+Another problem is that it stops the CPU, which can screw up 
+<a href="interrupts.htm">interrupts</a>, causing seemingly random 
+bugs. It does have its specific uses, usually in conjunction with 
+timers or interrupts, but for general copies, you might consider 
+other things as well. CpuFastSet() is a good routine, but tonclib 
+also comes with <code>memcpy16()/32()</code> and 
+<code>memset16()/32()</code> routines that are safer than that, and 
+less restrictions. They are assembly routines, though, so you'll 
+need to know how to assemble or use libraries.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">14.4.
+  DMA demo : circular windows</h2>
+
+<div class="cpt_fr" style="width:240px;">
+<img src="../img/demo/dma_demo.png" id="img-dma-demo"
+  alt="dma_demo shot"><br>
+<b>Fig 14.1</b>: palette for <tt>dma_demo</tt>.
+</div>
+
+<p>
+The demo for this chapter may seem a little complicated, but the 
+effect is worth it. The basic use of DMA transfers is so easy 
+that it's hardly worth having a demo of. Use of <i>triggered</i> 
+DMA is another matter. In this case, we'll look at 
+HBlank-triggered DMA, or HDMA for short. We'll use it to update 
+the <a href="gfx.htm#sec-win">window</a> sized inside the HBlank 
+to give a circular window effect.
+</p>
+<p>
+This is easier said than done, of course. The first step in the 
+design is how to use HDMA for this in the first place. Because 
+we need to copy to <code>REG_WIN0H</code> each HBlank, we need to 
+keep the destination fixed. Technically, it needs to be 
+<i>reset</i> to the original destination, but with only one 
+halfword to copy this means the same thing.
+For the source, we'll keep track of 
+the data that needs to be copied there in an array with one entry 
+for each scanline, and we'll progress through the array one 
+scanline at a time (i.e, incrementing source). And of course, the 
+transfer has to occur at <i>each</i> scanline, so we set it to 
+repeat. so basically we need this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> DMA_HDMA    <!--
+-->(DMA_ENABLE | DMA_REPEAT | DMA_AT_HBLANK | DMA_DST_RELOAD)
+</pre>
+
+<p>
+As for the circle, we need a routine that can calculate the left 
+and right edges of a circle. There are a couple of algorithms around 
+that can draw circles, for example  
+<a href="http://www.gamedev.net/reference/articles/article767.asp" target="_blank">Bresenham's</a> 
+version. We'll use a modified version of it because we only need 
+to store the left and right points instead of drawing a pixel there.
+Why left-right and not top-bottom? Because the array is scanline-based, 
+so that indicates the <i>y</i>-values already. 
+</p>
+<p>
+It doesn't really matter what you use actually, as long as you can find 
+the edges. Once you have, all you need to do is setup the DMA in the 
+VBlank and you're done.
+</p><br>
+
+<p>
+The end result will show something like 
+fig&nbsp;14.1. It's the Brinstar background 
+(again) inside the window, and a striped bg outside. The text 
+indicates the position and radius of the window, which can be moved 
+with the D-pad and scaled by A and B.
+</p>
+
+<pre class="proglist" id="cd-dma-demo">
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;tonc.h&gt;</span>
+
+<span class="keyw">#include</span> <span class="str">&quot;brin.h&quot;</span>
+
+<span class="cmt">// From tonc_math.h
+//#define IN_RANGE(x, min, max)	<!--
+-->( (x) &gt;= (min) &amp;&amp; (x) &lt; (max) )
+</span>
+
+<span class="cmt">// The source array</span>
+<b>u16 g_winh[SCREEN_HEIGHT+<span class="num">1</span>];</b>
+
+<span
+class="cmt">//! Create an array of horizontal offsets for a circular window.
+/*! The offsets are to be copied to REG_WINxH each HBlank, either 
+*     by HDMA or HBlank isr. Offsets provided by modified 
+*     Bresenham's circle routine (of course); the clipping code is not
+*     optional.
+*   \param winh Pointer to array to receive the offsets.
+*   \param x0   X-coord of circle origin.
+*   \param y0   Y-coord of circle origin.
+*   \param rr   Circle radius.
+*/</span>
+<span class="keyw">void</span> win_circle(u16 winh[], <span 
+class="keyw">int</span> x0, <span class="keyw">int</span> y0, <span 
+class="keyw">int</span> rr)
+{
+    <span class="keyw">int</span> x=<span 
+class="num">0</span>, y= rr, d= <span class="num">1</span>-rr;
+    u32 tmp;
+
+    <span class="cmt">// clear the whole array first.</span>
+    memset16(winh, <span class="num">0</span>, SCREEN_HEIGHT+<span 
+class="num">1</span>);
+
+    <span class="keyw">while</span>(y &gt;= x)
+    {
+        <span class="cmt">// Side octs</span>
+        tmp  = clamp(x0+y, <span class="num">0</span>, SCREEN_WIDTH);
+        tmp += clamp(x0-y, <span 
+class="num">0</span>, SCREEN_WIDTH)&lt;&lt;<span class="num">8</span>;
+        
+        <span class="keyw">if</span>(IN_RANGE(y0-x, <span 
+class="num">0</span>, SCREEN_HEIGHT))       <span class="cmt">// o4, o7</span>
+            winh[y0-x]= tmp;
+        <span class="keyw">if</span>(IN_RANGE(y0+x, <span 
+class="num">0</span>, SCREEN_HEIGHT))       <span class="cmt">// o0, o3</span>
+            winh[y0+x]= tmp;
+
+        <span class="cmt">// Change in y: top/bottom octs</span>
+        <span class="keyw">if</span>(d &gt;= <span 
+class="num">0</span>)      
+        {
+            tmp  = clamp(x0+x, <span class="num">0</span>, SCREEN_WIDTH);
+            tmp += clamp(x0-x, <span 
+class="num">0</span>, SCREEN_WIDTH)&lt;&lt;<span class="num">8</span>;
+            
+            <span class="keyw">if</span>(IN_RANGE(y0-y, <span 
+class="num">0</span>, SCREEN_HEIGHT))   <span class="cmt">// o5, o6</span>
+                winh[y0-y]= tmp;
+            <span class="keyw">if</span>(IN_RANGE(y0+y, <span 
+class="num">0</span>, SCREEN_HEIGHT))   <span class="cmt">// o1, o2</span>
+                winh[y0+y]= tmp;
+
+            d -= <span class="num">2</span>*(--y);
+        }
+        d += <span class="num">2</span>*(x++)+<span class="num">3</span>;
+    }
+    winh[SCREEN_HEIGHT]= winh[<span class="num">0</span>];
+}
+
+<span class="keyw">void</span> init_main()
+{
+    <span class="cmt">// Init BG 2 (basic bg)</span>
+    <b>dma3_cpy(pal_bg_mem, brinPal, brinPalLen);</b>
+    dma3_cpy(tile_mem[<span 
+class="num">0</span>], brinTiles, brinTilesLen);
+    dma3_cpy(se_mem[<span 
+class="num">30</span>], brinMap, brinMapLen);
+
+    REG_BG2CNT= BG_CBB(<span class="num">0</span>)|BG_SBB(<span 
+class="num">30</span>);
+
+    <span class="cmt">// Init BG 1 (mask)</span>
+    <span class="keyw">const</span> TILE tile= 
+    {{
+        <span 
+class="num">0xF2F3F2F3</span>, <span class="num">0x3F2F3F2F</span>, <span 
+class="num">0xF3F2F3F2</span>, <span class="num">0x2F3F2F3F</span>, 
+        <span 
+class="num">0xF2F3F2F3</span>, <span class="num">0x3F2F3F2F</span>, <span 
+class="num">0xF3F2F3F2</span>, <span class="num">0x2F3F2F3F</span>
+    }};
+    tile_mem[<span class="num">0</span>][<span 
+class="num">32</span>]= tile;
+    pal_bg_bank[<span class="num">4</span>][ <span 
+class="num">2</span>]= RGB15(<span class="num">12</span>,<span 
+class="num">12</span>,<span class="num">12</span>);
+    pal_bg_bank[<span class="num">4</span>][ <span 
+class="num">3</span>]= RGB15( <span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">8</span>);
+    pal_bg_bank[<span class="num">4</span>][<span 
+class="num">15</span>]= RGB15( <span class="num">0</span>, <span 
+class="num">0</span>, <span class="num">0</span>);
+    se_fill(se_mem[<span class="num">29</span>], <span 
+class="num">0x4020</span>);
+
+    REG_BG1CNT= BG_CBB(<span class="num">0</span>)|BG_SBB(<span 
+class="num">29</span>);
+
+    tte_init_chr4_b4_default(<span class="num">0</span>, BG_CBB(<span 
+class="num">2</span>)|BG_SBB(<span class="num">28</span>));
+    tte_init_con();
+    tte_set_margins(<span class="num">8</span>, <span 
+class="num">8</span>, <span class="num">232</span>, <span class="num">40</span>);
+
+    <span class="cmt">// Init window</span>
+    REG_WIN0H= SCREEN_WIDTH;
+    REG_WIN0V= SCREEN_HEIGHT;
+
+    <span class="cmt">// Enable stuff</span>
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_WIN0;
+    REG_WININ= WIN_BUILD(WIN_BG0|WIN_BG2, <span class="num">0</span>);
+    REG_WINOUT= WIN_BUILD(WIN_BG0|WIN_BG1, <span class="num">0</span>);
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> rr=<span class="num">40</span>, x0=<span 
+class="num">128</span>, y0=<span class="num">120</span>;
+
+    init_main();
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        key_poll();
+
+        rr += key_tri_shoulder();   <span 
+class="cmt">// size with B/A</span>
+        x0 += key_tri_horz();       <span 
+class="cmt">// move left/right</span>
+        y0 += key_tri_vert();       <span 
+class="cmt">// move up/down
+</span>
+        <span class="keyw">if</span>(rr&lt;<span class="num">0</span>)
+            rr= <span class="num">0</span>;
+
+        <span class="cmt">// Fill circle array</span>
+        <b>win_circle(g_winh, x0, y0, rr);</b>
+    
+        <span class="cmt">// Init win-circle HDMA</span>
+        <b>DMA_TRANSFER(&amp;REG_WIN0H, &amp;g_winh[<span 
+class="num">1</span>], <span class="num">1</span>, <span 
+class="num">3</span>, DMA_HDMA);</b>
+
+        tte_printf(<span 
+class="str">&quot;#{es;P}(%d,%d) | %d&quot;</span>, x0, y0, rr);
+    }
+    
+    <span class="keyw">return</span> <span class="num">0</span>;
+} 
+</pre>
+
+<p>
+The initialization function is mostly just fluff. Mostly, because there 
+is one thing of interest: the calls to <code>dma_cpy</code> to copy 
+the Brinstar palette, tiles and map. Aside from that, nothing to see 
+here.
+</p>
+<p>
+The main function itself is also pretty standard. Of interest here 
+are the call to <code>win_circle()</code>, which sets up the 
+source-array, and to <code>DMA_TRANSFER()</code> to initialize the 
+HDMA. Note that I'm actually making it start at 
+<code>g_winh[1]</code> instead of just <code>g_winh[0]</code>. The 
+reason for this is that the HBlank occurs <i>after</i> a given 
+scanline, not before it, so we'll lag one otherwise. The 
+<code>g_winh</code> array is actually 160+1 long, and both entry 0 and
+160 describe the data for scanline 0. What's also important, but not 
+exactly visible here, is that HDMA only occurs on the 
+<i>visible</i> HBlanks, not the ones in the VBlank. This saves up a 
+whole lot of trouble determining how many scanlines to correct for 
+when setting it up.
+</p>
+<p>
+And then there's <code>win_circle()</code>. If you're aware of how 
+the Bresenham circle algorithm work, you know it calculates an
+offset for one octant and then uses it for the 7 others via symmetry 
+rules. This happens here as well. What doesn't happen in the original
+probably is all the clipping (the <code>clamp()</code>s and 
+<code>IN_RANGE()s</code>). However, these steps are absolutely vital
+here. Going out of bounds horizontally would mean wrong windowing 
+offsets which would make the window turn in on itself. Going out 
+of bounds vertically means going OOB on <code>g_winh</code> for 
+all kind of horrible. Trust me, they are necessary. 
+</p>
+<p>
+Also, notice that I wipe the whole array clean first; this can be done 
+inside the loop, but sometimes it's just faster to fill the whole 
+thing first and then only update the parts you need. Lastly, as 
+mentioned before, the first scanline's data is copied to the final 
+entry of the array to account for the way HBlanks happen.
+</p><br>
+
+<p>
+And here ends the chapter on DMA. The use of HDMA in this manner is 
+great for all kinds of effects, not just circular windows. All you 
+need is an array containing scanline-data and a function that sets 
+it up beforehand. Be careful you don't get your channels mixed up, 
+though. 
+</p>
+<p>
+DMA is the fastest method of copying, but as you block interrupts
+using <code>memcpy32()</code> is probably safer. The speed difference 
+is only 10% anyway. DMA is also used for sound FIFO, in conjunction 
+with timers. I can't really show you how to use it for sound, but 
+I can tell you how timers work, and will do so in the next chapter.
+</p>
+
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Apr 16, 2008</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="gfx.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="timers.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Graphic effects</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Timers</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

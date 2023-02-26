@@ -1,0 +1,4352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20060505">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Whirlwind Tour of ARM Assembly</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="tte.htm">TTE</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="lab.htm">Lab</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">23.
+  Whirlwind Tour of ARM Assembly</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a></li>
+  <li><a href="#sec-asm">General assembly</a></li>
+  <li><a href="#sec-arm">ARM assembly</a></li>
+  <li><a href="#sec-thumb">THUMB assembly</a></li>
+  <li><a href="#sec-gas">GAS: the GNU assembler</a></li>
+  <li><a href="#sec-cpy">A real world example: fast 16/32-bit copiers</a></li>
+</ul>
+<!-- [[/toc]] -->
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">23.1.
+  Introduction</h2>
+<p>
+Very broadly speaking, you can divide programming languages into 
+4 classes. At the lowest level is machine code: raw numbers that 
+the CPU decodes into instructions to execute. One step up is 
+assembly. This is essentially machine code in words: each 
+assembly instruction corresponds to one machine code instruction. 
+Above this are compiled languages like C, which use structured 
+language element to read more like English, but need to be compiled 
+to machine code to be able to run. Finally, there are scripted 
+languages like PHP (and usually VB and Java) which are run through 
+interpreters configured to run the right kinds of machine code 
+for the desired effects. 
+</p>
+<p>
+Every step up the ladder increases the human readability factor and
+portability, at the cost of runtime speed and program size. In the 
+old days, programmers were Real Programmers and did their work in 
+machine code or assembly because of clock speed and/or memory 
+constraints. For PCs, these days are long gone and most work is 
+done in the higher level languages. This, admittedly, is a good 
+thing: code can be written faster and maintained more easily. However, 
+there are still a few instances where the higher languages are 
+insufficient. The GBA, with its 16.7Mhz CPU and less than 1 MB 
+or work RAM is one of them. Here the inefficiency of the highest 
+languages will cost you dearly, if it'd run at all. This is why
+most GBA work is done in C/C++, sometimes affectionately nicknamed
+&lsquo;portable assembly&rsquo;, because it still has the capability 
+of working with memory directly. But sometimes even that isn't 
+enough. Sometimes you <i>really</i> have to make every cycle count.
+And for this, you need <b>assembly</b>.
+</p>
+<p>
+Now, in some circles the word &ldquo;assembly&rdquo; can be used 
+to frighten small programmers. Because it is so closely tied to 
+the CPU, you can make it do everything; but that also means you 
+<i>have</i> to do everything. Being close to hardware also means 
+you're bypassing all the safety features that higher languages 
+may have, so that it's <i>much</i> easier to break things. 
+So yeah, it is harder and more dangerous. Although some may 
+prefer the term &lsquo;adventurous&rsquo;.
+</p><br>
+
+<p>
+To program in assembly, you need to know how a processor 
+actually works and write in a way it can understand, rather than rely 
+on a compiler or interpreter to do it for you. There are no structured 
+for- or while- loops or even if/else branches, just 
+<code>goto</code>; no structs or classes with inheritance, and even 
+datatypes are mostly absent. It's anarchy, but the lack of bureaucracy 
+is exactly what makes fast code possible.
+</p>
+<p>
+Speed/size issues aside, there are other reasons why learning 
+assembly might be a good idea. Like I said, it forces you to actually
+<i>understand</i> how the CPU functions, and you can use that 
+knowledge in your C code as well. A good example of this is the 
+&lsquo;best&rsquo; datatype for variables. Because the ARM processor 
+is 32bit, it will prefer ints for most things, and other types will
+be slower, sometimes much slower. And while this is obvious from 
+the description of the processor itself, knowledge of assembly will 
+show you <i>why</i> they are slower. 
+</p>
+<p>
+A third reason, and not an inconsiderable one, is just for 
+general coolness <kbd>=B)</kbd>. The very fact that it is harder than 
+higher languages should appeal to your inner geek, who relishes
+such challenges. The simplicity of the statements themselves have an 
+aesthetic quality as well: no messing about with classes, different 
+loop styles, operator precedence, etc &ndash; it's one line, one opcode 
+and never more than a handful of parameters.
+</p><br>
+
+<p>
+Anyway, about this chapter. 
+A complete document on assembly is nothing less than a full user's 
+manual for a CPU. This would require an entire book in itself, which 
+is not something I'm aiming at. My intention here is to give you 
+an introduction (but a thorough one) to ARM assembly. I'll explain 
+the most important instructions of the ARM and THUMB instruction sets, 
+what you can and cannot do with them (and a little bit about 
+why). I'll also cover how to use GCC's assembler to actually
+assemble the code and how to make your assembly and C files work 
+together. Lastly, I'll give an example of a fast memory copier as 
+an illustration of both ARM and Thumb code.
+</p>
+<p>
+With that information, you should be able to do a lot of stuff, 
+or at least know how to make use of the various reference documents 
+out there. This chapter is not an island, I am assuming you have 
+some or all of the following documents:
+</p>
+
+<ul>
+<li>
+  The rather large official ARM7DTMI Technical manual (PDF):
+  <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/index.html
+" target="_blank">DDI0210B_7TDMI_R4.pdf</a>.
+<li>
+  GBATek instruction reference: 
+  <a href="http://nocash.emubase.de/gbatek.htm#arminstructionset" target="_blank">ARM</a> /
+  <a href="http://nocash.emubase.de/gbatek.htm#thumbinstructionset" target="_blank">THUMB</a>.
+</li>
+<li>
+  Official ARM quick-references (PDF): 
+  <a href="http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf" target="_blank">ARM + Thumb</a>
+</li>
+<li>
+  Re-eject's quick-references (PDF): 
+  <a href="http://www.coranac.com/files/gba/re-ejected-gasref.pdf" target="_blank">GAS</a> /
+  <a href="http://www.coranac.com/files/gba/re-ejected-armref.pdf" target="_blank">ARM</a> /
+  <a href="http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf" target="_blank">THUMB</a>.
+  (note: minor syntax discrepancies at times)
+</li>
+<li>
+  GNU Assembler manual: 
+  <a href="http://sourceware.org/binutils/docs/as/index.html" target="_blank">GAS</a>.
+</li>
+</ul>
+
+<p>
+If you want more ARM/THUMB guides, you'll have to find them yourself.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-asm">23.2.
+  General assembly</h2>
+<p>
+Assembly is little more than a glorified macro language for machine
+code. There is a one-to-one relationship between the assembly
+instructions and the actual machine code and assembly uses
+<dfn>mnemonics</dfn> for the operations the processor is capable of,
+which are much easier to remember than the raw binary. The tool that
+converts the asm code into machine code is the <dfn>assembler</dfn>.
+</p>
+
+<h3 id="ssec-asm-ops">23.2.1.
+  Basic operations</h3>
+
+<p> 
+Every processor must be able to do basic data processing: 
+arithmetic and bit manipulation. They should also have instructions 
+to access memory, and be able to jump from one place in the code 
+to another of conditionals and loops and such.
+However, different processors will have different 
+ways of doing these things, and some operations of one set might not 
+be present in another. For example, ARM lacks a division 
+instruction, and can't perform data processing on memory directly. 
+However, the ARM instruction set has some benefits too, like a 
+fair amount of general-purpose registers and a simple instruction 
+set, for the proper definition of &ldquo;simple&rdquo;. And it has 
+a <i>very</i> nifty way of dealing with bit-shifts.
+</p>
+<p>
+In the snippet below you can find a few examples of additions and 
+memory reads in three different assembly languages: x86 (Intel), 
+68000, and ARM. The basic format is usually something like 
+&lsquo;<code>operation operand1, operand2, ...</code>&rsquo;, 
+though there are always exceptions. Note that where x86 and ARM put 
+the destination in <i>Op1</i>, 68000 asm puts it in the last. The 
+terminology of the registers is also different. Some semantics are
+pretty universal, the addition &lsquo;<code>x += y</code> is found
+in all three, for example, but x86 also has a special instruction for 
+increments by one, and in ARM the result register can be 
+different from the two operands. These differences correspond to
+how the processors actually work! Higher languages allow you 
+to use operations that do not seem present in the instruction set, 
+but in fact they only <i>appear</i> to do so: the compiler/interpreter 
+will convert it to a form the processor can actually handle.
+</p>
+<p>
+Another point I must make here is that even for a given processor, 
+there can be differences in how you write assembly. Assemblers aren't 
+difficult to write, and there's nothing to stop you from using a 
+different kind of syntax. Apart from the wrath of other programmers, 
+of course.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Some examples
+// Addition and memory loads in different assemblies</span>
+
+<span class="cmt">// === x86 asm <!--
+-->========================================================</span>
+<span class="keyw">add</span>     eax, #<span class="num">2</span>         <span 
+class="cmt">// Add immediate:   eax += 2;</span>
+<span class="keyw">add</span>     eax, ebx        <span 
+class="cmt">// Add register:    eax += ebx;</span>
+<span class="keyw">add</span>     eax, [ebx]      <span 
+class="cmt">// Add from memory: eax += ebx[0];</span>
+<span class="keyw">inc</span>     eax             <span 
+class="cmt">// Increment:       eax++;</span>
+
+<span class="keyw">mov</span>     eax, DWORD PTR [ebx]        <span 
+class="cmt">// Load int from memory:    eax= ebx[0];</span>
+<span class="keyw">mov</span>     eax, DWORD PTR [ebx+<span 
+class="num">4</span>]      <span 
+class="cmt">// Load next int:           eax= ebx[1];</span>
+
+<span class="cmt">// === 68000 asm <!--
+-->======================================================</span>
+<span class="keyw">ADD</span>     #<span class="num">2</span>, D0          <span 
+class="cmt">// Add immediate:   D0 += 2;</span>
+<span class="keyw">ADD</span>     D1, D0          <span 
+class="cmt">// Add register:    D0 += D1;</span>
+<span class="keyw">ADD</span>     (A0), D0        <span 
+class="cmt">// Add from memory: D0 += A0[0];</span>
+
+<span class="keyw">MOVE.L</span>  (A0), D0        <span 
+class="cmt">// Load int from memory:    D0= A0[0];</span>
+<span class="keyw">MOVE.L</span>  <span class="num">4</span>(A0), D0       <span 
+class="cmt">// Load next int:           D0= A0[1];</span>
+
+<span class="cmt">// === ARM asm <!--
+-->========================================================</span>
+<span class="keyw">add</span>     r0, r0, #<span class="num">2</span>      <span 
+class="cmt">// Add immediate:   r0 += 2;</span>
+<span class="keyw">add</span>     r0, r0, r1      <span 
+class="cmt">// Add register:    r0 += r1;</span>
+<span class="keyw">add</span>     r0, r1, r2      <span 
+class="cmt">// Add registers:   r0= r1 + r2;</span>
+
+<span class="keyw">ldr</span>     r0, [r2]        <span 
+class="cmt">// Load int from memory:    r0= r2[0];</span>
+<span class="keyw">ldr</span>     r0, [r2, #<span class="num">4</span>]    <span 
+class="cmt">// Load int from memory:    r0= r2[1];</span>
+<span class="keyw">ldmia</span>   r2, {r0, r1}    <span 
+class="cmt">// Load multiple:           r0= r2[0]; r1= r2[1];</span>
+</pre>
+
+<h3 id="ssec-asm-var">23.2.2.
+  Variables: registers, memory and the stack</h3>
+<p>
+In HLLs you have variables to work on, in assembly you can have 
+registers, variables (that is, specific ranges in memory), and 
+the stack. A 
+<a href="http://en.wikipedia.org/wiki/Processor_register" target="_blank">
+<dfn>register</dfn></a>
+is essentially a variable inside the chip itself, and can be 
+accessed quickly. The downside is that there are usually only a few
+of them, from just one to perhaps a few dozen. Most programs will 
+require a lot more, which is why you can put variables in addressable 
+memory as well. There's a lot more bytes in memory than in registers, 
+but it'll also be slower to use. Note that both registers and 
+memory are essentially <b>global</b> variables, change them in one 
+function and you'll have changed them for the rest of the program. 
+For local variables, you can use the stack. 
+</p>
+<p>
+The <a href="http://en.wikipedia.org/wiki/Stack_%28data_structure%29" target="_blank">
+<dfn>stack</dfn></a> is a special region of memory used as, well, 
+a stack: a Last-In, First-Out mechanism. There will be a special 
+register called the <dfn>stack pointer</dfn> (SP for short) which 
+contains the address of the top of the stack. You can <i>push</i> 
+variables onto the top of the stack for safe keeping, and then 
+<i>pop</i> them off once you're done with them, restoring the 
+registers to their original values. 
+The address of the stack (that is, the top of the stack, the 
+contents of SP) is not fixed: it grows as you move 
+deeper in the code's hierarchy, and shrinks as you move out again. 
+The point is that each block of code should clean up after itself 
+so that the stack pointer is the same before and after it. If not, 
+prepare for a spectacular failure of the rest of the program.
+</p>
+<p>
+For example, suppose you have functions <code>foo()</code> and which 
+uses registers A, B, C and D. Function <code>foo()</code> calls 
+function <code>bar()</code>, which also uses A, B and C, but in a 
+different context than <code>foo()</code>. To make sure
+<code>foo()</code> would still work, <code>bar()</code> pushes A, 
+B and C onto the stack at its start, then uses them the way it 
+wants, and then pops them off the stack into A, B and C again when it 
+ends. In pseudo code:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Use of stack in pseudo-asm</span>
+
+<span class="cmt">// Function foo</span>
+foo:
+    <span class="cmt">// Push A, B, C, D onto the stack, <!--
+-->saving their original values</span>
+    <span class="keyw">push</span>    {A, B, C, D}
+
+    <span class="cmt">// Use A-D</span>
+    <span class="keyw">mov</span>     A, #<span 
+class="num">1</span>        <span class="cmt">// A= 1</span>
+    <span class="keyw">mov</span>     B, #<span 
+class="num">2</span>        <span class="cmt">// B= 2</span>
+    <span class="keyw">mov</span>     C, #<span 
+class="num">3</span>        <span class="cmt">// well, you get the idea</span>
+    <b><span class="keyw">call</span>    bar</b>
+    <span class="keyw">mov</span>     D, global_var0
+
+    <span class="cmt">// global_var1 = A+B+C+D</span>
+    <span class="keyw">add</span>     A, B
+    <span class="keyw">add</span>     A, C
+    <span class="keyw">add</span>     A, D
+    <span class="keyw">mov</span>     global_var1, A
+
+    <span 
+class="cmt">// Pop A-D, restoring then to their original values</span>
+    <span class="keyw">pop</span>     {A-D}
+    <span class="keyw">return</span>
+
+<span class="cmt">// Function bar</span>
+bar:
+    <span 
+class="cmt">// push A-C: stack now holds 1, 2, 3 at the top</span>
+    <b><span class="keyw">push</span>    {A-C}</b>
+
+    <span class="cmt">// A=2; B=5; C= A+B;</span>
+    <span class="keyw">mov</span>     A, #<span class="num">2</span>
+    <span class="keyw">mov</span>     B, #<span class="num">5</span>
+    <span class="keyw">mov</span>     C, A
+    <span class="keyw">add</span>     C, B
+
+    <span class="cmt">// global_var0= A+B+C (is 2*C)</span>
+    <span class="keyw">add</span>     C, C
+    <span class="keyw">mov</span>     global_var, C
+
+    <span 
+class="cmt">// A=2, B=5, C=14 here, which would be bad when we </span>
+    <span 
+class="cmt">// return to foo. So we restore A-C to original values.</span>
+    <span 
+class="cmt">// In this case to: A=1, B=2, C=3</span>
+    <b><span class="keyw">pop</span>     {A-C}</b>
+    <span class="keyw">return</span>
+</pre>
+
+<p>
+While the syntax above is asm-like, it's not actually part of any 
+assembly &ndash; at least not as far as I know. It is also 
+particularly <i>bad</i> assembly, because it's inefficient in its use 
+of registers, for one. If you were to write the corresponding C code and
+compile it (with optimizations, mind you), you get better code.
+But the point was here stack-use, not efficiency.
+</p>
+<p>
+What you see here is that <code>foo()</code> 
+sets A, B and C to 1, 2 and 3, respectively (<code>mov</code> stands 
+for &lsquo;move&rsquo;, which usually comes down to assignment), and 
+then calls <code>bar()</code>, which sets them to something else and 
+sets a global variable called <code>global_var0</code> to A+B+C. 
+Because A, B and C are now different from what they were 
+<code>foo()</code>, that function would use the wrong values in later 
+calculations. To counter that, <code>bar()</code> uses the 
+stack to save and restore A, B and C so that functions that call 
+<code>bar()</code> still work. Note that <code>foo()</code> also 
+uses the stack for A, B, C and D, because the function calling 
+<code>foo()</code> may want to use them as well.
+</p>
+<p>
+Stacking registers inside the called function is only a
+<i>guideline</i>, not a law. You could make the caller save/restore
+the variables that it uses. You could even not use the stack at all, 
+as if you meant A, B and C to change and consider them return values
+of the function. By not setting the registers manually in 
+<code>bar()</code>, A and B would effectively be function arguments. 
+Or you could use the stack for function arguments. And return values. 
+Or use both registers and the stack. The point is, you are free to 
+do deal with them in any way you want. At least, in principle.
+In practice, there are guidelines written down by the original
+manufacturers, and while not written in stone, it can be considered 
+bad form not to adhere to them. And you can see just <i>how</i> 
+bad a form if you intend to make the code interface with compiled 
+code, which <i>does</i> adhere to them.
+</p>
+
+<h3 id="ssec-asm-jmp">23.2.3.
+  Branching and condition codes</h3>
+<p>
+The normal operation for a computer is to take instructions one by 
+one and execute them. A special register known as the <dfn>program 
+counter</dfn> (PC) indicates the address of the next instruction. 
+When it's time, the processor reads that instruction, does its 
+magic and increments the program counter for the next instruction. 
+This is a relatively straightforward process; things start to get 
+interesting when you can set the program counter to a completely 
+different address, redirecting the flow of the program. Some might 
+say that you can really only speak of a <i>computer</i> if such a 
+thing is possible.
+</p>
+
+<p>
+The technical term for this redirection is <dfn>branching</dfn>,
+though the term &lsquo;jump&rsquo; is used as well. With branching 
+you can create things like loops (infinite loops, mind you) 
+and implement subroutines. The usual mnemonic for branching is 
+something like <code>b</code> or <code>j(mp)</code>
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Asm version of the while(1) { ... } endless loop</span>
+
+<span class="cmt">// Label for (possible) branching destination</span>
+<b>endless</b>:
+
+    ...         <span class="cmt">// stuff</span>
+
+    <b><span class="keyw">b</span></b> endless <span 
+class="cmt">// Branch to endless, for an endless loop.</span>
+</pre>
+
+
+<p>
+The full power of branching comes from 
+branching only when certain <dfn>conditions</dfn> are met. With that, 
+you can perform if-else blocks and loops that can actually end.
+The conditions allowed depend on the processor, but the most common 
+ones are:
+</p>
+
+<ul>
+  <li><b>Zero</b> (Z). If the result of operation was 0.</li>
+  <li><b>Negative</b> (N). Result was negative (i.e. most significant 
+  bit set).</li>
+  <li><b>Carry bit set</b> (C). If the &lsquo;mostest&rsquo; 
+    significant bit is set (like bit 32 for 32bit operations).
+  <li><b>Arithmetic overflow</b> (V). Like adding two positive numbers 
+    and getting a negative number because the result got too big 
+	for the registers.</li>
+</ul>
+
+<p>
+These condition flags are stores in the 
+<dfn>Program Status Register</dfn> (PSR), and each data processing 
+instruction will set these one of more of these flags, depending on 
+the outcome of the operation. Special versions of the branch 
+instruction can use these flags to determine whether to make the jump.
+</p>
+<p>
+Below you can see a simple example of a basic for-loop. The  
+<code>cmp</code> instruction compares <code>A</code> to 16 and sets 
+the PSR flags accordingly. The instruction <code>bne</code> stands 
+for &lsquo;branch if Not Equal&rsquo;, which corresponds to a clear 
+Z-flag. the reason for the Zero-flag's involvement is that the 
+equality of two numbers is indicated by whether the difference 
+between them is zero or not. So if there's a difference between 
+<code>A</code> and 16, we jump back to <code>for_start</code>; if 
+not, then we continue with the rest of the code.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Asm version of for(A=0; A != 16; A++)</span>
+
+    <span class="keyw">mov</span>     A, #<span class="num">0</span>
+<span class="cmt">// Start of for-loop.</span>
+for_start:
+
+    ...             <span class="cmt">// stuff</span>
+
+    <span class="keyw">add</span>     A, #<span class="num">1</span>
+    <b><span class="keyw">cmp</span></b>     A, #<span 
+class="num">16</span>  <span class="cmt">// Compare A to 16</span>
+    <b><span class="keyw">bne</span></b> for_start   <span 
+class="cmt">// Branch to beginning of loop if A isn't 16</span>
+</pre>
+
+<p>
+The number and names of the conditional codes depends on the 
+platform. The ARM has 16 of these, but I'll cover these later.
+</p>
+
+<h3 id="ssec-asm-gcc">23.2.4.
+  An example: GCC generated ARM assembly</h3>
+<p>
+Before getting into ARM assembly itself, I'd like to show you a 
+real-life example it. Assembly is an intermediary step of the 
+build process, and you can capture GCC's assembly output by 
+using the &lsquo;<tt>-S</tt>&rsquo; or 
+&lsquo;<tt>-save-temps</tt>&rsquo; flags. This gives you the 
+opportunity to see what the compiler is actually doing, to 
+compare the C and assembly versions of a given algorithm, and 
+provides quick pointers on how to code non-trivial things in 
+assembly, like function calling, structures, loops etc.
+This section is optional, and you may not understand all the 
+things here, but it is very educational nonetheless.
+</p>
+
+<pre class="proglist">
+<span class="cmt"># Makefile settings for producing asm output</span>
+    $(CC) $(RCFLAGS) <b>-S</b> $&lt;
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// gen_asm.c : 
+//   plotting two horizontal lines using normal and inline functions.</span>
+<span class="keyw">#include</span> <span 
+class="str">&lt;tonc.h&gt;</span>
+
+<span class="keyw">void</span> PlotPixel3(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, u16 clr)
+{
+    vid_mem[y*<span class="num">240</span>+x]= clr;
+}
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> ii;
+
+    <span class="cmt">// --- using function ---</span>
+    ASM_CMT(<span class="str">&quot;using function&quot;</span>);
+    <span class="keyw">for</span>(ii=<span
+class="num">0</span>; ii&lt;<span class="num">240</span>; ii++)
+        PlotPixel3(ii, <span class="num">16</span>, CLR_LIME);
+
+    <span class="cmt">// --- using inline ---</span>
+    ASM_CMT(<span class="str">&quot;using inline&quot;</span>);
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;<span class="num">240</span>; ii++)
+        m3_plot(ii, <span class="num">12</span>, CLR_RED);
+
+    <span class="keyw">while</span>(<span class="num">1</span>);
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<pre class="proglist">
+<span class="cmt">@@ gen_asm.s :
+@@ Generated ASM (-O2 -mthumb -mthumb-interwork -S)
+@@ Applied a little extra formatting and comments for easier reading.
+@@ Standard comments use by @; my comments use @@</span>
+
+<span class="cmt">@@ Oh, and DON'T PANIC! :) </span>
+
+    .<span class="keyw">code</span>   <span class="num">16</span>
+    .<span class="keyw">file</span>   <span 
+class="str">&quot;gen_asm.c&quot;</span>     <span 
+class="cmt">@@ - Source filename (not required)</span>
+    .<span class="keyw">text</span>                   <span 
+class="cmt">@@ - Code section (text -&gt; ROM)
+
+@@ &lt;function block&gt;</span>
+    .<span class="keyw">align</span>  <span 
+class="num">2</span>               <span 
+class="cmt">@@ - 2^n alignment (n=2)</span>
+    .<span class="keyw">global</span> PlotPixel3      <span 
+class="cmt">@@ - Symbol name for function</span>
+    .<span class="keyw">code</span>   <span 
+class="num">16</span>              <span 
+class="cmt">@@ - 16bit THUMB code (BOTH are required!)</span>
+    .<span class="keyw">thumb_func</span>             <span 
+class="cmt">@@ /</span>
+    .<span class="keyw">type</span>   PlotPixel3, %function   <span 
+class="cmt">@@ - symbol type (not req)
+@@ Declaration : void PlotPixel3(int x, int y, u16 clr)
+@@ Uses r0-r3 for params 0-3, and stack for param 4 and over
+@@   r0: x
+@@   r1: y
+@@   r2: clr</span>
+PlotPixel3:
+    <span class="keyw">lsl</span>     r3, r1, #<span 
+class="num">4</span>      <span class="cmt">@@ \</span>
+    <span class="keyw">sub</span>     r3, r3, r1      <span 
+class="cmt">@@ - (y*16-1)*16 = y*240</span>
+    <span class="keyw">lsl</span>     r3, r3, #<span 
+class="num">4</span>      <span class="cmt">@@ /</span>
+    <span class="keyw">add</span>     r3, r3, r0      <span 
+class="cmt">@@ - (y*240+x)</span>
+    <span class="keyw">mov</span>     r1, #<span 
+class="num">192</span>        <span 
+class="cmt">@@ - 192&lt;&lt;19 = 0600:0000</span>
+    <span class="keyw">lsl</span>     r1, r1, #<span 
+class="num">19</span>     <span class="cmt">@@ /</span>
+    <span class="keyw">lsl</span>     r3, r3, #<span 
+class="num">1</span>      <span 
+class="cmt">@@ - *2 for halfword, not byte, offset</span>
+    <span class="keyw">add</span>     r3, r3, r1
+    <span class="cmt">@ lr needed for prologue</span>
+    <span class="keyw">strh</span>    r2, [r3]        <span 
+class="cmt">@@ store halfword at vid_mem[y*240+x]</span>
+    <span class="cmt">@ sp needed for prologue</span>
+    <span class="keyw">bx</span>  lr
+    .size   PlotPixel3, .-PlotPixel3    <span 
+class="cmt">@@ - symbol size (not req)
+@@ &lt;/ function block&gt;
+</span>
+    .<span class="keyw">align</span>  <span class="num">2</span>
+    .<span class="keyw">global</span> main
+    .<span class="keyw">code</span>   <span class="num">16</span>
+    .<span class="keyw">thumb_func</span>
+    .<span class="keyw">type</span>   main, %function
+main:
+    <span class="keyw">push</span>    {r4, lr}            <span 
+class="cmt">@@ Save regs r4, lr</span>
+    <span class="cmt">@ --- using function ---    <!--
+-->@@ Comment from ASM_CMT, indicating</span>
+    .<span class="keyw">code</span>   <span 
+class="num">16</span>                  <span 
+class="cmt">@@   the PlotPixel3() loop</span>
+    <span class="keyw">mov</span>     r4, #<span 
+class="num">0</span>              <span class="cmt">@@ r4: ii=0</span>
+.L4:
+        <span class="keyw">mov</span>     r2, #<span 
+class="num">248</span>        <span 
+class="cmt">@@ - r2: clr= 248*4= 0x03E0= CLR_LIME</span>
+        <span class="keyw">lsl</span>     r2, r2, #<span 
+class="num">2</span>      <span class="cmt">@@ /</span>
+        <span class="keyw">mov</span>     r0, r4          <span 
+class="cmt">@@ r0: x= ii</span>
+        <span class="keyw">mov</span>     r1, #<span 
+class="num">16</span>         <span class="cmt">@@ r1: y= 16</span>
+        <span class="keyw">add</span>     r4, r4, #<span 
+class="num">1</span>      <span class="cmt">@@ ii++</span>
+        <span class="keyw">bl</span>      PlotPixel3      <span
+class="cmt">@@ Call PlotPixel3 (params in r0,r1,r2)</span>
+        <span class="keyw">cmp</span>     r4, #<span 
+class="num">240</span>        <span 
+class="cmt">@@ - loop while(ii&lt;240)</span>
+        <span class="keyw">bne</span> .L4                 <span 
+class="cmt">@@ /</span>
+    <span class="cmt">@ --- using inline ---      <!--
+-->@@ Comment from ASM_CMT, indicating</span>
+    .<span class="keyw">code</span>   <span 
+class="num">16</span>                  <span 
+class="cmt">@@   the m3_plot() loop</span>
+    <span class="keyw">ldr</span>     r3, .L14            <span 
+class="cmt">@@ r3: starting/current address (vid_mem[12*240])</span>
+    <span class="keyw">ldr</span>     r2, .L14+<span 
+class="num">4</span>          <span 
+class="cmt">@@ r2: terminating address (vid_mem[13*240])</span>
+    <span class="keyw">mov</span>     r1, #<span 
+class="num">31</span>             <span 
+class="cmt">@@ r1: clr (CLR_RED)</span>
+.L6:
+        <span class="keyw">strh</span>    r1, [r3]        <span 
+class="cmt">@@ - *r3++ = clr</span>
+        <span class="keyw">add</span>     r3, r3, #<span 
+class="num">2</span>      <span class="cmt">@@ /</span>
+        <span class="keyw">cmp</span>     r3, r2          <span 
+class="cmt">@@ - loop while(r3&lt;r2)</span>
+        <span class="keyw">bne</span> .L6                 <span 
+class="cmt">@@ /</span>
+.L12:
+    <span class="keyw">b</span>   .L12
+.L15:
+    .<span class="keyw">align</span>  <span class="num">2</span>
+.L14:
+    .<span class="keyw">word</span>   <span 
+class="num">100669056</span>       <span 
+class="cmt">@@ 0600:1680 =&amp;vid_mem[12*240]</span>
+    .<span class="keyw">word</span>   <span 
+class="num">100669536</span>       <span 
+class="cmt">@@ 0600:1886 =&amp;vid_mem[13*240]</span>
+    .<span class="keyw">size</span>   main, .-main
+
+    .<span class="keyw">ident</span>  <span 
+class="str">&quot;GCC: (GNU) 4.1.0 (devkitARM release 18)&quot;</span>
+</pre>
+
+<p>
+After the initial shock of seeing a non-trivial assembly file 
+for the first time, you may be able to notice a few things, even 
+without any prior knowledge of assembly.
+</p>
+
+<ul>
+<li>
+  First, the assembly is much longer than the C file. This is not 
+  surprising as you can only have one instruction per line. While 
+  it makes the file longer, it also makes parsing each line easier.
+</li>
+<li>
+  There are four basic types of line formats: labels (lines ending
+  in a colon &lsquo;:&rsquo;), and instructions, and then in lines 
+  starting with a period or not. The instructions that start with 
+  a period are not really instructions, but <dfn>directives</dfn>; 
+  they are hints to the assembler, not part of the CPU's instruction 
+  set. As such, you can expect them to differ between assemblers.
+  <p>
+  The real instructions are usually composed of a mnemonic 
+  (<code>add</code>, <code>ldr</code>, <code>b</code>, 
+  <code>mov</code>) followed by register identifiers, numbers or 
+  labels. With a little thought, you should be able to piece together 
+  what each of these might do. For example, <code>add</code> performs 
+  an addition, <code>ldr</code> read something from memory, 
+  <code>b</code> branches, i.e. jumps to another memory address and 
+  <code>mov</code> does an assignment.
+  </p>
+</li>
+<li>
+  <p>
+  Function structure and calling. In GAS, a function is preceded by a 
+  number of directives for alignment, code section and instruction set, 
+  and a &lsquo;<code>.global</code>&rsquo; directive to make it 
+  globally visible. And a label to mark the start of the function of 
+  course. Note that for thumb functions, require a 
+  &lsquo;<code>.thumb_func</code>&rsquo; directive as well as either 
+  &lsquo;<code>.code 16</code>&rsquo; or 
+  &lsquo;<code>.thumb</code>&rsquo;. GCC also inserts a size info, but this are not required.
+  </p>
+  
+  <p>
+  Calling and returning from functions uses the <code>bl</code> and 
+  <code>bx</code> instructions. What isn't very clear from this code,
+  except in my added comments, is that the arguments of the functions 
+  are put in registers r0-r3. What you definitely don't see is that 
+  if there are more than 4 parameters, these are put on the stack, 
+  and that the return value is put in r0.
+  </p>
+  <p>
+  You <i>also</i> don't see that r0-r3 (and r12) are expected to be 
+  trashed in each function, so that the functions calling them should 
+  save their values if they want to use them after the call. The other 
+  registers (r4-r15) should be pushed into the stack by the called 
+  function. The standard procedure for function calling can be found 
+  in the <a href="http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042d/IHI0042D_aapcs.pdf
+" target="_blank">AAPCS</a>. 
+  Failure to adhere to this standard will break your code if you try 
+  to combine it with C or other asm.
+  </p>
+</li>
+<li>
+  Loading the CLR_LIME color (0x03E0) doesn't happen in one go, but 
+  is spread over two instructions: a move and a shift. Why not move 
+  it in one go? Well, because it can't. The ARM architecture only 
+  allows byte-sized immediate values; bigger things have to be 
+  constructed in other ways. I'll get back to this later.
+</li>
+<li>
+  The last thing I'd like to mention is the performance of the 
+  <code>PlotPixel3()</code> loop versus the <code>m3_plot()</code> 
+  loop, which you can find in the assembly because I've used a macro 
+  that can write asm comments in C. The <code>m3_plot()</code> loop 
+  contains 4 instructions. The <code>PlotPixel3()</code> loop 
+  takes 8, plus an additional 10 from the function itself. So that's 
+  4 instructions against 18 instructions. The C code <i>seems</i> 
+  pretty much the same, so what gives?
+  <p>
+  Welcome to the wonderful world of <i>function call overhead</i>. 
+  In principle, you only need the instructions of the shorter loop: 
+  a store, an add for the next destination, a compare and a 
+  loop-branch. Because  <code>m3_plot()</code> is inlined, the 
+  compiler can see that this is all that's required and optimize the 
+  loop accordingly. 
+  </p>
+  <p>
+  In contrast, because <code>PlotPixel()</code> is a full function, 
+  the caller does not know what its internal code is, hence 
+  no optimizations are possible. The loop should reset the registers 
+  on <i>every iteration</i> because <code>PlotPixel()</code> will 
+  clobber them, making the loop in <code>main()</code> unnecessarily
+  long. Furthermore, <code>PlotPixel3()</code> doesn't know under 
+  what conditions it will be called, so there are no optimizations 
+  there either. That means piecing together the destination in 
+  every iteration, rather than just incrementing it like the 
+  inline version does. All in all, you get a line plotter that's 
+  nearly 4 times as slow <i>purely</i> because you've used a function 
+  for a single line of code instead of inlining it via a macro 
+  or inline function. While anyone could have told you something 
+  like that would happen, actually looking at the differences leaves 
+  a stronger impression.
+  </p>
+</li>
+</ul>
+
+<p>
+There is a lot more that could be learned from this code, but I'll 
+leave it at this for now. The main aim was to show you what assembly 
+(in this case THUMB asm) looks like. In this small piece of code, 
+you can already see many of the elements that go into a full program.
+Even though the lack of variable identifiers is a bit of a pain, it 
+should be possible to follow along with the code, just as you would 
+with a C program. See, it's not all that bad now, is it?
+</p>
+
+<div class="note">
+<div class="nhcare">On working by example</div>
+<p>
+Looking at other people's code (in this case GCC's assembly) is a 
+nice way of learning how to make things work, it is <i>not</i> a 
+substitute for the manual. It may show you how to get something 
+done, there is always the danger of getting them done wrongly or 
+inefficiently. Programming is hardly ever trivial and you are likely 
+to miss important details: the compiler may not be not optimising 
+correctly, you could misinterpret the data, etc. This kind of learning 
+often leads to
+<a href="http://www.catb.org/~esr/jargon/html/C/cargo-cult-programming.html" target="_blank">cargo-cult 
+programming</a>, which often does more harm than good. If you want 
+examples of these problems, look at nearly all other GBA tutorials  
+and a lot of the available GBA demo code out there.
+</div>
+
+<h3 id="ssec-gen-as">Assembling assembly</h3>
+<p>
+The assembler of the GNU toolchains is known as the GNU assembler 
+or GAS, and the tool's name is <tt>arm-none-eabi-as</tt>. You can call 
+this directly, or you can use the familiar <tt>arm-none-eabi-gcc</tt> to 
+act as a gateway. The latter is probably a better choice, as it'll 
+allow the use of the C preprocessor with 
+&lsquo;<tt>-x assembler-with-cpp</tt>&rsquo;. That's right, you can 
+then use macros, C-style comments <i>and</i> #include if you wish. 
+A rule for assembling things might look something like this.
+</p>
+
+<pre class="proglist">
+AS      := arm-none-eabi-gcc
+ASFLAGS := -x assembler-with-cpp
+
+<span class="cmt"># Rule for assembling .s -&gt; .o files</span>
+$(SOBJ) : %.o : %.s
+	$(AS) $(ASFLAGS) -c $&lt; -o $@
+</pre>
+<p>
+This rule should work on the generated output of <tt>gcc -S</tt>. Note 
+that it will probably not assemble under other assemblers (ARM SDT, 
+Goldroad) because they have different standards for directives and 
+comments and the like. I'll cover some important directives of GAS 
+<a href="#sec-gas">later</a>, after we've seen what ARM assembly itself 
+is like.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-arm">23.3.
+  The ARM instruction set</h2>
+
+<p>
+The ARM core is a 
+<a href="http://en.wikipedia.org/wiki/RISC" target="_blank"><dfn>RISC</dfn></a> 
+(Reduced Instruction Set Computer) processor. Whereas 
+CISC (Complex Instruction Set Computer) chips have a rich 
+instruction set capable of doing complex things with a single
+instruction, RISC architectures try to go for more generalized 
+instructions and efficiency. They have a comparatively large number 
+of general-purpose registers and data instructions usually 
+use three registers: one destination and two operands. The length 
+of each instruction is the same, easing the decoding process, and 
+RISC processors strive for 1-cycle instructions.
+</p>
+<p>
+There are actually two instruction sets that the ARM core can use: 
+ARM code with 32bit instructions, and a subset of this called 
+THUMB, which has 16bit long instructions. Naturally, the ARM 
+set is more powerful, but because the most used instructions can 
+be found in both, an algorithm coded in THUMB uses less memory and
+may actually be faster if the memory buses are 16bit; which is
+true for GBA ROM and EWRAM and the reason why most of the code 
+is compiled to THUMB. The focus in this section will be the ARM 
+set, to learn THUMB is basically a matter of knowing which things 
+you cannot do anymore.
+</p>
+<p>
+The GBA processor's full name is 
+<a href="http://en.wikipedia.org/wiki/ARM7TDMI" target="_blank">ARM7TDMI</a>, 
+meaning it's an ARM 7 code (aka ARM v4), which can read <b>T</b>HUMB 
+code, has a <b>D</b>ebug mode and a fast <b>M</b>ultiplier. This 
+chapter has this processor in mind, but most of it should be 
+applicable to other chips in the ARM family as well.
+</p>
+
+<h3 id="ssec-arm-base">23.3.1.
+  Basic features</h3>
+
+<h4>ARM registers</h4>
+<p>
+ARM processors have 16 32bit registers named r0-r15, of which the 
+last three are usually reserved for special purposes:
+<b>r13</b> is used as the stack pointer (SP); <b>r14</b> is the 
+<dfn>link register</dfn> (LR), indicating where to return to from a 
+function, and <b>r15</b> is the program counter (PC).. The rest are 
+free, but there are a few conventions. The first four, <b>r0-r3</b>,
+are <dfn>argument</dfn> and/or <dfn>scratch registers</dfn>; 
+function parameters go here (or onto the stack), and these registers
+are expected to be clobbered by the called function. <b>r12</b> falls 
+into this category too. The rest, <b>r4-r11</b>, are also known as 
+<dfn>variable registers</dfn>.
+</p>
+
+<div class="lblock">
+<table id="tbl-regnames"
+  border=1 cellpadding=1 cellspacing=0>
+<caption align="bottom">
+  <b>Table 23.1</b>. Standard and alternative 
+  register names. 
+</caption>
+<tbody align="center">
+<tr> <th>std</th><th>gcc</th> <th>arm</th><th>description</th> </tr>
+<tr> 
+  <td>r0-r3</td> <td>r0-r3</td> <td>a1-a4</td> 
+  <td>argument / scratch</td>
+</tr>
+<tr> 
+  <td>r4-r7</td> <td>r4-r7</td> <td>v1-v4</td> 
+  <td>variable</td> 
+</tr>
+<tr> 
+  <td rowspan=2>r8<br>r9</td>
+  <td rowspan=2>r8<br>r9</td> <td>v5</td>
+  <td>variable</td> 
+</tr>
+  <tr> <td>v6/SB</td> <td>platform specific</td> </tr>
+<tr>
+  <td rowspan=2>r10<br>r11</td>
+  <td>sl</td> <td>v7</td> <td> variable </td>
+</tr>
+  <tr> <td>fp</td> <td>v8</td> 
+  <td> variable / frame pointer</tr>
+<tr>
+  <td>r12</td> <td>ip</td> <td>IP</td> 
+  <td>Intra-Procedure-call scratch</td>
+</tr>
+<tr>
+  <td>r13</td> <td>sp</td> <td>SP</td> 
+  <td>Stack Pointer</td>
+</tr>
+<tr>
+  <td>r14</td> <td>lr</td> <td>LR</td> 
+  <td>Link Register</td>
+</tr>
+<tr>
+  <td>r15</td> <td>pc</td> <td>PC</td> 
+  <td>Program Counter</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h4>ARM instructions</h4>
+<p>
+Nearly all of the possible instructions fall into the following 
+three classes: <dfn>data operations</dfn>, such as arithmetic and 
+bit ops; <dfn>memory operations</dfn>, load and store in many 
+guises and <dfn>branches</dfn> for jumping around code for loops,
+ifs and function calls. The speed of instructions almost follows 
+this scheme as well. Data instructions usually happen in a cycle; 
+memory ops uses two or three and branches uses 3 or 4. The 
+whole timing thing is actually a <i>lot</i> more complicated than
+this, but it's a useful rule of thumb.
+</p>
+
+<h4>All instructions are conditional</h4>
+<p>
+On most processors, you can only use branches conditionally, but 
+on ARM systems you can attach the conditionals to <i>all</i>
+instructions. This can be very handy for small if/else blocks, or 
+compound conditions, which would otherwise require the use of the 
+more time-consuming branches. The code below 
+contains asm versions of the familiar <code>max(a,&nbsp;b)</code>
+macro. The first one is the traditional version, which requires two 
+labels, two jumps (although only one of those is executed) and the
+two instructions that actually do the work. 
+The second version just uses two <code>mov</code>'s, but 
+only one of them will actually be executed thanks to the conditionals.
+As a result, it is shorter, faster and more readable. 
+</p>
+<p>
+These kinds of conditionals shouldn't be used blindly, though. Even 
+though you won't execute the instruction if the conditional fails, 
+you still need to read it from memory, which costs one cycle. As a rough 
+guideline, after about 3 skipped instructions, the branch would actually 
+be faster.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ // r2= max(r0, r1):
+@ r2= r0&gt;=r1 ? r0 : r1;
+
+@ Traditional code</span>
+    <span class="keyw">cmp</span>     r0, r1
+    <span class="keyw">blt</span> .Lbmax      <span 
+class="cmt">@ r1&gt;r0: jump to r1=higher code</span>
+    <span class="keyw">mov</span>     r2, r0  <span 
+class="cmt">@ r0 is higher</span>
+    <span class="keyw">b</span>   .Lrest      <span 
+class="cmt">@ skip r1=higher code</span>
+.Lbmax:
+    <span class="keyw">mov</span>     r2, r1  <span 
+class="cmt">@ r1 is higher</span>
+.Lrest:
+    ...             <span class="cmt">@ rest of code</span>
+    
+<span class="cmt">@ With conditionals; much cleaner</span>
+    <span class="keyw">cmp</span>     r0, r1
+    <span class="keyw">movge</span>   r2, r0  <span 
+class="cmt">@ r0 is higher</span>
+    <span class="keyw">movlt</span>   r2, r1  <span 
+class="cmt">@ r1 is higher</span>
+    ...             <span class="cmt">@ rest of code</span>
+</pre>
+
+<p>
+Another optional item is whether or not the status
+flags are set. Test instructions like <code>cmp</code> always 
+set them, but most of the other require an 
+&lsquo;<code>-s</code>&rsquo; affix. For example, 
+<code>sub</code> would not set the flags, but 
+<code>sub<b>s</b></code> would. Because this kinda clashes with the 
+plural &lsquo;s&rsquo;, I'm using adding an apostrophe for the
+plural form, so <code>subs</code> means <code>sub</code> with 
+status flags, but <code>sub</code>'s means multiple 
+<code>sub</code> instructions.
+</p>
+
+<div class="note">
+<div class="nhgood">All instructions are conditional</div>
+<p>
+Each instruction of the ARM set can be run conditionally, allowing 
+shorter, cleaner and faster code.
+</p>
+</div>
+
+<h4>The barrel shifter</h4>
+<p>
+A barrel shifter is a circuit dedicated to performing bit-shifts. 
+Well, shifts and rotations, but I'll use the word &lsquo;shift&rsquo; 
+for both here. The barrel shifter is part of the ARM core itself 
+and comes before any arithmetic so that you it can handle shifted 
+numbers very fast. The real value of the barrel shifter comes from the
+fact that almost all instructions can apply a shift to one of their 
+operands at no extra cost.
+</p>
+<p>
+There are four barrel-shift operations: 
+left shift (<code>lsl</code>), 
+logical right-shift (<code>lsr</code>), 
+arithmetic right-shift (<code>asr</code>) and 
+rotate-right (<code>ror</code>). The difference between arithmetic 
+and logical shift right is one of signed/unsigned numbers; see the
+<a href="numbers.htm#ssec-bitops-false">bit ops section</a> for 
+details.
+
+These operations are attached to the last register in an operation, 
+followed by an immediate value or a register. For example, instead of 
+simply <code>Rm</code> you can have 
+&lsquo;<code>Rm, lsl #2</code>&rsquo; means <code>Rm&lt;&lt;2</code> 
+and &lsquo;<code>Rm, lsr Rs</code>&rsquo; for <code>Rm&gt;&gt;Rs</code>.
+Because shifted registers can apply to almost all instructions and I 
+don't want to write it in full all the time, I will designate the 
+shifted register as <i>Op2</i>.
+</p>
+<p>
+Now this may seem like esoteric functionality, but it's actually 
+very useful and more common than you think. One application is  
+multiplications by 2<sup>n</sup>&plusmn;1, without resorting to 
+relatively slow multiplication instructions. For example, 
+<i>x</i>*9 is the same as <i>x</i>*(1+8) = 
+<i>x</i>&nbsp;+&nbsp;<i>x</i>*8 = <i>x</i>+(<i>x</i>&lt;&lt;3). This 
+can be done in a single <code>add</code>. Another use is in loading 
+values from arrays, for which indices would have to be multiplied by 
+the size of the elements to get the right addresses.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Multiplication by shifted add/sub</span>
+
+<span class="keyw">add</span> r0, r1, r1, lsl #<span 
+class="num">3</span>      <span 
+class="cmt">@ r0= r1+(r1&lt;&lt;3) = r1*9</span>
+<span class="keyw">rsb</span> r0, r1, r1, lsl #<span 
+class="num">4</span>      <span 
+class="cmt">@ r0= (r1&lt;&lt;2)-r1 = r1*15</span>
+
+<span class="cmt">@ word-array lookup: r1= address (see next section)</span>
+<span class="keyw">ldr</span> r0, [r1, r2, lsl #<span 
+class="num">2</span>]    <span class="cmt">@ u32 *r1; r0= r1[r2]</span>
+</pre>
+
+<p>
+Other uses are certainly possible as well. Like the conditional, you 
+might not really need use of shifted <code>add</code>'s and such, but 
+they allow for some <i>wonderfully</i> optimized code in the hands of 
+the clever programmer. These are things that make assembly fun.
+</p>
+
+<div class="note">
+<div class="nhgood">Shifts are free!</div>
+<p>
+Or at least very nearly so. Shifts-by-value can be performed at no 
+extra cost, and shifts-by-register cost only one cycle. Actually, 
+bit-rotates behave like this as well, but they're rather rare and 
+since I don't know of the correct term that encompasses both, I'll 
+use the word &ldquo;shift&rdquo; for both.
+</p>
+</div>
+
+<h4>Restricted use of immediate values</h4>
+<p>
+And now for one of the points that makes ARM assembly less fun. As I 
+said, each instruction is 32bits long. Now, there are 16 condition 
+codes, which take up 4 bits of the instruction. Then there's 2x four
+for the destination and first operand registers, one for the 
+set-status flag, and then an assorted number of bits for other matters 
+like the actual opcodes. The bottom line is that you only have 12 
+bits left for any immediate value you might like to use.
+</p>
+<p>
+That's right 12. <b>A whole 12 bits</b>. You may have already figured 
+out that, since this will only allow for 4096 distinct values, this 
+presents a bit of a problem. And you'd be right. 
+This is one of the major points of bad news for RISC processors:
+after assigning bits to instruction-type, registers and other fields, 
+there's very little room for actual numbers left. So how is one 
+to load a number like <code>0601:0000</code> (object VRAM) then? 
+Well &hellip; you <i>can't</i>! At least, not in one go.
+</p>
+<p>
+So, there is only a limited amount of numbers that can be used 
+directly; the rest must be pieced together from multiple smaller 
+numbers. Instead of just taking the 12 bits for a single integer, 
+what the designers have done is split it into an 8bit number 
+(<i>n</i>) and a 4bit rotation field (<i>r</i>). The barrel shifter 
+will take care of the rest. The full immediate value <i>v</i> is 
+given by: 
+
+<table id="eq-imm">
+<tr>
+  <td class="eqnrcell">(23.1)</td>
+  <td class="eqcell">
+    <i>v</i>&nbsp;=&nbsp;<i>n</i>&nbsp;ror&nbsp;2*<i>r</i>.
+  </td>
+</tr>
+</table>
+
+<p>
+This means that you can create values like 255 (<i>n</i>=255, 
+<i>r</i>=0) and 0x06000000 (<i>n</i>=6, <i>r</i>=4 (remember, 
+rotate-<i>right</i>)). However, 511 and 0x06010000 are still invalid 
+because the bit-patterns can't fit into one byte. For these invalid 
+numbers you have two options: construct them in multiple instructions, 
+or load them from memory. Both of these can become quite expensive so 
+if it is possible to avoid them, do so.
+</p>
+<p>
+The faster method of forming bigger numbers is a matter of debate. 
+There are many factors involved: the number in mind, memory section,
+instruction set and amount of space left, all interacting in nasty 
+ways. It's probably best not to worry about it too much, but as 
+a guideline, I'd say if you can do it in two data instructions do 
+so; if not, use a load. The easiest way of creating big numbers 
+is with a special form of the <code>ldr</code> instruction: 
+&lsquo;<code>ldr Rd,=num</code>&rsquo; (note: no &lsquo;#&rsquo;!). 
+The assembler will turn this into a mov if the number allows it, or 
+an <code>ldr</code> if it doesn't. The space that the number needs 
+will be created automatically as well.
+</p>
+
+<pre class="proglist">
+    <span class="cmt">@ form 511(0x101) with mov's</span>
+    <span class="keyw">mov</span>     r0, #<span 
+class="num">256</span>    <span 
+class="cmt">@ 256= 1 ror 24, so still valid</span>
+    <span class="keyw">add</span>     r0, #<span 
+class="num">255</span>    <span class="cmt">@ 256+255 = 511</span>
+
+    <span class="cmt">@ Load 511 from memory with special ldr</span>
+    <span class="cmt">@ NOTE: no '#' !</span>
+    <span class="keyw">ldr</span>     r0,=<span class="num">511</span>
+</pre>
+
+<p>
+That there is only room for an 8bit number + 4bit rotate for immediate 
+operands is something you'll just have to learn to live with. If the 
+assembler occasionally complains about invalid constants, you now know 
+what it means and how you can correct for it. Oh, and if you thought 
+this was bad, think of how it would work for THUMB code, which only 
+has 16 bits to work with.
+</p>
+
+<div class="note">
+<div class="nhcare">The only valid immediate values are rotated 
+  bytes</div>
+<p>
+When instructions allow immediate values, the only permissible values 
+are those that can be reduced to a byte rotated by an even number. 
+0xFF and 0x100 are allowed, but 0x101 is not. This has consequences 
+for data operations, but also for memory addressing since it will 
+not be possible to load a full 32bit address in one go. You can either 
+construct the larger value out of smaller parts, or use a 
+load-assignment construct: 
+&lsquo;<code>ldr <i>Rd</i>,=<i>num</i></code>&rsquo; which the assembler 
+will convert into a <code>mov</code> if possible, or a PC-relative load 
+if not. 
+</p>
+</div>
+
+<div class="note">
+<div class="nhgood">Remember the previous note</div>
+<p>
+Is this worth a separate note? Maybe not, but the previous note is 
+important enough to remember. It is not exactly intuitive that code 
+should behave that way and if you found yourself staring at 
+the enigmatic 
+<a href="http://forum.gbadev.org/viewtopic.php?t=9602" target="_blank">invalid 
+constant</a> 
+error message, you'd probably be lost without this bit of info. 
+</p>
+</div>
+
+<h3 id="ssec-arm-data-ins">23.3.2.
+  Data instructions</h3>
+<p>
+The data operations carry out the calculations of a program, which 
+includes both arithmetic and logical operations. You can find a
+summary of the data instructions in 
+table 23.2. While this lists them in four 
+groups, the only real division is between the multiplies and 
+the rest. As you can see, there is <b>no</b> division instruction. 
+While this can be considered highly annoying, as it turns out the 
+need for division is actually quite small &ndash; small enough to
+cut it out of the instruction set, anyway.
+</p>
+<p>
+Unlike some processors, ARM can only perform data processing on
+registers, not on memory variables directly. Most data instructions
+use one destination register and two operands. The first operand is 
+always a register, the second can be four things:
+an immediate value or register ( #<i>n</i> / <code>Rm</code>) or a 
+register shifted by an immediate value or register 
+(&lsquo;<code>Rm, lsl #<i>n</i></code>&rsquo;, 
+&lsquo;<code>Rm, lsl Rs</code>&rsquo;, and similar for 
+<code>lsr</code>, <code>asr</code> and <code>ror</code>). Because 
+this arrangement is quite common, it is often referred to as simply 
+<i>Op2</i>, even if it's not actually a second operand.
+</p>
+<p>
+Like all instructions, data instructions can be executed 
+conditionally by adding the appropriate affix. They can also alter 
+the status flags by appending the -<code>s</code> prefix. When using 
+both, the conditional affix always comes first.
+</p>
+
+<div class="cblock">
+<table id="tbl-ins-data">
+<caption align="bottom">
+  <b>23.2</b>: Data processing instructions.
+  Basic format <code>op{cond}{s} Rd, Rn, Op2</code>, 
+  <code>cond</code> and <code>s</code> are the optional condition and 
+  status codes, and <i>Op2</i> a shifted register.
+</caption>
+
+<tr>
+<td>
+  <table  border=1 cellpadding=2 cellspacing=0>
+    <tr align="center"><th>opcode		<th>operands	<th> function
+    <tr><th colspan=3 align="center">Arithmetic				</tr>
+    <tr><td>adc		<td>Rd, Rn, Op2 <td>Rd = Rn + Op2 + C	</tr>
+    <tr><td>add		<td>Rd, Rn, Op2 <td>Rd = Rn + Op2		</tr>
+    <tr><td>rsb		<td>Rd, Rn, Op2 <td>Rd = Op2 - Rn		</tr>
+    <tr><td>rsc		<td>Rd, Rn, Op2 <td>Rd = Op2 - Rn - !C	</tr>
+    <tr><td>sbc		<td>Rd, Rn, Op2 <td>Rd = Rn - Op2 -!C	</tr>
+    <tr><td>sub		<td>Rd, Rn, Op2 <td>Rd = Rn - Op2		</tr>
+    <tr><th colspan=3 align="center">Logical ops				</tr>
+    <tr><td>and		<td>Rd, Rn, Op2 <td>Rd = Rn &amp; Op2	</tr>
+    <tr><td>bic		<td>Rd, Rn, Op2 <td>Rd = Rn &amp;~ Op2	</tr>
+    <tr><td>eor		<td>Rd, Rn, Op2 <td>Rd = Rn ^ Op2		</tr>
+    <tr><td>mov		<td>Rd, Op2		<td>Rd = Op2			</tr>
+    <tr><td>mvn		<td>Rd, Op2		<td>Rd = ~Op2			</tr>
+    <tr><td>orr		<td>Rd, Rn, Op2 <td>Rd = Rn | Op2		</tr>
+  </table>
+</td>
+<td width=10%>&nbsp;</td>
+<td>
+  <table  border=1 cellpadding=2 cellspacing=0>
+    <tr align="center"><th>opcode		<th>operands	<th> function
+    <tr><th colspan=3 align="center">Status ops			</tr>
+    <tr><td>cmp		<td>Rn, Op2		<td>Rn - Op2		</tr>
+    <tr><td>cmn		<td>Rn, Op2		<td>Rn + Op2		</tr>
+    <tr><td>teq		<td>Rn, Op2		<td>Rn &amp; Op2	</tr>
+    <tr><td>tst		<td>Rn, Op2		<td>Rn ^ Op2		</tr>
+
+    <tr><th colspan=3 align="center">Multiplies			</tr>
+    <tr><td>mla		<td>Rd, Rm, Rs, Rn		<td>Rd = Rm * Rs + Rn	</tr>
+    <tr><td>mul		<td>Rd, Rm, Rs			<td>Rd = Rm * Rs		</tr>
+    <tr><td>smlal	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo += Rm * Rs	</tr>
+    <tr><td>smull	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo = Rm * Rs	</tr>
+    <tr><td>umlal	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo += Rm * Rs	</tr>
+    <tr><td>umull	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo = Rm * Rs	</tr>
+  </table>
+</td>
+</tr>
+</table>
+</div>
+
+<p>
+The first group, arithmetic, only contains variants of addition and 
+subtraction. <code>add</code> and <code>sub</code> are their base forms. 
+<code>rsb</code> is a special thing that reverses the operand order; 
+the difference with the regular <code>sub</code> is that <i>Op2</i> 
+is now the <i>minuend</i> (the thing subtracted from). Only <i>Op2</i> 
+is allowed to have immediate values and shifted registers, which allows 
+you to negate values (0&minus;<i>x</i>) and fast-multiply by 
+2<sup>n</sup>&minus;1.
+</p>
+<p>
+The variants ending in &lsquo;<code>c</code>&rsquo; are additions and 
+subtractions with carry, which allows for arithmetic for values larger 
+than the register size. For example, consider you have 8bit registers 
+and want to add 0x00FF and 0x0104. Because the latter doesn't fit into 
+one register, you have to split it and then add twice, starting with 
+with the least significant byte. This gives 0xFF+0x04=0x103, 
+represented by 0x02 in the destination register and a set carry flag. 
+For the second part you have to add 0x00 and 0x01 from the operands, 
+<i>and</i> the carry from the lower byte, giving 0x00+0x01+1 = 0x02. 
+Now string the separate parts together to give 0x0203.
+</p>
+<p>
+Because ARM registers are 32bit wide you probably won't be using the 
+those instructions much, but you never know.
+</p><br>
+
+<p>
+The second group are the bit operations, most of which you should be 
+familiar with already. The all have exact matches in C operators, 
+with the exception of bit-clear. However, the value of such an 
+instruction should be obvious. You will notice a distinct absence of 
+shift instructions here, for the simple reason that they're not 
+really necessary: thanks to the barrel shifter, the 
+<code>mov</code> instruction can be used for shifts and rotates. 
+&lsquo;r1 = r0&lt;&lt;4&rsquo; could be written as 
+&lsquo;<code>mov r1, r0, lsl #4</code>&rsquo;. 
+</p>
+<p>
+I have mentioned this a couple of times now, but as we're dealing with 
+another language now it bares repeating: there is a difference 
+between right-shifting a signed and unsigned numbers. Right-shifts 
+remove bits from the top; unsigned numbers should be zero-extended 
+(filled with 0), but signed numbers should be sign-extended (filled 
+with the original MSB). This is the difference between a 
+<dfn>logical shift right</dfn> and an <dfn>arithmetic shift 
+right</dfn>. This doesn't apply to left-shifts, because that fills 
+zeroes either way.
+</p><br>
+
+<p>
+The third group isn't much of a group, really. The status flag 
+operations set the status bits according to the results of their 
+functionality. Now, you can do this with the regular instructions 
+as well; for example, a compare (<code>cmp</code>) is basically 
+a subtraction that also sets the status flags, i.e., a 
+<code>subs</code>. The only real difference is that this time there's 
+no register to hold the result of the operation. 
+</p><br>
+
+<p>
+Lastly, the multiplication formats. At the table indicates, you 
+cannot use immediate values; if you want to multiply with a constant
+you <i>must</i> load it into a register first. Second, no 
+<i>Op2</i> means no shifted registers. There is also a third rule 
+that Rd and Rm can't use the same register, because of how the 
+multiplication algorithm is implemented. That said, there don't
+<i>seem</i> to be any adverse effects using Rd=Rm.
+</p>
+<p>
+The instruction <code>mla</code> stands for &lsquo;multiply with 
+accumulate&rsquo;, which can be handy for dot-products and the like. 
+The <code>mull</code> and <code>mlal</code> instructions are for 
+64bit arithmetic, useful for when you expect the result not to fit 
+into 32bit registers.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Possible variations of data instructions</span>
+<span class="keyw">add</span>     r0, r1, #<span 
+class="num">1</span>          <span class="cmt">@ r0 = r2 + 1</span>
+<span class="keyw">add</span>     r0, r1, r2          <span 
+class="cmt">@ r0 = r1 + r2</span>
+<span class="keyw">add</span>     r0, r1, r2, <span 
+class="keyw">lsl</span> #<span class="num">4</span>  <span 
+class="cmt">@ r0 = r1 + r2&lt;&lt;4</span>
+<span class="keyw">add</span>     r0, r1, r2, <span 
+class="keyw">lsl</span> r3  <span 
+class="cmt">@ r0 = r1 + r2&lt;&lt;r3</span>
+
+<span class="cmt">@ op= variants</span>
+<span class="keyw">add</span>     r0, r0, #<span 
+class="num">2</span>          <span class="cmt">@ r0 += 2;</span>
+<span class="keyw">add</span>     r0, #<span 
+class="num">2</span>              <span 
+class="cmt">@ r0 += 2; alternative  (but not on all assemblers)</span>
+
+<span class="cmt">@ Multiplication via shifted add/sub</span>
+<span class="keyw">add</span>     r0, r1, r1, <span 
+class="keyw">lsl</span> #<span class="num">4</span>  <span
+class="cmt">@ r0 = r1 + 16*r1 = 17*r1</span>
+<span class="keyw">rsb</span>     r0, r1, r1, <span 
+class="keyw">lsl</span> #<span class="num">4</span>  <span 
+class="cmt">@ r0 = 16*r1 - r1 = 15*r1</span>
+<span class="keyw">rsb</span>     r0, r1, #<span 
+class="num">0</span>          <span 
+class="cmt">@ r0 =     0 - r1 = -r1</span>
+
+<span class="cmt">@ Difference between asr and lsr</span>
+<span class="keyw">mvn</span>     r1, #<span 
+class="num">0</span>              <span 
+class="cmt">@ r1 = ~0 = 0xFFFFFFFF = -1</span>
+<span class="keyw">mov</span>     r0, r1, <span 
+class="keyw">asr</span> #<span class="num">16</span>     <span 
+class="cmt">@ r0 = -1>>16 = -1</span>
+<span class="keyw">mov</span>     r0, r1, <span 
+class="keyw">lsr</span> #<span class="num">16</span>     <span 
+class="cmt">@ r0 = 0xFFFFFFFF>>16 = 0xFFFF = 65535</span>
+
+
+<span class="cmt">@ Signed division using shifts. r1= r0/16
+@ if(r0&lt;0)
+@     r0 += 0x0F;
+@  r1= r0&gt;&gt;4;</span>
+<span class="keyw">mov</span>     r1, r0, <span 
+class="keyw">asr</span> #<span class="num">31</span>         <span 
+class="cmt">@ r0= (r0&gt;=0 ? 0 : -1);</span>
+<span class="keyw">add</span>     r0, r0, r1, <span 
+class="keyw">lsr</span> #<span class="num">28</span>     <span 
+class="cmt">@ += 0 or += (0xFFFFFFFF&gt;&gt;28 = 0xF)</span>
+<span class="keyw">mov</span>     r1, r0, <span 
+class="keyw">asr</span> #<span class="num">4</span>          <span 
+class="cmt">@ r1 = r0&gt;&gt;4;</span>
+</pre>
+
+<h3 id="ssec-arm-mem">23.3.3.
+  Memory instructions: load and store</h3>
+<p>
+Because ARM processors can only perform data processing on 
+registers, interactions with memory only come in two flavors: 
+loading values from memory into registers and 
+storing values into memory from registers. 
+</p>
+<p>
+The basic instructions for that are <code>ldr</code> 
+(LoaD Register) and <code>str</code> (STore Register), which 
+load and store words. Again, the most general form uses two 
+registers and an <i>Op2</i>:
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">
+  <td class="eqcell">
+    <i>op</i>{cond}{type} Rd, [Rn, <i>Op2</i>]
+</table>
+
+<p>
+Here <i>op</i> is either <code>ldr</code> or <code>str</code>. 
+Because they're so similar in appearance, I will just use 
+<code>ldr</code> for the remainder of the discussion on syntax, 
+except when things are different. The condition flag again goes 
+directly behind the base opcode. The <i>type</i> refers to the 
+datatype to load (or store), which can be words, halfwords or 
+bytes. The word forms do not use any extension, halfwords use 
+<code>-h</code> or <code>-sh</code>, and bytes use 
+<code>-b</code> and <code>-sb</code>. The extra <code>s</code> 
+is to indicate a signed byte or halfword. Because the registers 
+are 32bit, the top bits need to be sign-extended or zero-extended, 
+depending on the desired datatype. 
+</p>
+<p>
+The first register here, <code>Rd</code> can be either the 
+destination or source register. The thing between brackets always 
+denotes the memory address; <code>ldr</code> means load 
+<i>from</i> memory, in which case <code>Rd</code> is the 
+destination, and <code>str</code> means store <i>to</i> memory, 
+so <code>Rd</code> would be the source there. <code>Rn</code>
+is known as the <dfn>base register</dfn>, for reasons that we will 
+go into later, and <i>Op2</i> often serves as an offset. The 
+combination works very much like array indexing and pointer 
+arithmetic.
+</p>
+
+<div class="note">
+<div class="nh">Memory ops vs C pointers/arrays</div>
+<p>
+To make the comparison to C a little easier, I will sometimes indicate 
+what happens using pointers, but in order to do that I will have to 
+indicate the type of the pointer somehow. I could use some horrid 
+casting notation, but it would be easiest to use a form of arrays for 
+this, and use the register-name + an affix to show the data type. I'll 
+use &lsquo;_w&rsquo; for words, &lsquo;_h&rsquo; for halfwords, and 
+&lsquo;_b&rsquo; for bytes, and &lsquo;_sw&rsquo;, etc. for their 
+signed versions. For example, <code>r0_sh</code> would indicate that 
+<code>r0</code> is a signed halfword pointer. This is just a useful 
+bit of shorthand, not actually part of assembly itself.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Basic load/store examples. Assume r1 contains <!--
+-->a word-aligned address</span>
+<span class="keyw">ldr</span>     r0, [r1]    <span 
+class="cmt">@ r0= *(u32*)r1; //or r0= r1_w[0]; </span>
+<span class="keyw">str</span>     r0, [r1]    <span 
+class="cmt">@ *(u32*)r1= r0; //or r1_w[1]= r0; </span>
+</pre>
+</div>
+
+<h4>Addressing modes</h4>
+<p>
+There are several ways of interacting, known as 
+<dfn>addressing modes</dfn>. The simplest form is 
+<i>direct addressing</i>, where you indicate the address directly 
+via an immediate value. However, that mode is unavailable to 
+ARM systems because full addresses don't fit in the instruction.
+What we do have is several indirect addressing forms.
+</p><br>
+
+<p>
+The first available form is <dfn>register indirect addressing</dfn>, 
+which gets the address from a register, like 
+&lsquo;<code>ldr Rd, [Rn]</code>&rsquo;.
+An extension of this is <dfn>pre-indexed addressing</dfn>, 
+which adds an offset to the base register before the load. The 
+base form of this is 
+&lsquo;<code>ldr Rd, [Rn, <i>Op2</i>]</code>&rsquo;. This is very 
+much like array accesses. For example
+&lsquo;<code>ldr r1, [r0, r2, lsl #2]</code>&rsquo; 
+corresponds to <code>r0_w[r2]</code>: an word-array load using 
+<code>r2</code> as the index.
+</p>
+<p>
+Another special form of this is <dfn>PC-relative addressing</dfn>,
+which makes up for not having direct addressing. Suppose you have 
+a variable in memory somewhere. While you may not be able to use 
+that variable's address directly, what you can do is store the 
+address close to where you are in the code. <i>That</i> address 
+is at a certain allowed offset from the program counter register 
+(PC), so you could load the variable's address from there and then 
+read the variable's contents. You can also use this to load
+constants that are too large to fit into a shifted byte.
+</p>
+<p>
+While it is possible to calculate the required offset manually, 
+you'll be glad to know you can let the assembler do this for you. 
+There are two ways of doing this. The first is to create a
+<dfn>data-pool</dfn> where you intend to put the addresses and 
+constants, and label it. You can then get its address via
+&lsquo;<code>ldr Rd, <i>LabelName</i></code>&rsquo; (note the 
+absence of brackets here). The assembler will turn this into 
+pc-relative loads. The second method is to let the assembler do 
+all the work by using 
+&lsquo;<code>ldr Rd,=<i>foo</i></code>&rsquo;, where <i>foo</i> 
+is the variable name or an immediate value. The assembler will 
+then allocate space for <i>foo</i> itself. Please remember that 
+using <i>=varname</i> does <b>not</b> load the variable itself, 
+only its address.
+</p><br>
+
+<p>
+And then there are the so-called <dfn>write-back</dfn> modes. 
+In the pre-index mode, the final address was made up of 
+<code>Rn</code>+<i>Op2</i>, but that had no effect on 
+<code>Rn</code>. With write-back, the final address is put 
+in <code>Rn</code>. This can be useful for walking through
+arrays because you won't need an actual index.
+</p>
+<p>
+There are two forms of write-back, pre-indexing and post-indexing. 
+Pre-indexing write-back works much like the normal write-back and
+is indicated by an exclamation mark after the brackets: 
+&lsquo;<code>ldr Rd, [Rn, <i>Op2</i>]!</code>&rsquo;. Post-indexing 
+doesn't add <i>Op2</i> to the address (and <code>Rn</code>) until 
+<i>after</i> the memory access; its format is 
+&lsquo;<code>ldr Rd, [Rn], <i>Op2</i></code>&rsquo;.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Examples of addressing modes
+@ NOTE: *(u32*)(address+ofs) is the same as ((u32*)address)[ofs/4]
+@   That's just how array/pointer offsets work</span>
+    <span class="keyw">mov</span>     r1, #<span class="num">4</span>
+    <span class="keyw">mov</span>     r2, #<span class="num">1</span>
+    <span class="keyw">adr</span>     r0, fooData     <span 
+class="cmt">@ u32 *src= fooData;
+@ PC-relative and indirect addressing</span>
+    <span class="keyw">ldr</span>     r3, fooData             <span
+class="cmt">@ r3= fooData[0];   // PC-relative</span>
+    <span class="keyw">ldr</span>     r3, [r0]                <span
+class="cmt">@ r3= src[0];       // Indirect addressing</span>
+    <span class="keyw">ldr</span>     r3, fooData+<span 
+class="num">4</span>           <span class="cmt">@ r3= fooData[1];   // PC-relative</span>
+    <span class="keyw">ldr</span>     r3, [r0, r1]            <span
+class="cmt">@ r3= src[1];       // Pre-indexing</span>
+    <span class="keyw">ldr</span>     r3, [r0, r2, <span
+class="keyw">lsl</span> #<span class="num">2</span>]    <span
+class="cmt">@ r3= src[1]        // Pre-index, via r2
+@ Pre- and post-indexing write-back</span>
+    <span class="keyw">ldr</span>     r3, [r0, #<span
+class="num">4</span>]!           <span class="cmt">@ src++;    r3= *src;</span>
+    <span class="keyw">ldr</span>     r3, [r0], #<span
+class="num">4</span>            <span class="cmt">@ r3= *src; src++;
+@ u32 fooData[3]= { 0xF000, 0xF001, 0xF002 };</span>
+fooData:
+    .<span class="keyw">word</span>   <span class="num">0x0000F000</span>
+    .<span class="keyw">word</span>   <span class="num">0x0000F001</span>
+    .<span class="keyw">word</span>   <span class="num">0x0000F002</span>
+</pre>
+
+<div class="note">
+<div class="nhgood">PC-relative specials</div>
+<p>
+PC-relative instructions are common, and have a special 
+shorthand that is easier and shorter to use than creating a pool of 
+data to load from. The format for this is 
+&lsquo;<code>ldr Rd,=<i>foo</i></code>&rsquo;, where <i>foo</i> is 
+a label or an immediate value. In both cases, a pool is created to 
+hold these numbers automatically. Note that the value for the label 
+is its <i>address</i>, not the address' contents.
+</p>
+<p>
+If the label is near enough you can also use <code>adr</code>, which 
+is assembled to a PC-add instruction. This will not create a 
+pool-entry.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Normal pc-relative method:
+@   create a nearby pool and load from it</span>
+    <span class="keyw">ldr</span>     r0, .Lpool      <span 
+class="cmt">@ Load a value</span>
+    <span class="keyw">ldr</span>     r0, .Lpool+<span 
+class="num">4</span>    <span class="cmt">@ Load far_var's address</span>
+    <span class="keyw">ldr</span>     r0, [r0]        <span 
+class="cmt">@ Load far_var's contents</span>
+.Lpool:
+    .<span class="keyw">word</span>   <span class="num">0x06010000</span>
+    .<span class="keyw">word</span>   far_var
+</pre>
+
+<pre class="proglist">
+<span class="cmt">@ Shorthand: use ldr= <!--
+-->and GCC will manage the pool for you</span>
+    <span class="keyw">ldr</span>     r0,=<span 
+class="num">0x06010000</span>  <span class="cmt">@ Load a value</span>
+    <span class="keyw">ldr</span>     r0,=far_var     <span 
+class="cmt">@ Load far_var's address</span>
+    <span class="keyw">ldr</span>     r0, [r0]        <span 
+class="cmt">@ Load far_var's contents</span>
+</pre>
+
+<p>
+Note that I'm not actually creating <code>far_var</code> here; just 
+storage room for its address. Creation of variables is covered later.
+</p>
+</div>
+
+<h4>Data types</h4>
+
+<p>
+It is also possible to load/store bytes and halfwords. The opcodes 
+for loads are <code>ldrb</code> and <code>ldrh</code> for unsigned, 
+and <code>ldrsb</code> and <code>ldrsh</code> for signed bytes and 
+halfwords, respectively. The &lsquo;r&rsquo; in the signed versions is
+actually optional, so you'll also see <code>ldsb</code> and 
+<code>ldsh</code> now and then. As stores can cast away the more 
+significant bytes anyway, <code>strb</code> and <code>strh</code> 
+will work for both signed and unsigned stores..
+</p>
+<p>
+All the things you can do with <code>ldr/str</code>, you can do with 
+the byte and halfword versions as well: PC-relative, indirect, 
+pre/post-indexing it's all there &hellip; with one exception. The 
+signed-byte load (<code>ldsb</code>) and <i>all</i> of the halfword 
+loads and stores cannot do shifted register-loads. Only 
+<code>ldrb</code> has the complete functionality of the word
+instructions. The consequence is that signed-byte or halfword arrays 
+may require extra instructions to keep the offset and index in check.
+</p>
+<p>
+Oh, one more thing: alignment. In C, you could rely on the compiler to 
+align variables to their preferred boundaries. Now that you're taking 
+over from the compiler, it stands to reason that you're also in 
+charge of alignment. This can be done with the 
+&lsquo;.align <i>n</i>&rsquo; directive, with aligns the next 
+piece of code or data to a 2<sup>n</sup> boundary. Actually, you're 
+supposed to properly align code as well, something I'm taking for 
+granted in these snippets because it makes things easier.
+</p>
+
+<pre class="proglist">
+    <span class="keyw">mov</span>     r2, #<span class="num">1</span>
+<span class="cmt">@ Byte loads</span>
+    <span class="keyw">adr</span>     r0, bytes
+    <span class="keyw">ldrb</span>    r3, bytes       <span 
+class="cmt">@ r3= bytes[0];     // r3= 0x000000FF= 255</span>
+    <span class="keyw">ldrsb</span>   r3, bytes       <span 
+class="cmt">@ r3= (s8)bytes[0]; // r3= 0xFFFFFFFF= -1</span>
+    <span class="keyw">ldrb</span>    r3, [r0], r2    <span 
+class="cmt">@ r3= *r0_b++;      // r3= 255, r0++;</span>
+<span class="cmt">@ Halfword loads</span>
+    <span class="keyw">adr</span>     r0, hwords
+    <span class="keyw">ldrh</span>    r3, hwords+<span 
+class="num">2</span>    <span 
+class="cmt">@ r3= words[1];     // r3= 0x0000FFFF= 65535</span>
+    <span class="keyw">ldrsh</span>   r3, [r0, #<span 
+class="num">2</span>]    <span 
+class="cmt">@ r3= (s16)r0_h[1]; // r3= 0xFFFFFFFF= -1</span>
+    <span class="rem">ldrh    r3, [r0, r2, lsl #1]    <!--
+-->@ r3= r0_h[1]? <b>No! Illegal instruction :(</b></span>
+
+<span class="cmt">@ Byte array: u8 bytes[3]= { 0xFF, 1, 2 };</span>
+bytes:
+    .<span class="keyw">byte</span>   <span class="num">0xFF</span>, <span 
+class="num">1</span>, <span class="num">2</span>
+<span class="cmt">@ Halfword array u16 hwords[3]= <!--
+-->{ 0xF001, 0xFFFF, 0xF112 };</span>
+    .<span class="keyw">align</span>  <span class="num">1</span>    <span 
+class="cmt">@ align to even bytes <b>REQUIRED!!!</b></span>
+hwords:
+    .<span class="keyw">hword</span>  <span 
+class="num">0xF110</span>, <span class="num">0xFFFF</span>, <span 
+class="num">0xF112</span>
+</pre>
+
+<h4>Block transfers</h4>
+<p>
+Block transfers allow you to load or store multiple successive words 
+into registers in one instruction. This is useful because it saves on 
+instructions, but more importantly, it saves time because individual 
+memory instructions are quite costly and with block transfers you 
+only have to pay the overhead once. The basic instructions for block
+transfers are <code>ldm</code> (LoaD Multiple) and 
+<code>stm</code> (STore Multiple), and the operands are a base 
+register (with an optional exclamation mark for <code>Rd</code> 
+write-back) and a list of registers between braces.
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">
+  <td class="eqcell">
+    <i>op</i>{cond}{mode} Rd{!}, {<i>Rlist</i>}
+</table>
+
+<p>
+This register list can be comma separated, or hyphenated to indicate a 
+range. For example, <code>{r4-r7, lr}</code> means registers r4, r5, 
+r6, r7 and r14. The order in which the registers are actually loaded 
+or stored are <b>not</b> based on the order in which they are 
+specified in this list! Rather, the list indicates the number of words 
+used (in this case 5), and the order of addresses follows the index of
+the registers: the lowest register uses the lowest address in the
+block, etc.
+</p>
+<p>
+The block-transfer opcodes can take a number of affixes that determine 
+how the block extends from the base register <code>Rd</code>. The four 
+possibilities are: 
+<code>-IA</code>/<code>-IB</code> (Increment After/Before) and
+<code>-DA</code>/<code>-DB</code> (Decrement After/Before). The 
+differences are essentially those between pre/post-indexing and 
+incrementing or decrementing from the base address. It should be noted 
+that these increments/decrements happen regardless of whether the base 
+register carries an exclamation mark or not: that thing only indicates 
+that the base register <i>itself</i> is updated afterwards.
+</p>
+
+<pre class="proglist">
+    <span class="keyw">adr</span>     r0, words+<span 
+class="num">16</span>    <span class="cmt">@ u32 *src= &amp;words[4];</span>
+                            <span 
+class="cmt">@             r4, r5, r6, r7</span>
+    <span class="keyw">ldmia</span>   r0, {r4-r7}     <span 
+class="cmt">@ *src++    :  0,  1,  2,  3</span>
+    <span class="keyw">ldmib</span>   r0, {r4-r7}     <span 
+class="cmt">@ *++src    :  1,  2,  3,  4</span>
+    <span class="keyw">ldmda</span>   r0, {r4-r7}     <span
+class="cmt">@ *src--    : -3, -2, -1,  0</span>
+    <span class="keyw">ldmdb</span>   r0, {r4-r7}     <span 
+class="cmt">@ *--src    : -4, -3, -2, -1</span>
+    .<span class="keyw">align</span>  <span class="num">2</span>
+words:
+    .<span class="keyw">word</span>   -<span
+class="num">4</span>, -<span class="num">3</span>, -<span 
+class="num">2</span>, -<span class="num">1</span>
+    .<span class="keyw">word</span>    <span 
+class="num">0</span>,  <span class="num">1</span>,  <span 
+class="num">2</span>,  <span class="num">3</span>, <span class="num">4</span>
+</pre>
+
+<p>
+The block transfers are also used for stack-work. There are four types 
+of stacks, depending on whether the address that <code>sp</code>
+points to already has a stacked value or not (Full or Empty), and 
+whether the stack grows down or up in memory (Descending/Ascending). 
+These have special affixes (<code>-FD</code>, <code>-FA</code>, 
+<code>-ED</code> and <code>-EA</code>) because using the standard 
+affixes would be awkward. For example, the GBA uses an FD-type stack,
+which means that pushing is done with <code>stmdb</code> because 
+decrementing after the store would overwrite an already stacked value 
+(full stack), but popping requires <code>ldmia</code> for similar 
+reasons. A <code>stmfd/ldmfd</code> pair is much easier to deal with. 
+Or you could just use <code>push</code> and <code>pop</code>, 
+which expand to &lsquo;<code>stmfd sp!,</code>&rsquo; and 
+&lsquo;<code>ldmfd sp!,</code>&rsquo;, respectively.
+</p>
+
+<div class="lblock">
+<table id="tbl-block"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 23.3</b>: Block transfer 
+  instructions.
+</caption>
+<tr> <th>Block op</th> <th>Standard</th> <th>Stack alt</th> </tr>
+<tr> <td>Increment After</td>  
+  <td>ldmia / stmia</td> <td>ldmfd / stmea</td> </tr>
+<tr> <td>Increment Before</td> 
+  <td>ldmib / stmib</td> <td>ldmed / stmfa</td> </tr>
+<tr> <td>Decrement After</td>  
+  <td>ldmda / stmda</td> <td>ldmfa / stmed</td> </tr>
+<tr> <td>Decrement Before</td> 
+  <td>ldmdb / stmdb</td> <td>ldmea / stmfd</td> </tr>
+</table>
+</div>
+
+<div class="note">
+<div class="nhcare">push and pop are not universal ARM instructions</div>
+<p>
+They seem to work for devkitARM r15 and up (haven't checked older 
+versions), but DevKitAdv for example doesn't accept them. Just try
+and see what happens.
+</p>
+</div>
+
+<h3 id="ssec-arm-cnd">23.3.4.
+  Conditionals and branches</h3>
+<p>
+Higher languages typically have numerous methods for implementing 
+choices, loops and function calls. The all come down to the same 
+thing though: the ability to move the program counter and thereby 
+diverting the flow of the program. This procedure is known as 
+branching.
+</p>
+<p>
+There are three branching instructions in ARM: the simple 
+branch <code>b</code> for ifs and loops, the branch with 
+link <code>bl</code> used for function calls, and branch with 
+exchange <code>bx</code> used for switching between ARM and THUMB 
+code, returning from functions and out-of-section jumps. 
+<code>b</code> and <code>bl</code> use a label as their argument, 
+but <code>bx</code> uses a register with the address to branch 
+to. Technically there are more ways of branching (PC is just another 
+register, after all) but these three are the main ones.
+</p>
+
+<h4>Status flags and condition codes</h4>
+<p>
+I've already mentioned part of this in the introduction, so I'll make 
+this brief. The ARM processor has 4 status flags, (<b>Z</b>)ero, 
+(<b>N</b>)egative, (<b>C</b>)arry and signed o(<b>V</b>)erflow, which 
+can be found in the program status register. There are actually two of 
+these: one for the <i>current</i> status (CPSR) and a <i>saved</i> 
+status register (SPSR), which is used in interrupt handlers. You won't 
+have to deal with either of these, though, as reacting to status 
+registers usually goes through the conditional codes 
+(table&nbsp;23.4). But first, a few words 
+about the flags themselves:
+</p>
+
+<ul>
+  <li><b>Zero</b> (Z). If the result of operation was 0.</li>
+  <li><b>Negative</b> (N). Result was negative (i.e. most significant 
+  bit set).</li>
+  <li><b>Carry bit set</b> (C). If the &lsquo;mostest&rsquo; 
+    significant bit is set (like bit 32 for 32bit operations).
+  <li><b>Arithmetic overflow</b> (V). Like adding two positive numbers 
+    and getting a negative number because the result got too big 
+	for the registers.</li>
+</ul>
+
+<p>
+Each of the data instructions can set the status flags by appending 
+<code>-s</code> to the instruction, except for <code>cmp</code>, 
+<code>cmn</code>, <code>tst</code> and <code>teq</code>, which always 
+set the flags. 
+</p>
+<p>
+Table 23.4 lists 16 affixes that can be 
+added to the basic branch instruction. For example, 
+<code>bne Label</code> would jump to <code>Label</code> if the status 
+is non-zero, and continue with the next instruction if it isn't. 
+</p>
+
+<div class="lblock">
+<table id="tbl-cnd-afx"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 23.4</b>: conditional affixes.
+</caption>
+<col span=2 align="center">
+<tr> <th>Affix</th> <th>Flags</th> <th>Description</th> </tr>
+<tr> <td>eq</td> <td>Z=1</td>
+  <td>Zero (EQual to 0)</td> </tr>
+<tr> <td>ne</td> <td>Z=0</td> 
+  <td>Not zero  (Not Equal to 0)</td> </tr>
+<tr> <td>cs / hs</td> <td>C=1</td> 
+  <td>Carry Set / unsigned Higher or Same </td> </tr>
+<tr> <td>cc / lo</td> <td>C=0</td> 
+  <td>Carry Clear / unsigned LOwer</td> </tr>
+<tr> <td>mi</td> <td>N=1</td> 
+  <td>Negative (MInus)</td> </tr>
+<tr> <td>pl</td> <td>N=0</td> 
+  <td>Positive or zero (PLus)</td> </tr>
+<tr> <td>vs</td> <td>V=1</td> 
+  <td>Sign overflow (oVerflow Set)</td> </tr>
+<tr> <td>vc</td> <td>V=0</td>
+  <td>No sign overflow (oVerflow Clear)</td> </tr>
+<tr> <td>hi</td> <td>C=1 &amp; Z=0</td> 
+  <td>Unsigned HIgher</td> </tr>
+<tr> <td>ls</td> <td>C=0 | Z=1</td> 
+  <td>Unsigned Lower or Same</td> </tr>
+<tr> <td>ge</td> <td>N=V</td> 
+  <td>Signed Greater or Equal</td> </tr>
+<tr> <td>lt</td> <td>N != V</td> 
+  <td>Signed Less Than</td> </tr>
+<tr> <td>gt</td> <td>Z=0 &amp; N=V</td> 
+  <td>Signed Greater Than</td> </tr>
+<tr> <td>le</td> <td>Z=1 | N != V</td> 
+  <td>Signed Less or Equal</td> </tr>
+<tr> <td>al</td> <td> - </td> 
+  <td>ALways (default)</td> </tr>
+<tr> <td>nv</td> <td> - </td> 
+  <td>NeVer</td> </tr>
+</table></div>
+
+<p>
+To use these condition codes properly, you need to know what each 
+stands for, but also how the data operations set the flags. 
+The effect on the status flags depends on the instruction itself, 
+and not all flags are affected by all instructions. For example, 
+overflow only has meaning for arithmetic, not bit operations.
+</p>
+<p>
+In the case of Z and N, the case is pretty easy. The operation 
+gives a certain 32bit value as its result; if it's 0, then the 
+Zero flag is set. Because of two's complement, the Negative flag 
+is the same as bit 31. The reason <code>-eq</code> and 
+<code>ne</code> are linked to the zero flags is because a 
+comparison (<code>cmp</code>) is basically a subtraction: it 
+looks at the difference between the two numbers and when that's 
+zero, then the numbers are equal.
+</p>
+<p>
+For the carry bit it can get a little harder. The best way to see it 
+is as an extra most significant bit. You can see how this work in 
+the example of table&nbsp;23.5. Here we add 
+two unsigned numbers, 2<sup>31</sup> = 0x80000000. When adding them, 
+the result would overflow 32bits, giving 0 and not 2<sup>32</sup>. 
+However, that overflowed bit will go into the carry. With the 
+<code>adc</code> instruction you could then go on to build adders 
+for numbers larger thatn the registers.
+</p>
+
+<div class="lblock">
+<table id="tbl-carry">
+<caption align="bottom">
+<b>Table 23.5</b>: 
+  carry bit in (unsigned) addition.
+</caption>
+<col width=160>
+<tr valign="bottom"><td>
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tr>
+	  <th>2<sup>31</sup> &nbsp;
+	  <td><code>&nbsp;&nbsp;8000 0000</code>
+    <tr>
+	  <th class="bdrB">2<sup>31</sup> &nbsp;
+	  <td class="bdrB"><code>&nbsp;&nbsp;8000 0000</code>&nbsp;
+	  <td class="bdrB"> +
+    <tr>
+	  <th>2<sup>32</sup>
+	  <td><code><b>1</b> 0000 0000</code>
+  </table>
+</table>
+</div>
+
+<p>
+Bit-operations like <code>orr</code> or <code>and</code> don't affect 
+it because they operate purely on the lower 32bits. Shifts, however 
+do.
+</p>
+<p>
+You may find it odd that <code>-cc</code> is the code for 
+unsigned higher than. As mentioned, a comparison is essentially 
+a subtraction, but when you subtract, say 7&minus;1, there 
+doesn't really seem to be a carry here. The key here is that 
+subtractions are infact forms of additions: 7&minus;1 is actually 
+7+0xFFFFFFFF, which would cause an overflow into the carry bit. 
+You can also thing of subtractions as starting out with the carry 
+bit set.
+</p><br>
+
+<p>
+The overflow flag indicates <i>signed</i> overflow (the carry bit
+would be unsigned overflow). Note, this is <i>not</i> 
+merely a sign change, but a sign change the wrong way. For example, 
+an addition of two positive numbers <i>should</i> always be positive, 
+but if the numbers are big enough (say, 2<sup>30</sup>, see 
+table 23.6) then the results  of the lower 
+30 bits may overflow into bit 31, therefore changing the sign and 
+you'll have an incorrect addition. For subtraction, there can be a 
+similar problem. Short of doing the full operation and checking 
+whether the signs are correct, there isn't a simple way of figuring 
+out what counts as overflow, but fortunately you don't have to. 
+Usually overflow is only important for signed comparisons, and the 
+condition mnemonics themselves should provide you with enough 
+information to pick the right one.
+</p>
+
+<div class="lblock">
+<table id="tbl-overflow">
+<caption align="bottom">
+<b>Table 23.6</b>: sign overflow.
+</caption>
+<col width=160>
+<tr valign="bottom"><td>
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+    <tr>
+	  <th>+2<sup>30</sup> &nbsp;
+	  <td><code>4000 0000</code>
+    <tr>
+	  <th class="bdrB">+2<sup>30</sup> &nbsp;
+	  <td class="bdrB"><code>4000 0000</code>&nbsp;
+	  <td class="bdrB"> +
+    <tr>
+	  <th><b>&minus;</b>2<sup>31</sup>
+	  <td><code>8000 0000</code>
+  </table>
+</table>
+</div>
+
+<!--
+
+<div class="note">
+<div class="nhcare">Carry bit in subtractions and comparisons</div>
+<p>
+When subtracting, the carry bit is set if the operation <b>doesn't</b> 
+require a carry. This may be initially counter-intuitive, but 
+actually makes sense. Remember that subtraction is actually a form of 
+addition, and 7&minus;1 is actually 7+0xFFFFFFFF, which would cause 
+an overflow.
+</p>
+<p>
+&ldquo;Hang on! For 7&minus;(&minus;1)= 7+1 = 8, which keeps the 
+Carry clear. But 7 is greater than &minus;1, so wouldn't this 
+invalidate the meanings of <code>-hi</code> and 
+<code>-cs</code>?&rdquo; No, because those mnemonics are for 
+<i>unsigned</i> higher, so you didn't really have &minus;1 in the 
+first place.
+</p>
+</div>
+-->
+
+<p>
+With these points in mind, the conditional codes shouldn't be too 
+hard to understand. The descriptions tell you what code you should use 
+when. Also, don't forget that any instruction can be conditionally 
+executed, not just a branch. 
+</p>
+
+<h4>The basic branch</h4>
+<p>
+Let's start with the most basic of branches, <code>b</code>. This is 
+the most used branch, used to implement normal conditional code and 
+loops of all kinds. It is most often used in conjunction with one 
+of the 16 conditional codes of table 23.4. 
+Most of the times a branch will look something like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Branch example, pseudo code</span>
+    <span class="keyw">data-op</span><b>s</b>, Rd, Rn, Op2   <span 
+class="cmt">@ Data operation to set the flags</span>
+    <span class="keyw">b</span><i>cnd-code</i> .Llabel       <span 
+class="cmt">@ Branch upon certain conditions
+</span>
+    <span class="cmt">@ more code A</span>
+
+.Llabel:                    <span class="cmt">@ Branch goes here</span>
+    <span class="cmt">@ more code B</span>
+</pre>
+
+<p>
+First, you have a data processing instruction that sets the status 
+flags, usually a <code>subs</code> or <code>cmp</code>, but it can 
+be any one of them. Then a <code>b</code><i>cond</i> diverts the
+flow to <code>.Llabel</code> if the conditions are met. A simple
+example of this would be a division routine which checks if the 
+denominator is zero first. For example, the <code>Div()</code> 
+routine that uses <a href="bios.htm">BIOS Call</a> #6 could be
+safeguarded against division by 0 like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ int DivSafe(int num, int den);
+@ \param num    Numerator (in r0)
+@ \param den    Denominator (in r1)
+@ \return       r0= r0/r1, or INT_MAX/INT_MIN if r1 == 0</span>
+DivSafe:
+    <b><span class="keyw">cmp</span>     r1, #<span 
+class="num">0</span></b>
+    <b><span class="keyw">beq</span>     .Ldiv_bad</b>   <span 
+class="cmt">@ Branch on r1 == 0</span>
+    <span class="keyw">swi</span>     <span class="num">0x060000</span>
+    <span class="keyw">bx</span>      lr
+.Ldiv_bad:
+    <span class="keyw">mvn</span>     r1, #<span 
+class="num">0x80000000</span>     <span class="cmt">@ \</span>
+    <span class="keyw">sub</span>     r0, r1, r0, <span 
+class="keyw">asr</span> #<span class="num">31</span> <span 
+class="cmt">@ - r0= r0&gt;=0 ? INT_MAX : INT_MIN;</span>
+    <span class="keyw">bx</span>      lr
+</pre>
+
+<p>
+The numerator and denominator will be in registers r0 and r1, 
+respectively. The <code>cmp</code> checks whether the denominator is 
+zero. If it's not, no branch is taken, the swi 6 is executed and 
+the function returns afterwards. If it is zero, the <code>beq</code> 
+will take the code to <code>.Ldiv_bad</code>. The two instructions 
+there set r0 to either INT_MAX (2<sup>31</sup>&minus;1 = 0x7FFFFFFF) 
+or INT_MIN (&minus;2<sup>31</sup> = 0x80000000), depending on whether 
+r0 is positive or negative. If it's a little hard to see that, 
+<code>mvn</code> inverts bits, so the first line after 
+<code>.Ldiv_bad</code> sets r0 to INT_MAX. The second line we've seen 
+before: &lsquo;<code>r0, asr #31</code>&rsquo; does a sign-extension 
+in to all other bits, giving 0 or &minus;1 for positive and negative 
+numbers, respectively, giving INT_MAX&minus; &minus;1 = INT_MIN for
+negative values of r0. Little optimizing tricks like these decide if 
+you're fit to be an assembly programmer; if not you could just as well 
+let the compiler do them, because it does know. (It's where I got the
+&lsquo;<code>asr #31</code>&rsquo; thing from in the first place.)
+</p>
+<p>
+Now in this case I used a branch, but in truth, it wasn't even 
+necessary. The non-branch part consists of one instruction, 
+and the branched part of two, so using conditional instructions 
+throughout would have been both shorter and faster:
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Second version using conditionally executed code</span>
+DivSafe:
+    <span class="keyw">cmp</span>     r1, #<span class="num">0</span>
+    <span class="keyw">mvneq</span>   r1, #<span 
+class="num">0x80000000</span>
+    <span class="keyw">subeq</span>   r0, r1, r0, <span 
+class="keyw">asr</span> #<span class="num">31</span>
+    <span class="keyw">swine</span>   <span class="num">0x060000</span>
+    <span class="keyw">bx</span>      lr
+</pre>
+
+<p>
+If the denominator is not zero, the <code>mvneq</code> and 
+<code>subeq</code> are essentially skipped. Actually, not so much 
+skipped, but turned into <code>nop</code>: non-operations. So is 
+<code>swine</code> (i.e., <code>swi</code> + <code>ne</code>, 
+no piggies here) if it is zero. True, the division line has 
+increased by a cycle, not taking the branch makes the exception line
+a little faster and the function itself has shrunk from 7 to 5 
+instructions.
+</p>
+
+<div class="note">
+<div class="nhgood">Symbol vs internal labels</div>
+<p>
+In the first <code>DivSafe</code> snippet, the internal branch 
+destination used a <code>.L</code> prefix, while the function 
+label did not. The <code>.L</code> prefix is used by GCC to indicate 
+labels for the sake of labels, as opposed to symbol labels like 
+<code>DivSafe</code>. While not required, it's a useful convention.
+</p>
+</div>
+
+<h4>Major and minor branches</h4>
+<p>
+Any sort of branch will create a fork in the road and, depending on 
+the conditions, one road will be taken more often. That would be 
+the <dfn>major</dfn> branch. The other one would be the 
+<dfn>minor</dfn> branch, probably some sort of exception. The 
+branch instruction, <code>b</code>, represents a deviation from the 
+normal road and is relatively costly, therefore it pays to have to 
+branch to the exceptions. Consider these possibilities:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Basic if statement in C</span>
+<span class="keyw">if</span>(r0 == <span class="num">0</span>)
+{   <span class="cmt">/* IF clause */</span>   }
+...
+</pre>
+
+<pre class="proglist">
+<span class="cmt">@ === asm-if v1 : 'bus stop' branch ===</span>
+    <span class="keyw">cmp</span>     r0, #<span class="num">0</span>
+    <span class="keyw">beq</span>     .Lif
+.Lrest:
+    ...
+    <span class="keyw">bx</span>      lr      <span 
+class="cmt">@ function ends</span>
+.Lif
+    <span class="cmt">@ IF clause</span>
+    <span class="keyw">b</span>   .Lrest
+
+
+<span class="cmt">@ === asm-if v2 : 'skip' branch ===</span>
+    <span class="keyw">cmp</span>     r0, #<span class="num">0</span>
+    <span class="keyw">bne</span>     .Lrest
+    <span class="cmt">@ IF clause</span>
+.Lrest:
+    ...
+    <span class="keyw">bx</span>      lr      <span 
+class="cmt">@ function ends</span>
+</pre>
+
+<p>
+The first version is more like the C version: it splits off
+for the IF-clause and the returns to the rest of the code. The flow 
+branches twice if the conditions are met, but if they aren't the
+rest of the code doesn't branch at all.
+The second version branches if the conditions <i>aren't</i> met: 
+it skips the IF-clause. Overall, the assembly code is simpler and 
+shorter, but the fact that the branch-conditions are inverted with
+respect to the C version could take some getting used to.
+</p>
+<p>
+So which to use? Well, that depends actually. All things being equal, 
+the second one is better because it's one instruction and label 
+shorter. As far as I know, this is what GCC uses. The problem is that 
+some things may be more equal than others. If the IF-clause is 
+exceptional (i.e., the minor branch), it'd mean that the second 
+version almost always takes the branch, while the first version would 
+hardly ever branch, so on average the latter would be faster. 
+</p>
+<p>
+Which one you chose is entirely up to you as you know your intentions 
+best. I hope. For the remainder of this chapter I'll use the 
+skip-branch because in demonstrations things usually are equal. 
+Of course, if the clause is small enough you can just use conditional 
+instructions and be done with it <kbd>:)</kbd>.
+</p>
+
+<h4>Common branching constructs</h4>
+<p>
+Even though all you have now is <code>b</code>, it doesn't mean you 
+can't implement branching construct found in HLLs in assembly. 
+After all, the compiler seems to manage. Here's a couple of them.
+</p><br>
+
+<h5>if-elseif</h5>
+<p>
+The <code>if-elseif</code> is an extension of the normal 
+<code>if-else</code>, and from it you can extend to longer 
+<code>if-elseif-else</code> chains. In this case I want to look 
+at a wrapping algorithm for keeping numbers within certain boundaries:
+the number <i>x</i> should stay within range 
+[<i>mn</i>, <i>mx</i>&rang;, if it exceeds either boundary it should
+come out the other end. In C it looks like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// wrap(int x, int mn, int mx), C version:</span>
+<span class="keyw">int</span> res;
+<span class="keyw">if</span>(x &gt;= mx)
+    res= mn + x-mx;
+<span class="keyw">else</span> <span class="keyw">if</span>(x &lt; mn)
+    res= mx + x-mn;
+<span class="keyw">else</span>
+    res= x;
+</pre>
+<p>
+The straightforward compilation would be:
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ r0= x ; r1= mn ; r2= mx</span>
+    <span class="keyw">cmp</span>     r0, r2
+    <b><span class="keyw">blt</span>     .Lx_lt_mx</b>       <span 
+class="cmt">@ if( x &gt;= mx )</span>
+    <span class="keyw">add</span>     r3, r0, r1      <span 
+class="cmt">@   r0= mn + x-mx</span>
+    <span class="keyw">sub</span>     r0, r3, r2
+    <b><span class="keyw">b</span>       .Lend</b>
+<b>.Lx_lt_mx:</b>
+    <span class="keyw">cmp</span>     r0, r1          <span 
+class="cmt">@</span>
+    <b><span class="keyw">bge</span>     .Lend</b>           <span 
+class="cmt">@ if( x &lt; mn )</span>
+    <span class="keyw">add</span>     r3, r0, r2      <span 
+class="cmt">@   r0= mx + x-mn;</span>
+    <span class="keyw">sub</span>     r0, r3, r1
+<b>.Lend:</b>
+    ...
+</pre>
+
+<p>
+This is what GCC gives, and it's pretty good. The ordering of the 
+clauses remained, which means that the condition for the branches 
+have to be inverted, so
+&lsquo;<code>if(x &gt;= mx) {}</code>&rsquo; becomes
+&lsquo;skip if NOT <i>x</i> &gt;= <i>mx</i>&rsquo;. At the end of 
+each clause, you'd need to skip all the others: 
+branch to <code>.Lend</code>. The conditional branches mean 
+&lsquo;go to the next branch&rsquo;.
+</p>
+<p>
+And now an optimized version. First, a <code>cmp</code> is 
+equivalent to <code>sub</code> except that it doesn't put the 
+result in a register. However, as we need the result later on anyway, 
+we might as well combine the &lsquo;<code>cmp</code>&rsquo;
+and &lsquo;<code>sub</code>&rsquo;. Secondly, the clauses are pretty 
+small, so we can use conditional ops as well. The new version would 
+be:
+</p>
+<pre class="proglist">
+<span class="cmt">@ Optimized wrapper</span>
+    <span class="keyw">subs</span>    r3, r0, r2      <span 
+class="cmt">@ r3= x-mx</span>
+    <span class="keyw">addge</span>   r0, r3, r1      <span 
+class="cmt">@   x= x-mx + mn</span>
+    <b><span class="keyw">bge</span>     .Lend</b>
+    <span class="keyw">subs</span>    r3, r0, r1      <span 
+class="cmt">@ r3= x-mn</span>
+    <span class="keyw">addlt</span>   r0, r3, r2      <span 
+class="cmt">@   r0= x-mn + mx;</span>
+<b>.Lend:</b>
+    ...
+</pre>
+
+<p>
+Cleans up nicely, wouldn't you say? Less branches, less code and 
+it matches the C code more closely. We can even get rid of 
+the last branch too because we can execute the <code>subs</code> 
+conditionally as well. Because <code>ge</code> and <code>lt</code>
+are each others complements there won't be any interference.
+So the final version is:
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Optimized wrapper, version 2</span>
+    <span class="keyw">subs</span>    r3, r0, r2      <span 
+class="cmt">@ r3= x-mx</span>
+    <span class="keyw">addge</span>   r0, r3, r1      <span 
+class="cmt">@   x= x-mx + mn</span>
+    <span class="keyw">sublts</span>  r3, r0, r1      <span 
+class="cmt">@ r3= x-mn</span>
+    <span class="keyw">addlt</span>   r0, r3, r2      <span
+class="cmt">@   r0= x-mn + mx;</span>
+    ...
+</pre>
+
+<p>
+Of course, it isn't always possible to optimize to such an extent. 
+However, if the clauses have small bodies conditional instructions 
+may become attractive. Also, converting a compare to some form of 
+data operation that you'd need later anyway is common and recommended.
+</p><br>
+
+<h5>Compound logical expressions</h5>
+<p>
+Higher languages often allow you to string multiple conditions 
+together using 
+logical AND (<code>&amp;&amp;</code>) and 
+logical OR (<code>||</code>). What the books often won't say is 
+that these are merely shorthand notations of a chain of 
+<code>if</code>s. Here's what actually happens.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// === if(x &amp;&amp; y) { /* clause */ } ===</span>
+<span class="keyw">if</span>(x)
+{
+    <span class="keyw">if</span>(y)
+    { <span class="cmt">/* clause */</span> }
+}
+
+<span class="cmt">// === if(x || y) { /* clause */ } ===</span>
+<span class="keyw">if</span>(x)
+{ <span class="cmt">/* clause */</span> }
+<span class="keyw">else</span> <span class="keyw">if</span>(y)
+{ <span class="cmt">/* clause */</span> }
+</pre>
+
+<p>
+The later terms in the AND are only evaluated if earlier expressions 
+were true. If not, they're simply skipped. Much fun can be had if the 
+second term happens to be a function with side effects. A logical OR is 
+basically an if-else chain with identical clauses; this is just for 
+show of course, in the final version there's one clause which is 
+branched to. In assembly, these would look something like this.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ if(r0 != 0 &amp;&amp; r1 != 0) { /* clause */ }</span>
+    <span class="keyw">cmp</span>     r0, #0
+    <span class="keyw">beq</span>     .Lrest
+    <span class="keyw">cmp</span>     r1, #0
+    <span class="keyw">beq</span>     .Lrest
+    <span class="cmt">@ clause</span>
+.Lrest:
+    ...
+
+<span class="cmt">@ Alternative</span>
+    <span class="keyw">cmp</span>     r0, #0
+    <span class="keyw">cmpne</span>   r1, #0
+    <span class="keyw">beq</span>     .Lrest
+    <span class="cmt">@ clause</span>
+.Lrest:
+    ...
+</pre>
+
+<pre class="proglist">
+<span class="cmt">@ if( r0 != 0 || r1 != 0 ){ /* clause */ }</span>
+    <span class="keyw">cmp</span>     r0, #0
+    <span class="keyw">bne</span>     .Ltrue
+    <span class="keyw">cmp</span>     r1, #0
+    <span class="keyw">beq</span>     .Lrest
+.Ltrue:
+    <span class="cmt">@ clause</span>
+.Lrest:
+	...
+</pre>
+
+<p>
+As always, alternative solutions will present themselves for your
+specific situation. Also note that you can transform ANDs into 
+ORs using 
+<a href="http://en.wikipedia.org/wiki/De_Morgan_duality" target="_blank">De Morgan's 
+Laws</a>.
+</p><br>
+
+<h5>Loops</h5>
+<p>
+One of the most important reasons to use assembly is speeding up 
+oft-used code, which will probably involve loops because that's where 
+most of the time will be spent. If you can remove one instruction 
+in a non-loop situation, you'll have won one cycle. If you remove
+one from a loop, you'll have gained one for every iteration of the 
+loop. For example, saving a cycle in a clear-screen function would 
+save 240*160 = 19200 cycles &ndash; more, actually, because of memory 
+wait-states. That one cycle can mean the difference between smooth 
+and choppy animation.
+</p>
+<p>
+In short, optimization is pretty much all about loops, especially 
+inner loops. Interestingly, this is where GCC often misses the mark, 
+because it adds more stuff than necessary. For example, 
+in older versions (DKA and DKP r12, something like that) it often 
+kept constructed memory addresses (VRAM, etc) inside the loop. 
+Unfortunately, DKP r19 also has major issues with struct copies 
+and <code>ldm/stm</code> pairs, which are now only give a small
+benefit over other methods. Now, before you blame GCC for slow loops, 
+it's also often the C programmer that forces GCC to produce slow 
+code. In the introduction, you could see the major difference that 
+inlining makes, and in the 
+<a href="text.htm#ssec-demo-se2">profiling</a> demo 
+I showed how much difference using the wrong datatype makes.
+</p><br>
+
+<p>
+Anyway, loops in assembly. Making a loop is the easiest thing in the 
+world: just branch to a previous label. The differences between 
+<code>for</code>, <code>do-while</code> and <code>while</code> loops 
+are a matter of where you increment and test. In C, you usually use 
+a for-loop with an incrementing index. In assembly, it's customary to 
+use a while-loop with a decrementing index. Here are two examples of 
+a word-copy loop that should show you why.
+</p>
+
+
+<pre class="proglist">
+<span class="cmt">@ Asm equivalents of copying 16 words.
+@ u32 *dst=..., *src= ..., ii    // r0, r1, r2</span>
+
+<span class="cmt">@ --- Incrementing for-loop ---
+@ for(ii=0; ii&lt;16; ii++)
+@     dst[ii]= src[ii];</span>
+    <span class="keyw">mov</span>     r2, #<span class="num">0</span>
+.LabelF:
+    <span class="keyw">ldr</span>     r3, [r1, r2, <span 
+class="keyw">lsl</span> #<span class="num">2</span>]
+    <span class="keyw">str</span>     r3, [r0, r2, <span 
+class="keyw">lsl</span> #<span class="num">2</span>]
+    <span class="keyw">add</span>     r2, r2, #<span class="num">1</span>
+    <span class="keyw">cmp</span>     r2, r2, #<span class="num">16</span>
+    <span class="keyw">blt</span> .LabelF
+
+<span class="cmt">@ --- Decrementing while-loop ---
+@ ii= 16;
+@ while(ii--)
+@     *dst++ = *src++;</span>
+    <span class="keyw">mov</span>     r2, #<span class="num">16</span>
+.LabelW:
+    <span class="keyw">ldr</span>     r3, [r1], #<span class="num">4</span>
+    <span class="keyw">str</span>     r3, [r0], #<span class="num">4</span>
+    <span class="keyw">subs</span>    r2, r2, #<span class="num">1</span>
+    <span class="keyw">bne</span> .LabelW
+</pre>
+
+<p>
+In an incrementing for-loop you need to increment and then compare 
+against the limit. In the decrementing while loop you subtract and 
+test for zero. Because the zero-test is already part of every 
+instruction, you don't need to compare separately. True, it's not much 
+faster, maybe 10% or so, but many 10 percents here and there do
+add up. There are actually many versions of this kind of loop, here's 
+another one using block-transfers. The benefit of those is that 
+they also work in THUMB:
+</p>
+<pre class="proglist">
+<span class="cmt">@ Yet another version, using ldm/stm</span>
+
+    <span class="keyw">add</span>     r2, r0, #<span class="num">16</span>
+.LabelW:
+    <span class="keyw">ldmia</span>   r1!, {r3}
+    <span class="keyw">stmia</span>   r0!, {r3}
+    <span class="keyw">cmp</span>     r2, r0
+    <span class="keyw">bne</span> .LabelW
+</pre>
+
+<p>
+This is one of those occasions where knowing assembly can help you 
+write efficient C. Using a decrementing counter and pointer arithmetic 
+will usually be a little faster, but usually GCC willl do this for you 
+anyway. Another point is using the right datatype. And with 
+&lsquo;right&rsquo; I mean <code>int</code>, of course. 
+Non-ints require implicit casts
+(<code>lsl</code>/<code>lsr</code> pairs) after every arithmetic
+operation. That's two instructions after <b>every</b> plus, minus or 
+whatever. While GCC has become quite proficient in converting 
+non-ints into ints where possible, this has not always been the case, 
+and it may not always be possible. I've seen the loops above 
+cost between 600% more because the index and pointer were 
+<code>u16</code>, I shit you not.
+</p><br>
+
+<p>
+When dealing with loops, be extremely careful with how you start and 
+stop the loop. It's very easy to come up with a loop that runs once 
+too often or too little. I'm pretty sure these two versions are 
+correct. The way I usually check it is to see how it runs when the 
+count should be 1 or 2. If that works out, larger numbers will too.
+</p>
+
+<div class="note">
+<div class="nhgood">Merge comparisons with data instructions</div>
+<p>
+The <b>Z</b> status flag revolves around the number zero, so if you 
+use 0 to compare to you can often combine the comparison with the 
+data instruction that sets the flags. 
+</p>
+<p>
+This is also true for testing individual bits. The <b>N</b> and 
+<b>C</b> flags are effectively bits 31 and 32, respectively. If you 
+can manipulate the algorithm to use those, you don't need a 
+<code>cmp</code> or <code>tst</code>.
+</p>
+</div>
+
+<div class="note">
+<div class="nhcare">&ldquo;No, there is another&rdquo;</div>
+<p>
+You probably know this already, but this is a good time to repeat 
+the warning: watch out for off-by-one errors (also known as <a 
+href="http://www.catb.org/~esr/jargon/html/O/obi-wan-error.html">obi-wan 
+errors</a>). It is just way too easy to do one iteration too few or 
+too many, so always check whether the code you have does the right 
+thing. Goes for other programming languages too, of course.
+</p>
+</div>
+
+<h4>Function calls</h4>
+<p>
+Function calls use a special kind of branching instruction, namely 
+<code>bl</code>. It works exactly like the normal branch, except that 
+it saves the address after the <code>bl</code> in the link register 
+(<code>r14</code> or <code>lr</code>) so that you know where to return 
+to after the called function is finished. In principle, you can return 
+with to the function using &lsquo;<code>mov pc, lr</code>&rsquo;, 
+which points the program counter back to the calling function, but in 
+practice you might be better off with <code>bx</code> (Branch and 
+eXchange). The difference is that <code>bx</code> can also switch 
+between ARM and THUMB states, which isn't possible with the 
+<code>mov</code> return.
+Unlike <code>b</code> and <code>bl</code>, <code>bx</code> takes a 
+register as its argument, instead of a label. This register will 
+usually be <code>lr</code>, but the others are allowed as well. 
+</p>
+<p>
+There's also the matter of passing parameters to the function and 
+returning values from it. In principle you're free to use any system 
+you like, it is recommended to ARM's own 
+<a href="http://www.arm.com/miscPDFs/8031.pdf" target="_blank">ARM Architecture 
+Procedure Call Standard</a> (AAPCS) for this. For the majority of 
+the work this can be summarized like this.
+</p>
+
+<ul>
+<li>
+  The first 4 arguments go into r0-r3. Later ones go on the stack, 
+  in order of appearance.
+</li>
+<li>The return value goes into r0.</li>
+<li>
+   The scratch registers r0-r3 (and r12) are free to use without 
+   restriction in a function. As such, after <i>calling</i> a function 
+   they should be considered &lsquo;dirty&rsquo;. 
+</li>
+<li>
+  The other registers must leave a function with the same values as 
+  they came in. Push them on the stack before use, and pop them 
+  when leaving the function. Note that another <code>bl</code> sets 
+  <code>lr</code>, so stack that one too in that case.
+</li>
+</ul>
+
+<p>
+Below is a real-world example of function calling, complete with 
+parameter passing, stackwork and returning from the call. The function 
+<code>oamcpy()</code> copies OBJ_ATTRs. The function uses the same 
+argument order as <code>memcpy()</code>, and these need to be set by 
+the calling function; before and after the call, <code>lr</code> is 
+pushed and popped. These two things are part of what's called the 
+function overhead, which can be disastrous for small functions, as 
+we've already seen. Inside <code>oamcpy()</code> we either jump back 
+immediately if the count was 0, or proceed with the copies and then 
+return. Note that <code>r4</code> is stacked here, because that's 
+what the caller expects; if I hadn't and the caller used 
+<code>r4</code> as well, I'd be screwed and rightly so. I should 
+probably point out that <code>r12</code> is usually considered a 
+scratch register as well, which I could have used here instead of 
+<code>r4</code>, removing the need for stacking.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Function calling example: oamcpy
+@ void oamcpy(OBJ_ATTR *dst, const OBJ_ATTR *src, u32 nn);
+@ Parameters: r0= dst; r1= src; r2= nn;</span>
+    .<span class="keyw">align</span>  <span class="num">2</span>
+oamcpy:
+    <span class="keyw">cmp</span>     r2, #<span class="num">0</span>
+    <span class="keyw">bxeq</span>    lr          <span 
+class="cmt">@ Nothing to do: return early</span>
+    <span class="keyw">push</span>    {r4}        <span 
+class="cmt">@ Put r4 on stack</span>
+.Lcpyloop:
+        <span class="keyw">ldmia</span>   r1!, {r3, r4}
+        <span class="keyw">stmia</span>   r0!, {r3, r4}
+        <span class="keyw">subs</span>    r2, #<span class="num">1</span>
+        <span class="keyw">bne</span>     .Lcpyloop
+    <span class="keyw">pop</span>     {r4}        <span 
+class="cmt">@ Restore r4 to its original value</span>
+    <span class="keyw">bx</span>      lr          <span 
+class="cmt">@ Return to calling function</span>
+
+<span class="cmt">@ Using oamcpy.</span>
+    <span class="cmt">@ Set arguments</span>
+    <span class="keyw">mov</span>     r0, #<span class="num">0x07000000</span>
+    <span class="keyw">ldr</span>     r1,=obj_buffer
+    <span class="keyw">mov</span>     r2, #<span class="num">128</span>
+    <span class="keyw">push</span>    {lr}        <span 
+class="cmt">@ Save lr</span>
+    <span class="keyw">bl</span>      oamcpy      <span 
+class="cmt">@ Call oamcpy (clobbers lr; assumes clobbering of r0-r3,r12)</span>
+    <span class="keyw">pop</span>     {lr}        <span 
+class="cmt">@ Restore lr</span>
+</pre>
+
+<div class="note">
+<div class="nhgood">Use <kbd>bx</kbd> instead of <kbd>mov pc,lr</kbd></div>
+<p>
+The <code>bx</code> instruction is what makes interworking between 
+ARM and THUMB function possible. Interworking is good. Therefore, 
+<code>bx</code> is good.
+</p>
+</div>
+
+<p>
+This concludes the primary section on ARM assembly. There are more 
+things like different processor states, and data-swap (<code>swp</code>) 
+and co-processor instructions, but those are rare. 
+If you need more information, look 
+them up in the proper reference guides. The next two subsections 
+cover instruction speeds and what an instruction actually looks like 
+in binary, i.e., what the processor actually processes. Neither 
+section is necessary in the strictest sense, but still informative. 
+If you do not want to be informed, move on to the next section: 
+<a href="asm.htm#sec-thumb">the THUMB instruction set</a>.
+</p>
+
+<h3 id="ssec-misc-cycles">Cycle counting</h3>
+<p>
+Since the whole reason for coding in asm is speed (well, that and 
+space efficiency), it is important to know how fast each instruction 
+is so that you can decide on which one to use where. The term 
+&lsquo;cycle&rsquo; actually has two different meanings: there is the 
+<dfn>clock cycle</dfn>, which measures the amount of clock ticks, 
+and there's <dfn>functional cycle</dfn> (for lack of a better word), 
+which indicates the number of stages in an instruction. In an ideal 
+world these two would be equal. However, this is the real world, 
+where we have to deal with waitstates and buswidths, which make functional 
+cycles cost multiple clock cycles. A <dfn>wait(state)</dfn> is the 
+added cost for accessing memory; memory might just not be as fast 
+as the CPU itself. Memory also as a fixed <dfn>buswidths</dfn>, 
+indicating the maximum number of bits that can be sent in 
+one cycle: if the data you want to transfer is larger 
+than the memory bus can handle, it has to be cut up into smaller 
+sections and put through, costing additional cycles. For example, 
+ROM has a 16bit bus which is fine for transferring bytes or halfwords, 
+but words are transferred as two halfwords, costing two functional 
+cycles instead of just one. If you hadn't guessed already, this is 
+why THUMB code is recommended for ROM/EWRAM code.
+</p>
+<p>
+There are three types of functional cycles: the 
+<dfn>non-sequential</dfn> (N), the <dfn>sequential</dfn> (S) and the 
+<dfn>internal</dfn> (I) cycle. There is a fourth, the coprocessor 
+cycle (C), but as the GBA doesn't have a coprocessor I'm leaving that 
+one out.
+</p>
+<p>
+Anyway, the N- and S-cycles have to do with memory fetches: 
+if the transfer of the current (functional) cycle is not related 
+to the previous cycle, it is non-sequential; otherwise, it's 
+sequential. Most instructions will be sequential (from the instruction 
+fetch), but branches and loads/stores can have non-sequentials as 
+they have to look up another address. Both sequential and 
+non-sequential cycles are affected by section waitstates. 
+The internal cycles is one where the CPU is already doing something 
+else so that even though it's clear what the next action should be, 
+it'll just have to wait. I-cycles do not suffer from waitstates. 
+</p>
+
+<div class="cblock">
+<table width=80% align="center">
+<tr>
+<td><table id="tbl-cycles"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 23.7</b>: Cycle times for the most 
+important instructions.
+</caption>
+<tr> <th>Instruction</th> <th>Cycles</th> </tr>
+<tr> <td>Data</td> <td>1S</td> </tr>
+<tr> <td>ldr(type)</td>   <td>1N + 1N<sub>d</sub> + 1I</td> </tr>
+<tr> <td>str(type)</td>   <td>1N + 1N<sub>d</sub></td></tr>
+<tr> <td>ldm {<i>n</i>}</td> 
+  <td>1N + 1N<sub>d</sub> + (<i>n</i>-1)S<sub>d</sub>+ 1I</td> </tr>
+<tr> <td>stm {<i>n</i>}</td> 
+  <td>1N + 1N<sub>d</sub> + (<i>n</i>-1)S<sub>d</sub></td> </tr>
+<tr> <td>b/bl/bx/swi</td> <td>2S + 1N</td></tr>
+<tr> <td>THUMB bl</td> <td>3S + 1N</td></tr>
+<tr> <td>mul</td> <td>1S + <i>m</i>I</td></tr>
+<tr> <td>mla/mull</td> <td>1S + (<i>m</i>+1)I</td></tr>
+<tr> <td>mlal</td> <td>1S + (<i>m</i>+2)I</td></tr>
+
+</table></td>
+
+<td><table id="tbl-waits" 
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 23.8</b>: Section default timing details. 
+  See also 
+<a href="http://nocash.emubase.de/gbatek.htm#memorymap" target="_blank">GBATek memory map</a>.
+</caption>
+<col>
+<col span=3 align="center">
+<tbody align="center">
+<tr> <th>Section</th> <th>Bus</th> <th>Wait (N/S)</th> <th>Access 8/16/32</tr>
+<tr> <th>BIOS </th> <td>32</td> <td>0/0</td> <td>1/1/1</td> </tr>
+<tr> <th>EWRAM</th> <td>16</td> <td>2/2</td> <td>3/3/6</td> </tr>
+<tr> <th>IWRAM</th> <td>32</td> <td>0/0</td> <td>1/1/1</td> </tr>
+<tr> <th>IO   </th> <td>32</td> <td>0/0</td> <td>1/1/1</td> </tr>
+<tr> <th>PAL  </th> <td>16</td> <td>0/0</td> <td>1/1/2</td> </tr>
+<tr> <th>VRAM </th> <td>16</td> <td>0/0</td> <td>1/1/2</td> </tr>
+<tr> <th>OAM  </th> <td>32</td> <td>0/0</td> <td>1/1/1</td> </tr>
+<tr> <th>ROM  </th> <td>16</td> <td>4/2</td> <td>5/5/8</td> </tr>
+</tbody>
+</table></td>
+</table>
+</div>
+
+<p>
+Table 23.7 shows how much the instructions 
+cost in terms of N/S/I cycles. How one can arrive to these cycle 
+times is explained below. Table 23.8 lists 
+the buswidths, the waitstates and the access times in clock cycles 
+for each section. Note that these are the default wait states, which 
+can be altered in 
+<a href="http://nocash.emubase.de/gbatek.htm#systemcontrol" target="_blank">REG_WAITCNT</a>.
+</p>
+<p>
+The data presented here is just an overview of the most important 
+items, for all the gory details you should look them up in GBATek or 
+the official documents.
+</p>
+<ul>
+<li><p>
+  The cost of an instruction begins with fetching it from memory, which 
+  is a 1S operation. For most instructions, it ends there as well. 
+  </p></li>
+<li><p>
+  Memory instructions also have to get data from memory, 
+  which will cost 1N<sub>d</sub>; I've added a subscript <i>d</i> here 
+  because this is an access to the section where the <i>data</i> is 
+  kept, whereas other waitstates are taken from the section where the 
+  code resides. This is an important distinction. Also, because the 
+  address of the next instruction won't be related to the current
+  address, its timing will begin as a 1N instead of a 1S. This 
+  difference is encompassed in the transfer timing. Note however that 
+  most documentation list <code>ldr</code> as 1S+1N+1I, but this is 
+  false! If you actually test it, you'll see that it is really 
+  1N+1N<sub>d</sub>+1I.
+  </p></li>
+<li><p>Block transfer behave like normal transfers, except 
+  that all accesses after the first are S<sub>d</sub>-cycles. 
+  </p></li>
+<li><p>Branches need an extra 1N+1S for jumping to the new 
+  address and fetching the resetting the pipeline (I think). Anything 
+  that changes <code>pc</code> can be considered a branch. The THUMB 
+  <code>bl</code> is actually two instructions (or, rather, one 
+  instruction and an address), which is why that has an additional 
+  1S.
+  </p></li>
+<li><p>
+  Register-shifted operations add 1I to the base cost because the 
+  value has to be read from the register before it can be applied.
+  </p></li>
+<li><p>
+  Multiplies are 1S operations, plus 1I for every significant byte 
+  of the <i>second</i> operand. Yes, this does mean that the cost 
+  is asymmetric in the operands. If you can estimate the ranges 
+  of values for the operands, try to put the lower one in the 
+  second operand. Another 1I is required for the add of 
+  <code>mla</code>, and one more for long multiplications.
+  </p></li>
+</ul>
+
+
+<div class="note">
+<div class="nhcare">There is no 1S in loads!</div>
+<p>
+Official documentation gives 1S+1N<sub>d</sub>+1I as the timing of 
+<code>ldr</code>, but this is not entirely accurate. It is actually 
+1<b>N</b>+1N<sub>d</sub>+1I. The difference is small and only 
+visible for ROM instructions, but could be annoying if you're 
+wondering why what you predicted and what you measured for your 
+routine doesn't match exactly. This applies to <code>ldm</code> 
+and perhaps <code>swp</code> too.
+</p>
+<p>
+See <a href="http://forum.gbadev.org/viewtopic.php?t=9602" target="_blank">forum:9602</a> 
+for a little more on the subject.
+</p>
+</div>
+
+<h3 id="ssec-arm-add">23.3.6.
+  Anatomy of an addition</h3>
+<p>
+As an example of how instructions are actually formatted, I invite 
+you to an in-depth look at the <code>add</code> instruction. This 
+will be the absolute rock bottom in terms of GBA programming, the 
+lowest level of them all. Understanding this will go a long way 
+in understanding the hows and whys (and why-nots!) of ARM assembly.
+</p>
+<p>
+Before I show the bits, I should point out that <code>add</code> 
+(and in fact all data instructions) come in three forms, depending 
+on the second operand. This can be an immediate field (numeric 
+value), an immediate-shifted register or a register-shifted register. 
+Bits 4 and 19h indicate the type of <code>add</code>, the lower 
+12 bits describe the second operand; the rest are the same for 
+all <code>add</code> forms.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-arm-add"
+  border=1 frame=void cellpadding=2 cellspacing=0>
+<caption class="reg">
+  <b>Table 23.3.6.</b>: The <code>add</code> 
+  instruction(s)
+</caption>
+<tbody style="font-size:95%">
+<tr class="bits">
+  <td>&nbsp;
+  <td>1F - 1C<td>1B 1A<td>19<td>18 - 15
+  <td>14<td>13 - 10<td>F - C
+  <td>B - 8<td>7<td>6 5<td>4<td>3 - 0
+</tr>
+<tr class="bf">
+  <td style="font:100%,Arial,normal;">add Rd, Rn, #
+  <td class="rclr0" rowspan=3>cnd
+  <td class="rclr1" rowspan=3>TA
+  <td class="rclr2" rowspan=3>IF
+  <td class="rclr1" rowspan=3>TB
+  <td class="rclr2" rowspan=3>S
+  <td class="rclr3" rowspan=3>Rn
+  <td class="rclr4" rowspan=3>Rd
+  <td class="rclr5" colspan=1>IR
+  <td class="rclr6" colspan=6>IN
+</tr>
+<tr class="bf">
+  <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op #
+  <td class="rclr5" colspan=2>IS
+  <td class="rclr8" rowspan=2>ST
+  <td class="rclr7" rowspan=2>SF
+  <td class="rclr6" rowspan=2>Rm
+</tr>
+<tr class="bf">
+  <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op Rs
+  <td class="rclr5">Rs
+  <td> 0
+</tr>
+</tbody>
+</table>
+<br>
+
+<table>
+<caption>
+  Top 20 bits for <code>add</code>; denote instruction type, 
+  status/conditional flags and destination and first operand 
+  registers.
+</caption>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+<tr align="left"><th>bits<th>name<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td> C-F <td class="rclr4">Rd
+  <td><b>Destination register</b>.
+<tr class="bg1">	
+  <td> 10-13 <td class="rclr3">Rn
+  <td><b>First operand register</b>.
+<tr class="bg0">	
+  <td> 14 <td class="rclr2">S
+  <td> Set <b>Status</b> bits (the <code>-s</code> affix).
+<tr class="bg1">	
+  <td> 15-18 <td class="rclr1">TB
+  <td><b>Instruction-type</b> field. Must be 4 for <code>add</code> .
+<tr class="bg0">	
+  <td> 19 <td class="rclr2">IF
+  <td><b>Immediate flag</b>. The second operand is an immediate value 
+    if set, and a (shifted) register if clear.
+<tr class="bg1">	
+  <td> 1A-1C <td class="rclr1">TA
+  <td> Another <b>instruction-type</b> field. Is zero for all data 
+    instructions.
+<tr class="bg0">	
+  <td> 1D-1F <td class="rclr0">cnd
+  <td><b>Condition</b> field.
+</tbody>
+</table><br>
+
+<table>
+<caption>
+  Lower 12 bits for <code>add</code>; these form the second operand.
+</caption>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+<tbody valign="top">
+<tr align="left"><th>bits<th>name<th>description
+<tr class="bg0">	
+  <td> 0-7 <td class="rclr6">IN
+  <td><b>Immediate Number</b> field. The second operand is 
+	<code>IN ror 2*IR</code>.
+<tr class="bg1">	
+  <td> 8-B <td class="rclr5">IR
+  <td><b>Immediate Rotate</b> field. This denotes the 
+    rotate-right amount applied to <i>IN</i>.
+<tr class="bg0">	
+  <td> 0-3 <td class="rclr6">Rm
+  <td><b>Second operand</b> register.
+<tr class="bg1">	
+  <td> 4 <td class="rclr7">SF
+  <td><b>Shift-operand flag</b>. If set, the shift is the immediate 
+    value in <i>IS</i>; if clear, the shift comes from register 
+    <i>Rs</i>.
+<tr class="bg0">	
+  <td> 5-6 <td class="rclr8">ST
+  <td><b>Shift type</b>. 
+   <b>0</b>: <code>lsl</code>, <b>1</b>: <code>lsr</code>
+   <b>2</b>: <code>asr</code>, <b>3</b>: <code>ror</code>
+<tr class="bg1">	
+  <td> 7-B <td class="rclr5">IS
+  <td><b>Immediate Shift</b> value. Second operand is 
+    <code>Rm Op IS</code>.
+<tr class="bg0">	
+  <td> 8-B <td class="rclr5">Rs
+  <td><b>Shift Register</b>. Second operand is 
+    <code>Rm Op Rs</code>.
+</tbody>
+</table>
+</div>
+
+<p>
+These kinds of tables should feel familiar: yes, I've also used them 
+for IO-registers throughout Tonc. The fact of the matter is that the 
+instructions are coded in a very similar way. In this case, you 
+have a 32bit value, with different bitfields describing the type 
+of instruction (<code>TA</code>=0 and <code>TB</code>=4 indicate  
+is an <code>add</code> instruction), the registers to use 
+(<code>Rd</code>, <code>Rd</code> and maybe <code>Rm</code> and 
+<code>Rs</code> too) and a few others. We have seen this thing a 
+number of times by now, so there should be no real difficulty in 
+understanding here. The assembly instructions are little more than 
+the <a href="regobj.htm#cd-oe-build">BUILD macros</a> I've used a 
+couple of times, only this time it's the assembler that turn them 
+into raw numbers instead of the preprocessor. Having said that, 
+it <i>is</i> possible to construct the instructions manually, 
+even at run-time, but whether you really want to do such a thing is 
+another matter.
+</p>
+<p>
+Now, the top 20 bits indicate the kind of instruction it is and 
+which registers it uses. The bottom 12 are for <i>Op2</i>. 
+If this involves a shifted register the bottom 4 bits indicate 
+<code>Rm</code>. Bits 5 and 6 describe the type of shift-operation 
+(shift-left, shift-right or rotate-right) and depending on bit 4, 
+bits 7 to 11 form either the register to shift by (<code>Rs</code>) 
+or a shift-value (5 bits for 0 to 31). And then there's the 
+immediate operand &hellip;
+<p>
+Sigh. Yes, here are the mere twelve bits you can use for an immediate 
+operand, divided into a 4bit rotate part and 8bit immediate part. The 
+allowable immediate values are given by <code>IN ror 2*IR</code>.
+This seems like a small range, but interestingly enough you can get 
+quite far with just these. It does mean that you can never 
+load variable addresses into a register in one go; you have to 
+get the address first with a PC-relative load and then load its 
+value.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Forming 511(0x101)</span>
+    <span class="rem">mov     r0, #511    <!--
+-->@ <b>Illegal instruction! D:</b></span>
+
+    <span class="keyw">mov</span>     r0, #<span 
+class="num">256</span>    <span 
+class="cmt">@ 256= 1 ror 24, so still valid</span>
+    <span class="keyw">add</span>     r0, #<span 
+class="num">255</span>    <span class="cmt">@ 256+255 = 511</span>
+
+    <span class="cmt">@ Load 511 from memory with ldr</span>
+    <span class="keyw">ldr</span>     r0, .L0
+
+    <span class="cmt">@ Load 511 from memory with special ldr</span>
+    <span class="cmt">@ NOTE: no '#' !</span>
+    <span class="keyw">ldr</span>     r0,=<span class="num">511</span>
+.L0:
+    .<span class="keyw">word</span>   <span class="num">511</span>
+</pre>
+
+<p>
+Anyway, the bit patterns of table 23.9 is what 
+the processor actually sees when you use an <code>add</code> 
+instruction. You can see what the other instructions look like in the 
+references I gave earlier, especially the quick references. The 
+orthogonality of the whole instruction set shows itself in very 
+similar formatting of a given class of instructions. For example, 
+the data instructions only differ by the <code>TB</code> field: 4 
+for <code>add</code>, 2 for <code>sub</code>, et cetera.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-thumb">23.4.
+  THUMB assembly</h2>
+<p>
+The THUMB instruction set is a subset of the full list of ARM 
+instructions. The defining feature of THUMB instructions is that 
+they're only 16 bits long. As a result a function in THUMB can be 
+much shorter than in ARM, which can be beneficial if you don't have 
+a lot of room to work with. Another point is that 16bit instructions
+will pass through a 16bit databus in one go and be executed 
+immediately, whereas execution of 32bit instructions would have to
+wait for the second chunk to be fetched, effectively halving the 
+instruction speed. Remember that ROM and EWEAM, the two main areas 
+for code have 16bit buses, which is why THUMB instructions are advised 
+for GBA programming.
+</p>
+<p>
+There are downsides, of course; you can't just cut the size of an 
+instruction in half and expect to get away with it. Even though THUMB 
+code uses many of the same mnemonics as ARM, functionality has been 
+severely reduced. For example, the only instruction that can be
+conditional is the branch, <code>b</code>; instructions can no longer 
+make use of shifts and rotates (these are separate instructions now), 
+and most instructions can only use the lower 8 registers 
+(<code>r0-r7</code>); the higher ones are still available, but you have 
+to move things to the lower ones because you can use them.
+</p>
+<p>
+In short, writing efficient THUMB code is much more challenging. It's 
+not exactly bondage-and-disciple programming, but if you're used to 
+the full ARM set you might be in for a surprise now and then. THUMB 
+uses most of ARM's mnemonics, but a lot of them are restricted in 
+some way so learning how to code in THUMB basically comes down to 
+what you <i>can't</i> do anymore. With that in mind, this section will
+cover the differences between ARM and THUMB, rather than the THUMB set 
+itself.
+</p>
+
+<ul>
+<li>
+  <p>
+  <b>Removed instructions</b>. A few instructions have been cut 
+  altogether. Of the various multiplication instructions only 
+  <code>mul</code> remains, reverse subtractions (<code>rsb</code>, 
+  <code>rsc</code>) are gone, as are the swapping and coprocessor 
+  instructions, but those are rare anyway. 
+  </p>
+</li>
+<li>
+  <p>
+  <b>&lsquo;New&rsquo; instructions</b>. The mnemonics are new, but 
+  really, they're just special cases of conventional ARM instructions. 
+  THUMB has separate shift/rotate opcodes: <code>lsl</code>, 
+  <code>lsr</code>, <code>asr</code> and <code>ror</code> codes, which 
+  are functionally equivalent to 
+  &lsquo;<code>mov Rd, Rm, Op2</code>&rsquo;. There is also a 
+  &lsquo;<code>neg Rd,Rm</code>&rsquo; for 
+  <i>Rd</i>= 0&minus;<i>Rm</i>, essentially an <code>rsb</code>. And I 
+  suppose you could call <code>push</code> and <code>pop</code> new, 
+  as they don't appear as ARM opcodes in some devkits.
+  </p>
+</li>
+<li>
+  <p><b>No conditionals</b>. Except on branch. Hello,
+  gratuitous labelling <kbd>:\</kbd>.</p>
+</li>
+<li>
+  <p>The <b>Set Status</b> flag is always on. So in THUMB 
+  <code>sub</code> will always work as a <code>subs</code>, etc.  
+<li>
+  <p>
+  <b>No barrel shifter</b>. Well, it still exist, of course; you just 
+  can't use it in conjunction with the instructions anymore.
+  This is why there are separate bitshift/-rotate opcodes.
+  </p>
+</li>
+<li>
+  <p><b>Restricted register availability</b>. Unless 
+  explicitly stated otherwise, the instructions can only use 
+  <code>r0-r7</code>. The exceptions here are <code>add</code>, 
+  <code>mov</code> and <code>cmp</code>, which can at times use 
+  high-regs as operands. This restriction also applies to memory 
+  operations, with small exceptions: <code>ldr/str</code> 
+  can still use PC-or SP-relative stuff; <code>push</code> allows 
+  <code>lr</code> in its register list and <code>pop</code> allows 
+  <code>pc</code>. With these, you could return from functions 
+  quickly, but you should use <code>bx</code> for that anyway. 
+  Fortunately, <code>bx</code> also allows use of every register so 
+  you can still do &lsquo;<code>bx lr</code>&rsquo;.
+  </p>
+</li>
+<li>
+  <p>
+  <b>Little to no immediate or second operand support</b>. In ARM-code, 
+  most instructions allowed for a second operand <i>Op2</i>, which was 
+  either an immediate value or a (shifted) register. Most THUMB 
+  data instructions are of the form 
+  &lsquo;<code><i>ins</i> Rd, Rm</code>&rsquo; and correspond to the 
+  C assignment operators like <code>+=</code> and <code>|=</code>. 
+  Note that <code>Rm</code> is a register, not an immediate.
+  The only instructions that break this pattern are the shift-codes, 
+  <code>add</code>, <code>sub</code>, <code>mov</code> and 
+  <code>cmp</code>, which can have both immediate values and second 
+  operands. See the reference docs for more details.
+  </p>
+</li>
+<li>
+  <p><b>No write-back in memory instructions</b>. That means 
+  you will have to use at least one extra register and extra 
+  instructions when traversing arrays. There is one exception to this, 
+  namely block-transfers. The only surviving versions are 
+  <code>ldmia</code> and <code>stmia</code>, and in both versions the 
+  write-back is actually required.</p>
+</li>
+<li>
+  <p>
+  <b>Memory operations are tricky</b>. Well, they are! ARM memory opcodes 
+  were identical in what they could do, but here you have to be on your 
+  toes. Some features are completely gone (write-back and shifted 
+  register offsets), and the others aren't always available to all
+  types. Register-offset addressing is always available, but immediate 
+  offsets do not work for the signed loads (<code>ldrsh</code>, 
+  <code>ldrsb</code>). Remember that the registers can only be 
+  <code>r0-r7</code>, except for <code>ldr/str</code>: there you can 
+  also use PC and SP-relative stuff (with immediate offsets). 
+  Table 23.10 gives an overview.
+  </p>
+  <div style="margin:0.5em;">
+  <table id="tbl-thumb-mem"
+    border=1 cellpadding=2 cellspacing=0>
+  <caption align="bottom">
+    <b>Table 23.10</b>. THUMB addressing mode 
+    availability.
+  </caption>
+  <col align="right">
+  <col span=3 align="center">
+  <tbody align="center">
+  <tr><td>&nbsp;</td><th>[Rn,Rm]</th> <th>[Rn,#]</th> <th>[pc/sp,#]</th></tr>
+  <tr><th>ldr/str</th> <td>+</td> <td>+</td> <td>+</td> </tr>
+  <tr><th>ldrh/strh</th> <td>+</td> <td>+</td> <td>-</td> </tr>
+  <tr><th>ldrb/strb</th> <td>+</td> <td>+</td> <td>-</td> </tr>
+  <tr><th>ldrsh/ldrsb</th> <td>+</td> <td>-</td> <td>-</td> </tr>
+  </tbody>
+  </table></div>
+  <p>Actually, &lsquo;<code>ldrh Rd,=X</code>&rsquo; 
+  also seem to work, but these are actually converted into 
+  &lsquo;<code>ldr Rd,=X</code>&rsquo; internally.
+</li>
+</ul><br>
+
+<p>
+Is that it? Well no, but it's enough. Remember, THUMB is essentially
+ARM Lite: it looks similar, but it has lost a lot of substance. I'd
+suggest learning THUMB code in that way too: start with ARM then 
+learn what you can't do anymore. This list gives most of the things 
+you need to know; for the rest, just read at the assembler messages 
+you will get from time to time and learn from the experience. 
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-gas">23.5.
+  GAS: the GNU assembler</h2>
+<p>
+The instructions are only part of functional assembly, you also need 
+<dfn>directives</dfn> to tie code together, control sections and 
+alignment, create data, etc. Somewhat fittingly, directives seem to be
+as unportable as assembly itself: directives for one assembler might 
+not work under others.
+</p>
+<p>
+This section covers the main directives of the GNU assembler, GAS. 
+Since we're already working with the GNU toolchain, the choice for 
+this assembler is rather obvious. GAS is already part of the normal 
+build sequence, so there is no real loss of functionality, and you 
+can work together with C files just as easily as with other assembly; 
+it's all the same to GCC. Another nice feature is that you can use 
+the preprocessor so if you have header files with just preprocessor 
+stuff (#include and #define only), you can use those here as well.
+Of course, you could do that anyway because <tt>cpp</tt> is a 
+standalone tool, but you don't have to resort to trickery here.
+</p>
+<p>
+But back to directives. In this section you'll see some of the most 
+basic directives. This includes creating symbols for functions 
+(both ARM and THUMB) and variables. With out these you wouldn't be 
+able to do anything. I'll also cover basic datatypes and placing 
+things in specific sections. There are many other directives as well, 
+but these should be the most useful. For the full list, go to 
+the
+<a href="http://sourceware.org/binutils/docs-2.22/as/index.html" target="_blank">GAS manual</a> 
+at www.gnu.org.
+</p>
+
+<h3 id="ssec-gas-sym">23.5.1.
+  Symbols</h3>
+<p>
+Data (variable and constant) and functions are collectively known as 
+<dfn>symbols</dfn> and, just like in C, these have declarations and 
+definitions. Any label (a valid identifier on a separate line ending 
+with a colon) is potentially a symbol definition, but it's better to 
+distinguish between global and local labels. Simply put, a label is 
+global if there is a &lsquo;<code>.global <i>lname</i></code>&rsquo; 
+directive attached to it that makes it visible to the outside world.
+Local labels are everything else, and conventionally start with 
+&lsquo;<code>.L</code>&rsquo;, though this is not required. If you
+want to use symbols from outside, you have to use 
+&lsquo;<code>.extern <i>lname</i></code>&rsquo;.
+</p>
+<p>
+Now, unless you're using some notational device, a label tells you 
+nothing about what it actually stands for: it gives you no information
+on whether it's data or a function, nor the number of arguments for
+the latter. There is &lsquo;<code>.type, </code><i>str</i>&rsquo; 
+directive that lets you indicate if it's a function 
+(<i>str</i> = <code>%function</code>) or some form of data 
+(<i>str</i> = <code>%object</code>), but that's about it. 
+Since you can tell that difference by looking at what's after the 
+label anyway, I tend to leave this out. For other information, please 
+comment on what the symbols mean.
+</p>
+<p>
+The directives you'd use for data will generally tell you what the 
+datatypes are, but that's something for a later subsection. Right now, 
+I'll discuss a few directives for functions. The most important one 
+is &lsquo;<code>.code <i>n</i></code>&rsquo;, where <i>n</i> is 
+32 or 16 for ARM or THUMB code respectively. You can also use the 
+more descriptive <code>.arm</code> and <code>thumb</code> 
+directives, which do the same thing. These are global settings, 
+remaining active until you change them. Another important directive 
+is <code>.thumb_func</code>, which is <b>required</b> for 
+interworking THUMB functions. This directive applies to the next 
+symbol label. Actually, <code>.thumb_func</code> already implies 
+<code>.thumb</code>, so adding the latter explicitly isn't necessary.
+</p><br>
+
+<p>
+A very important and sneaky issue is alignment. <b>You</b> are 
+responsible for aligning code and data, not the assembler. In 
+C, the compiler did this for you and the only times you might have 
+had problems was with
+<a href="bitmaps.htm#ssec-data-align">alignment mismatches</a> 
+when casting, but here both code <i>and</i> data can be misaligned; 
+in assembly, the assembler just strings your code and data together 
+as it finds it, so as soon as you start using anything other than 
+words you have the possibility of mis-alignments. 
+</p>
+<p>
+Fortunately, alignment is very easy to do: 
+&lsquo;<code>.align <i>n</i></code>&rsquo; aligns to the next 
+2<sup>n</sup> byte boundary and if you don't like the fact that
+<i>n</i> is a power here, you can also use &lsquo;<code>.balign
+<i>m</i></code>&rsquo;, which aligns to <i>m</i> 
+bytes. These will update the current location so that the next item of
+business is properly aligned. Yes, it applies to the <i>next</i> item 
+of code/data; it is not a global setting, so if you intend to have
+mixed data-sizes, be prepared to align things often.
+</p>
+<p>
+Here are a few examples of how these things would work in practice. 
+Consider it standard boilerplate material for the creation and use 
+of symbols.
+</p>
+
+<pre class="proglist"><span class="cmt">@ ARM and THUMB versions of m5_plot
+@ extern u16 *vid_page;
+@ void m5_plot(int x, int y, u16 clr)
+@ {   vid_page[y*160+x]= clr;    }</span>
+
+<span class="cmt">@ External declaration
+@ NOTE: no info on what it's a declaration of!</span>
+    <b>.<span class="keyw">extern</span> vid_page</b>            <span 
+class="cmt">@ extern u16 *vid_page;</span>
+
+<span class="cmt">@ ARM function definition
+@ void m5_plot_arm(int x, int y, u16 clr)</span>
+    <b>.<span class="keyw">align</span> <span 
+class="num">2</span></b>                    <span 
+class="cmt">@ Align to word boundary</span>
+    <b>.<span class="keyw">arm</span></b>                        <span 
+class="cmt">@ This is ARM code</span>
+    <b>.<span class="keyw">global</span> m5_plot_arm</b>         <span 
+class="cmt">@ This makes it a real symbol</span>
+    <b>.<span class="keyw">type</span> m5_plot_arm STT_FUNC</b>  <span 
+class="cmt">@ Declare m5_plot_arm to be a function.</span>
+<b>m5_plot_arm:</b>                    <span 
+class="cmt">@ Start of function definition</span>
+    <span class="keyw">add</span>     r1, r1, <span 
+class="keyw">lsl</span> #<span class="num">2</span>
+    <span class="keyw">add</span>     r0, r1, <span 
+class="keyw">lsl</span> #<span class="num">5</span>
+    <span class="keyw">ldr</span>     r1,=vid_page
+    <span class="keyw">ldr</span>     r1, [r1]
+    <span class="keyw">mov</span>     r0, r0, <span 
+class="keyw">lsl</span> #<span class="num">1</span>
+    <span class="keyw">strh</span>    r2, [r1, r0]
+    <span class="keyw">bx</span>      lr
+
+<span class="cmt">@ THUMB function definition
+@ void m5_plot_thumb(int x, int y, u16 clr)</span>
+    <b>.<span class="keyw">align</span> <span 
+class="num">2</span></b>                    <span 
+class="cmt">@ Align to word boundary</span>
+    <b>.<span class="keyw">thumb_func</span></b>                 <span 
+class="cmt">@ This is a thumb function</span>
+    <b>.<span class="keyw">global</span> m5_plot_thumb</b>       <span 
+class="cmt">@ This makes it a real symbol</span>
+    <b>.<span class="keyw">type</span> m5_plot_thumb STT_FUNC</b>    <span 
+class="cmt">@ Declare m5_plot_thumb to be a function.</span>
+<b>m5_plot_thumb:</b>                  <span 
+class="cmt">@ Start of function definition</span>
+    <span class="keyw">lsl</span>     r3, r1, #<span class="num">2</span>
+    <span class="keyw">add</span>     r1, r3
+    <span class="keyw">lsl</span>     r1, #<span class="num">5</span>
+    <span class="keyw">add</span>     r0, r1
+    <span class="keyw">ldr</span>     r1,=vid_page
+    <span class="keyw">ldr</span>     r1, [r1]
+    <span class="keyw">lsl</span>     r0, #<span class="num">1</span>
+    <span class="keyw">strh</span>    r2, [r1, r0]
+    <span class="keyw">bx</span>      lr
+</pre>
+
+<p>
+The functions above show the basic template for functions: 
+three lines of directives, and a label for the function. Note that 
+there is no required order for the four directives, so you may see 
+others as well. In fact, the <code>.global</code> directive can be 
+separated completely from the rest of the function's code if you 
+want. Also note the use of <code>.extern</code> to allow access to 
+<code>vid_page</code>, which in tonclib always points to the current 
+back buffer. To be honest, it isn't even necessary because GAS 
+assumes that all unknown identifiers come from other files; 
+nevertheless, I'd suggest you use it anyway, just for maintenance
+sake. 
+</p>
+<p>
+And yes, these two functions do actually form functional mode 5 
+pixel plotters. As an exercise, try to figure out how they work and 
+why they're coded the way they are. Also, notice that the THUMB 
+function is only two instructions longer than the ARM version; if 
+this were ROM-code, the THUMB version would be a whole lot faster 
+due to the buswidth, which is exactly why THUMB code is recommended
+there.
+</p>
+
+  <div class="note">
+    <div class="nhcare">GCC 4.7 note: symbol-type for functions now required</div>
+	<p>
+	  As of GCC 4.7, the <code>.type</code> directive is pretty much required 
+	  for functions. Or, rather, it is required if you want ARM and Thumb interworking 
+	  to work. Just add the following line to each function definition:
+	</p>
+<pre class="proglist">
+    .<span class="keyw">type</span> <i>[function-name]</i> STT_FUNC
+</pre>
+	<p>
+	  <code>STT_FUNC</code> is an internal macro that expands to the correct attribute 
+	  (presumably <code>%function</code>). Replace <code>[function-name]</code> with the 
+	  real function name.
+	</p>
+  </div>
+  
+<div class="note">
+<div class="nhbad">Implicit extern considered harmful</div>
+<p>
+The <code>.extern</code> directive for external symbols is actually 
+not required: GAS assumes that unknown identifiers are external. 
+While I can see the benefits of implicit declarations/definitions, 
+I still think that it is a <i>bad</i> idea. If you've ever misspelled
+an identifier in languages that have implicit definitions, you'll 
+know why.
+</p>
+<p>
+And yes, I know this is actually a non-issue because it'll get caught 
+by the linker anyway, but explicitly mentioning externals is 
+probably still a good idea. <kbd>:P</kbd>
+</p>
+</div>
+
+<h3 id="ssec-gas-data">23.5.2.
+  Definition of variables</h3>
+<p>
+Of course, you can also have data in assembly, but before we go there  
+a word about acceptable number formats and number uses. GAS uses the 
+same number representations as C: plain numbers for decimals, 
+&lsquo;<code>0</code>&rsquo; for octal and 
+&lsquo;<code>0x</code>&rsquo; for hexadecimal. There is also a binary 
+representation, using the &lsquo;<code>0b</code>&rsquo; prefix: 
+for example, <code>0b1100</code> is 12. I've already used numbers a 
+couple of times now, and you should have noticed that they're 
+sometimes prepended by &lsquo;<code>#</code>&rsquo;. The symbol is
+not actually part of the number, but is the indicator for an 
+immediate value.
+</p>
+<p>
+It is also possible to perform arithmetic on numbers in assembly.
+That is to say, you can have something like 
+&lsquo;<code>mov r0, #1+2+3+4</code>&rsquo; to load 10 into 
+<code>r0</code>. Not only arithmetic, but bit operations will work
+too, which can be handy if you want to construct masks or colors. 
+Note, this only works for constants.
+</p><br>
+
+<p>
+And now for adding data to your code. The main data directives are 
+<code>.byte</code>, <code>.hword</code>, and <code>.word</code>, 
+which create bytes, halfwords and words, respectively. If you want 
+you can count <code>.float</code> among them as well, but you don't 
+want to because floats are evil on the GBA. Their use is  
+simple: put the directive on a line and add a number after it, 
+or even a comma-separated list for an array. If you add a label 
+in front of the data, you have yourself a variable. There are 
+also a few directives for strings, namely <code>.ascii</code>, 
+<code>.asciz</code> and <code>.string</code>. <code>.asciz</code> 
+and <code>.string</code> differ from <code>.ascii</code> in that 
+they add the terminating '<code>\0</code>' to the string, which is 
+how strings usually work. Just like the other data directives, you 
+can make an array of strings by separating them with commas.
+</p>
+<p>
+You can 
+see some examples below; note that what should have been the 
+<code>hword_var</code> will definitely be misaligned and hence 
+useless.
+</p>
+
+<pre class="proglist">
+    .<span class="keyw">align</span> <span class="num">2</span>
+word_var:               <span 
+class="cmt">@ int word_var= 0xCAFEBABE</span>
+    .<span class="keyw">word</span>   <span 
+class="num">0xCAFEBABE</span>
+word_array:             <span 
+class="cmt">@ int word_array[4]= { 1,2,3,4 }</span>
+    .<span class="keyw">word</span>   <span 
+class="num">1</span>, <span class="num">2</span>, <span 
+class="num">3</span>, <span class="num">4</span>      <span 
+class="cmt">@ NO comma at the end!!</span>
+byte_var:               <span class="cmt">@ char byte_var= 0;</span>
+    .<span class="keyw">byte</span>   <span class="num">0</span>
+hword_var:              <span 
+class="rem">@ NOT short hword_var= 0xDEAD;</span>
+    .<span class="keyw">hword</span>  <span 
+class="num">0xDEAD</span>      <span 
+class="rem">@   due to bad alignment!</span>
+str_array:                 <span 
+class="cmt">@ Array of NULL-terminated strings:</span>
+    .<span class="keyw">string</span> <span 
+class="str">&quot;Hello&quot;</span>, <span 
+class="str">&quot;Nurse!&quot;</span>
+</pre>
+
+<h3 id="ssec-gas-dsec">23.5.3.
+  Data sections</h3>
+<p>
+So now you know how to make code and variables, you have to put them 
+into the proper sections. A <dfn>section</dfn> is a contained area
+where code and data are stored; the linker uses a linkscript to see 
+where the different sections are and then adds all your symbols and 
+links accordingly. The format for sections is
+&lsquo;<code>.section <i>secname</i></code>&rsquo;, with optional 
+&lsquo;<code>, &quot;<i>flags</i>&quot;, %<i>type</i></code>&rsquo; 
+information I'll get to in a minute. 
+</p>
+<p>
+Traditionally, the section for code is called <code>.text</code> 
+and that for data is called <code>.data</code>, but there are a few 
+more to consider: the general sections <code>.bss</code> and 
+<code>.rodata</code>, and the GBA-specific <code>.ewram</code> 
+and <code>.iwram</code>. In principle, these four are data sections, 
+but they can be used for code by setting the correct section flags.
+As you might have guessed, <code>.ewram</code> stands for the EWRAM 
+section (0200:0000h), <code>.iwram</code> is IWRAM (0300:0000h) 
+and <code>.rodata</code> is ROM (0800:0000). 
+The <code>.bss</code> section is a section 
+intended for variables that are either uninitialized or filled with 
+zero. The nice thing about this section is that it requires no ROM 
+space, as it doesn't have data to store there. The section will be 
+placed in IWRAM, just like the <code>.data</code>. You may also 
+sometimes see <code>.sbss</code> which stands for &lsquo;small 
+bss&rsquo; and has a similar function as the standard <code>.bss</code>, 
+but happens to be placed in EWRAM.
+</p>
+<p>
+These data sections can be used to indicate different kinds of 
+data symbols. For example, constants (C keyword <code>const</code>) 
+should go into <code>.rodata</code>. Non-zero (and non-const, 
+obviously) initialised data goes into <code>.data</code>, and
+zero or uninitialized data is to be placed into <code>.bss</code>. 
+Now, you still have to indicate the amount of storage you need for 
+each bss-variable. This can be done with 
+&lsquo;<code>.space <i>n</i></code>&rsquo;, which indicates 
+<i>n</i> zero bytes (see also <code>.fill</code> and 
+<code>.skip</code>), or &lsquo;<code>.comm <i>name</i>, 
+<i>n</i>, <i>m</i></code>&rsquo;, which creates a bss symbol called 
+<i>name</i>, allocates <i>n</i> bytes for it and aligns it to 
+<i>m</i> bytes too. GCC likes to use this for uninitialized variables.
+</p>
+
+<!--
+<div><em>[[.comm's are in COMMON, not .bss actually]]</em></div>
+-->
+
+<pre class="proglist">
+<span class="cmt">// C symbols and their asm equivalents</span>
+
+<span class="cmt">// === C versions ===</span>
+<span class="keyw">int</span> var_data= <span 
+class="num">12345678</span>;
+<span class="keyw">int</span> var_zeroinit= <span class="num">0</span>;
+<span class="keyw">int</span> var_uninit;
+<span class="keyw">const</span> u32 cst_array[<span 
+class="num">4</span>]= { <span class="num">1</span>, <span 
+class="num">2</span>, <span class="num">3</span>, <span 
+class="num">4</span> };
+u8 charlut[<span class="num">256</span>] EWRAM_BSS;
+
+<span class="cmt">@ === Assembly versions ===
+@ Removed alignment and global directives for clarity</span>
+
+<span class="cmt">@ --- Non-zero Initialized data ---</span>
+    .<span class="keyw">data</span>
+var_data:
+    .<span class="keyw">word</span>   <span class="num">12345678</span>
+
+<span class="cmt">@ -- Zero initialized data ---</span>
+    .<span class="keyw">bss</span>
+var_zeroinit:
+    .<span class="keyw">space</span>	<span class="num">4
+</span>
+<span class="cmt">@ --- Uninitialized data ---
+@ NOTE: .comm takes care of section, label and alignment for you
+@   so those things need not be explicitly mentioned</span>
+    .comm var_uninit,<span class="num">4</span>,<span class="num">4
+</span>
+<span class="cmt">@ --- Constant (initialized) data ---</span>
+    .<span class="keyw">section</span> .rodata
+cst_array:
+    .<span class="keyw">word</span> <span class="num">1</span>, <span 
+class="num">2</span>, <span class="num">3</span>, <span class="num">4
+</span>
+<span class="cmt">@ --- Non-zero initialized data in ewram ---</span>
+    .<span class="keyw">section</span> .sbss
+charlut:
+    .<span class="keyw">space</span> <span class="num">256</span>
+</pre>
+
+
+
+<div class="note">
+<div class="nhgood">Assembly for data exporters</div>
+<p>
+Assembly is a good format for exporting data to. Assembling arrays 
+is faster than compilation, the files can be bigger and you can 
+control alignment more easily. Oh, any you can't be tempted to 
+#include the data, because that simply will not work.
+</p>
+
+<pre class="proglist">
+    .<span class="keyw">section</span> .rodata    <span 
+class="cmt">@ in ROM, please</span>
+    .<span class="keyw">align</span>  <span 
+class="num">2</span>           <span class="cmt">@ Word alignment</span>
+    .<span class="keyw">global</span> foo         <span 
+class="cmt">@ Symbol name</span>
+foo:
+    <span class="cmt">@ Array goes in here. Type can be .byte, .hword or .word</span>
+    <span class="cmt">@ NOTE! No comma at the end of a line! This is important</span>
+    .<span class="keyw">hword</span>  <span 
+class="num">0x0000</span>,<span class="num">0x0001</span>,<span 
+class="num">0x0002</span>,<span class="num">0x0003</span>,<span 
+class="num">0x0004</span>,<span class="num">0x0005</span>,<span 
+class="num">0x0006</span>,<span class="num">0x0007</span>
+    .<span 
+class="keyw">hword</span>  <span 
+class="num">0x0008</span>,<span class="num">0x0009</span>,<span 
+class="num">0x000A</span>,<span class="num">0x000B</span>,<span 
+class="num">0x000C</span>,<span class="num">0x000D</span>,<span 
+class="num">0x000E</span>,<span class="num">0x000F</span>
+    .<span class="keyw">hword</span>  <span 
+class="num">0x0010</span>,<span class="num">0x0011</span>,<span 
+class="num">0x0012</span>,<span class="num">0x0013</span>,<span 
+class="num">0x0014</span>,<span class="num">0x0015</span>,<span 
+class="num">0x0016</span>,<span class="num">0x0017
+</span>
+    ...
+</pre>
+
+<p>
+You need a const section, word alignment, a symbol declaration and 
+definition and the data in soe form of array. To make use of it, make 
+a suitable declaration of the array in C and you're all set.
+</p>
+</div>
+
+<h3 id="ssec-gas-csec">23.5.4.
+  Code sections</h3>
+<p>
+That was data in different sections, now for code. The normal section
+for code is <code>.text</code>, which will equate to ROM or EWRAM 
+depending on the linker specs. At times, you will want to have code 
+in IWRAM because it's a lot faster than ROM and EWRAM. You might 
+think that &lsquo;<code>.section .iwram</code> does the trick, but 
+unfortunately this does not seem generally true. Because 
+IWRAM is actually a data section, you have to add section-type 
+information here as well. The full section declaration needs to be 
+&lsquo;<code>.section .iwram, "ax", %progbits</code>&rsquo;, which 
+marks the section as allocatable and executable (<code>"ax"</code>), 
+and that the section contains data as well (<code>%progbits</code>), 
+although this last bit doesn't seem to be required.
+</p><br>
+
+<p>
+Another interesting point is how to call the function once you have 
+it in IWRAM. The problem is that IWRAM is too far away from ROM to 
+jump to in one go, so to make it work you have to load the address 
+of your function in a register and then jump to it using 
+<code>bx</code>. And set <code>lr</code> to the correct return address, 
+of course. The usual practice is to load the function's address into 
+a register and branch to a dummy function that just consists of 
+a <code>bx</code> using that register. GCC has these support functions 
+under the name <code>_call_via_<i>rx</i></code>, where <i>rx</i> 
+is the register you want to use. These names follow the GCC 
+naming scheme as given in table 23.1.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ --- ARM function in IWRAM: ---</span>
+    .<span class="keyw">section</span> .iwram, <span
+class="str">&quot;ax&quot;</span>, %progbits
+    .<span class="keyw">align</span> <span class="num">2</span>
+    .<span class="keyw">arm</span>
+    .<span class="keyw">global</span> iw_fun
+    .<span class="keyw">type</span> iw_fun STT_FUNC
+iw_fun:
+    <span class="cmt">@ &lt;code goes in here&gt;
+
+
+@ --- Calling iw_fun somewhere ---</span>
+    <span class="keyw">ldr</span> r3,=iw_fun      <span 
+class="cmt">@ Load address</span>
+    <span class="keyw">bl</span>  _call_via_r3   <span 
+class="cmt">@ Set lr, jump to long-call function
+
+
+@ --- Provided by GCC: ---</span>
+_call_via_r3:
+    <span class="keyw">bx</span>  r3      <span 
+class="cmt">@ Branch to r3's address (i.e., iw_fun)</span>
+                <span 
+class="cmt">@ No bl means the original lr is still valid</span>
+</pre>
+
+<p>
+The <code>_call_by_<i>rx</i></code> indirect branching is how 
+function calling works when you use the <tt>-mlong-calls</tt> 
+compiler flag. It's a little slower than straight branching, 
+but generally safer. Incidentally, this is also how 
+interworking is implemented.
+</p>
+
+<div class="note">
+<div class="nh">Standard and special sections</div>
+<p>
+Sections <code>.text</code>, <code>.data</code> and <code>.bss</code> 
+are standard GAS sections and do not need explicit 
+mention of the <code>.section</code> directive. Sections 
+<code>.ewram</code>, <code>.iwram</code>, <code>.rodata</code> and 
+<code>.sbss</code> and more GBA specific, and do need 
+<code>.section</code> in front of them.
+</p>
+</div>
+
+<p>
+With this information, you should be able to create functions, 
+variables and even place them into the right sections. This is 
+probably 90% of whay you might want to do with directives already. For 
+the remaining few, read the manual or browse through GCC generated 
+asm. Both should point you in the right direction.
+</p>
+
+
+
+<!--
+<em>[[notes on .section-less sections, and more?]]</em>
+-->
+
+<!--
+<h3 name="ssec-gas-misc">Other useful GAS directives</h3>
+<p>
+The directives discussed so far are the ones most likely to be 
+used for assembly in general, but there are a <i>lot</i> more.
+</p>
+-->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-cpy">23.6.
+  A real world example: fast 16/32-bit copiers</h2>
+<p>
+In the last section, I will present two assembly functions &ndash; one
+ARM and one THUMB &ndash; intended for copying data quickly and with 
+safety checks for alignment. They are called <code>memcpy16()</code> and 
+<code>memcpy32()</code> and I have already used these a number of times 
+throughout Tonc. <code>memcpy32()</code> does what
+<code>CpuFastSet()</code> does, but without requiring that the 
+word-count is a multiple of 8. Because this is a primary function, 
+it's put in IWRAM as ARM code. <code>memcpy16()</code> is intended for 
+use with 16bit data and calls <code>memcpy32()</code> if alignments of 
+the source and destination allow it and the number of copies warrant 
+it. Because its main job is deciding whether to use 
+<code>memcpy32</code>, this function can stay in ROM as THUMB code.
+</p>
+<p>
+This is not merely an exercise; these functions are there to be used.
+They are optimized and take advantage of most of the features of
+ARM/THUMB assembly. Nearly everything covered in this chapter can 
+be found here, so I hope you've managed to keep up. To make things 
+a little easier, I've added the C equivalent code here too, so you 
+can compare the two.
+</p>
+<p>
+Also, these functions are not just for pure assembly projects, but can 
+also be used in conjunction with C code, and I'll show you how to do
+this too. As you've already seen demos using these functions without 
+any hint that they were assembly functions (apart from me saying so), 
+this part isn't actually to hard. So that's the program for this 
+section. Ready? Here we go.
+</p>
+
+<h3 id="ssec-cpy-32">23.6.1.
+  memcpy32()</h3>
+<p>
+This function will copy words. <i>Fast</i>. The idea is to use 
+8-fold block-transfers where possible (just like 
+<code>CpuFastSet()</code>), and then copy the remaining 0 to 7 words 
+of the word count with simple transfers. Yes, one could make an 
+elaborate structure of tests and block-transfers to do these 
+residuals in one go as well, but I really don't think that's worth it.
+</p>
+<p>
+One could write a function for this in C, which is done below. 
+However, even though GCC does use block-transfers for the BLOCK 
+struct-copies, I've only seen it go up to 4-fold 
+<code>ldm/stm</code>s. Furthermore, it tends to use more registers 
+than strictly necessary. You could say that GCC doesn't do its job 
+properly, but it's hard to understand what humans mean, alright? 
+If you want it done as efficient as possible, do it your damn self. 
+Which is exactly what we're here to do, of course.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// C equivalent of memcpy32</span>
+<span class="keyw">typedef</span> <span 
+class="keyw">struct</span> BLOCK { u32 data[<span 
+class="num">8</span>]; } BLOCK;
+
+<span class="keyw">void</span> memcpy32(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const</span> <span 
+class="keyw">void</span> *src, uint wdcount) IWRAM_CODE
+{
+    u32 blkN= wdcount/<span
+class="num">8</span>, wdN= wdcount&amp;<span class="num">7</span>;
+    u32 *dstw= (u32*)dst, *srcw= (u32*)src;
+    <span class="keyw">if</span>(blkN)
+    {
+        <span class="cmt">// 8-word copies</span>
+        BLOCK *dst2= (BLOCK*)dst, *src2= (BLOCK*)src;
+        <span class="keyw">while</span>(blkN--)
+            *dst2++ = *src2++;
+        dstw= (u32*)dst2;  srcw= (u32*)src2;
+    }
+    <span class="cmt">// Residual words</span>
+    <span class="keyw">while</span>(wdN--)
+        *dstw++ = *srcw++;
+}
+</pre>
+
+<p>
+The C version should be easy enough to follow. The number of words, 
+<code>wdcount</code> is split into a block count and residual 
+word count. If there are full block to copy, then we do so and 
+adjust the pointers so that the residuals copy correctly. Note that 
+<code>wdcount</code> is the number of words to copy, not the
+number of bytes, and that <code>src</code> and <code>dst</code> are 
+assumed to be word-aligned.
+</p>
+<p>
+The assembly version &ndash;surprise, surprise&ndash; does exactly 
+the same thing, only much more efficient than GCC will make it. There 
+is little I can add about what it does because all things have been 
+covered already, but there are a few things about <i>how</i> it does 
+them that deserve a little more attention.
+</p>
+<p>
+First, note the general program flow. The <code>movs</code> gives 
+the number of blocks to copy, and if that's zero then we jump 
+immediately to the residuals, <code>.Lres_cpy32</code>. What happens 
+there also interesting: the three instructions after decrementing the 
+word-count (in <code>r12</code>) all carry the <code>cs</code> flag.
+This means that if <code>r12</code> is (unsigned) lower than one, 
+(i.e., <code>r12</code>==0) these instructions are ignored. This is 
+exactly what we want, but usually there is a separate check for 
+zero-ness before the body of the loop and these extra instructions 
+cost space and time. With clever use of conditionals, we can spare 
+those.
+</p> 
+<p>
+The main loop doesn't use these conditionals, nor, it would 
+seem, a zero-check. The check here is actually done at that
+<code>movs</code> lines as well: if it doesn't jump, we can be sure 
+there are blocks to copy, so another check is unnecessary. Also note 
+that the non-scratch registers <code>r4-r10</code> are only stacked 
+when we're sure they'll actually be used. GCC normally stacks at the 
+beginning and end of functions, but there is no reason not to delay 
+it until it's actually necessary.
+</p>
+<p>
+Lastly, a few words on non-assembly matters. First, the general 
+layout: I use one indent for everything except labels, and
+sometimes more for what in higher languages would be loops or 
+if-blocks. Neither is required, but I find that it makes reading 
+easier. I also make sure that the instruction parameters are all 
+in line, which works best if you reserve 8 spaces for the mnemonic 
+itself. How you set the indents is a matter of personal preference 
+and a subject of many holy wars, so I'm not touching that one here 
+<kbd>:P</kbd>
+</p>
+<p>
+Another point is comments. Comments are even more important in 
+assembly than in C, but don't overdo it! Overcommenting just drowns 
+out the comments that are actually useful and maybe even the code as
+well. Comment on blocks and what each register is and maybe on 
+important tests/branches, but do you really have to say that
+&lsquo;<code>subs r2, r2, #1</code>&rsquo; decrements a loop variable? 
+No, I didn't think so either. It might also help to give the intended 
+declaration of the function if you want to use it in C. 
+</p>
+<p>
+Also, 
+it's a good idea to always add section, alignment and code-set before 
+a function-label. Yes, these things aren't strictly necessary, but 
+what if some yutz decides to add a function in the middle of the 
+file which screws up these things for functions that follow it? Lastly, 
+try to distinguish between symbol-labels and branch-labels. GCC's 
+take on this is starting the latter with 
+&lsquo;<code>.L</code>&rsquo;, which is as good of a convention as 
+any.
+</p>
+
+<pre class="proglist">
+<span 
+class="cmt">@ === void memcpy32(void *dst, const void *src, <!--
+-->uint wdcount) IWRAM_CODE; =============</span>
+<span class="cmt">@ r0, r1: dst, src
+@ r2: wdcount, then wdcount&gt;&gt;3
+@ r3-r10: data buffer
+@ r12: wdn&amp;7</span>
+    .<span class="keyw">section</span> .iwram,<span 
+class="str">&quot;ax&quot;</span>, %progbits
+    .<span class="keyw">align</span>  <span class="num">2</span>
+    .<span class="keyw">code</span>   <span class="num">32</span>
+    .<span class="keyw">global</span> memcpy32
+    .<span class="keyw">type</span>   memcpy32 STT_FUNC
+memcpy32:
+    <span class="keyw">and</span>     r12, r2, #<span 
+class="num">7</span>     <span class="cmt">@ r12= residual word count</span>
+    <span class="keyw">movs</span>    r2, r2, <span 
+class="keyw">lsr</span> #<span class="num">3</span>  <span 
+class="cmt">@ r2=block count</span>
+    <span class="keyw">beq</span>     .Lres_cpy32
+    <span class="keyw">push</span>    {r4-r10}
+    <span class="cmt">@ Copy 32byte chunks with 8fold xxmia</span>
+    <span class="cmt">@ r2 in [1,inf&gt;</span>
+.Lmain_cpy32:
+        <span class="keyw">ldmia</span>   r1!, {r3-r10}   
+        <span class="keyw">stmia</span>   r0!, {r3-r10}
+        <span class="keyw">subs</span>    r2, #<span class="num">1</span>
+        <span class="keyw">bne</span>     .Lmain_cpy32
+    <span class="keyw">pop</span>     {r4-r10}
+    <span class="cmt">@ And the residual 0-7 words. r12 in [0,7]</span>
+.Lres_cpy32:
+        <span class="keyw">subs</span>    r12, #<span class="num">1</span>
+        <span class="keyw">ldrcs</span>   r3, [r1], #<span class="num">4</span>
+        <span class="keyw">strcs</span>   r3, [r0], #<span class="num">4</span>
+        <span class="keyw">bcs</span>     .Lres_cpy32
+    <span class="keyw">bx</span>  lr
+</pre>
+
+<h3 id="ssec-cpy-16">23.6.2.
+  memcpy16()</h3>
+<p>
+The job of the halfword copier <code>memcpy16()</code> isn't really 
+copying halfwords. If possible, it'll use <code>memcpy32()</code> for 
+addresses that can use it, and do the remaining halfword parts (if 
+any) itself. Because it doesn't do much copying on its own we don't 
+have to waste IWRAM with it; the routine can stay as a normal 
+THUMB function in ROM.
+</p>
+<p>
+Two factors decide whether or not jumping to <code>memcpy32()</code> 
+is beneficial. First is the number of halfwords (<code>hwcount</code>) 
+to copy. I've ran a number of checks and it seems that the break-even 
+point is about 6 halfwords. At that point, the power of word copies in 
+IWRAM already beats out the cost of function-call overhead and 
+THUMB/ROM code.
+</p>
+<p>
+The second is whether the incoming source and destination 
+addresses can be resolved to word addresses. This is true if bit 1 of 
+the source and destinations are equal (bit 0 is zero because these 
+are valid halfword addresses), in other words:
+<code>(src^dst)&amp;2</code> should not be zero. If it resolvable, 
+do one halfword copy to word-align the addresses if necessary, then 
+call <code>memcpy32()</code> for all the word copies. After than, 
+adjust the original halfword stuff and if there is anything left
+(or if <code>memcpy32()</code> couldn't be used) copy by
+halfword. 
+</p>
+
+<pre class="proglist">
+<span class="cmt">// C equivalent of memcpy16</span>
+<span class="keyw">void</span> memcpy16(<span 
+class="keyw">void</span> *dst, <span class="keyw">const</span> <span 
+class="keyw">void</span> *src, uint hwcount)
+{
+    u16 *dsth= (u16*)dst, *srch= (u16*)src;
+    <span class="cmt">// Fast-copy if and only if:
+    //   <b>(1)</b> enough halfwords and 
+    //   <b>(2)</b> equal src/dst alignment</span>
+    <span class="keyw">if</span>( (hwcount&gt;<span
+class="num">5</span>) &amp;&amp; !(((u32)dst^(u32)src)&amp;<span 
+class="num">2</span>) )
+    {
+        <span class="keyw">if</span>( ((u32)src)&amp;<span 
+class="num">1</span> )  <span class="cmt">// <b>(3)</b> align to words</span>
+        {
+            *dsth++= *srch++;
+            hwcount--;
+        }
+        <span 
+class="cmt">// <b>(4)</b> Use memcpy32 for main stint</span>
+        memcpy32(dsth, srch, hwcount/<span class="num">2</span>);
+        <span 
+class="cmt">// <b>(5)</b> and adjust parameters to match</span>
+        srch += hwcount&amp;~<span class="num">1</span>; 
+        dsth += hwcount&amp;~<span class="num">1</span>;
+        hwcount &amp;= <span class="num">1</span>;
+    }
+    <span class="cmt">// <b>(6)</b> Residual halfwords</span>
+    <span class="keyw">while</span>(hwcount--)
+        *dsth++ = *srch++;
+}
+</pre>
+
+<p>
+The C version isn't exactly pretty due to all the casting and masking, 
+but it works well enough. If you were to compile it and compare it to 
+the assembly below you should see many similarities, but it won't
+be exactly equal because the assembly programmer is allowed greater 
+freedoms than GCC, and doesn't have to contend with the syntax of C.
+</p>
+<p>
+Anyway, before the function actually starts I state the declaration, 
+the use of the registers, and the standard boilerplate for functions. 
+As I need more than 4 registers and I'm calling a function, I need 
+to stack <code>r4</code> and <code>lr</code>. This time I am doing 
+this at the start and end of the function because it's just too much 
+of a hassle not to. One thing that may seem strange is why I pop
+<code>r4</code> and then <code>r3</code> separately, especially as 
+it's <code>lr</code> that I need and not <code>r3</code>. Remember 
+the register restrictions: <code>lr</code> is actually 
+<code>r14</code>, which can be reached by <code>push</code>, but 
+not <code>pop</code>. So I'm using <code>r3</code> here instead. 
+I'm also doing this separately from the <code>r4</code>-pop because 
+&lsquo;<code>pop {r4,r3}</code>&rsquo; pops the registers in the 
+wrong order (lower regs are loaded first).
+</p>
+<p>
+The rest of the code follows the structure of the C code; I've added 
+numbered points to indicate where we are. Point 1 checks the
+size, and point 2 checks the relative alignment of source and 
+destination. Note that what I actually do here is not AND with 2, but 
+shift by 31, which pushes bit 1 into the carry bit; THUMB code can 
+only AND between registers and rather than putting 2 in a register 
+and ANDing, I just check the carry bit. You can also use the sign 
+bit to shift to, of course, which is what GCC would do. I do 
+something similar to check whether the pointers are already 
+word-aligned or if I have to do that myself.
+</p>
+<p>
+At point 4 I set up and call <code>memcpy32()</code>. Or, rather, 
+I call <code>_call_via_r3</code>, which calls <code>memcpy32()</code>. 
+I can't use &lsquo;<code>bl memcpy32</code>&rsquo; directly because 
+its in IWRAM and <code>memcpy16()</code> is in ROM and the distance 
+is simply too big. The <code>_call_via_r3</code> is an intermediary 
+(in ROM) consisting only of &lsquo;<code>bx r3</code>&rsquo; and 
+since <code>memcpy32()</code>'s address was in <code>r3</code> we 
+got where we wanted to go. Returning from <code>memcpy32()</code> 
+will work fine, as that was set by the call to 
+<code>_call_via_r3</code>. 
+</p>
+<p>
+The C code's point 5 consisted of adjusting the source and 
+destination pointers to account for the work done by 
+<code>memcpy32()</code>; in the assembly code, I'm being a very 
+sneaky bastard by not doing any of that. The thing is, after 
+<code>memcpy32()</code> is done <code>r0</code> and <code>r1</code> 
+would <i>already</i> be where I want them; while the rules say that 
+<code>r0-r3</code> are clobbered by calling functions and should 
+therefore be stacked, if I <i>know</i> that they'll only end up the 
+way I want them, do I really have to do the extra work? I think not. 
+Fair enough, it's not recommended procedure, but where's the fun in
+asm programming if you can't cheat a little once in a while? Anyway,
+the right-shift from <code>r4</code> counters the left-shift into 
+<code>r4</code> that I had before, corresponding to a 
+<code>r2&amp;1</code>; the test after it checks whether the result 
+is zero, signifying that I'm done and I can get out now.
+</p>
+<p>
+Lastly, point 6 covers the halfword copying loop. I wouldn't have 
+mentioned it here except for one little detail: the array is copied 
+back to front! If this were ARM code I'd have used post-indexing, 
+but this is THUMB code where no such critter exists and I'm 
+restricted to using offsets. I could have used another register 
+for an ascending offset (one extra instruction/loop), or 
+incrementing the <code>r0</code> and <code>r1</code> (two extra per
+loop), or I could copy backwards which works just as well. Also note 
+that I use <code>bcs</code> at the end of the loop and not 
+<code>bne</code>; <code>bcs</code> is essential here because 
+<code>r2</code> could already be 0 on the first count, which 
+<code>bne</code> would miss.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ === void memcpy16(void *dst, const void *src, <!--
+-->uint hwcount); =============</span>
+<span class="cmt">@ Reglist:
+@  r0, r1: dst, src
+@  r2, r4: hwcount
+@  r3: tmp and data buffer</span>
+    .<span class="keyw">text</span>
+    .<span class="keyw">align</span>  <span class="num">2</span>
+    .<span class="keyw">code</span>   <span class="num">16</span>
+    .<span class="keyw">thumb_func</span>
+    .<span class="keyw">global</span> memcpy16
+    .<span class="keyw">type</span>   memcpy16 STT_FUNC
+memcpy16:
+    <span class="keyw">push</span>    {r4, lr}
+    <span class="cmt">@ <b>(1)</b> under 5 hwords -&gt; std cpy</span>
+    <span class="keyw">cmp</span>     r2, #<span class="num">5</span>
+    <span class="keyw">bls</span>     .Ltail_cpy16
+    <span 
+class="cmt">@ <b>(2)</b> Unreconcilable alignment -&gt; std cpy</span>
+    <span 
+class="cmt">@ if (dst^src)&amp;2 -&gt; alignment impossible</span>
+    <span class="keyw">mov</span>     r3, r0
+    <span class="keyw">eor</span>     r3, r1
+    <span class="keyw">lsl</span>     r3, #<span 
+class="num">31</span>         <span 
+class="cmt">@ (dst^src), bit 1 into carry</span>
+    <span class="keyw">bcs</span>     .Ltail_cpy16    <span 
+class="cmt">@ (dst^src)&amp;2 : must copy by halfword</span>
+    <span class="cmt">@ <b>(3)</b> src and dst have same alignment <!--
+-->-&gt; word align</span>
+    <span class="keyw">lsl</span>     r3, r0, #<span class="num">31</span>
+    <span class="keyw">bcc</span>     .Lmain_cpy16    <span 
+class="cmt">@ ~src&amp;2 : already word aligned</span>
+    <span class="cmt">@ Aligning is necessary: copy 1 hword and align</span>
+        <span class="keyw">ldrh</span>    r3, [r1]
+        <span class="keyw">strh</span>    r3, [r0]
+        <span class="keyw">add</span>     r0, #<span class="num">2</span>
+        <span class="keyw">add</span>     r1, #<span class="num">2</span>
+        <span class="keyw">sub</span>     r2, #<span class="num">1</span>
+    <span class="cmt">@ <b>(4)</b> Right, and for the REAL work, <!--
+-->we're gonna use memcpy32</span>
+.Lmain_cpy16:
+    <span class="keyw">lsl</span>     r4, r2, #<span class="num">31</span>
+    <span class="keyw">lsr</span>     r2, r2, #<span class="num">1</span>
+    <span class="keyw">ldr</span>     r3,=memcpy32
+    <span class="keyw">bl</span>      _call_via_r3
+    <span class="cmt">@ <b>(5)</b> NOTE: r0,r1 are altered by memcpy32, <!--
+-->but in exactly the right </span>
+    <span class="cmt">@ way, so we can use them as is.</span>
+    <span class="keyw">lsr</span>     r2, r4, #<span class="num">31</span>
+    <span class="keyw">beq</span>     .Lend_cpy16
+    <span class="cmt">@ <b>(6)</b> Copy residuals by halfword</span>
+.Ltail_cpy16:
+    <span class="keyw">sub</span>     r2, #<span class="num">1</span>
+    <span class="keyw">bcc</span>     .Lend_cpy16     <span 
+class="cmt">@ r2 was 0, bug out</span>
+    <span class="keyw">lsl</span>     r2, r2, #<span 
+	class="num">1</span>      <span 
+class="cmt">@ r2 is offset (Yes, we're copying backward)</span>
+.Lres_cpy16:
+        <span class="keyw">ldrh</span>    r3, [r1, r2]
+        <span class="keyw">strh</span>    r3, [r0, r2]
+        <span class="keyw">sub</span>     r2, r2, #<span class="num">2</span>
+        <span class="keyw">bcs</span>     .Lres_cpy16
+.Lend_cpy16:
+    <span class="keyw">pop</span>     {r4}
+    <span class="keyw">pop</span>     {r3}
+    <span class="keyw">bx</span>  r3
+</pre>
+
+<h3 id="ssec-cpy-c">Using memcpy32() and memcpy16() in C</h3>
+<p>
+While you're working on uncrossing your eyes, a little story on how 
+you can call these functions from C. It's ridiculously simple 
+actually: all you need is a declaration. Yup, that's it. GCC does 
+really care about the language the functions are in, all it asks is 
+that they have a consistent memory interface, as covered in the AAPCS.
+As I've kept myself to this standard (well, mostly), there is no 
+problem here.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Declarations of memcpy32() and memcpy16()</span>
+<span class="keyw">void</span> memcpy16(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, uint hwcount);
+<span class="keyw">void</span> memcpy32(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, uint wdcount) IWRAM_CODE;
+
+<span class="cmt">// Example use</span>
+{
+    <span class="keyw">extern const</span> u16 fooPal[<span 
+class="num">256</span>];
+    <span class="keyw">extern const</span> u32 fooTiles[<span 
+class="num">512</span>];
+
+    memcpy16(pal_bg_mem, fooPal, <span class="num">256</span>);      <span 
+class="cmt">// Copy by halfword. Fine</span>
+    memcpy32(pal_bg_mem, fooPal, <span class="num">256</span>/<span 
+class="num">2</span>);    <span 
+class="cmt">// Copy by word; Might be unsafe</span>
+    memcpy32(tile_mem, fooTiles, <span class="num">512</span>);      <span 
+class="cmt">// Src is words too, no prob.</span>
+}
+</pre>
+
+<p>
+See? They can be called just as any other C function. Of course, you 
+have to assemble and link the assembly files instead of #include them, 
+but that's how you're supposed to build projects anyway.
+</p>
+<p>
+You do need to take care to provide the <b>correct</b> declaration, 
+though. The declaration tells the compiler how a function expects to 
+be called, in this case destination and source pointers (in that 
+order), and the number of (half)words to transfer. It is legal to 
+change the order of the parameters or to add or remove some
+&ndash; the function won't <i>work</i> anymore, but the compiler does 
+allow it. This is true of C functions too and should be an obvious 
+point, but assembly functions don't provide an easy check to 
+determine if you've used the correct declaration, so please be 
+careful.
+</p>
+
+<div class="note">
+<div class="nhgood">Make the declaration fit the function</div>
+<p>
+This is a very important point. Every function has expectations on 
+how it's called. The section, return-type and arguments of the 
+declaration must match the function's, lest chaos ensues. The 
+best way would be not explicitly mention the full declaration near 
+the function definition, so that the user just has to copy-paste 
+it.
+</p>
+</div>
+
+<div class="note">
+<div class="nhgood">Use `extern "C"' for C++</div>
+<p>
+Declarations for C++ work a little different, due to the 
+<a href="http://en.wikipedia.org/wiki/Name_mangling" target="_blank">name mangling</a> 
+it expects. To indicate that the function name is <i>not</i> mangled, 
+add &lsquo;<code>extern "C"</code>&rsquo; to the declaration.
+</p>
+<pre class="proglist">
+<span class="cmt">// C++ declarations of memcpy32() and memcpy16()</span>
+<span class="keyw">extern</span> <span class="str">"C"</span> <span 
+class="keyw">void</span> memcpy16(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, uint hwcount);
+<span class="keyw">extern</span> <span class="str">"C"</span> <span 
+class="keyw">void</span> memcpy32(<span 
+class="keyw">void</span> *dst, <span 
+class="keyw">const void</span> *src, uint wdcount) IWRAM_CODE;
+</pre>
+</div><br>
+
+<p>
+And that all folks. As far as this chapter goes anyway. Like all 
+languages, it takes time to fully learn its ins and outs, but with 
+this information and a couple of (quick)reference documents, you 
+should be able to produce some nice ARM assembly, or at least be able 
+to read it well enough. Just keep your wits about you when writing 
+assembly, please. Not just in trying to avoid bugs, but also in 
+keeping the assembly maintainable. Not paying attention in C is bad 
+enough, but here it can be absolutely disastrous. Think of what you 
+want to do first, <i>then</i> start writing the instructions. 
+</p>
+<p>
+Also remember: yes, assembly can be fun. Think of it as one of 
+those shuffle-puzzles: you have a handful of pieces (the registers) 
+and ways of manipulating them. The goal is to get to the final 
+picture in then least amount of moves. For example, take a look at 
+what an 
+<a href="http://forum.gbadev.org/viewtopic.php?p=53322#53322" target="_blank">optimized 
+palette blend routine</a> would look like. Now it's your turn 
+<kbd>:P</kbd>.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Dec 12, 2012</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="tte.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="lab.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">TTE</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Lab</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

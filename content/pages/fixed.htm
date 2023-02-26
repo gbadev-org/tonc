@@ -1,0 +1,1448 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031101">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Fixed-Point Numbers and LUTs</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="numbers.htm">Numbers, bits, bit-ops</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="matrix.htm">Matrices</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">B.
+  Fixed-Point Numbers and LUTs</h1>
+
+<!-- [[/toc]] -->
+<ul>
+  <li><a href="#sec-intro">What are fixed-point numbers</a>.
+  <li><a href="#sec-fmath">Fixed-point math</a>.
+  <li><a href="#sec-rmdiv">Faking division</a>.
+  <li><a href="#sec-lut">Look-up Tables</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">B.1.
+  What are fixed-point numbers</h2>
+<p>
+Roughly put, there are two types of numbers: integers and 
+floating-points. For most serious math you would get nowhere with 
+integers because, by definition, they don't allow fractions. So for
+3D games you'd use floating-point math. Back in the old days, before 
+the arrival of specialized floating-point hardware, that stuff was 
+very slow! Or at least slower than integer arithmetic. Fortunately, 
+there is a way of faking numbers with decimal points with integers. 
+This is known as <dfn>fixed-point math</dfn>.
+</p>
+
+<h3 id="ssec-fix-gen">B.1.1.
+  General fixed-point numbers</h3>
+<p>
+Here's an example. Say you have $10.78 in wallet. If you want to write 
+this don't as an integer you have a problem, because you'd either have 
+to leave off the fractional part ($10), or round it to $11. However, 
+you could also write it down not in dollars, but in <i>cents</i>. That 
+way you'd write 1078, which is an integer, problem solved.<br>
+</p>
+<p>
+That's the way fixed-point math works. Instead of counting units, you 
+count <i>fractions</i>. In the previous example, you count in cents,
+or hundredths. Fixed-points have a in integer part (the 
+&ldquo;10&rdquo;), and a fractional part (&ldquo;78&rdquo;). Since we 
+have 2 digits for the fractional part, we call this a fixed-point 
+number in an <dfn>x.2</dfn> format.
+</p>
+<p>
+Note that PCs have floating-point units (FPU) nowadays, so floating 
+point arithmetic is just as fast as integer arithmetic (sometimes even
+faster) so using fixed-point math is not really worth the trouble 
+except, perhaps, in rasterization, since the conversion from
+<code>float</code>s to <code>int</code>s is still slow. However, the 
+GBA doesn't do floating-point stuff well, so it's fixed math all the 
+way.
+</p>
+
+<h3 id="ssec-fix-gba">B.1.2.
+  GBA fixed-point usage</h3>
+<p>
+Because computers use the 
+<a href="numbers.htm#ssec-num-basen">binary system</a>, using decimals 
+would be silly as a basis for fixed-points would be silly. Fortunately, 
+you can do fixed-point math in any base, including binary. The basic 
+format is <i>i</i>.<i>f</i>, where <i>i</i> is number of integer 
+bits, and <i>f</i> the number of fractional bits. Often, only the 
+fractional is important to know, so you'll also come across just 
+the indication &lsquo;.<i>f</i>&rsquo;. 
+</p>
+<p>
+The GBA uses fixed-point math in a number of cases. The
+<a href="affine.htm">affine 
+parameters</a>, for example, are all .8 fixed-point numbers 
+(&ldquo;<dfn>fixeds</dfn>&rdquo;, for short). Effectively, this means 
+you're counting in 1/2<sup>8</sup> = 1/256ths, giving you a 0.004 
+accuracy. So when you write 256 to a register like REG_BG2PA, this 
+is actually interpreted as 256/256=1.00. REG_BG2PA=512 would be 2.00, 
+640 is 2.50, et cetera. Of course, it is a little hard to see in 
+the decimal system, but grab a calculator and you'll see that it's 
+true. For this reason, it is often more convenient to write them down 
+as hex numbers: 256=0x100&rarr;1.00, 512=0x200&rarr;2.00, 
+640=0x280&rarr;2.50 (remember that 8 is 16/2, or one half).
+</p>
+
+<pre class="proglist">
+<span class="cmt">// .8 fixed point examples : counting in fractions of 256</span>
+
+<span class="keyw">int</span> a= <span class="num">256</span>;         <span 
+class="cmt">// 256/256 = 1.00</span>
+<span class="keyw">int</span> a= <span class="num">1</span> &lt;&lt; <span 
+class="num">8</span>;      <span class="cmt">// Ditto</span>
+<span class="keyw">int</span> a= <span class="num">0x100</span>;       <span 
+class="cmt">// Ditto
+</span>
+<span class="keyw">int</span> b= <span class="num">0x200</span>;       <span 
+class="cmt">// 0x200/256 = 512/256 = 2.00</span>
+<span class="keyw">int</span> c= <span class="num">0x080</span>;       <span 
+class="cmt">// 0x080/256 = 128/256 = 0.50</span>
+<span class="keyw">int</span> d= <span class="num">0x280</span>;       <span 
+class="cmt">// 0x280/256 = 640/256 = 2.50</span>
+</pre>
+
+
+<p>
+The affine registers aren't the only places fixed-points are used, 
+though that's where they are the most recognizable. The 
+<a href="gfx.htm#sec-blend">blend weights</a> are essentially 
+fixed-point numbers as well, only they are 1.4 fixeds, 
+not .8 fixeds. This is an important point, actually: the position 
+you set the fixed-point to is arbitrary, and you can even switch 
+the position as you go along. Now, the numbers themselves won't 
+tell you where the point is, so it is important to either remember 
+it yourself or better yet, write it down in the comments. Trust me, 
+you do not want to guess at the fixed-point position in the middle of 
+a lengthy algorithm.
+</p>
+
+<div class="note">
+<div class="nhgood">Comment your fixed-point position</div>
+<p>
+When you use fixed-point variables, try to indicate the fixed-point 
+format for them, especially when you need them for longer 
+calculations, where the point may shift position depending on the 
+operations you use.
+</p>
+</div>
+
+
+<h3 id="ssec-fix-sign">B.1.3.
+  Fixed-point and signs</h3>
+<p>
+Fixed-point numbers are supposed to be a poor man's replacement for 
+floating-point numbers, which would include negative numbers as well. 
+This means that they're supposed to be <i>signed</i>. Or at least, 
+usually. For example, the affine registers use signed 8.8 fixeds, but 
+the blend weights are unsigned 1.4 fixeds. You may think it hardly 
+matters, but <a href="numbers.htm#bits-int-sign">signs</a> can really 
+mess things up if you're not careful. Say you're using fixed-points 
+for positions and velocities. Even if your positions are always 
+positive, the velocities won't be, so signed numbers would be more 
+appropriate. Furthermore, if your fixed-point numbers are 
+halfwords, say 8.8 fixeds, a signed &lsquo;&minus;1&rsquo; will be 
+used as <code>0xFFFFFFFF</code>, i.e. a proper &lsquo;&minus;1&rsquo;, 
+but an unsigned &lsquo;&minus;1&rsquo; is <code>0x0000FFFF</code>, 
+which is actually a positive number. You won't be the first person 
+to trip over this, nor would be the last. So signed fixeds, please.
+</p>
+<p>
+Another point of notice is the way signed fixeds are often indicated. 
+You may see things of the form &lsquo;1.<i>n</i>.<i>f</i>&rsquo;.
+This is meant to indicate one sign bit, <i>n</i> integer bits and 
+<i>f</i> fractional bits. Technically speaking, this is <b>false</b>. 
+Fixed-point numbers are just plain integers, just interpreted as 
+fractions. That means they follow 
+<a href="numbers.htm#bits-int-neg">twos' complement</a> and that, 
+while a set top bit does indicate a negative number, it isn't 
+<i>the</i> sign bit. As I already mentioned, &lsquo;&minus;1&rsquo; 
+is <code>0xFFFFFFFF</code>, not <code>0x80000001</code> as would 
+have been the case with a separate sign bit. You might not think 
+much of this distinction and that it's obvious that it's still twos' 
+complement, but considering that floating-point formats <i>do</i> 
+have a separate sign bit, I'd say it's worth remembering.
+</p>
+
+<div class="note">
+<div class="nhcare">Signed fixed format notation</div>
+<p>
+Signed fixed-point formats are sometimes indicated as 
+&lsquo;1.<i>n</i>.<i>f</i>&rsquo;. From that, you might think they 
+have a separate sign bit like floating-point formats, but this 
+is <b>not correct</b>. They're still regular integers, using  
+twos' complement for negative numbers.
+</p>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-fmath">B.2.
+  Fixed-point math</h2>
+<p>
+Knowing what fixed-point numbers are is one thing, you still have to
+use them somehow. Three things concern us here.
+</p>
+
+<ul>
+<li>Converting between regular integers or floats and fixed-point.
+  numbers
+<li>Arithmetical operations.
+<li>Overflow.
+</ul>
+
+<p>
+None of these items are difficult to understand, but each does have 
+its awkward issues. In fact, overflow <i>is</i> merely an issue, not 
+really an item. This section will focus on 24.8 signed fixeds, for 
+which I will use a &ldquo;FIXED&rdquo; typedef'ed int. Although it 
+only uses this fixed-point format, the topics covered here can easily 
+be applied to other formats as well.
+</p>
+
+
+<h3 id="ssec-fmath-conv">B.2.1.
+  Converting to and from fixed-points</h3>
+<p>
+I'm not really sure is &ldquo;conversion&rdquo; is even the right word 
+here. The only difference between fixed-point numbers and normal ones 
+is a scaling factor <i>M</i>. All that's necessary to go from a FIXED 
+to an int or float is account for that scale by either multiplication 
+or division. Yes, it really is that simple.
+As we're using power-of-two's for the scales, the 
+integer&harr;FIXED conversion can even be done with shifts. You can add 
+the shifts in the code yourself, but the compiler is smart enough to 
+convert power-of-two multiplications and divisions to shifts itself.
+</p>
+
+<pre class="proglist">
+<span class="keyw">typedef</span> s32 FIXED;         <span 
+class="cmt">//! 32bit FIXED in 24.8 format</span>
+
+<span class="cmt">// For other fixed formats, change FIX_SHIFT <!--
+-->and the rest goes with it.</span>
+
+<span class="cmt">//! Convert an integer to fixed-point</span>
+INLINE FIXED int2fx(<span class="keyw">int</span> d)
+{   <span class="keyw">return</span> d&lt;&lt;FIX_SHIFT;    }
+
+<span class="cmt">//! Convert a float to fixed-point</span>
+INLINE FIXED float2fx(<span class="keyw">float</span> f)
+{   <span class="keyw">return</span> (FIXED)(f*FIX_SCALEF);   }
+
+
+<span class="cmt">//! Convert a fixed point value to an <!--
+-->unsigned integer.</span>
+INLINE u32 fx2uint(FIXED fx)    
+{   <span class="keyw">return</span> fx&gt;&gt;FIX_SHIFT;   }
+
+<span class="cmt">//! Get the unsigned fractional part <!--
+-->of a fixed point value (orly?).</span>
+INLINE u32 fx2ufrac(FIXED fx)
+{   <span class="keyw">return</span> fx&amp;FIX_MASK; }
+
+<span class="cmt">//! Convert a FIXED point value to an <!--
+-->signed integer.</span>
+INLINE <span class="keyw">int</span> fx2int(FIXED fx)
+{   <span class="keyw">return</span> fx/FIX_SCALE;    }
+
+<span class="cmt">//! Convert a fixed point value to <!--
+-->floating point.</span>
+INLINE <span class="keyw">float</span> fx2float(FIXED fx)
+{   <span class="keyw">return</span> fx/FIX_SCALEF;   }
+</pre>
+
+<h4>Rounding off and negative number inconsistencies</h4>
+<p>
+The conversions are almost as simple as described above. The two 
+places where things may be problematic are round-off 
+inconsistencies and negative fractions. Note that I said they 
+<i>may</i> be problematic; it depends on what you had in mind. 
+I am not going to explain all the ins and out here, because they 
+generally won't be much of a problem, but you need to be aware of
+them.
+</p><br>
+
+<p>
+If you're not new to programming, you will undoubtedly be aware
+of the problem of round-off from floats to ints: a simple cast 
+conversion truncates a number, it does not really round it off. 
+For example, &lsquo;(int)1.7&rsquo; gives 1 as a result, not 2. 
+The earlier macros have the same problem (if you can call it that). 
+Float-to-int rounding is done by adding one half (0.5) to the float 
+before rounding, which we can also apply to fixed-point conversion.
+In this case, of course, the value of one half depends on the number 
+of fixed-point bits. For example, .8 fixeds, &frac12; is 0x80=128 
+(256/2), for .16 fixeds it is 0x8000=32768. Add this before shifting 
+down and it'll be rounded off properly. There are actually multiple 
+ways of rounding off, which you can read about in 
+<a href="http://www.bookofhook.com/Article/GameDevelopment/AnIntroductiontoFixedPoin.html" target="_blank">
+this fixed-point introduction</a><em>[b0rked]</em>.
+</p><br>
+
+<p>
+And then there are negative numbers. Frankly, division on negative 
+integers is always a bitch. The basic problem here is that they are 
+always rounded towards zero: both +3/4 and &minus;3/4 give 0. In some 
+ways this makes sense, but in one way it doesn't: it breaks up the 
+sequence of outputs around zero. This is annoying on its own, but 
+what's worse is that right-shifting <i>doesn't</i> follow this behaviour; 
+it always shifts towards negative infinity. In other words, for 
+negative integer division, the division and right-shift operators 
+are <i>not</i> the same. Which method you choose is a design 
+consideration on your part. Personally, I'm inclined to go with 
+shifts because they give a more consistent result.
+</p>
+
+<div class="cblock">
+<table id="tbl-neg-div"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table B.1</b>:
+  Division and right-shifts around zero.
+</caption>
+<col span=19 width=20>
+<tbody align="center">
+<tr>
+  <th><i>x</i> 
+  <td> -8<td> -7<td> -6<td> -5<td> -4<td> -3<td> -2<td> -1<td>  0
+  <td>  1<td>  2<td>  3<td>  4<td>  5<td>  6<td>  7<td>  8<td>  9
+<tr>
+  <th><i>x</i>/4 
+  <td> -2<td> <b>-1</b><td> <b>-1</b><td> <b>-1</b><td> -1
+  <td>  <b>0</b><td>  <b>0</b><td>  <b>0</b><td>  0
+  <td>  0<td>  0<td>  0<td>  1<td>  1<td>  1<td>  1<td>  2<td>  2
+
+<tr>
+  <th><i>x</i>&gt;&gt;2 
+  <td> -2<td> <b>-2</b><td> <b>-2</b><td> <b>-2</b><td> -1
+  <td> <b>-1</b><td> <b>-1</b><td> <b>-1</b><td>  0
+  <td>  0<td>  0<td>  0<td>  1<td>  1<td>  1<td>  1<td>  2<td>  2
+</tbody>
+</table>
+</div>
+
+<p>
+The negative division nasty is even worse when you try to deal with 
+the fractional part. Masking with AND effectively destroys the sign 
+of a number. For example, a 8.8 &minus;2&frac14; is 
+&minus;0x0240 = 0xFDC0. Mask that with 0xFF and you'll get 
+0xC0 = &frac34;, a positive number, and the wrong fraction as well. 
+On the other hand 0xFDC0&gt;&gt;8 is &minus;3, for better or for 
+worse, and &minus;3 + &frac34; is indeed &minus;2&frac14;, so in 
+that sense it does work out. The question whether or not it works 
+for <i>you</i> is something you'll have to decide on your own. 
+If you want to display the fixed numbers somehow (as, say -2.40 in 
+this case), you'll have to be a little more creative than just 
+shifts and masks. Right now, I'm not even touching that one. 
+</p>
+
+<div class="note">
+<div class="nhcare">Converting negative fixed-point numbers</div>
+<p>
+The conversion from negative fixed-point numbers to integers 
+is a particularly messy affair, complicated by the fact that there
+are multiple, equally valid solutions. Which one you should choose 
+is up to you. If you can, avoid the possibility; the fixed&rarr;int 
+conversion is usually reserved for the final stages of arithmetic 
+and if you can somehow ensure that those numbers will be positive, 
+do so.
+</p>
+</div>
+
+
+<h3 id="ssec-fmath-ops">B.2.2.
+  Arithmetical operations</h3>
+<p>
+Fixed-point numbers are still integers, so they share their arithmetic 
+operations. However, some caution needs to be taken to keep the fixed
+point in its proper position at times. The process is the same as
+arithmetic on decimals. For example, 0.01+0.02 = 0.03 ; what you will
+usually do for this sum is remove the decimal point, leaving 1 and 2, 
+adding those to give 3, and putting the decimal point back. That's 
+essentially how fixed-points work as well. But when adding, say, 0.1 and 
+0.02, the fixed decimals aren't 1 and 2, but <b>10</b> and 2. The key 
+here is that for addition (and subtraction) the point should be in the 
+same place.
+</p>
+<p>
+A similar thing happens for multiplication and division. Take the
+multiplication 0.2*0.3. 2*3 equals 6, then put the point back which
+gives 0.6, right? Well, if you did your homework in pre-school you'll 
+know that the result should actually be 0.06. Not only do the decimals 
+multiply, the <i>scales</i> multiply as well.
+</p>
+<p>
+Both of these items apply to fixed-point arithmetic as well. If you 
+always use the same fixed point, addition and subtractions will pose 
+no problem. For multiplication and division, you'll need to account
+for extra scaling factor as well. A fixed-fixed multiply required a
+division by the scale afterwards, whereas a fixed-fixed division 
+needs a scale multiply <i>before</i> the division. In both cases, the 
+reason of the place of the scale correction is to keep the highest 
+accuracy. Equations 1 and 2 show this in a more mathematical form. The 
+fixed-point numbers are always given by a constant times the fixed 
+scale <i>M</i>. Addition and subtraction maintain the scale, 
+multiplication and division don't, so you'll have to remove or add a
+scaling factor, respectively.
+</p>
+
+<table id="eq-fix-add">
+<tr>
+  <td class="eqnrcell">(B.1)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <i>fa</i>
+    <td>=
+    <td> <i>a</i> &middot; <i>M</i>
+  <tr>
+    <td> <i>fb</i>
+    <td>=
+    <td> <i>b</i> &middot; <i>M</i>
+  </table>
+</table>
+
+<table id="eq-fix-mul">
+<tr>
+  <td class="eqnrcell">(B.2)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <i>fc</i>
+    <td>=
+    <td> <i>fa + fb</i>
+	<td>=
+	<td>(<i>a + b</i>) &middot; <i>M</i>
+  <tr>
+    <td> <i>fd</i>
+    <td>=
+    <td> <i>fa &minus; fb</i>
+	<td>=
+	<td>(<i>a &minus; b</i>) &middot; <i>M</i>
+  <tr>
+    <td> <i>fe</i>
+    <td>=
+    <td> <i>fa &middot; fb</i>
+	<td>=
+	<td>(<i>a + b</i>) &middot; <i>M</i> &sup2;
+  <tr>
+    <td> <i>ff</i>
+    <td>=
+    <td> <i>fa</i> / <i>fb</i>
+	<td>=
+	<td>(<i>a</i> / <i>b</i>)
+  </table>
+</table>
+
+<pre class="proglist">
+<span class="cmt">//! Add two fixed point values</span>
+INLINE FIXED fxadd(FIXED fa, FIXED fb)
+{   <span class="keyw">return</span> fa + fb;         }
+
+<span class="cmt">//! Subtract two fixed point values</span>
+INLINE FIXED fxsub(FIXED fa, FIXED fb)
+{   <span class="keyw">return</span> fa - fb;         }
+
+<span class="cmt">//! Multiply two fixed point values</span>
+INLINE FIXED fxmul(FIXED fa, FIXED fb)
+{   <span class="keyw">return</span> (fa*fb)&gt;&gt;FIX_SHIFT;              }
+
+<span class="cmt">//! Divide two fixed point values.</span>
+INLINE FIXED fxdiv(FIXED fa, FIXED fb)
+{   <span class="keyw">return</span> ((fa)*FIX_SCALE)/(fb);           }
+</pre>
+
+
+<h3 id="ssec-fmath-flow">B.2.3.
+  Over- and underflow</h3>
+<p>
+This is actually a subset of the scaling problems of multiplication
+and division. Overflow is when the result of your operation is higher 
+that the about of bits you have to store it. This is a potential 
+problem for any integer multiplication, but in fixed-point math it
+will occur much more often because not only are fixed-point numbers 
+scaled upward, multiplying fixeds scales it up <i>twice</i>. A .8 
+fixed multiplication has its &lsquo;one&rsquo; 
+at 2<sup>16</sup>, which is already out of range for halfwords.
+</p>
+<p>
+One way of covering for the extra scale is not to correct after the 
+multiplication, but before it; though you will lose some accuracy 
+in the process. A good compromise would be to right-shift both 
+operands by half the full shift.
+</p>
+<p>
+Fixed divisions have a similar problem called underflow. As a simple 
+example of this, consider what happens in integers division 
+<i>a</i>/<i>b</i> if <i>b</i>&gt;<i>a</i>. That's right: the result 
+would be zero, even though a fraction would be what you would like. To 
+remedy this behaviour, the numerator is scaled up by <i>M</i> first 
+(which may or may not lead to an overflow problem <kbd>:P</kbd>).
+</p><br>
+
+<p>
+As you can see, the principles of fixed-point math aren't that difficult 
+or magical. But you do have to keep your head: a missed or misplaced 
+shift and the whole thing crumbles. If you're working on a new algorithm, 
+consider doing it with floats first (preferably on a PC), and convert to
+fixed-point only when you're sure the algorithm itself works.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-rmdiv">B.3.
+  Faking division (optional)</h2>
+
+<div class="note">
+<div class="nhcare">Math heavy and optional</div>
+<p>
+This section is about a sometimes useful optimization technique. 
+It not only introduces the technique, but also derives its 
+use and safety limits. As such, there is some nasty math along 
+the way. Chances are you're perfectly safe without detailed 
+knowledge of this section, but it can help you get rid of some 
+slow divisions if the need is there.
+</p>
+</div>
+
+<p>
+You may have heard of the phrase &ldquo;division by a constant is 
+multiplication by its reciprocal&rdquo;. This technique can be used 
+to get rid of division and replace it with a much faster 
+multiplication. For example 
+<i>x</i>/3&nbsp;= <i>x</i>&middot;(1/3)&nbsp;= <i>x</i>&middot;0.333333. 
+At first glance, this doesn't seem to help your case: the integer 
+form of 1/<i>y</i> is always zero by definition; the alternative 
+to this is floating-point, which isn't so hot either, and you 
+<i>still</i> need a division to get even there! This is all true, but 
+the important thing is that these problems can be avoided. The 
+integer/floating-point problem can be solved by using fixed-point 
+instead. As for the division, remember that we're talking about 
+division by a <i>constant</i>, and arithmetic on constants is done 
+at compile-time, not runtime. So problems solved, right? Uhm, yeah. 
+Sure. The <i>superficial</i> problems are solved, but now the 
+two age-old problems of overflow and round-off rear their ugly 
+heads again. 
+</p>
+<p>
+Below is the code for the evaluation of &ldquo;<i>x</i>/12&rdquo;. 
+The ARM-compiled code creates a .33 fixed-point for 1/12, then 
+uses a 64bit multiplication for the division. On the other hand, 
+the THUMB version doesn't (and indeed can't) do this and uses the 
+standard, slow division routine. If you want to get rid of this 
+time consuming division, you will have to take care of it yourself. 
+for the record, yes I know that even if you know ARM assembly, 
+why it does what it does may be hard to follow. That's what this 
+section is for.
+</p>
+
+<pre class="proglist">
+<span class="cmt">@ Calculating y= x/12</span>
+
+<span class="cmt">@ === THUMB version ===</span>
+    <span class="keyw">ldr</span>     r0, .L0     <span 
+class="cmt">@ load numerator</span>
+    <span class="keyw">ldr</span>     r0, [r0]
+    <span class="keyw">mov</span>     r1, <span 
+class="num">#12</span>     <span class="cmt">@ set denominator</span>
+    <span class="keyw">bl</span>      __divsi3    <span 
+class="cmt">@ call the division routine</span>
+    <span class="keyw">ldr</span>     r1, .L0+<span class="num">4</span>
+    <span class="keyw">str</span>     r0, [r1]
+.L0:
+    .<span class="keyw">align</span>  <span class="num">2</span>
+    .<span class="keyw">word</span>   x
+    .<span class="keyw">word</span>   y
+
+<span class="cmt">@ === ARM version ===</span>
+    <span class="keyw">ldr</span>     r1, .L1         <span 
+class="cmt">@ Load M=2^33/12</span>
+    <span class="keyw">ldr</span>     r3, .L1+<span class="num">4</span>
+    <span class="keyw">ldr</span>     r3, [r3]        <span 
+class="cmt">@ Load x</span>
+    <span class="keyw">smull</span>   r2, r0, r1, r3  <span 
+class="cmt">@ r0,r2= x*M (64bit)</span>
+    <span class="keyw">mov</span>     r3, r3, asr <span 
+class="num">#31</span>     <span 
+class="cmt">@ s = x>=0 ? 0 : -1 (for sign correction)</span>
+    <span class="keyw">rsb</span>     r3, r3, r0, asr <span 
+class="num">#1</span>  <span class="cmt">@ y= (x*M)/2 - s = x/12</span>
+    <span class="keyw">ldr</span>     r1, .L1+<span class="num">8</span>
+    <span class="keyw">str</span>     r3, [r1]        <span 
+class="cmt">@  store y</span>
+.L1:
+    .<span class="keyw">align</span>  <span class="num">2</span>
+    .<span class="keyw">word</span>   <span 
+class="num">715827883</span>   <span 
+class="cmt">@ 0x2AAAAAAB (&asymp; 2^33/12 )</span>
+    .<span class="keyw">word</span>   x
+    .<span class="keyw">word</span>   y
+</pre>
+
+<p>
+The remainder of this section is on recognizing and dealing with these 
+problems, as well as deriving some guidelines for safe use of this 
+technique. But first, we need some definitions.
+</p>
+
+<p>
+Integer division; positive integers <i>p</i>, <i>q</i>, <i>r</i>
+</p>
+
+<table id="eq-int-div">
+<tr>
+  <td class="eqnrcell">(B.3)
+  <td class="eqcell">
+    <i>r</i> = <i>p</i>\<i>q</i> 
+    &nbsp;&hArr;&nbsp;
+    <i>p</i> = <i>r&middot;q</i> + <i>p</i>%<i>q</i>
+</table>
+
+<p>Approximation; positive integers <i>x</i>, <i>y</i>, <i>a</i>, 
+<i>m</i>, <i>n</i> and real error term &delta;</p>
+
+<table id="eq-div-aprx">
+<tr>
+  <td class="eqnrcell">(B.4)
+  <td class="eqcell">
+    <i>y</i> = <i>x</i> \ <i>a</i> = 
+    (<i>x&middot;m</i>) \ <i>n</i> + &delta;  
+</table>
+
+<p>
+I'm using the backslash (&lsquo;\&rsquo;) to indicate integer 
+division, which is basically the rounded down version of real 
+division. As usual, modulo is the remainder and calculated usually 
+calculated with <i>p</i> &minus; <i>r&middot;q</i>. The key to the 
+approximation of 1/<i>a</i> is in terms <i>m</i> and <i>n</i>. In our 
+case <i>n</i> will be a power of two <i>n</i>=2<sup>F</sup> so that 
+we can use shifts, but it need not be. &delta; is an error term that 
+is inherent in any approximation. Note that I'm only using positive 
+integers here; for negative numbers you need to add one to the 
+result if you want to mimic a &lsquo;true&rsquo; division. (Or, 
+subtract the sign bit, which work just as well as you can see in 
+the ARM assembly shown above).
+</p>
+
+<div class="note">
+<div class="nh">Faking negative divisions and rounding</div>
+<p>
+This section is about positive numbers. If you want the standard 
+integer-division result (round toward zero), you will have to add 
+one if the numerator is negative. This can be done quickly by 
+subtracting the sign-bit.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// pseudo-code for division by constant M</span>
+<span class="keyw">int</span> x, y;
+y= fake_div(x, M);  <span class="cmt">// shift-like div</span>
+y -= y&gt;&gt;<span class="num">31</span>;         <span 
+class="cmt">// convert to /-like division</span>
+</pre>
+
+<p>
+If you want to round to minus infinity you'll have to do something 
+else. But I'm not quite sure what, to be honest.
+</p>
+
+</div>
+
+
+<h3 id="ssec-rmdiv-try">B.3.1.
+  Theory</h3>
+<p>
+There are two things we need to have for success. First, a way of 
+finding <i>m</i>. Second, a way of determining when the approximation 
+will fail. The latter can be derived from 
+eq&nbsp;4. The error in the approximation is given 
+by &epsilon;\<i>n</i>, so as long as this is zero you're safe. 
+</p>
+
+<table id="eq-aprx-fail">
+<tr>
+  <td class="eqnrcell">(B.5)
+  <td class="eqcell">
+    <i>x&middot;m</i> &minus; <i>n</i>(<i>x</i> \ <i>A</i>) = &epsilon; 
+    ; Fail if :  &epsilon;&nbsp;&ge;&nbsp;<i>n</i>
+</table>
+
+<p>
+As for finding <i>m</i>. Recall that 
+1\<i>A</i>&nbsp;=&nbsp;(<i>n&middot;A</i>)\<i>n</i>, so that it'd 
+appear that using <i>m</i>&nbsp;=&nbsp;<i>n</i>\<i>A</i> would be a 
+good value. However, it's not. 
+</p><br>
+
+<p>
+This is probably a good time for a little example. Consider the case 
+of <i>A</i>&nbsp;=&nbsp;3, just like at the start. We'll use .8 fixed 
+numbers here, in other words <i>k</i>&nbsp;=&nbsp;8 and <i>n</i>=256. 
+Our trial <i>m</i> is then <i>m</i>&nbsp;=&nbsp;<i>n</i>\<i>A</i> = 85 
+= 0x55, with 1 as the remainder. 
+</p>
+<p>
+An alternative way of looking at it is to go to hexadecimal floating 
+point and taking the first <i>F</i> bits. This is not as hard as you 
+might think. The way you find a floating-point number of a fraction 
+is to multiply by the base, write down the integral part, multiply the 
+remainder by the base, write down the integral part and so forth. 
+The table below has the hex version of 1/7 (I'm not using 1/3 because 
+that's rather monotonous). As you can see 1/7 in hex is 
+0.249249&hellip;h. Do this for one third and you'll find 
+0.5555&hellip;h.
+</p>
+
+<div class="lblock">
+<table id="tbl-hexfloat"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table B.2</b>: 
+  Floating-point representation of 1/7 in base <i>B</i>=16
+</caption>
+<tbody align="center">
+<tr><th> x <th> x&middot;B <th> x&middot;B\7 <th> x&middot;B%7
+<tr><th width=16> 1 <td> 16  <td> 2     <td> 2
+<tr><th> 2 <td> 32  <td> 4     <td> 4
+<tr><th> 4 <td> 64  <td> 9     <td> 1
+<tr><th> 1 <td> 16  <td> 2     <td> 2
+<tr><th> 2 <td> 32  <td> 4     <td> 4
+</tbody>
+</table>
+</div>
+
+<p>
+So 1/3 in hex is zero, followed by a string of fives, or just 
+<i>m</i>=0x55 in truncated .8 fixed-point notation. Now look what 
+happens when you do the multiplication by reciprocal thing. I'm using 
+hex floats here, and <i>y</i>=(<i>x&middot;m</i>)\<i>n</i>, as per 
+eq&nbsp;B.4. The result you actually get is just 
+the integer part, ignore the (hexi)decimals
+</p>
+
+<div class="cblock">
+<table id="tbl-rmdiv-bad"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table B.3</b>: 
+  <i>x</i>/3, using <i>m</i>= 256\3 = 0x55. Bad at 3, 6, &hellip;
+</caption>
+<tbody align="center">
+<tr><th>x
+  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7
+<tr><th>y=(x&middot;m)&gt;&gt;F
+  <td> 0.00h        <td> 0.55h <td> 0.AAh 
+  <td> <b>0.FFh</b> <td> 1.54h <td> 1.A9h
+  <td> <b>1.FEh</b> <td> 2.53h
+<tr><th>true <i>x</i>/3
+  <td> 0 <td> 0 <td> 0 <td> 1 <td> 1 <td> 1 <td> 2 <td> 2
+</tbody>
+</table>
+</div>
+
+<p>
+As you can see, problems arise almost <i>immediately</i>! You can't 
+even get up to <i>x</i>=<i>A</i> without running into trouble. This 
+is <i>not</i> a matter of accuracy: you can use a .128 fixed-point 
+numbers and it'll still be off. This is purely a result of 
+<dfn>round-off error</dfn>, and it'd happen with floats just as well. 
+When you use reciprocal division, <i>m</i> should be rounded 
+<i>up</i>, not down. You can use the alignment trick here: 
+add <i>A</i>&minus;1, then divide. Now <i>m</i>=0x56, and you'll be 
+safe. At least, for a while.
+</p>
+
+<table id="eq-reci-m">
+<tr>
+  <td class="eqnrcell">(B.6)
+  <td class="eqcell"><i>m</i> = (<i>n</i>+<i>A</i>&minus;1) \ <i>A</i>
+</table>
+
+<div class="cblock">
+<table id="tbl-rmdiv-good"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table B.4</b>: 
+  <i>x</i>/3, using <i>m</i>= (256+2)\3 = 0x56. Still good at 3, 6, &hellip;
+</caption>
+<tbody align="center">
+<tr><th>x
+  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7
+<tr><th>y=(x&middot;m)&gt;&gt;F
+  <td> 0.00h <td> 0.56h <td> 0.ACh 
+  <td> 1.02h <td> 1.58h <td> 1.AEh
+  <td> 2.04h <td> 2.5Ah
+<tr><th>true <i>x</i>/3
+  <td> 0 <td> 0 <td> 0 <td> 1 <td> 1 <td> 1 <td> 2 <td> 2
+</tbody>
+</table>
+</div>
+
+<p>
+Yes, you're safe. But for how long? Eventually, you'll reach a 
+value of <i>x</i> where there will be trouble. This time around, it 
+does concern the accuracy. Fortunately, you can derive safety limits 
+for <i>x</i> and <i>n</i> that spell out when things can go 
+badly. It is possible that the true range is a little bit better 
+due to the way the error condition of 
+eq&nbsp;B.5
+jumps around, but better safe than sorry. The derivations start at 
+eq&nbsp;B.5 
+and make use of eq&nbsp;B.3 and a trick 
+concerning modulo, namely that 
+<i>p</i>%<i>q</i> &isin; [0,&nbsp;<i>q</i>&rang;.
+</p>
+
+<table id="eq-lims">
+<col>
+<col align="right">
+<col span=2 align="left">
+<tr><td class="eqnrcell" rowspan=6>(B.7)
+<tr>
+  <td><i>x&middot;m</i> &minus; <i>n</i>(<i>x</i>\<i>A</i>) 
+  <td>&lt; <i>n</i>
+  <td>&nbsp;
+<tr>
+  <td><i>x&middot;m&middot;a</i> &minus; 
+    <i>n</i>(<i>x</i>\<i>A</i>)<i>A</i> 
+  <td>&lt; <i>n&middot;A</i>
+  <td>[ insert (<i>x</i>\<i>A</i>)<i>A</i> = 
+    <i>x</i> &minus; <i>x</i>%<i>A</i> ] 
+<tr>
+  <td><i>x&middot;m&middot;A</i> &minus; <i>n&middot;x</i> 
+    + <i>n</i>(<i>x</i>%<i>A</i> )
+  <td>&lt; <i>n&middot;A</i>
+  <td>[ insert max(<i>x</i>%<i>A</i>) = <i>A</i>&minus;1 ] 
+<tr>
+  <td><i>x</i>(<i>m</i>&middot;<i>A</i> &minus; <i>n</i>) + 
+    <i>n</i>(<i>A</i>&minus;1) 
+  <td>&lt; <i>n&middot;A</i>
+  <td>&nbsp;
+<tr>
+  <td><i>x</i>(<i>m</i>&middot;<i>A</i> &minus; <i>n</i>)
+  <td>&lt; <i>n</i>
+  <td>&nbsp;
+</table><br>
+
+<p>
+From this result, we can easily calculate the maximum valid <i>x</i> 
+for given <i>A</i> and <i>n</i>:
+</p>
+
+<table id="eq-lim-x">
+<tr>
+  <td class="eqnrcell">(B.8)
+  <td class="eqcell"><i>x</i> &lt; <i>n</i> / 
+    (<i>m&middot;A</i> &minus; <i>n</i>)
+</table>
+
+<p>
+The lower-limit for <i>n</i> follows from the fact that, by 
+(6), max(<i>m&middot;A</i>) = 
+<i>n</i>+<i>A</i>&minus;1, so that:
+</p>
+
+<table id="eq-lim-n">
+<tr>
+  <td class="eqnrcell">(B.9)
+  <td class="eqcell"><i>n</i> &gt; <i>x</i>(<i>A</i>&minus;1)
+</table>
+
+<p>
+And that's basically it. There's a little more to it, of course. As 
+you'll be multiplying, the product <i>m&middot;A</i> must fit inside 
+a variable. The practical limit of numbers will therefore be around
+16 bits. You can sometimes ease this limitation a little bit by 
+shifting out the lower zero-bits of <i>A</i>. For example, for 
+<i>A</i>=10=5&middot;2, you can right-shift <i>x</i> once before doing 
+the whole calculation. Even 360 is 45&middot;8, and you can save three 
+bits this way. Also, note that even if you surpass the limits, 
+there's a good chance that the thing is still correct or only off by 
+a small amount (check eq&nbsp;B.5). You 
+should be able to find the true answer relatively quickly then.
+</p>
+
+<div class="note">
+<div class="nhgood">ARM &lsquo;int/const int&rsquo; division is always safe</div>
+<p>
+We can now see why GCC can always safely optimize 32bit divisions.
+The maxima of 32bit <i>x</i> and <i>A</i> are, of course,  
+2<sup>32</sup>. The safety limit for this is 
+2<sup>64</sup>&minus;2<sup>32</sup>, which will always fit in the 64bit 
+result of <code>smull</code>.
+</p>
+</div>
+
+<p>
+Of course, you don't want to have to type in these things all the 
+time. So here are two macros that can do the work for you. They 
+look horrible, but the preprocessor and compiler know how to handle 
+them. I'd advise against converting these to inline functions, 
+because for some reason there is a good chance you will lose any 
+advantages the code is supposed to bring.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Division by reciprocal multiplication
+// a, and fp _must_ be constants</span>
+
+<span 
+class="cmt">//! Get the reciprocal of \a a with \a fp fractional bits</span>
+<span class="keyw">#define</span> FX_RECIPROCAL(a, fp)    ( ((<span 
+class="num">1</span>&lt;&lt;(fp))+(a)-<span class="num">1</span>)/(a) )
+
+<span class="cmt">//! Division of x/a by reciprocal multiplication</span>
+<span class="keyw">#define</span> FX_RECIMUL(x, a, fp)    ( ((x)*((<span 
+class="num">1</span>&lt;&lt;(fp))+(a)-<span 
+class="num">1</span>)/(a))&gt;&gt;(fp) )
+</pre>
+
+
+<h3 id="ssec-rmdiv-sum">B.3.2.
+  Summary</h3>
+<p>
+Never forget that this is something of a hack and <b>only</b> works 
+when <i>A</i> is constant. The whole point was to have the division 
+at compile time rather than runtime, and that is only possible 
+if <i>A</i> is constant. One nice thing about constants is that 
+they're known beforehand, by definition. Negative values and powers 
+of two may be resolved at compile-time too if desired.
+</p>
+<p>
+The reciprocal multiplier <i>m</i> is <i>not</i> merely 
+<i>n</i>\<i>A</i>, for reasons of round-off error. Always round up. 
+In other words:
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell"><i>m</i> = (<i>n</i>+<i>A</i>&minus;1) \ <i>A</i>
+</table>
+
+<p>
+Then there's the matter of failed divisions, i.e. where the 
+approximation differs from the &lsquo;true&rsquo; <i>x</i>\<i>A</i>. 
+The exact condition doesn't really matter, but it is useful to know 
+the safe ranges of <i>x</i>, and conversely what <i>n</i> you need 
+for a given <i>x</i>-range. Again, because the important terms are 
+constant they can be figured out in advance. Note that the relations 
+given below represent <i>A</i> limit, not <i>the</i> limit. The 
+actual numbers for failure may be a bit looser, but depend on the 
+circumstances and as such, relations for those would be more complex.
+</p>
+
+<table>
+<tr>
+  <td rowspan=2 class="fill">
+  <td class="eqcell"><i>x</i> &lt; <i>n</i> / 
+    (<i>m&middot;a</i> &minus; <i>n</i>)
+<tr>
+  <td class="eqcell"><i>n</i> &gt; <i>x</i>(<i>A</i>&minus;1)
+</table>
+
+<p>
+Lastly, if you have absolutely no idea what this whole section was 
+about, I'd advise against using this strategy. It is a partially 
+safe optimisation technique for division and while it can be a good 
+deal faster that the normal division, it might not be worth it in 
+non-critical areas. Just, use your judgement.
+</p>
+
+<div class="note">
+<div class="nh">Altenative method</div>
+<p>
+There is an alternative method for reciprocal multiplication: instead of 
+rounding <i>n</i>/<i>A</i> up, you can also add 1 to <i>x</i> for
+</p>
+
+<table>
+<tr>
+  <td class="fill">
+  <td class="eqcell"><i>y</i> = <i>x</i> \ <i>A</i> 
+    &asymp; (<i>x</i>+1) * <i>N</i> \ <i>A</i> \ <i>N</i>
+</table>
+
+<p>
+This will also get rid of the problems described by 
+table&nbsp;B.3. The safety conditions are almost 
+the same as before, but there is some difference for division of negative
+<i>x</i>. If you <i>really</i> must know, details are available on request.
+</p>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-lut">B.4.
+  Look-up Tables</h2>
+<p>
+A <dfn>look-up table</dfn> (or <dfn>LUT</dfn>) is, well, it's a table 
+that you use to look stuff up. That was rather obvious, wasn't it? The
+important point is that you can do it really <i>quickly</i>. As a simple
+example, what is 2<sup>5</sup>, and what is 3<sup>5</sup>? Real 
+Programmers (should) know the answer to the first one instantly, but 
+the other might take a little longer to find. Why? Because
+any self-respecting programmer knows the powers of 2 by heart, up to
+2<sup>10</sup> at least. The powers of 2 crop up so often in
+programming that you've got the answers memorized &ndash; you see as
+much as see the question &quot;2<sup>5</sup>&quot;, you don't
+calculate the answer via repeated multiplication, your mind simply
+<b>looks it up</b> in its memory and you give the answer instantly, 
+almost without thinking. The same goes for (decimal) multiplication 
+tables: 7&times;8? 56, just like that. But move to, say, powers of 3 
+or hexadecimal multiplications and the process fails and you have to do
+it the hard and long way. What I'm trying to say here is that things 
+can go a lot faster when you can simply look them up, rather than 
+having to do the proper calculations.
+</p><br>
+
+<p>
+The concept of look-up tables works for computers as well, otherwise 
+I wouldn't have brought it up. In this case, the look-up table is 
+simply an array that you stuff with whatever you think you might 
+need to look up.
+</p>
+
+
+<h3 id="ssec-lut-sin">B.4.1.
+  Example: sine/cosine luts</h3>
+<p>
+Classic examples are trigonometry luts. Sines and
+cosines are expensive operations, especially on the GBA, so it 
+would be best to make a table of them so you only have to spend a 
+memory access instead of going through two (expensive) type 
+conversions, floating-point function. A simple way to do this is 
+to create two FIXED arrays of, say, 360 elements each (one for every
+degree) and fill it at the start of your game.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> PI <span class="num">3.14159265</span>
+<span class="keyw">#define</span> DEGREES    <span
+class="num">360</span>      <span class="cmt">// Full circle</span>
+
+FIXED sin_lut[DEGREES], cos_lut[DEGREES];
+
+<span class="cmt">// A really simple (and slow and wasteful) <!--
+-->LUT builder</span>
+<span class="keyw">void</span> sincos_init()
+{
+    <span class="keyw">const double</span> conv= 2*PI/DEGREES;
+    <span class="keyw">for</span>(<span class= keyw>int</span> ii=<span 
+class="num">0</span>; ii&lt;DEGREES; ii++)
+    {
+        sin_lut[ii]= (FIXED)(sin(conv*ii)*FIX_SCALEF);
+        cos_lut[ii]= (FIXED)(cos(conv*ii)*FIX_SCALEF);
+    }
+}
+</pre>
+
+<p>
+However, this particular method is deeply flawed. Yes, it works, yes, 
+it's easy, but there is definitely room for improvement. To start 
+with an issue that would be immediately visible if you were to use 
+this function, it actually takes a few <i>seconds</i> to complete. 
+Yes, that's how slow the standard trig routines are. This is a fairly 
+mild issue as you only have to call it once, but still. Additionally, 
+because the arrays are not constant, they are put in IWRAM. That's
+10% of IWRAM basically wasted on something that is never actually 
+changed except during initialization. There are a number of ways of 
+improving on these two points like using the sine-cosine symmetries 
+to cut down on calculation time and having the tables overlap, but 
+why calculate them inside the game at all? It is just as easy to 
+precalculate the tables on a PC, then export that data to arrays: 
+then they will be constant (i.e., not hogging IWRAM), and the GBA won't
+have to spend a cycle on their initialization.
+</p>
+<p>
+A second improvement would be to use a higher fixed-point fraction. 
+The range of sine and cosine is [&minus;1, +1]. This means that by 
+using 8.8 fixeds for the lut, I am actually wasting 6 bits that I 
+could have used for a higher accuracy. So what I'm going to do is 
+use 4.12 fixed-point. Yes, you could go up to .14 fixeds, but 12 is a 
+nicer number.
+</p>
+<p>
+And for the final improvement, I'm not going to use 360 units for a 
+circle, but a power of two; 512 in this case. This has two benefits:
+</p>
+
+<ul>
+  <li>
+    For wrapping (&alpha;&lt;0 or &alpha;&gt;2&pi;), I can use a 
+    bitmask instead of if-statements or *gasp* modulo.
+  </li>
+  <li>
+    Since the cosine is just shifted sine, and because of point one, 
+	I now only need one table for both waves, and can use an offset 
+	angle and wrap-by-masking to get one wave from the other. 
+  </li>
+</ul>
+
+<p>
+Both these points can make life a lot easier. 
+</p>
+<p>
+For the record, it is perfectly alright to this. The forms of sine and 
+cosine stem from travelling along the circumference of the unit circle; 
+the number of divisions along that path is arbitrary. The number 360 
+has historical significance, but that's it. Let's face it, you wouldn't 
+be able to tell how much a degree is anyway, the thing that matters is 
+circle divisions. 360&deg; is a full circle, 90&deg; is a quarter 
+circle, et cetera. Now it's 512 for a full circle, 128 (512/4) for a 
+quarter, and so on. A quick and dirty sin LUT generator might look 
+something like this. Summing up:
+</p>
+
+<ul>
+  <li>Precalculate the lut outside the GBA, and link it in like a normal 
+  const array.</li>
+  <li>Use 4.12 fixeds instead of 4.8.</li>
+  <li>Divide the lut into a power-of-two (like 512), instead of 360.</li>
+</ul>
+
+<pre class="proglist">
+<span class="cmt">// Example sine lut generator</span>
+<span class="keyw">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="keyw">#include</span> <span class="str">&lt;math.h&gt;</span>
+
+<span class="keyw">#define</span> M_PI <span 
+class="num">3.1415926535f</span>
+<span class="keyw">#define</span> SIN_SIZE <span class="num">512</span>
+<span class="keyw">#define</span> SIN_FP <span class="num">12
+</span>
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> ii;
+    FILE *fp= fopen(<span class="str">&quot;sinlut.c&quot;</span>, <span 
+class="str">&quot;w&quot;</span>);
+    <span class="keyw">unsigned</span> <span class="keyw">short</span> hw;
+
+    fprintf(fp, <span class="str">&quot;//\n// Sine lut; %d entries, <!--
+-->%d fixeds\n//\n\n&quot;</span>, 
+        SIN_SIZE, SIN_FP);
+    fprintf(fp, <span 
+class="str">&quot;const short sin_lut[%d]=\n{&quot;</span>, SIN_SIZE);
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;SIN_SIZE; ii++)
+    {
+        hw= (<span class="keyw">unsigned</span> <span 
+class="keyw">short</span>)(sin(ii*<span 
+class="num">2</span>*M_PI/SIN_SIZE)*(<span 
+class="num">1</span>&lt;&lt;SIN_FP));
+        <span class="keyw">if</span>(ii%<span 
+class="num">8</span> == <span class="num">0</span>)
+            fputs(<span class="str">&quot;\n\t&quot;</span>, fp);
+        fprintf(fp, <span class="str">&quot;0x%04X, &quot;</span>, hw);
+    }
+    fputs(<span class="str">&quot;\n};\n&quot;</span>, fp);
+
+    fclose(fp);
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+It creates a file <tt>sinlut.c</tt> which contains a 512 halfword 
+array called <code>sin_lut</code>. Note that while I'm creating a 
+C file here, you could just as well create a table in an assembly 
+file, or even just as a binary file that you then somehow link 
+to the project. Actually finding the sine and cosine values goes 
+through the <code>lu_sin()</code> and <code>lu_cos()</code> 
+functions.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Sine/cosine lookups. 
+// NOTE: theta's range is [0, 0xFFFF] for [0,2&pi;&rang;, just like the 
+// BIOS functions</span>
+
+<span class="cmt">//! Look-up a sine value</span>
+INLINE s32 lu_sin(u32 theta)
+{   <span class="keyw">return</span> sin_lut[(theta&gt;&gt;<span 
+class="num">7</span>)&amp;<span class="num">0x1FF</span>];   }
+
+<span class="cmt">//! Look-up a cosine value</span>
+INLINE s32 lu_cos(u32 theta)
+{   <span class="keyw">return</span> sin_lut[((theta&gt;&gt;<span 
+class="num">7</span>)+<span class="num">128</span>)&amp;<span 
+class="num">0x1FF</span>]; }
+</pre>
+
+<h4>Presenting excellut</h4>
+<p>
+I haven't actually used the generator shown above for the luts in 
+tonclib. Rather, I've used my own 
+<a href="http://www.coranac.com/projects/#excellut" target="_blank">excellut</a>. 
+This is not a program, but an Excel file. Yes, I did say Excel. 
+The thing about using a spreadsheet program for building LUTs is that 
+you can make <i>any</i> kind of mathematical table with it, test 
+whether it has the desired accuracy and plot it and everything. Then 
+after you're satisfied, you can then just export part of the 
+spreadsheet in the manner of your choice. How's that for flexibility?
+</p>
+
+<h4>Accuracy and resolution</h4>
+<p>
+These are the two main things to consider when creating your lut. 
+<dfn>Accuracy</dfn> concerns the number of significant bits of each 
+entry; <dfn>resolution</dfn> is how far apart each entry is in the 
+argument space. Bigger is better in both cases, but there is a 
+space trade-off, of course. A compromise is necessary, and once 
+again, it depends very much on what you intend to do with it. 
+</p>
+<p>
+For accuracy, you need to think of the range of the function. 
+As said, the sine range is [&minus;1, +1] and using 8.8 fixeds 
+would waste 6 bits that could have been used for more significant bits.. 
+For a division LUT like the one I'm using for the 
+<a href="mode7.htm">first mode 7 chapter</a>, I need 1/1 up to 1/160, 
+which would <i>not</i> work well with .8 fixeds, so I'm using .16 
+fixeds there, which may still not be enough, but more might give 
+overflow problems. 
+</p>
+<p>
+The second issue, resolution, is tied to how many entries you have. 
+Even if you have all the accuracy in the world, it wouldn't do you 
+much good if they're spread out too thin. It's similar to screen 
+resolutions: even with 32bit color, things will look mighty hideous 
+if you only have a 17 inch monitor with a 320&times;240 resolution. 
+On the other hand, an overly high resolution doesn't help you if 
+the accuracy isn't there to support it. Most LUT-worthy functions 
+will be smooth curves and for any given accuracy, you will 
+reach a point where increasing resolution will only add identical 
+values to the lut, which would be a waste of space. And remember, 
+if you really need to you can always do an interpolation if 
+necessary. 
+</p>
+<p>
+The first few values of my 512, 8.8 fixeds sine-lut, for 
+example, read &ldquo;0x0000, 0x0003, 0x0006, 0x0009&rdquo; That is 
+where the derivative is maximal, so these are the largest 
+differences between neighbours you will find. If I were to increase 
+the resolution fourfold, the differences would be in the final bit; 
+going any further would be useless unless I increased the accuracy 
+as well.
+</p>
+<p>
+So it's actually a three-way compromise. There needs to be a balance 
+between accuracy and resolution (the derivative of the function 
+would be helpful to find this), and pitted against those two is the 
+amount of ROM space you want to allot to the LUT. Again, the only 
+person who can judge on the right balance is you.
+</p>
+
+<h3 id="ssec-lut-lerp">B.4.2.
+  Linear interpolation of LUTs</h3>
+<p>
+Look-up tables are essentially a collection of points sampled from a 
+function. This is fine if you always access the arrays at those points, 
+but what if you want to retrieve value between points? An example of 
+this would be a fixed-point angle, like <code>theta</code> of the 
+(co)sine inline functions. Usually, the lower bits of a fixed-point 
+number are just cut off and the point before it is used. While fast, 
+this does have some loss of accuracy as its result. 
+</p>
+
+<div class="cpt_fr" style="width:256px;">
+  <img src="../img/math/lutlerp.png" id="img-lerp" 
+    alt="lut lerp" width=256><br>
+  <b>Fig B.1</b>: approximating a sine by direct 
+  look-up or linear interpolation.
+</div>
+<p>
+A more accurate solution would be to use the surrounding points and 
+interpolate to the desired point. The easiest of these is 
+<dfn>linear interpolation</dfn> (or <dfn>lerp</dfn>). Say you have 
+a point 
+<i>x</i><sub>a</sub> and <i>x</i><sub>b</sub>, with function values 
+<i>y</i><sub>a</sub> and <i>y</i><sub>b</sub>, respectively. This can 
+be used to define a line. The function value of point <i>x</i> can then 
+be interpolated by:
+</p>
+
+<table id="eq-lerp">
+<tr>
+  <td class="eqnrcell">(B.10)
+  <td class="eqcell">
+    <i>y</i> = 
+  <td class="eqcell">
+	<table>
+	  <tr><td class="bdrB"><i>y</i><sub>b</sub> &minus; <i>y</i><sub>a</sub>
+	  <tr><td><i>x</i><sub>b</sub> &minus; <i>x</i><sub>a</sub>
+	</table>
+  <td class="eqcell">
+    (<i>x</i> &minus; <i>x</i><sub>a</sub>) + <i>y</i><sub>a</sub>
+</table>
+
+<p>
+Fig&nbsp;B.1 gives an example of the difference 
+that linear interpolation can make. Here I have a sine function sampled 
+at 16 points and at .12f precision. The blue line represents the actual 
+sine function. The magenta like is the direct look-up using the 
+preceding point, and the lerp is given by the yellow line. Note that 
+the blue and yellow lines are almost the same, but the magenta line 
+can be a good deal off. Consider <i>x</i>&nbsp;=&nbsp;4.5, given in 
+red. The LUT value is off by 8.5%, but the lerp value by only 0.5%: 
+that's 16 times better! True, this is an exaggerated case, but lerping 
+can make a huge difference.
+</p>
+<p>
+So how do we implement this? Well, essentially by using 
+eq&nbsp;B.10. The division in it may look nasty, 
+but remember that the difference between successive points is always 1
+&ndash; or a power-of-two for fixed point numbers. An efficient 
+implementation would be:
+</p>
+
+<pre class="proglist">
+<span class="cmt">//! Linear interpolator for 32bit LUTs.
+/*! A lut is essentially the discrete form of a function, f(\i x).
+*   You can get values for non-integer \i x via (linear) 
+*   interpolation between f(x) and f(x+1).
+*   \param lut  The LUT to interpolate from.
+*   \param x    Fixed point number to interpolate at.
+*   \param shift    Number of fixed-point bits of \a x.
+*/</span>
+INLINE <span class="keyw">int</span> lu_lerp32(<span 
+class="keyw">const</span> s32 lut[], <span class="keyw">int</span> x, <span 
+class="keyw">const</span> <span class="keyw">int</span> shift)
+{
+    <span class="keyw">int</span> xa, ya, yb;
+    xa=x&gt;&gt;shift;
+    ya= lut[xa]; yb= lut[xa+<span class="num">1</span>];
+    <span class="keyw">return</span> ya + <!--
+-->((yb-ya)*(x-(xa&lt;&lt;shift))&gt;&gt;shift);
+}
+</pre>
+
+<p>
+That's the version for 32-bit LUTs, there is also a 16-bit version 
+called <code>lu_lerp16()</code>, which has the same body, but a 
+different declaration. In C++, this would make a nice template 
+function. 
+</p>
+<p>
+These functions work for every kind of LUT, expect for a little snag 
+at the upper boundary. Say you have a LUT of <i>N</i> entries. The 
+functions use <i>x</i>+1, which is likely not to exist for the final 
+interval between <i>N</i>&minus;1 and <i>N</i>. This could seriously 
+throw the interpolation off at that point. Rather than covering that 
+as a special case, add an extra point to the LUT. The 
+<code>sinlut</code> actually has 513 points, and not 512. (Actually, 
+it has 514 points to keep things word-aligned, but that's beside the 
+point.)
+</p>
+
+<div class="note">
+<div class="nhcare">Lerping at the upper boundary</div>
+<p>
+Linear interpolation needs the sampling point above and below 
+<i>x</i>, which can cause problems at the upper boundary. Add an 
+extra sampling point there to &ldquo;finish the fence&rsquo;, as it 
+were.
+</p>
+</div>
+
+<p>
+The direct look-up is also known as 0-order interpolation; linear 
+interpolation is first order. Higher orders also exists but require 
+more surrounding points and more and complexer calculations. Only 
+attempt those if you really, really have to.
+</p>
+
+<h3 id="ssec-lut-nomath">B.4.3.
+  Non mathematical LUTs</h3>
+<p>
+While the most obvious use of lookup tables is for precalculated 
+mathematical functions, LUTs aren't restricted to mathematics. In my 
+<a href="text.htm">text systems</a>, for example, I'm using a 
+look-up table for the character&rarr;tile-index conversion. This 
+offers me a greater range in the distribution of tiles that 
+otherwise would be possible. The default font uses ASCII 
+characters 32-127, and the tiles for these are usually in tiles 0 
+through 95. But if for some reason I would only need the number 
+tiles, I could set-up the character LUT for only numbers, and the 
+text system would take it from there. the rest of the tiles would 
+then be free for other purposes.
+</p>
+<p>
+Another use would be flag lookup. The libraries that come with 
+Visual C++ use LUTs for the character type routines, 
+<code>isalpha()</code>, <code>isnum()</code> and the like. There is 
+a table with bitflags and when you use the routines, they just 
+grab the appropriate element and do some bit testing. You can 
+find something similar in game programming too, like a table with 
+bitflags for the tile types: background, walkable, trap, etc. 
+Instead of massive switch-blocks, you might only have to do an 
+array-lookup, which is a lot faster.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Dec 12, 2012</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="numbers.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="matrix.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Numbers, bits, bit-ops</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Matrices</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

@@ -1,0 +1,900 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031127">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Mode 7 Part 1</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!--
+  If you're reading this, you're a geek :)
+  But by all means stick around. 
+-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="text.htm">Text systems</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="mode7ex.htm">More mode 7</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">20.
+  Mode 7 Part 1</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>.
+  <li><a href="#sec-persp">Getting a sense of perspective</a>.
+  <li><a href="#sec-m7-math">Enter Mode 7</a>.
+  <li><a href="#sec-demo">Threefold demo</a>.
+  <li><a href="#sec-order">Order, order!</a>.
+  <li><a href="#sec-final">Final thoughts</a>.
+</ul>
+<!-- [[/toc]] -->
+
+<br>
+<p>
+Right, and now for something cool: mode 7. Not just how to
+implement it on the GBA, but also the math behind it. You need 
+to know your way around 
+<a href="regbg.htm">tiled backgrounds</a> (especially the 
+<a href="affbg.htm">transformable</a> ones) 
+<a href="interrupts.htm">interrupts</a>. Read up on those subjects if 
+you don't. The stuff you'll find here explains the basics of Mode 7. 
+I also have an <a href="mode7ex.htm">advanced page</a>, but I urge 
+you to read this one first, since the math is still rather easy 
+compared to what I'll use there.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">20.1.
+  Introduction</h2>
+
+<p>
+Way, way back in 1990, there was the Super NES, the 16bit successor 
+to the Nintendo Entertainment System. Apart from the usual 
+improvements that are inherent to new technology, the SNES was the 
+first console to have special hardware for graphic tricks that 
+allowed linear transformations (like rotation and scaling) on 
+backgrounds and sprites. <dfn>Mode7</dfn> took this one step further: 
+it not only rotated and scaled a background, but added a step for
+perspective to create a 3D look.
+</p>
+<p>
+One could hardly call Mode 7 yet another pretty gimmick. For example,
+it managed to radically change the racing game genre. Older racing 
+games (like Pole Position and Outrun) were limited to simple left and 
+right bends. Mode 7 allowed more interesting tracks, as your vision 
+wasn't limited to the part of the track right in front of you. 
+F-Zero was the first game to use it and blew everything before it out 
+of the water (the original Fire Field is still one of the most vicious 
+tracks around with its hairpins, mag-beams and mines).
+
+<!--(and, IMHO, a great deal after it as well 
+in terms of gameplay, including the more recent fully 3D racers. 
+Wipeout? Oh, plz! If you need weapons to win a race, you don't deserve 
+to play). Silence, Port Town II, 
+Death Wind II, Fire Field, these tracks were EEeeevil. I have <i>so</i> 
+many fond memories of Fire Field; that S at about 2/3rd or the lap 
+was absolute murder. The trick was to hit the far wall after
+the second hair-pin at exactly 420kph for maximum effect; doing
+it faster would spin you out of control, slower meant coming out 
+of the curve at 320kph, rather than 370 kph. This was the 
+curve that separated the men from the boys. 
+<br>Huh, what's that? Oh right, mode 7. Sorry, I got a little
+carried away there.<br>
+Anyway, F-Zero was the first to use Mode 7 to full effect. -->
+Other 
+illustrious games were soon to follow, like Super Mario Kart 
+(mmmm, Rainbow Road. 150cc, full throttle all the way through 
+*gargle*) and Pilotwings<!--, and the aptly titled 
+Game-not-appearing-in-this-tutorial-->.
+</p><br>
+
+<p>
+Since the GBA is essentially a miniature SNES, it stands to 
+reason that you could do Mode7 graphics on it as well. And, you'd be 
+right, although I heard the GBA Mode7 is a little different as the 
+SNES'. On the SNES the video modes really did run up to #7 (see the
+&ldquo;qsnesdoc.htm&rdquo; in the 
+<a href="http://nesdev.parodius.com/#docsSNES" target="_blank">SNES starter kit</a>) 
+The GBA only has modes 0-5. So technically &ldquo;GBA Mode 7&rdquo; 
+is a yet another misnomer. However, for 
+everyone who's not a SNES programmer (which <i>is</i> nearly everyone, 
+me included) the term is synonymous with the graphical effect it was 
+famous for: a perspective view. And you can create a perspective view 
+on the GBA, so in that sense the term's still true.
+</p>
+<p>
+I'm not sure about the SNES, but GBA Mode 7 is a very much unlike
+true 3D APIs like OpenGL and Direct3D. On those systems, you can just 
+give the proper perspective matrix and place it into the pipeline. On 
+the GBA, however, you only have the general 2D transformation matrix 
+<b>P</b> and displacement <b>dx</b> at your disposal and you have to do 
+all the perspective calculations yourself. This basically means that 
+you have to alter the scaling and translation on every scanline 
+using either the HBlank DMA or the HBlank interrupt. 
+</p><br>
+
+<p>In this tutorial, I will use the 64x64t affine background
+from the <a href="affbg.htm#sec-demo">sbb_aff</a> demo (which looks 
+a bit like fig&nbsp;20.1), do the Mode7 mojo 
+and turn it into something like depicted in 
+fig&nbsp;20.2. The focus will be on showing, 
+in detail, how the magic works. While the end result is given as a 
+HBlank interrupt function; converting to a HBlank DMA case shouldn't 
+be to hard.
+</p>
+
+<div class="lblock">
+<table>
+<tr valign="top">
+<td>
+  <div class="cpt" style="width:256px;">
+  <img src="../img/mode7/m7_map.png" id="img-m7-map"
+    alt="This is your map."><br>
+  <b>Fig 20.1</b>: this is your map (well, kinda)
+  </div>
+<td>
+  <div class="cpt" style="width:240px;">
+  <img src="../img/mode7/m7_persp.png" id="img-m7-persp"
+    alt="This is your map in mode7."><br>
+  <b>Fig 20.2</b>: this is your map in mode7.
+  </div>
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-persp">20.2.
+  Getting a sense of perspective</h2>
+<p>
+(If you are familiar with the basics of perspective, you can just skim 
+this section.)<br>
+If you've ever looked at a world map or a 3D game, you know that 
+when mapping from 3D to 2D, something' has to give. The technical 
+term for this is <dfn>projection</dfn>. There are many types of 
+projection, but the one we're concerned with is <dfn>perspective</dfn>, 
+which makes objects look smaller the further off they are.
+<p>
+We start with a 3D space like the one in 
+fig&nbsp;20.3. In computer 
+graphics, it is customary to have the <i>x</i>-axis pointing to the 
+right and the <i>y</i>-axis pointing up. The <i>z</i>-axis is the 
+determined by the handedness of the space: a <dfn>right-handed</dfn> 
+coordinate system has it pointing to the back (out of the screen), 
+which in a left-handed system it's pointing to the front. I'm using a 
+right-handed system because my mind gets hopelessly confused in a
+left-handed system when it comes to rotation and calculating normals.
+Another reason is that this way the screen coordinates correspond to 
+(<i>x</i>, <i>z</i>) values. It is also customary to have the viewer 
+at the 
+origin (for a different viewer position, simply translate the world 
+in the other direction). For a right-handed system, this means that 
+you're looking down the negative <i>z</i>-axis.
+</p>
+<p>
+Of course, you can't see everything: only the objects inside the
+<dfn>viewing volume</dfn> are visible. For a perspective projection 
+this is defined by the viewer position (the origin in our case) and 
+the <dfn>projection plane</dfn>, located in front of the viewer at a 
+distance <i>D</i>. Think of it as the screen. The projection plane 
+has a width <i>W</i> and height <i>H</i>. So the viewing volume is 
+actually a <dfn>viewing pyramid</dfn>, though in practice it is 
+usually a viewing <i>frustum</i> (a beheaded pyramid), since 
+there is a minimum and maximum to the distance you can perceive as 
+well.
+</p>
+<p>
+Fig&nbsp;20.4 shows what the perspective 
+projection actually does. Given is a point (<i>y</i>, <i>z</i>) 
+which is projected to point 
+(<i>y</i><sub>p</sub>, &minus;<i>D</i>) on the projection plane. The 
+projected <i>z</i>-coordinate, by definition, is &minus;<i>D</i>. The 
+projected <i>y</i>-coordinate is the intersection of the projection 
+plane and the line passing through the viewer and the original point: 
+</p>
+
+<table id="eq-persp">
+<tr>
+  <td class="eqnrcell">(20.1)
+  <td class="eqcell">
+    <i>y</i><sub>p</sub> = <i>y</i>·D/z
+</table>
+
+<p>
+Basically, you divide by <i>z/D</i>. Since it is so important a factor
+it has is own variable: the <dfn>zoom factor</dfn> &lambda;:
+</p>
+
+<table id="eq-lambda">
+<tr>
+  <td class="eqnrcell">(20.2)
+  <td class="eqcell">
+    &lambda; = <i>z</i>/<i>D</i>= <i>y</i>/<i>y</i><sub>p</sub>
+</table>
+
+<p>
+As a rule, everything in front the projection plane (&lambda;&lt;1) will 
+be enlarged, and everything behind it (&lambda;&gt;1) is shrunk.
+</p>
+
+<div class="cblock">
+<table>
+<tr valign="top">
+<td>
+  <div class="cpt" style="width:256px;">
+  <img src="../img/mode7/m7_3dview.png" id="img-3dview"
+    alt="3D coordinate system"><br>
+  <b>Fig 20.3</b>: 
+  3D coordinate system showing the viewing pyramid 
+  defined by the origin, and the screen rectangle 
+  (<i>W</i>&times;<i>H</i>) at <i>z</i>= &minus;<i>D</i>
+  </div>
+<td>
+  <div class="cpt" style="width:320px;">
+  <img src="../img/mode7/m7_side1.png" id="img-side1"
+    alt="projection step, side view"><br>
+  <b>Fig 20.4</b>: 
+  Side view; point (<i>y, z</i>) is projected onto the 
+  (<i>z</i> = &minus;<i>D</i> plane. The projected point is 
+  <i>y</i><sub>p</sub> =  <i>y·D/z</i>
+  </div>
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-m7-math">20.3.
+  Enter Mode 7</h2>
+<p>
+Figs&nbsp;20.3 and 20.4 
+describe the general case for perspective projection 
+in a 3D world with tons of objects and viewer orientations. The case 
+for Mode 7 is considerably less complicated than that:
+</p>
+
+<ul>
+  <li><b>Objects</b>. We only work with two objects: the viewer (at 
+    point <b>a</b>&nbsp;= (<i>a</i><sub>x</sub>, <i>a</i><sub>y</sub>, 
+	<i>a</i><sub>z</sub>) )
+    and the floor (at <i>y</i>=0, by definition).
+  <li><b>Viewer orientation</b>. In a full 3D world, the viewer 
+    orientation is given by 3 angles: yaw (y-axis), pitch (x-axis) and 
+    roll (z-axis). We will limit ourselves to yaw to keep things simple. 
+  <li><b>The horizon issue</b>. Because the view direction is kept 
+    parallel to the floor, the horizon should go in the center of the 
+    screen. This would leave the top half of the screen empty, which 
+    is a bit of a waste. To remedy this we only use the bottom half of 
+    the viewing volume, so that the horizon is at the top of the 
+    screen. Note that even though the top and bottom view-lines are now 
+    the same as when you would look down a bit, the cases are 
+    <i>NOT</i> equal as the projection plane is still vertical. It is 
+    important that you realize the difference.
+</ul>
+
+<div class="lblock">
+<div class="cpt" style="width:320px;">
+<img src="../img/mode7/m7_side2.png" id="img-side2"
+  alt="Side view of Mode7 perspective">
+<b>Fig 20.5</b>: side view of Mode 7 perspective
+</div>
+</div>
+
+<p>
+Fig&nbsp;20.5 shows the whole situation. A 
+viewer at <i>y</i>&nbsp;=&nbsp;<i>a</i><sub>y</sub> is
+looking in the negative z-direction. At a distance <i>D</i> in front 
+of the viewer is the projection plane, the bottom half of which is 
+displayed on the GBA screen of height <i>H</i> (=160). And now for the 
+fun part. The GBA doesn't have any real 3D hardware capabilities, but
+you can fake it by cleverly manipulating the scaling and translation
+<code>REG_BGxX-REG_BGxPD</code> for every scanline. You just have to 
+figure out which line of part of the floor goes into which scanline, 
+and at which zoom level. Effectively, you're building a very simple 
+ray-caster.
+</p>
+
+<h3 id="ssec-math-math">20.3.1.
+  The math</h3>
+<p>
+Conceptually, there are four steps to Mode 7, depicted in 
+figs&nbsp;20.6a-d.
+Green figures indicate the original map; red is the map after the 
+operation. Given a scanline <i>h</i>, here's what we do:
+</p>
+
+<ol type=a>
+  <li><b>Pre-translation</b> by <b>a</b>= (<i>a</i><sub>x</sub>, 
+    <i>a</i><sub>z</sub>). This places the viewer at the origin, which 
+    is where we need it for steps b and c.
+  <li><b>Rotation</b> by &alpha;. This takes care of the yaw angle. 
+    These steps have been the same as for normal transformable
+    backgrounds so you shouldn't have any difficulty understanding 
+    them.
+  <li><b>Perspective division</b>. Next, we scale the whole thing 
+    by 1/&lambda;. From eq&nbsp;20.2 we have
+	&lambda;&nbsp;=&nbsp;<i>a</i><sub>y</sub>/<i>h</i>. 
+    The line <i>z</i>&nbsp;=&nbsp;<i>z</i><sub>h</sub> is the line 
+	that belongs on scanline <i>h</i>. The new position of this line
+    after scaling is <i>z</i> = &minus;<i>D</i>, since that was the 
+	whole point of perspective division.
+  <li><b>Post-translation</b> by (&minus;<b>x</b><sub>s</sub>). Note 
+    the minus sign. After the perspective division, all that remains 
+	is moving the fully transformed map back to its proper screen 
+	position (the beige area). For obvious reasons the horizontal
+	component should be half the screen width. The vertical move 
+	should move the floor-line to the scanline, so the vector is:
+<table id="eq-post-ofs">
+<tr>
+  <td class="eqnrcell">(20.3)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><i>x</i><sub>s</sub>
+    <td>=
+    <td><i>W</i>/2 = 120<br>
+  <tr>
+    <td><i>y</i><sub>s</sub>
+    <td> =
+    <td>(<i>D+h</i>)
+  </table>
+</table>
+</ol>
+
+<div class="cblock">
+<table id="img-steps"
+  border=1 cellpadding=4 cellspacing=0>
+<caption align="bottom">
+  Fig 20.6a-d: The 4 steps of mode 7
+</caption>
+<tr>
+  <td><img src="../img/mode7/m7_step1.png" alt="pre-translate">
+  <td><img src="../img/mode7/m7_step2.png" alt="rotate">
+  <td><img src="../img/mode7/m7_step3.png" alt="scale">
+  <td><img src="../img/mode7/m7_step4.png" alt="post-translate">
+<tr>
+  <td>20.6a: 
+    pre-translate by (<i>a</i><sub>x</sub>, <i>a</i><sub>z</sub>)
+  <td>20.6b: 
+    rotate by &alpha;
+  <td>20.6c: 
+    scale by 1/&lambda;
+  <td>20.6d: 
+    post-translate by (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>)
+</table>
+</div>
+
+<h3 id="ssec-math-combine">20.3.2.
+  Putting it all together</h3>
+<p>
+While the steps described above are indeed the full procedure, there 
+are still a number of loose ends to tie up. First of all, remember that 
+the GBA's transformation matrix <b>P</b> maps from screen space to 
+background space, which is actually the inverse of what you're trying 
+to do. So what you should use is:
+</p>
+
+<table id="eq-prs">
+<tr>
+  <td class="eqnrcell">(20.4)
+  <td class="eqcell">
+    <b>P</b> &nbsp;=&nbsp;
+    <b>S</b>(&lambda;) &middot; <b>R</b>(&alpha;) 
+    &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>&lambda;&middot;cos(&alpha;)
+    <td>&nbsp;
+    <td>&minus;&lambda;&middot;sin(&alpha;)
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>&lambda;&middot;sin(&alpha;)
+    <td>&nbsp;
+    <td>&lambda;&middot;cos(&alpha;)
+  </tbody>
+  </table>
+</table>
+
+<p>
+And yes, the minus sign is correct for a counter-clockwise rotation 
+(<b>R</b> is defined as a clockwise rotation). Also remember that the 
+GBA uses the following relation between screen point <b>q</b> and
+background point <b>p</b>:
+</p>
+
+<table id="eq-ofs-base">
+<tr>
+  <td class="eqnrcell">(20.5)
+  <td class="eqcell">
+    <b>dx</b> + <b>P</b> &middot; <b>q</b> = <b>p</b> ,
+</table>
+
+<p>
+that is, <u>one</u> translation and <u>one</u> transformation. We have 
+to combine the pre- and post-translations to make it work. We've seen 
+this before in eq&nbsp;4 in the <a href="affbg.htm#sec-aff-ofs">affine 
+background page</a>, only with different names. Anyway, what you need 
+is:
+</p>
+
+<table id="eq-aff-ofs">
+<tr>
+  <td class="eqnrcell">(20.6)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>dx + P &middot; q</b>
+	<td> =
+	<td> <b>p</b>
+  <tr>
+    <td class="bdrB"> <b>P</b> &middot; (<b>q &minus; x</b><sub>s</sub>)
+    <td class="bdrB">=
+	<td class="bdrB"> <b>p &minus; a</b>
+    <td class="bdrB">&minus;
+  <tr>
+    <td> <b>dx + P &middot; x</b><sub>s</sub>
+	<td> =
+	<td> <b>a</b>
+  <tr>
+    <td><b>dx</b>
+	<td> = 
+	<td> <b>a</b> &minus; <b>P &middot; x</b><sub>s</sub>
+  </table>
+</table>
+
+
+<p>
+So for each scanline you do the calculations for the zoom, put the
+<b>P</b> matrix of eq&nbsp;20.4 into 
+<code>REG_BGxPA-REG_BGxPD</code>, and
+<b>a&minus;P·x</b><sub>s</sub> into <code>REG_BGxX</code> and
+<code>REG_BGxY</code> and presto! Instant Mode 7.
+</p>
+<p>
+Well, almost. <a href="affbg.htm#ssec-ao-refpts">Remember</a> what 
+happens when writing to <code>REG_BGxY</code> inside an HBlank
+interrupt: the <i>current</i> scanline is perceived as the 
+screen's origin null-line. In other words, it does the 
+<i>+h</i> part of <i>y<sub>s</sub></i> automatically. Renaming 
+the true <i>y</i><sub>s</sub> to <i>y</i><sub>s0</sub>, what 
+you <i>should</i> use is 
+</p>
+
+<table id="eq-yofs">
+<tr>
+  <td class="eqnrcell">(20.7)
+  <td class="eqcell">
+    <i>y</i><sub>s</sub> =  
+	  <i>y</i><sub>s0</sub>&minus;<i>h</i> = <i>D</i>. 
+</table>
+
+<p>
+Now, in theory you have everything you need. In practice, though, 
+there are a number of things that can go wrong. Before I go into that, 
+here's a nice, (not so) little demo.
+</p>
+
+<!--
+<p>I would hope that after all the math, understanding the code 
+shouldn't be too hard. Naturally the LUTs of <code>SIN16, COS16</code> 
+and <code>DIV16</code> should be calculated before hand. For 
+<code>ys</code> we need the projection plane distance 
+<code>M7_D</code>. This can be anything, but using the screen height 
+here makes it easier to check your calculations. Note that 
+<code>M7_D</code> has <i>nothing</i> to do with where the rotation 
+point goes. No matter what PERN says. Note that I've delayed signing  
+<code>xs</code> and <code>ys</code>, but this is just a personal 
+preference. Lastly, all the shifts are necessary for (a) correcting 
+fixed numbers after multiplication and (b) making sure they fit 
+within a FIXED (i.e., a 32-bit signed integer).
+</p>
+-->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">20.4.
+  Threefold demo</h2>
+<p>
+As usual, there is a demo. Actually, I have several Mode 7 demos,
+but that's not important right now. The demo is called <tt>m7_demo</tt>
+and the controls are:
+</p>
+
+<table>
+<col valign="top">
+<tr><th>D-pad<td>Strafe.
+<tr><th>L, R<td>turn left and right (i.e., rotate map right and left, 
+	respectively)
+<tr><th>A, B<td>Move up and down, though I forget which is which.
+<tr><th>Select<td>Switch between 3 different Mode7 types (A, B, C)
+<tr><th>Start<td>Resets all values (<b>a</b>= (256, 32, 256), 
+	&alpha;= 0)
+</table>
+
+<p>
+&ldquo;Switch between 3 different Mode7 types&rdquo;?  That's what I 
+said, yes. Make sure you move around in all three types. Please. There's 
+a label in the top-left corner indicating the current type.
+</p>
+
+<div class="cblock">
+<table id="img-types">
+<tr>
+<td>
+  <div class="cpt" style="width:240px;">
+  <img src="../img/demo/m7_demo_a.png" alt="blocky"><br>
+  <b>Fig 20.7a</b>: Type A: blocked.
+  </div>
+<td>
+  <div class="cpt" style="width:240px;">
+  <img src="../img/demo/m7_demo_b.png" alt="sawtooth"><br>
+  <b>Fig 20.7b</b>: Type B: sawtooth.
+  </div>
+<tr><td colspan=2 align="center">
+  <div class="cpt" style="width:240px;">
+  <img src="../img/demo/m7_demo_c.png" alt="smooth"><br>
+  <b>Fig 20.7c</b>: Type C: smooth.
+  </div>
+</table>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-order">20.5.
+  Order, order!</h2>
+<p>
+Fiddled with my demo a bit? Good. Noticed the differences between 
+the three types? Even better! For reference, take a look at
+Figs&nbsp;20.7a-c, which correspond to the
+types. They adequately show what's different.
+<ul>
+  <li>Type A is horribly blocky. Those numbers in the red tiles 
+    are supposed to be &lsquo;8&rsquo;s. Heh, numbers? What numbers! 
+  <li>Type B is better. The left-hand side is smooth, but there's 
+    still some trouble on the right-hand side. But at least you 
+    can see eights with some imagination.
+  <li>Type C. Now we're talking! The centerline is clear, which
+    is important since that's what you're looking at most of the time.
+    But even on the sides, things are looking pretty decent.
+</ul>
+
+<p>So we have three very different Mode7 results, but I guarantee you 
+it's all based on the same math. So how come one method looks
+so crummy, and the other looks great?
+</p>
+
+<h3 id="ssec-order-code">20.5.1.
+  The code</h3>
+<p>
+Here are the two HBlank ISRs that create the types. Types A and B
+are nearly identical, except for one thing. Type C is very 
+different from the others. If you have a thing for self-torture, 
+try explaining the differences from the code alone. I spent most of
+yesterday night figuring out what made Type C work, so I have half
+a mind of leaving you hanging. Fortunately for you, that half's
+asleep right now.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> M7_D   <span class="num">128</span>
+
+<span class="keyw">extern</span> VECTOR cam_pos;          <span 
+class="cmt">// Camera position</span>
+<span class="keyw">extern</span> FIXED g_cosf, g_sinf;    <span 
+class="cmt">// cos(phi) and sin(phi), .8f</span>
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// --- Type A ---</span>
+<span class="rem">// (offset * zoom) * rotation
+// All .8 fixed</span>
+<span class="keyw">void</span> m7_hbl_a()
+{
+    FIXED lam, xs, ys;
+
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;<span 
+class="num">16</span>;  <span class="cmt">// .8*.16/.16 = .8</span>
+
+    <span class="cmt">// Calculate offsets (.8)</span>
+    xs= <span class="num">120</span>*lam;
+    ys= M7_D*lam;
+
+    REG_BG2PA= (g_cosf*lam)&gt;&gt;<span class="num">8</span>;
+    REG_BG2PC= (g_sinf*lam)&gt;&gt;<span class="num">8</span>;
+
+    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)&gt;&gt;<span 
+class="num">8</span> );
+    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)&gt;&gt;<span 
+class="num">8</span> );    
+}
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// --- Type B ---</span>
+<span class="rem">// (offset * zoom) * rotation
+// Mixed fixed point: lam, xs, ys use .12</span>
+<span class="keyw">void</span> m7_hbl_b()
+{
+    FIXED lam, xs, ys;
+
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;<span 
+class="num">12</span>;  <span class="cmt">// .8*.16/.12 = .12</span>
+
+    <span class="cmt">// Calculate offsets (.12f)</span>
+    xs= <span class="num">120</span>*lam;
+    ys= M7_D*lam;
+
+    REG_BG2PA= (g_cosf*lam)&gt;&gt;<span class="num">12</span>;
+    REG_BG2PC= (g_sinf*lam)&gt;&gt;<span class="num">12</span>;
+
+    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)&gt;&gt;<span 
+class="num">12</span> );
+    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)&gt;&gt;<span 
+class="num">12</span> );   
+}
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// --- Type C ---</span>
+<span class="rem">// offset * (zoom * rotation)
+// Mixed fixed point: lam, lxr, lyr use .12
+// lxr and lyr have different calculation methods</span>
+<span class="keyw">void</span> m7_hbl_c()
+{
+    FIXED lam, lcf, lsf, lxr, lyr;
+
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;<span 
+class="num">12</span>;  <span class="cmt">// .8*.16 /.12 = 20.12</span>
+    lcf= lam*g_cosf&gt;&gt;<span
+class="num">8</span>;                     <span 
+class="cmt">// .12*.8 /.8 = .12</span>
+    lsf= lam*g_sinf&gt;&gt;<span 
+class="num">8</span>;                     <span 
+class="cmt">// .12*.8 /.8 = .12</span>
+    
+    REG_BG2PA= lcf&gt;&gt;<span class="num">4</span>;
+    REG_BG2PC= lsf&gt;&gt;<span class="num">4</span>;
+
+    <span class="cmt">// Offsets</span>
+    <span class="cmt">// Note that the lxr shifts down first! 
+</span>
+    <span class="cmt">// horizontal offset</span>
+    lxr= <span class="num">120</span>*(lcf&gt;&gt;<span 
+class="num">4</span>);      lyr= (M7_D*lsf)&gt;&gt;<span class="num">4</span>;
+    REG_BG2X= cam_pos.x - lxr + lyr;
+
+    <span class="cmt">// vertical offset</span>
+    lxr= <span class="num">120</span>*(lsf&gt;&gt;<span 
+class="num">4</span>);      lyr= (M7_D*lcf)&gt;&gt;<span class="num">4</span>; 
+    REG_BG2Y= cam_pos.z - lxr - lyr;
+}
+</pre>
+
+<h3 id="ssec-order-disc">20.5.2.
+  The discussion (technical)</h3>
+<p>
+All three versions do the following things: calculate the zoom-factor 
+&lambda;, using eq&nbsp;2 and a division LUT, calculate the affine 
+matrix using &lambda; and stored versions of cos(&phi;) and sin(&phi;), 
+and calculate the affine offsets. Note that only <i>p</i><sub>a</sub> 
+and <i>p</i><sub>c</sub> are actually calculated; because 
+the scanline offset is effectively zero all the time, 
+<i>p</i><sub>b</sub> and <i>p</i><sub>d</sub> have no effect and can 
+be ignored. Those are the similarities, but what's more interesting 
+are the differences:
+</p>
+
+<ol>
+<li><b>Fixed point</b>. 
+  Type A uses .8 fixed point math throughout, but B and C use a 
+  combination of .12 and .8 fixeds.
+</li>
+<li><b>Calculation order of the affine offset</b>
+  The affine displacement <b>dx</b> is a combination of 3 parts: scale, 
+  rotation and offsets. Type A and B use <b>dx</b> = 
+  (offset*scale)*rotation, while C uses 
+  <b>dx</b> = offset*(scale*rotation). Because type C does the offsets 
+  last, it can also use different fixed-points for the offsets.
+</li>
+</ol>
+
+<div class="cpt_fr">
+<table id="tbl-divs"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align= bottom>
+  <b>Table 20.1</b>: division tables and zoom 
+	factors. <i>a</i><sub>y</sub>=32
+</caption>
+<tr><th>h	<th>1/h			<th>&lambda; (true)	<th>&lambda;(.8)
+<tr><td>157	<td>0.01a16d..h	<td>0.342da7h	<td>0.34h
+<tr><td>158	<td>0.019ec8..h	<td>0.33d91dh	<td>0.33h
+<tr><td>159	<td>0.019c2d..h	<td>0.3385a2h	<td>0.33h
+<tr><td>160	<td>0.019999..h	<td>0.333333h	<td>0.33h
+</table>
+</div>
+
+<p>
+These two (well, 2 and a half, really) differences are enough to 
+explain the differences in the results. Please remember that the  
+differences in the code are quite subtle: fixed point numbers are 
+rarely used outside consoles, and results changing due to the order 
+of calculation is probably even rarer. Yet is these two items that 
+make all the difference here.
+</p>
+
+<p>
+Let's start with types A and B, which differ only by the 
+fixed-point of <code>lam</code>. &lambda; is the ration of the camera 
+height and the scanline, which will often be quite small &ndash; 
+smaller than 1 at any rate. Table&nbsp;20.1 
+shows a few of the numbers.
+Note that using a  &lambda; with only 8 fractional bits means that 
+you'll often have the same number for multiple scanlines, which 
+carries through in the later calculations. This is why type A, which
+plays by the rules and uses a constant fixed-point like a good little
+boy, is so blocky at low altitudes. The four extra bits of type B 
+gives much better results. Rules are nice and all, but sometimes they 
+needs to be broken to get results.
+</p>
+<p>
+Now, you will notice that type B still has a bit of distortion, so
+why only go to .12 fixeds in type B, why not 16? Well, with 16 you can 
+get into trouble with integer overflow. It'd be alright for calculating 
+<code>xs</code> and <code>ys</code>, but we still have to rotate these 
+values later on as well. OK, so we'll use 64bit math, then the 32bit 
+overflow wouldn't matter and we could use <i>even more</i> fixed point 
+bits! After all, more == better, right? 
+</p>
+<p>
+Well, no. Bigger/stronger/more does not always mean better (see the 
+DS vs PSP). The remaining distortion is not a matter of the number of 
+fixed-point bits; not exactly. You could use a 128bit math and .32f 
+division and trig tables for all I care; it wouldn't matter here, 
+because that's not were the problem is.
+</p>
+<p>
+The problem, or at least part of it, is the basic algorithm used in 
+types A and B. If you look back to the theory, you'll see that the 
+affine matrix is calculated first, then the offsets. In other words, 
+first combine the scale and rotation, then calculate the 
+offset-correction, <b>P</b>·<b>x</b><sub>s</sub>. This is how the 
+affine parameters in the GBA work anyway.
+However, this is actually only the first step. If you follow that 
+procedure, you'd still get the jagged result. The <i>real</i> reason 
+for these jaggies is the order of calculation of <code>lxr</code>.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Multiply, then shift to .8 (A and B)</span>
+    lxr= (<span class="num">120</span>*lcf)&gt;&gt;<span 
+class="num">4</span>;
+
+<span class="cmt">// Shift to .8 first, then multiply (C)</span>
+    lxr= <span class="num">120</span>*(lcf&gt;&gt;<span
+class="num">4</span>);
+</pre>
+
+<p>
+Getting <code>lxr</code>&nbsp;=&nbsp;<i>p</i><sub>a/c</sub>·<i>x</i><sub>s</sub> 
+requires two parts: multiplication with <b>P</b> elements and the
+shift down to .8 fixeds. You might expect doing the shift last would 
+be better because it has a higher precision. The funny thing is that 
+it <b>doesn't</b>! Shifting <i>p</i><sub>a</sub> or <i>p</i><sub>c</sub> 
+down to 8 fractional bits before the multiplication is what gets rid 
+of the remaining distortions, reversing the order of operations 
+doesn't.
+</p>
+<p>
+As for why, I'm not 100% sure, but I can hazard a guess. The affine 
+transformation takes place around the origin of the screen, and to 
+place the origin somewhere else we need to apply a post-translation 
+by <b>x</b><sub>s</sub>. The crucial point I think is that 
+<b>x</b><sub>s</sub> is a point in screen-space which uses normal 
+integers, not fixed points. However, it only applies to 
+<i>x</i><sub>s</sub> because that <i>really</i> represents an 
+on-screen offset; <i>y</i><sub>s</sub> is actually not a point on 
+the screen but the focal distance of the camera. On the other hand, 
+it might have something to do with the internal registers for 
+the displacement. 
+</p>
+
+<h3 id="ssec-order-verdict">20.5.3.
+  The verdict</h3>
+<p>
+Obviously, type C is the one you want. It really bugs the hell out 
+of me that I didn't think of it myself. And the fact that I 
+<i>did</i> use the scale-rotation multiplication but abandoned it 
+because I screwed up with the multiplication by the projection 
+distance <i>D</i> doesn't help either (yes, this sentence makes 
+sense). The code of <code>m7_hbl_c</code> shown above works, 
+even though it only uses 32-bit math. As long as you do the 
+scale-rotation multiplication first and shift down to .8 fixeds 
+before you multiply by 120 in the calculation of <code>wxr</code> 
+everything should be fine.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-final">20.6.
+  Final Thoughts</h2>
+<p>
+This has been one of those occasions that show that programming 
+(especially low-level programming) is as much of a science as an art. 
+Even though the theory for the three mode 7 versions was the same, 
+the slight differences in the order and precision of the calculations 
+in the implementations made for very noticeable differences in the 
+end result. When it comes to mode 7, calculate the affine matrix 
+before the correction offset. But most importantly, the 
+<i>x</i>-offset for the screen should not be done in fixed point.
+</p>
+<p>
+Secondly, this was only the basic theory behind mode 7 graphics. 
+No sprites, no pitch-angle and no horizon, and tailored to the GBA 
+hardware from the start. In the next chapter, we'll derive the theory 
+more extensively following standard 3D theory with linear algebra. 
+This chapter will also show how to position sprites in 3D and how to 
+do other things with them like animating for rotation and sorting, 
+and also present variable-pitch and a horizon. If this sounds 
+complicated, well, I supposed that it is. It's definitely worth 
+a look, though.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Apr 8, 2010</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="text.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="mode7ex.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Text systems</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">More mode 7</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

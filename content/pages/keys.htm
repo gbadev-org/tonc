@@ -1,0 +1,628 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20030928">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Keys</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="bitmaps.htm">Bitmap modes</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="objbg.htm">Object/bg overview</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">6.
+  The GBA buttons (a.k.a. keys)</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-intro">Introduction</a>
+  <li><a href="#sec-regs">Key registers</a>.
+  <li><a href="#sec-adv-keys">Beyond basic button states</a>.
+  <li><a href="#sec-demo">A simple key demo</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-intro">6.1.
+  Introduction</h2>
+<p>
+As you no doubt already know, the GBA has one 4-way directional pad
+(D-pad); two control buttons (Select and Start); two regular fire 
+buttons (A and B) and two shoulder buttons (L and R), making a total 
+of 10 <dfn>keys</dfn>. This is all you have in terms of user-GBA 
+interaction, and for most purposes it is plenty. The principles of 
+key-handling are pretty simple: you have one register with the 
+keystates and you see which buttons are pressed based on whether its 
+bits are set or cleared. I will cover this, but I'll also give some 
+more advanced functions that you will probably want to have at some 
+point.
+</p>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-regs">6.2.
+  Keypad registers</h2>
+
+<h3 id="ssec-reg-keys">6.2.1.
+  The keypad register, REG_KEYINPUT</h3>
+<p>
+As said, the GBA has ten buttons, often referred to as keys. Their 
+states can be found in the first 10 bits of the <code>REG_KEYINPUT</code> 
+register at location <code>0400:0130h</code> (a.k.a. <code>REG_P1</code>). 
+The exact layout is shown below. I will refrain from giving a 
+bit-by-bit description because it should be quite obvious. The names 
+of the defined constants I use are 
+&quot;<code>KEY_</code><i>x</i>&quot;, where <i>x</i> is the
+name of the button, in caps.
+</p>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-keys"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_KEYINPUT (REG_P1) @ <code>0400:0130h</code>
+</caption>
+<tr class="bits rof">
+  <td>F E D C B A
+  <td>9<td>8 <td>7<td>6<td>5<td>4<td>3<td>2<td>1<td>0
+<tr class="bf">
+  <td> - 
+  <td class="rclr3">L
+  <td class="rclr3">R
+  <td class="rclr0">down
+  <td class="rclr0">up
+  <td class="rclr0">left
+  <td class="rclr0">right
+  <td class="rclr2">start
+  <td class="rclr2">select
+  <td class="rclr1">B
+  <td class="rclr1">A
+</table>
+</div>
+
+<p>
+Checking whether a key is pressed (down) or not would be obvious, if 
+it weren't for one little detail: the bits are <i>clear</i>ed when 
+a key is down. So the default state of <code>REG_KEYINPUT</code> is 
+<code>0x03FF</code>, and not <code>0</code>. As such, checking if 
+<code>key</code> is down goes like this:
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> KEY_DOWN_NOW(key)  <!--
+-->(~(REG_KEYINPUT) &amp; key)
+</pre>
+
+<p>
+In case your bit-operation knowledge is a bit hazy (get it cleared up. 
+Fast!), this first inverts <code>REG_KEYINPUT</code> to a more intuitive 
+(and useful) &lsquo;bit is set when down&rsquo; setting and then masks 
+it with the key(s) you want to check. Note that <code>key</code> can 
+in fact be a combination of multiple keys and the result will be the 
+combination of keys that are actually down. 
+</p>
+
+<div class="note">
+<div class="nhcare">Key states are inverted</div>
+<p>
+The key bits are low-active, meaning that they are <b>cleared</b> when 
+a button is pressed and <b>set</b> when they're not. This may be a 
+little counter-intuitive, but that's the way it is.
+</p>
+</div>
+
+<h3 id="ssec-reg-keycnt">6.2.2.
+  The key control register, REG_KEYCNT</h3>
+<p>
+Just about everything you will ever need in terms of key-handling can 
+be done with <code>REG_KEYINPUT</code>. That said, you might like to know 
+there is another key-register for some extra control. The register in 
+question is <code>REG_KEYCNT</code>, the key control register. This
+register is used for keypad <a href="interrupts.htm">interrupts</a>, 
+much like <code>REG_DISPSTAT</code> was used for video interrupts. The
+layout is the same as for <code>REG_KEYINPUT</code>, except for the top two 
+bits, see the table below. With <code>REG_KEYCNT</code>{14} you can
+enable the keypad interrupt. The conditions for raising this interrupt
+are determined by <code>REG_KEYCNT</code>{0-9}, which say what keys to
+watch out for and <code>REG_KEYCNT</code>{15}, which state the exact 
+conditions. If this bit is clear, then any of the aforementioned keys 
+will raise the interrupt; if set, then they must all be down for the 
+interrupt to be raised. I wouldn't be surprised if this is how you can 
+reset most games by pressing Start+Select+B+A. Of course, to make use 
+of this register you need to know how to work with 
+<a href="interrupts.htm">interrupts</a> first.
+</p><br>
+
+<div class="reg">
+<table class="reg" id="tbl-reg-keycnt"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  REG_KEYCNT (REG_P1CNT) @ <code>0400:0132h</code>
+</caption>
+<tr class="bits">
+  <td>F<td>E<td>D C B A<td>9<td>8
+  <td>7<td>6<td>5<td>4<td>3<td>2<td>1<td>0
+<tr class="bf">
+  <td class="rclr1">Op
+  <td class="rclr0">I
+  <td> - 
+  <td class="rclr9">L
+  <td class="rclr9">R
+  <td class="rclr9">down
+  <td class="rclr9">up
+  <td class="rclr9">left
+  <td class="rclr9">right
+  <td class="rclr9">start
+  <td class="rclr9">select
+  <td class="rclr9">B
+  <td class="rclr9">A
+</table><br>
+
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">
+  <td>0-9<td class="rclr9">keys
+  <td>KEY_<i>x</i>
+  <td>keys to check for raising a key interrupt.
+<tr class="bg1">
+  <td> E <td class="rclr0">I
+  <td>KCNT_IRQ
+  <td>Enables keypad interrupt
+<tr class="bg0">
+  <td> F <td class="rclr1">Op
+  <td>KCNT_OR, KCNT_AND
+  <td>Boolean operator used for determining whether to raise a key-
+    interrupt or not. If clear, it uses an OR (raise if any of the
+    keys of bits 0-9 are down); if set, it uses an AND (raise if
+    all of those keys are down).
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-adv-keys">6.3.
+  Beyond basic button states</h2>
+<p>
+While checking for the keystate with <code>KEY_DOWN_NOW()</code> is 
+nice and simple, there are better and/or more preferable methods of 
+key-state handling. I will discuss two (or three) of them here. First, 
+<dfn>synchronous keystates</dfn>. This is just a fancy way of reading 
+the key-state at a given point and using that variable, instead of 
+repeated reads of REG_KEYINPUT when you process input. An outshoot of this 
+is <dfn>transitional states</dfn>, where you track not only the current 
+state, but also the previous one. This lets you test for <i>changes</i> 
+in keystates, rather than just the keystates themselves.. Lastly, 
+<dfn>tribools</dfn>: three-state variables (in this cases &minus;1, 0 
+and +1) that can be used to simplify direction processing.
+</p>
+
+<h3 id="ssec-adv-sync">6.3.1.
+  Synchronous and transitional key states</h3>
+<p>
+The use of <code>KEY_DOWN_NOW()</code> is a form of 
+<dfn>asynchronous</dfn> key handling: you check the state at the 
+time the code needs it. While it works, it's not always the best 
+approach. Firstly, it is less efficient in terms of code because 
+the register is loaded and read every time it is necessary (it's 
+volatile, remember?). A secondary concern is that a simultaneous 
+multi-button tap may not be registered as such because the code 
+reading the button states are a little apart. 
+</p>
+<p>
+But those are just minor concerns; the main issue is that there's 
+just little you can really do with them. You can get the current state, 
+but that's it. As a simple example of why this is insufficient for 
+games, consider (un)pausing a game. This is usually done by 
+pressing Start, and then Start again for unpausing. That's fine 
+until you consider that the game runs faster than you can react (this 
+is a basic fact of life; the only reason you can win games is because 
+the game lets you. Deal), so the <tt>Start</tt> button will be down 
+for multiple frames. With <code>KEY_DOWN_NOW()</code>, the game will 
+pause <i>and</i> unpause during this time; the state of the game when 
+you finally release the button is essentially random. Needless to 
+say, this is a Bad Thing&trade;.
+</p>
+<p>
+Enter synchronous states. Simply read the state once, at the beginning 
+of the frame for example, and use that as &lsquo;the&rsquo; 
+state for the whole frame. That takes care of the excess readings of 
+REG_KEYINPUT, and potentially missed simultaneity. For tracking state
+changes, we also save the state of the previous frame. So at the very 
+least, we need two variables and a function that updates them, and 
+for good measure, some functions that check the states. Because 
+these will be quite small, it makes sense to inline them as well.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// === (tonc_core.c) ==================================================
+// Globals to hold the key state</span>
+u16 __key_curr=<span class="num">0</span>, __key_prev=<span 
+class="num">0</span>;
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// === (tonc_input.h) =================================================</span>
+<span class="keyw">extern</span> u16 __key_curr, __key_prev;
+
+<span class="keyw">#define</span> KEY_A        <span 
+class="num">0x0001</span>
+<span class="keyw">#define</span> KEY_B        <span 
+class="num">0x0002</span>
+<span class="keyw">#define</span> KEY_SELECT   <span 
+class="num">0x0004</span>
+<span class="keyw">#define</span> KEY_START    <span 
+class="num">0x0008</span>
+<span class="keyw">#define</span> KEY_RIGHT    <span 
+class="num">0x0010</span>
+<span class="keyw">#define</span> KEY_LEFT     <span 
+class="num">0x0020</span>
+<span class="keyw">#define</span> KEY_UP       <span 
+class="num">0x0040</span>
+<span class="keyw">#define</span> KEY_DOWN     <span 
+class="num">0x0080</span>
+<span class="keyw">#define</span> KEY_R        <span 
+class="num">0x0100</span>
+<span class="keyw">#define</span> KEY_L        <span 
+class="num">0x0200</span>
+
+<span class="keyw">#define</span> KEY_MASK     <span 
+class="num">0x03FF</span>
+
+<span class="cmt">// Polling function</span>
+INLINE <span class="keyw">void</span> key_poll()
+{
+    __key_prev= __key_curr;
+    __key_curr= ~REG_KEYINPUT &amp; KEY_MASK;
+}
+
+<span class="cmt">// Basic state checks</span>
+INLINE u32 key_curr_state()         {   <span 
+class="keyw">return</span> __key_curr;          }
+INLINE u32 key_prev_state()         {   <span 
+class="keyw">return</span> __key_prev;          }
+INLINE u32 key_is_down(u32 key)     {   <span 
+class="keyw">return</span>  __key_curr &amp; key;   }
+INLINE u32 key_is_up(u32 key)       {   <span 
+class="keyw">return</span> ~__key_curr &amp; key;   }
+INLINE u32 key_was_down(u32 key)    {   <span
+class="keyw">return</span>  __key_prev &amp; key;   }
+INLINE u32 key_was_up(u32 key)      {   <span 
+class="keyw">return</span> ~__key_prev &amp; key;   }
+</pre>
+
+<p>
+The key states are stored in <code>__key_curr</code> and 
+<code>__key_prev</code>. The function that updates them 
+is <code>key_poll()</code>. Note that this function already 
+inverts REG_KEYINPUT, so that the variables are active high, which makes 
+later operations more intuitive. For example, to test whether 
+A is currently down (pressed), just mask <code>__key_curr</code> 
+with <code>KEY_A</code>, the bit for A. This is what 
+<code>key_is_down()</code> does. While <code>KEY_DOWN_NOW()</code> 
+gives (almost) the same answer, I would still recommend using 
+<code>key_is_down()</code> instead.
+</p>
+
+<div class="note">
+<div class="nhgood">Invert REG_KEYINPUT reads as soon as possible</div>
+<p>
+The things that you might check the keystates for are simply easier
+in active-high settings. Therefore, it is a good idea to make the 
+keystate variables work that way.
+</p>
+</div>
+
+<h3 id="ssec-adv-trans">6.3.2.
+  Transitional states</h3>
+<p>
+Back to the pause/unpause issue. The nasty behaviour 
+<code>KEY_DOWN_NOW()</code> causes is known as 
+<dfn>key bounce</dfn>. This is because the macro only checks the 
+current state. What you need for proper (un)pausing is something 
+that checks whether a key is <i>going</i> down, rather than just 
+down: you need to check the transition. That's where the 
+previous state comes in. When a key is hit, i.e., the moment of 
+it going down, it will be pressed in the current state, but not 
+the one before. In other words, the keys that are &lsquo;hit&rsquo; 
+are down currently, and not before: 
+<code>__key_curr&amp;~__key_prev</code>. After that, checking for 
+a particular key can be achieved with a simple mask as usual. 
+This is done by <code>key_hit()</code>.
+</p>
+<p>
+That's really all there is to it, and you can create similar 
+functions to check for releases (before AND NOT now), if 
+it is held (before AND now), et cetera. Again, it all seems so 
+simple because the states were already inverted; when I first made 
+these functions, I had a terrible time figuring out what the right 
+bit-ops were because the active-low logic was throwing me off. 
+Well okay, not <i>really</i> but it would have been easier if I 
+had them inverted from the start.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Transitional state checks.</span>
+
+<span class="cmt">// Key is changing state.</span>
+INLINE u32 key_transit(u32 key)
+{   <span 
+class="keyw">return</span> ( __key_curr ^  __key_prev) &amp; key;   }
+
+<span class="cmt">// Key is held (down now and before).</span>
+INLINE u32 key_held(u32 key)
+{   <span 
+class="keyw">return</span> ( __key_curr &amp;  __key_prev) &amp; key;  }
+
+<span class="cmt">// Key is being hit (down now, but not before).</span>
+INLINE u32 key_hit(u32 key)
+{   <span 
+class="keyw">return</span> ( __key_curr &amp;~ __key_prev) &amp; key;  }
+
+<span class="cmt">Key is being released (up now but down before)</span>
+INLINE u32 key_released(u32 key)
+{   <span 
+class="keyw">return</span> (~__key_curr &amp;  __key_prev) &amp; key;  }
+</pre>
+
+
+<h3 id="ssec-adv-tri">6.3.3.
+  Key tribool states</h3>
+<p>
+This is a little technique taken from the 
+<a href="http://www.palib.info/wiki/doku.php?id=day4" target="_blank">PA_Lib wiki</a>.
+It isn't so much about keys per se, but a shorthand in how you 
+can use the functions, and you will have to make up for yourself 
+whether what's discussed in this subsection is right for you.
+</p>
+<p>
+Imagine you have a game/demo/whatever in which you can move stuff 
+around. To make a character move left and right, for example, you
+might do use something like this.
+</p>
+<pre class="proglist">
+<span class="cmt">// variable x, speed dx</span>
+<span class="keyw">if</span>(key_is_down(KEY_RIGHT))
+    x += dx;
+<span class="keyw">else</span> <span 
+class="keyw">if</span>(key_is_down(KEY_LEFT))
+    x -= dx;
+</pre>
+
+<p>
+Thing moves right, <i>x</i> increases; thing moves left, <i>x</i> 
+decreases, simple enough. Works fine too. However, and this may 
+just be my ifphobia acting up, it's not very pretty code. So let's 
+see if we can find something smoother.
+</p>
+<p>
+Take a look at what the code is actually doing. Depending on two 
+choices, the variable is either increased (+), decreased (&minus;), 
+or unchanged (0). That's a pretty good definition of a 
+<dfn>tribool</dfn>, a variable with three possible states, in this 
+case +1, 0 and &minus;1. What I'm after is something that lets you 
+use these states to do the following.
+</p>
+<pre class="proglist">
+x += DX*key_tri_horz();
+</pre>
+<p>
+I suppose I could just wrap the <code>if</code>s in this function, 
+but I prefer to do it via bit operations. All I need to do for this 
+is shift the bits for specific keys down, mask that with one, and 
+subtract the results.
+</p>
+<pre class="proglist">
+<span class="cmt">// === (tonc_core.h) ==================================================
+// tribool: 1 if {plus} on, -1 if {minus} on, 0 if {plus}=={minus}</span>
+INLINE <span class="keyw">int</span> bit_tribool(u32 x, <span 
+class="keyw">int</span> plus, <span class="keyw">int</span> minus)
+{   <span class="keyw">return</span> ((x&gt;&gt;plus)&amp;<span 
+class="num">1</span>) - ((x&gt;&gt;minus)&amp;<span 
+class="num">1</span>);  }
+</pre>
+
+<pre class="proglist">
+<span class="cmt">// === (tonc_input.h) =================================================</span>
+<span class="keyw">enum</span> eKeyIndex
+{
+    KI_A=<span class="num">0</span>, KI_B, KI_SELECT, KI_START, 
+    KI_RIGHT, KI_LEFT, KI_UP, KI_DOWN,
+    KI_R, KI_L, KI_MAX
+};
+
+<span class="cmt">// --- TRISTATES ---</span>
+INLINE <span class="keyw">int</span> key_tri_horz()       <span 
+class="cmt">// right/left : +/-</span>
+{   <span class="keyw">return</span> <!--
+-->bit_tribool(__key_curr, KI_RIGHT, KI_LEFT);  }
+
+INLINE <span class="keyw">int</span> key_tri_vert()       <span 
+class="cmt">// down/up : +/-</span>
+{   <span class="keyw">return</span> <!--
+-->bit_tribool(__key_curr, KI_DOWN, KI_UP);     }
+
+INLINE <span class="keyw">int</span> key_tri_shoulder()   <span 
+class="cmt">// R/L : +/-</span>
+{   <span class="keyw">return</span> <!--
+-->bit_tribool(__key_curr, KI_R, KI_L);         }
+
+INLINE <span class="keyw">int</span> key_tri_fire()       <span 
+class="cmt">// B/A : -/+</span>
+{   <span class="keyw">return</span> <!--
+-->bit_tribool(__key_curr, KI_A, KI_B);         }
+</pre>
+
+<p>
+The inline function <code>bit_tribool()</code> creates a tribool 
+value from any two bits in a number (register or otherwise). 
+The rest of the functions listed here use the current keystate 
+and the key-bits to create tribools for horizontal, vertical, 
+shoulder and fire buttons; others can be creates with relative 
+ease. These functions make the code look cleaner and are faster 
+to boot. You will be seeing them quite often.
+</p>
+<p>
+While the functions mentioned above only use 
+<code>__key_curr</code>, it is easy to write code that uses other
+key-state types. For example, a right-left <code>key_hit</code> 
+variant might look something like this:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// increase/decrease x on a right/left hit</span>
+x += DX*bit_tribool(key_hit(-<span 
+class="num">1</span>), KI_RIGHT, KI_LEFT);
+</pre>
+<p>
+It's just a call to <code>bit_tribool()</code> with using 
+<code>key_hit()</code> instead of <code>__key_curr</code>. In 
+case you're wondering what the &ldquo;&minus;1&rdquo; is doing there, 
+I just need it to get the full hit state. Remember that &minus;1 
+is <code>0xFFFFFFFF</code> in hex, in other words a full mask, which 
+will be optimized out of the final code. You will see this use of 
+tribools a couple of times as well.
+</p>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-demo">6.4.
+  A simple key demo</h2>
+
+<div class="cpt_fr" style="width:120px;">
+  <img src="../img/demo/gba_sm.png" id="img-key-demo"
+    alt="key_demo screenshot"><br>
+  <b>Fig 6.1</b>: 
+  key_demo screenshot, with L and B held.
+</div>
+
+<p>
+I have the <tt>key_demo</tt> demo illustrates how these key functions 
+can be used. It shows a mode 4 picture of a GBA (a 240x160 8bit 
+bitmap); the colors change according to the button presses. The normal 
+state is grey; when  you press the key, it turns red; when you release it, 
+it goes yellow; and as long as it's held it's green.
+Fig 6.1 shows this for the L and B buttons. 
+Here's the code that does the real work:
+</p>
+
+<pre class="proglist" id="cd-key-demo">
+<span class="keyw">#include</span> <span class="str">&lt;string.h&gt;</span>
+
+<span class="keyw">#include</span> <span class="str">&quot;toolbox.h&quot;</span>
+<span class="keyw">#include</span> <span class="str">&quot;input.h&quot;
+</span>
+<span class="keyw">#include</span> <span class="str">&quot;gba_pic.h&quot;
+</span>
+<span class="keyw">#define</span> BTN_PAL_ID  <span class="num">5</span>
+<span class="keyw">#define</span> CLR_UP   RGB15(<span 
+class="num">27</span>,<span class="num">27</span>,<span class="num">29</span>)
+
+<span class="keyw">int</span> main()
+{
+    <span class="keyw">int</span> ii;
+    u32 btn;
+    COLOR clr;
+    <span class="keyw">int</span> frame=<span class="num">0</span>;
+
+    memcpy(vid_mem, gba_picBitmap, gba_picBitmapLen);
+    memcpy(pal_bg_mem, gba_picPal, gba_picPalLen);
+
+    REG_DISPCNT= DCNT_MODE4 | DCNT_BG2;
+
+    <span class="keyw">while</span>(<span class="num">1</span>)
+    {
+        vid_vsync();
+        <span 
+class="cmt">// slowing down polling to make the changes visible</span>
+        <span class="keyw">if</span>((frame &amp; <span 
+class="num">7</span>) == <span class="num">0</span>)
+            key_poll();
+        <span class="cmt">// check state of each button</span>
+        <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;KI_MAX; ii++)
+        {
+            clr=<span class="num">0</span>;
+            btn= <span class="num">1</span>&lt;&lt;ii;
+            <span class="keyw">if</span>(key_hit(btn))
+                clr= CLR_RED;
+            <span class="keyw">else</span> <span 
+class="keyw">if</span>(key_released(btn))
+                clr= CLR_YELLOW;
+            <span class="keyw">else</span> <span 
+class="keyw">if</span>(key_held(btn))
+                clr= CLR_LIME;
+            <span class="keyw">else</span>
+                clr= CLR_UP;
+            pal_bg_mem[BTN_PAL_ID+ii]= clr;
+        }
+        frame++;
+    }
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+<code>BTN_PAL_ID</code> 
+is the starting index of the palette-part used for the buttons and 
+<code>CLR_UP</code> is a shade of grey; the rest of the colors should 
+be obvious. To make sure that you can actually see the changes in 
+button colors I'm only polling the keys once every 8 frames. If I 
+didn't do that, you'll hardly ever see a red or yellow button. (By 
+the way, I don't actually change the buttons' colors, but only the 
+palette color that that button's pixels use; palette animation is a 
+Good Thing&trade;).
+</p><br>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Jul 17, 2009</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="bitmaps.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="objbg.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Bitmap modes</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Object/bg overview</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+</body>
+</html>
+
+

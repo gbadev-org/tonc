@@ -1,0 +1,1621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20031001">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: My first GBA demo</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="setup.htm">Set-up</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="video.htm">Video intro</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+
+<hr>
+
+<h1 id="ch-">3.
+  My first GBA demo</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-first">Finally, your first GBA program</a>.
+  <li><a href="#sec-second">Your second first GBA program</a>.
+  <li><a href="#sec-notes">General notes on GBA programming</a>
+  <li><a href="#sec-testing">Testing your code on a real GBA</a>.
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-first">3.1.
+  Finally, your first GBA program</h2>
+<p>
+Now that you have your development environment ready, it's time to 
+take a look at a simple GBA program. For this we will use the code
+from the C-file <tt>first.c</tt>. The plan at this point is not full 
+understanding; the plan is to get something to compile and get 
+something running. The code will be discussed in this chapter, but 
+what it all means will be covered in later chapters.
+</p>
+
+<pre class="proglist" id="cd-first">
+<span class="cmt">// First demo. You are not expected to <!--
+-->understand it 
+// (don't spend too much time trying and read on).
+// But if you do understand (as a newbie): wow!</span>
+
+<span class="keyw">int</span> main()
+{
+    *(<span class="keyw">unsigned int</span>*)<span 
+class="num">0x04000000</span> = <span class="num">0x0403</span>;
+
+    ((<span class="keyw">unsigned short</span>*)<span 
+class="num">0x06000000</span>)[<span 
+class="num">120</span>+<span class="num">80</span>*<span 
+class="num">240</span>] = <span class="num">0x001F</span>;
+    ((<span class="keyw">unsigned short</span>*)<span 
+class="num">0x06000000</span>)[<span 
+class="num">136</span>+<span class="num">80</span>*<span 
+class="num">240</span>] = <span class="num">0x03E0</span>;
+    ((<span class="keyw">unsigned short</span>*)<span 
+class="num">0x06000000</span>)[<span 
+class="num">120</span>+<span class="num">96</span>*<span 
+class="num">240</span>] = <span class="num">0x7C00</span>;
+
+    <span class="keyw">while</span>(<span class="num">1</span>);
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+Don't worry about the code just yet, there's time for that later. 
+And don't leave just yet, I'll give a nicer version later on. 
+All that matters now is that you're able to compile and run it. 
+The makefile to build the project was given in the
+<a href="setup.htm#ssec-cli-make">setup</a>, but I'll repeat it here.
+You can also find it on Tonc's examples folder under 
+<tt>code/basic/first</tt>.
+</p>
+
+
+<pre class="proglist">
+<span class="cmt">#
+# Makefile for first.gba
+#</span>
+
+PATH := $(DEVKITARM)/bin:$(PATH)
+
+<span class="cmt"># --- Project details -------------------------------------------------</span>
+
+PROJ    := first
+TARGET  := $(PROJ)
+
+OBJS    := $(PROJ).o
+
+<span class="cmt"># --- Build defines ---------------------------------------------------</span>
+
+PREFIX  := arm-none-eabi-
+CC      := $(PREFIX)gcc
+LD      := $(PREFIX)gcc
+OBJCOPY := $(PREFIX)objcopy
+
+ARCH    := -mthumb-interwork -mthumb
+SPECS   := -specs=gba.specs
+
+CFLAGS  := $(ARCH) -O2 -Wall -fno-strict-aliasing
+LDFLAGS := $(ARCH) $(SPECS)
+
+
+.PHONY : build clean
+
+<span class="cmt"># --- Build -----------------------------------------------------------</span>
+<span class="cmt"># <b>Build process starts here!</b></span>
+build: $(TARGET).gba
+
+<span class="cmt"># Strip and fix header (step 3,4)</span>
+$(TARGET).gba : $(TARGET).elf
+	$(OBJCOPY) -v -O binary $&lt; $@
+	-@gbafix $@
+
+<span class="cmt"># Link (step 2)</span>
+$(TARGET).elf : $(OBJS)
+	$(LD) $^ $(LDFLAGS) -o $@
+
+<span class="cmt"># Compile (step 1)</span>
+$(OBJS) : %.o : %.c
+	$(CC) -c $&lt; $(CFLAGS) -o $@
+		
+<span class="cmt"># --- Clean -----------------------------------------------------------</span>
+
+clean : 
+	@rm -fv *.gba
+	@rm -fv *.elf
+	@rm -fv *.o
+
+<span class="cmt">#EOF</span>
+</pre>
+
+
+<div class="cpt_fr" style="width:240px;">
+  <img src="../img/demo/first.png" id="img-first"
+    alt="picture of the first demo">
+  <b>Fig 3.1</b>: picture of the first demo
+</div>
+
+<p>
+Build the project by opening <tt>first.pnproj</tt> and hitting Alt+1 
+or double-clicking <tt>build.bat</tt>. This will 
+</p>
+
+<ul>
+  <li>
+    <b>compile</b> <tt>first.c</tt> to <tt>first.o</tt> (the 
+    <code>$(PROJ)</code> is replaced with &lsquo;first&rsquo;, 
+    remember?), 
+  <li>
+    <b>link</b> the list of object files (currently only 
+    <tt>first.o</tt>) to <tt>first.elf</tt>, 
+  <li>
+    <b>translate</b> <tt>first.elf</tt> to <tt>first.gba</tt> by 
+      stripping all excess ELF information,
+  <li>
+    <b>fix the header</b> so that the GBA will accept it.
+</ul>
+
+<p>
+After the makefile has run, you should have a file called 
+<tt>first.gba</tt>, if you don't there's a problem with your 
+set-up because the code sure isn't wrong. I've made a list 
+of potential problems <a href="setup.htm#ssec-dkp-error">setup:dkp</a>; 
+check if yours is one of them.
+</p>
+<p>
+If you do find yourself with a GBA executable, run it on 
+hardware or your emulator of choice and you should get a red, a 
+green, and a blue pixel at positions (120, 80), (136, 80) and 
+(120, 96), respectively. 
+</p><br>
+
+<p>
+Now, for the code itself &hellip;
+</p>
+
+<h3 id="ssec-first-huh">3.1.1.
+  Huh?</h3>
+<p>
+If you're somewhat confused by it, you wouldn't be alone.
+I expect that unless you already know a thing or two about GBA 
+programming or have experience with low-level programming from other 
+platforms, the code will be a total mystery. If you're proficient 
+enough in C you may have some idea what's making the three pixels 
+appear, but I admit that it is <i>very</i> hard to see. 
+</p>
+
+<p>
+And that was kind of my point actually. If one were to hand this in 
+for a test at a programming class, you would fail <i>so</i> hard. And 
+if not, the professors should be fired. While the code show above does 
+work, the fact that it's almost unreadable makes it bad code. Writing 
+good code is not only about getting results, it's also about making 
+sure <i>other</i> people can understand what's happening without too 
+much trouble.
+</p>
+<p>
+The code of <tt>first.c</tt> also serves another purpose, namely as a 
+reminder that GBA programming is <i>very</i> low-level. You interact 
+directly with the memory, and not through multiple layers of 
+abstraction brought by APIs. To be able to do that means you have to 
+really understand how computers work, which all programmers should know 
+at least to some degree. There are APIs (for lack of a better word)
+like HAM that take care of the lowest levels, which definitely has its 
+merits as it allows you to deal with more important stuff like actual 
+<i>game</i> programming, but on the other hand it hides a lot of 
+details &ndash; details that sometimes are better left in the open.
+</p><br>
+<p>
+Those who want a better, more intelligible, version of the previous 
+code can skip the next section and move on to the 
+<a href="#sec-second">second</a> first demo. The warped minds who 
+can't just let it go and want to have an explanation right now (for 
+the record, I count myself among them), here's what's going on.
+</p>
+
+<h3 id="ssec-first-expl">3.1.2.
+  Explanation of the code</h3>
+<p>
+This is a quick and dirty explanation of the earlier code. Those 
+previously mentioned warped minds for whom this section is intended 
+will probably prefer it that way. A more detailed discussion will 
+be given later.
+</p>
+<p>
+As I said, GBA programming is low-level programming and sometimes goes 
+right down to the bit. The <code>0x04000000</code> and 
+<code>0x06000000</code> are parts of the accessible 
+<a href="hardware.htm#sec-memory">memory sections</a>. These numbers 
+themselves don't mean much, by the way; they just refer to different 
+sections. There aren't really <code>0x02000000</code> between these 
+two sections. As you can see in the memory map, these two 
+sections are for the IO registers and VRAM, respectively. 
+</p>
+<p>
+To work with these sections in C, we have to make pointers out of them, 
+which is what the &lsquo;<code>unsigned int*</code>&rsquo; and 
+&lsquo;<code>unsigned short*</code>&rsquo; do. The types used here 
+are almost arbitrary; almost, because some of them are more convenient 
+than others. For example, the GBA has a number of different video
+modes, and in modes 3 and 5 VRAM is used to store 16-bit colors, so in 
+that case casting it to halfword pointers is a good idea. Again, it 
+is not <i>required</i> to do so, and in some cases different people 
+will use different types of pointers. If you're using someone else's 
+code, be sure to note the datatypes of the pointers used, not just 
+the names.
+</p>
+<p>
+The word at 0400:0000 contains the main bits for the display control. 
+By writing <code>0x0403</code> into it, we tell the GBA to use video 
+mode 3 and activate background 2. What this actually means will be 
+explained in the <a href="video.htm">video</a> and 
+<a href="bitmaps.htm">bitmap mode </a> chapters. 
+</p>
+<p>
+In mode 3, VRAM is a 16-bit bitmap; when we make a halfword 
+pointer for it, each entry is a pixel. This bitmap itself is the 
+same size as the screen (240x160) and because of the way 
+<a href="bitmaps.htm">bitmaps</a> and C matrices work, by using 
+something of the form 
+&lsquo;array[<i>y</i>*<i>width</i> + <i>x</i>]&rsquo; are the contents 
+of coordinates (<i>x</i>, <i>y</i>) on screen. That gives us our 3 
+pixel locations. We fill these with three 16-bit numbers that happen to 
+be full red, green and blue in 5.5.5 BGR format. Or is that RGB, I 
+always forget. In any case, that's what makes the pixels appear. After 
+that there is one more important line, which is the infinite loop. 
+Normally, infinite loops are things to be avoided, but in this case 
+what happens after <code>main()</code> returns is rather undefined 
+because there's little to return <i>to</i>, so it's best to avoid that 
+possibility. 
+</p>
+<p>
+And that's about it. While the Spartan purity of the code does 
+appeal to a part of me, I will stress again that this is <i>not</i> 
+the right way to program in C. Save the raw numbers for assembly 
+please.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-second">3.2.
+  Your second first GBA program</h2>
+<p>
+So, let's start over again and do it <i>right</i> this time. Or at 
+least more right than before. There are a number of simple ways to 
+improve the legibility of the code. Here is the list of things we'll 
+do.
+<ul>
+<li>
+  First and foremost is the use of <b>named literals</b>, that is 
+  to say #defined names for the constants. The numbers that went into 
+  the display control will get proper names, as will the colors that 
+  we plotted.
+<li>
+  We'll also use #define for the <b>memory mapping</b>: the 
+  display control and VRAM will then work more like normal variables. 
+<li>
+  We'll also create some <b>typedefs</b>, both for ease of use and 
+  to indicate conceptual types. For instance, a 16-bit color is 
+  essentially a halfword like any other, but if you typedef it as, say, 
+  <code>COLOR</code>, everyone will know that it's not a normal 
+  halfword, but has something to do with colors.
+<li>
+  Finally, instead of plotting pixels with an array access, which 
+  could still mean anything, well use a <b>subroutine</b> for it 
+  instead.
+</ul>
+
+<p>
+Naturally, this will expand the total lines of code a bit. Quite a 
+bit, in fact. But it is well worth it. The code is actually a 
+two-parter. The actual code, the thing that has all the functionality of 
+the first demo, can be found in <tt>second.c</tt>. All the items
+discussed above, the typedefs, #defines and inlines, are put in 
+<tt>toolbox.h</tt>.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// toolbox.h: 
+//
+// === NOTES ===
+// * This is a _small_ set of typedefs, #defines and inlines that can 
+//   be found in tonclib, and might not represent the 
+//   final forms.</span>
+
+
+<span class="keyw">#ifndef</span> TOOLBOX_H
+<span class="keyw">#define</span> TOOLBOX_H
+
+<span class="cmt">// === (from tonc_types.h) ============================================
+</span>
+<span class="keyw">typedef</span> <span class="keyw">unsigned</span> <span class="keyw">char</span>   u8;
+<span class="keyw">typedef</span> <span class="keyw">unsigned</span> <span class="keyw">short</span>  u16;
+<span class="keyw">typedef</span> <span class="keyw">unsigned</span> <span class="keyw">int</span>    u32;
+
+<span class="keyw">typedef</span> u16 COLOR;
+
+<span class="keyw">#define</span> INLINE <span class="keyw">static</span> <span class="keyw">inline
+</span>
+<span class="cmt">// === (from tonc_memmap.h) ===========================================
+</span>
+<span class="keyw">#define</span> MEM_IO      <span class="num">0x04000000</span>
+<span class="keyw">#define</span> MEM_VRAM    <span class="num">0x06000000
+</span>
+<span class="keyw">#define</span> REG_DISPCNT     *((<span 
+class="keyw">volatile</span> u32*)(MEM_IO+<span class="num">0x0000</span>))
+
+<span class="cmt">// === (from tonc_memdef.h) ===========================================
+
+// --- REG_DISPCNT defines ---</span>
+<span class="keyw">#define</span> DCNT_MODE0     <span class="num">0x0000</span>
+<span class="keyw">#define</span> DCNT_MODE1      <span class="num">0x0001</span>
+<span class="keyw">#define</span> DCNT_MODE2      <span class="num">0x0002</span>
+<span class="keyw">#define</span> DCNT_MODE3      <span class="num">0x0003</span>
+<span class="keyw">#define</span> DCNT_MODE4      <span class="num">0x0004</span>
+<span class="keyw">#define</span> DCNT_MODE5      <span class="num">0x0005</span>
+<span class="cmt">// layers</span>
+<span class="keyw">#define</span> DCNT_BG0        <span class="num">0x0100</span>
+<span class="keyw">#define</span> DCNT_BG1        <span class="num">0x0200</span>
+<span class="keyw">#define</span> DCNT_BG2        <span class="num">0x0400</span>
+<span class="keyw">#define</span> DCNT_BG3        <span class="num">0x0800</span>
+<span class="keyw">#define</span> DCNT_OBJ        <span class="num">0x1000
+
+</span>
+<span class="cmt">// === (from tonc_video.h) ============================================
+</span>
+<span class="keyw">#define</span> SCREEN_WIDTH   <span class="num">240</span>
+<span class="keyw">#define</span> SCREEN_HEIGHT  <span class="num">160
+</span>
+<span class="keyw">#define</span> vid_mem     ((u16*)MEM_VRAM)
+
+INLINE <span class="keyw">void</span> m3_plot(<span class="keyw">int</span> x, <span class="keyw">int</span> y, COLOR clr)
+{   vid_mem[y*SCREEN_WIDTH+x]= clr;    }
+
+<span class="keyw">#define</span> CLR_BLACK   <span class="num">0x0000</span>
+<span class="keyw">#define</span> CLR_RED     <span class="num">0x001F</span>
+<span class="keyw">#define</span> CLR_LIME    <span class="num">0x03E0</span>
+<span class="keyw">#define</span> CLR_YELLOW  <span class="num">0x03FF</span>
+<span class="keyw">#define</span> CLR_BLUE    <span class="num">0x7C00</span>
+<span class="keyw">#define</span> CLR_MAG     <span class="num">0x7C1F</span>
+<span class="keyw">#define</span> CLR_CYAN    <span class="num">0x7FE0</span>
+<span class="keyw">#define</span> CLR_WHITE   <span class="num">0x7FFF
+
+</span>
+INLINE COLOR RGB15(u32 red, u32 green, u32 blue)
+{   <span class="keyw">return</span> red | (green&lt;&lt;<span class="num">5</span>) | (blue&lt;&lt;<span class="num">10</span>);   }
+
+<span class="keyw">#endif</span> <span class="cmt">// TOOLBOX_H</span>
+</pre>
+
+<pre class="proglist">
+<span class="keyw">#include</span> <span class="str">&quot;toolbox.h&quot;
+</span>
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    m3_plot( <span class="num">120</span>, <span 
+class="num">80</span>, RGB15(<span class="num">31</span>, <span 
+class="num">0</span>, <span class="num">0</span>) );    <span 
+class="cmt">// or CLR_RED</span>
+    m3_plot( <span class="num">136</span>, <span 
+class="num">80</span>, RGB15( <span 
+class="num">0</span>,<span class="num">31</span>, <span 
+class="num">0</span>) );    <span class="cmt">// or CLR_LIME</span>
+    m3_plot( <span class="num">120</span>, <span 
+class="num">96</span>, RGB15( <span class="num">0</span>, <span 
+class="num">0</span>,<span class="num">31</span>) );    <span 
+class="cmt">// or CLR_BLUE
+</span>
+    <span class="keyw">while</span>(<span class="num">1</span>);
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+As you can see, the number of lines in <tt>toolbox.h</tt> is actually 
+much larger than that of the real code. This may seem like a bit of 
+a waste now, but this is only because it's such a small demo. None of 
+the contents of <tt>toolbox.h</tt> is actually compiled, so there is 
+no cost in terms of memory use. In fact, if it did it wouldn't 
+belong in a header file, but that's a discussion I'll go into 
+<a href="bitmaps.htm#ssec-data-hdr">another time</a>. Right now, let's 
+see what we actually have in <tt>toolbox.h</tt>
+</p>
+
+<h3 id="ssec-2nd-toolbox">3.2.1.
+  The toolbox</h3>
+
+<h4>Types and typedefs</h4>
+<p>
+First of all, we create some shorthand notations of commonly used 
+types. No matter what anyone says, <b>brevity is a virtue</b>. For 
+example, unsigned types are very common and writing out the full names 
+(e.g, &lsquo;<code>unsigned short</code>&rsquo;) serves little purpose.
+The shorthand &lsquo;<code>u16</code>&rsquo; is just much more 
+convenient. Besides convenience, it also gives better information on 
+the size of the variable, which is also of great importance here.
+</p>
+<p>
+I've also added a <dfn>conceptual typedef</dfn>. While it's true that, 
+in principle, an int is an int no matter what it's used for, it is 
+helpful if you can tell what its supposed use is from its 
+type. In this case, I have a <code>COLOR</code> alias for
+<code>u16</code> when I want to indicate a particular halfword 
+contains color information.
+</p>
+
+<h4>Memory map defines</h4>
+<p>
+To be able to work directly specific addresses in memory, you'll have 
+to cast them to pointers or arrays and work with those. In this demo's 
+case, the addresses we're interested in are <code>0600:0000</code> 
+(VRAM) and <code>0400:0000</code> (the display control register). 
+In the first demo I did the casts manually, but it's better to use 
+names for them so that you don't have to remember all the numbers and 
+also because nobody else would have any clue to what's going on. 
+</p>
+<p>
+For the IO registers I'm using the official names, which are recognized 
+by all parties. The display control is known as REG_DISPCNT, and is 
+defined as the word at <code>0400:0000</code>. Note that neither the 
+name nor the type are set in stone: you could as easily have called it 
+&ldquo;BOO&rdquo; and even used a halfword pointer. The full list of 
+register #defines can be found in tonclib's <tt>regs.h</tt>.
+</p>
+<p>
+For those who aren't as familiar with pointers as you should (boy, are 
+you gonna be in trouble <kbd>:P</kbd>), here is the structure of the 
+REG_DISPCNT #define. I'm using <code>vu32</code> as a typedef for 
+&lsquo;volatile u32&rsquo; here.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#define</span> REG_DISPCNT *((<span 
+class="keyw">volatile</span> u32*)(MEM_IO+<span class="num">0x0000</span>)) 
+</pre>
+
+<div class="cblock">
+<table border=1 cellpadding=2 cellspacing=0 width="90%">
+<col align="right">
+<tr>
+  <th width=130>code	<th>type	<th>description
+<tr>
+  <td><code>MEM_IO+0x0000</code>
+  <td>Address
+  <td>MEM_IO=<code>0x04000000</code>, so this is address 0400:0000
+<tr>
+  <td><code>(vu32*)0x04000000</code>
+  <td>pointer
+  <td>A pointer to an unsigned int of the volatile persuasion
+    (ignore this last part for now)
+<tr>
+  <td><code>*(vu32*)0x04000000</code>
+  <td>&lsquo;variable&rsquo;
+  <td>By <dfn>dereferencing</dfn> the pointer (the &lsquo;*&rsquo; 
+    unary operator), we access the contents of the pointer. Id est, 	
+	the whole thing becomes usable as a variable.
+</table>
+</div>
+
+<p>
+So for all intents and purposes, REG_DISPCNT is a variable just like 
+any other. You can assign values to it, read its contents, perform 
+bit operations on it and so forth. Which is good, because that's just 
+the way we want to use that register.
+</p>
+<p>
+A similar procedure is carried out for VRAM, only this is still in 
+its pointer form in the end. Because of that, <code>vid_mem</code> 
+works as an <i>array</i>, not a variable. Again, this is exactly 
+how we want things. Please be careful with the definition, though: 
+all the parentheses there are <b>required</b>! Because of the 
+operator precedence between casts and arrays, leaving out the outer 
+parentheses pair gives compilation errors.
+</p>
+
+<h4>IO register and their bits</h4>
+<p>
+The IO registers (not to be confused with the CPU registers) are a
+collection of switches in the form of bitfields that control various 
+operations of the GBA. The IO registers can be found in the  
+<code>0400:0000</code> range of memory, and are usually clumped into 
+words or halfwords according to personal preference. To get anything 
+done, you have to set specific bits of the IO registers. While you 
+can try to remember all the numerical values of these bits, it's 
+more convenient to use #defines instead.
+</p>
+<p>
+The toolbox header lists a number of the #defines I use for 
+REG_DISPCNT. The full list can be found in <tt>vid.h</tt> of 
+tonclib, and the register itself is described in the 
+<a href="video.htm">video</a> chapter. For now, we only need 
+DCNT_MODE3 and DCNT_BG2. The former sets the video mode to 
+mode 3, which is simplest of the 3 available 
+<a href="bitmaps.htm">bitmap modes</a>, and the latter activates 
+background 2. Out of a total of four, bg 2 is the only one available 
+in the bitmap modes and you have to switch it on if you want 
+anything to show up. You have to admit that these names are a lot 
+more descriptive than <code>0x0003</code> and <code>0x0400</code>, 
+right? <!--If not, you are <i>banned</i> from programming 
+<kbd>:P</kbd>.-->
+</p>
+<p>
+I've also added a list of useful color defines, even though I'm not 
+using them in <tt>second.c</tt>. They may or may not be useful in 
+the future, though, so it's good to have them around.
+</p><br>
+
+<p>
+Creating the register #defines is probably the biggest part of 
+header files. As a rough estimate, there are 100 registers with 
+16 bits each, so that would be 1600 #defines. That's a lot. The 
+exact number may be smaller, but it is still large. Because the 
+names of the #defines in and of themselves aren't important, you 
+can expect different naming schemes for different people. I am 
+partial to my own set of names, other older GBA coders may use 
+PERN's names and more recent ones may use libgba's, which comes 
+with devkitARM. Take your pick.
+</p>
+
+<h4>Macros and inline functions</h4>
+<p>
+You can also create #defines that work a little like functions. These 
+are called <dfn>macros</dfn>. I'm not using them here, but there are 
+plenty to be found in tonclib's headers. Like all #defines, macros are 
+part of the preprocessor, not the compiler, which means that the 
+debugger never sees them and they can have many hidden errors in 
+them. For that reason, they have been depreciated in favor of 
+<a href="http://gcc.gnu.org/onlinedocs/gcc-4.0.2/gcc/Inline.html" target="_blank">
+<dfn>inline functions</dfn></a>. They have all the benefits of macros 
+(i.e., integrated into the functions that call them so that they're 
+fast), but are still function-like in syntax and resolved at compile 
+time. At least that's the theory, in practice they're not <i>quite</i> 
+as speedy as macros, but often preferable anyway. 
+</p>
+<p>
+One inline function I'm using is <code>m3_plot()</code>, which, 
+as you may have guessed, is used to plot pixels in mode 3. In mode 3, 
+VRAM is just a matrix of 16bit colors, so all we have to do to plot 
+a pixel is enter a halfword in the right array element. 
+<code>m3_plot()</code> looks exactly like a normal function, but 
+because the &lsquo;<code>static inline</code>&rsquo; in front of it 
+makes it an inline function. Note that inlining is only a 
+recommendation to the compiler, not a commandment, and it only works 
+if optimizations are switched on. 
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Mode 3 plotter as macro ...</span>
+<span class="keyw">#define</span> M3_PLOT(x, y, clr)  <!--
+--> vid_mem[(y)*SCREEN_WIDTH+(x)]=(clr)
+
+<span class="cmt">// and as an inline function</span>
+<span class="keyw">static inline void</span> m3_plot(<span 
+class="keyw">int</span> x, <span class="keyw">int</span> y, COLOR clr)
+{   vid_mem[y*SCREEN_WIDTH+x]= clr;  }
+</pre>
+
+<p>
+The second inline function is <code>RGB15()</code>, which creates 
+a 16bit color from any given red, green and blue values. The GBA 
+uses 16bit colors for its graphics &ndash; or actually 15bit 
+colors in a 5.5.5 BGR format. That's 32 shades of red in the 
+first (lowest) 5 bits, 32 greens in bits 5 to 9, and 32 blues 
+in 10-14. The <code>RGB15()</code> inline takes care of all the 
+shifting and masking to make that happen.
+</p>
+
+
+<h3 id="ssec-2nd-src">3.2.2.
+  The working code</h3>
+<p>
+Making use of the contents of <tt>toolbox.h</tt> makes the code of 
+the demo much more understandable. 
+<p>
+The first line in 
+<code>main()</code> sets a few bits in the display control, commonly 
+known as REG_DISPCNT. I use <code>DCNT_MODE3</code> to set the 
+video mode to mode 3, and activate background 2 with 
+<code>DCNT_BG2</code>. This translates to <code>0x0403</code> as 
+before, but this method gives a better indication of what's 
+happening than entering the raw number. Using a variable-like 
+#define instead of the raw dereferenced pointer is also preferable; 
+especially as the latter is sure to wig out people new to C.
+</p>
+<p>
+So how do I know what bit does what to create the #defines in the 
+first place? Simple, I looked them up in 
+<a href="http://nocash.emubase.de/gbatek.htm" target="_blank">GBATek</a>, the
+essential reference to GBA programming. For every IO register I use 
+in these pages I'll give a description of the bits and a list of 
+#defines as they're defined in tonclib. The formats for these 
+descriptions were given in the 
+<a href="intro.htm#ssec-note-reg">preface</a>, and the table for 
+REG_DISPCNT can be found in the 
+<a href="video.htm#sec-vid-regs">video chapter</a>.
+</p>
+<p>
+Actually plotting the pixels is now done 
+with the inline function <code>m3_plot()</code>, which is formatted 
+much the same way as every kind of pixel plotter in existence: 2 
+coordinates and the color. Much better than raw memory access, even 
+though it works exactly the same way. The colors themselves are now 
+created with an inline too: <code>RGB15</code> takes 3 numbers for 
+the red, green and blue components and ties them together to form a 
+valid 16-bit color.
+</p>
+<p>
+Finally, there is an endless loop to prevent the program from ever 
+ending. But aren't endless loops bad? Well usually yes, but not 
+here. Remember what happens when PC programs end: control is kicked 
+back to the operating system. Well, we don't <i>have</i> an operating 
+system. So what happens after <code>main()</code> returns is 
+undefined. It is possible to see what happens by looking at a file 
+called <tt>ctrs0.S</tt>, which comes with your dev-kit, but that's 
+not a thing for beginners so at the moment my advice is to simply not 
+let it happen. Ergo, endless loop. For the record, there are better
+ways of stopping GBA programs, but this one's the easiest. And now 
+we've reached the end of the demo.
+</p>
+
+<h4>Better, no?</h4>
+<p>
+And that is what proper code looks like. As a basic rule, try to avoid 
+raw numbers: nobody except you will know what they mean, and after 
+a while you may forget them yourself as well. Typedefs (and enums and
+structs) can work wonders in structuring code, so can subroutines 
+(functions, inline functions and macros). Basically, every time you
+notice you are repeating yourself (copy&amp;paste coding), it might
+be time to think about creating some subs to replace that code.
+</p>
+<p>
+These are just a few basic guidelines. If you need more, you can 
+find some more 
+<a href="http://www.jetcafe.org/~jim/c-style.html" target="_blank">here</a>, for example.
+Google is your friend. Now, if you've followed any classes on C, 
+you should already know these things. If not, you have been cheated. 
+Books and tutorials may sometimes skip these topics, so it may be 
+necessary to browse around for more guidelines on programming 
+styles. That's all they are, by the way: <i>guidelines</i>. While 
+the rules are usually sensible, there's no need to get fascist about 
+them. Sometimes the rules won't quite work for your situation; 
+in that case feel free to break them. But please keep in mind that 
+these guidelines have been written for a reason: more often than not 
+you will benefit from following them.
+</p>
+
+
+<h3 id="ssec-2nd-v3">3.2.3.
+  First demo v3?</h3>
+<p>
+There are many ways that lead to Rome. You've already seen two ways 
+of coding that essentially do the same thing, though one was easily 
+superior. But sometimes things aren't so clear cut. In many cases, 
+there are a number of equally valid ways of programming. The obvious 
+example is the names you give your identifiers. No one's forcing you 
+to a particular set of names because it's not the names that are 
+important, it's what they stand for. Another point of contention is 
+whether you use macros, functions, arrays or what not for dealing 
+with the memory map. In most cases, there's no difference in the 
+compiled code.
+</p>
+<p>
+The code below shows yet another way of plotting the 3 pixels. In this 
+case, I am using the color #defines rather than the RGB inline, but 
+more importantly I'm using an array typedef <code>M3LINE</code> with 
+which I can map VRAM as a matrix so that each pixel is represented 
+by a matrix element. Yes, you can do that, and in some way it's even 
+better than using an inline or macro because you're not limited to 
+just setting pixels; getting, masking and what not are all perfectly 
+possible with a matrix, but if you were to go the subroutine way, 
+you'd have to create more for each type of action.
+</p>
+<p>
+As you can see, there's all kinds of ways of getting 
+something done, and some are more practical than others. Which one 
+is appropriate for your situation is pretty much up to you; it's just 
+part of software design.
+</p>
+
+<pre class="proglist">
+<span class="keyw">#include</span> <span 
+class="str">&quot;toolbox.h&quot;</span>
+
+<span class="cmt">// extra stuff, also in tonc_video.h</span>
+<span class="keyw">#define</span> M3_WIDTH    SCREEN_WIDTH
+<span class="cmt">// typedef for a whole mode3 line</span>
+<span class="keyw">typedef</span> COLOR       M3LINE[M3_WIDTH];
+<span class="cmt">// m3_mem is a matrix; m3_mem[y][x] is pixel (x,y)</span>
+<span class="keyw">#define</span> m3_mem    ((M3LINE*)MEM_VRAM)
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    m3_mem[<span class="num">80</span>][<span class="num">120</span>]= <!--
+-->CLR_RED;
+    m3_mem[<span class="num">80</span>][<span class="num">136</span>]= <!--
+-->CLR_LIME;
+    m3_mem[<span class="num">96</span>][<span class="num">120</span>]= <!--
+-->CLR_BLUE;
+
+    <span class="keyw">while</span>(<span class="num">1</span>);
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-notes">3.3.
+  General notes on GBA programming</h2>
+<p>
+Console programming is substantially different from PC programming, 
+especially for something like the GBA. There is no operating system,
+no complex API to learn, it's just you against the memory. You need 
+to have intimate knowledge of the GBA memory sections to make things 
+work, and good pointer and bit-operation skills are a must.
+Also remember that you don't have a 2GHz CPU, half a gig of RAM and
+a GPU that can do a gazillion polygons per second. It's just a 16 MHz 
+CPU with 96kB video memory. And <i>no</i> floating point support or 
+even hardware division. These are all things you need to be aware of 
+when designing your GBA software.
+</p><br>
+
+<p>
+Another thing that you need to remember is that the GBA has a tendency 
+to do things just a tiny bit different than you may expect. The 
+primary example of this is the matrix used for 
+<a href="affine.htm">affine transformations</a> like rotation and 
+scaling. All of the popular tutorials give the wrong matrix for 
+a rotation-scale transformation, even though the reference documents 
+give the correct description of each element. Other good examples 
+are the end result of trying to 
+<a href="bitmaps.htm#ssec-intro-details">write 
+a single byte to VRAM</a>, the fact that 
+<a href="keys.htm#ssec-reg-keys">bits
+for key-states</a> are actually <i>set</i> when the button's unpressed 
+instead of the other way around, or what the timer register 
+<a href="timers.htm#ssec-reg-tmxd">REG_TMxD</a> <i>really</i> does.
+</p>
+<p>
+I've tried to be complete in my explanations of all these things, but 
+I'm positive I've missed a thing or two. If you encounter problems, 
+you're probably not the first one. There are plenty of FAQs and forums 
+where you can find the solution. If that fails, it never hurts to ask. 
+If any of my information is incorrect or incomplete, please don't 
+hesitate to tell me.
+</p>
+
+<h3 id="ssec-notes-bad">3.3.1.
+  GBA Good/bad practices</h3>
+<p>
+For some reason, there are a lot of bad programming practices among 
+the GBA development community. The main reason for this is probably
+that people just copy-paste from tutorial code, most of which use 
+these practices. Here's a short list of things to avoid, and things 
+to adopt.
+</p>
+
+<ul>
+<li>
+  <p class="in">
+  <b>Don't believe everything you read</b>. Bottom line: people make 
+  mistakes. Sometimes, the information that is given is incorrect or 
+  incomplete. Sometimes the code doesn't work; sometimes it does, 
+  but it's inefficient or inconsistent or just contains practices that 
+  will come back to bite you later on. This is true for most (if not 
+  all) older tutorials. Don't automatically assume you're doing it 
+  wrong: there is a chance it's the source material.
+  </p>
+  <p>
+  Unfortunately, if you're new to programming you might not recognize 
+  the bad and adopt the standards exhibited by some sources. <i>Do not 
+  learn C programming from GBA tutorials!</i> I'd almost extent that 
+  suggestion to on-line tutorials in general, especially short ones. 
+  Books are usually more accurate and provide a better insight into the 
+  material. (But again, 
+<a href="http://www.coranac.com/documents/taptngba/" target="_blank">not always.</a>)
+  </p>
+</li>
+<li>
+  <b>RTFAQ / RTFR</b>. Read the
+   <a href="http://forum.gbadev.org/viewtopic.php?t=418" target="_blank">gbadev 
+  forum FAQ</a>. Should go without saying. It covers a lot of common 
+  problems. Additionally, read the fuckin reference, by which I mean 
+  <a href="http://nocash.emubase.de/gbatek.htm" target="_blank">GBATek</a>, which covers 
+  just about everything.
+</li>
+<li>
+  <p>
+  <b>Makefiles are good</b>. Many tutorials use batchfiles for building 
+  projects. This is a very easy method, I agree, but in the long run, 
+  it's very inefficient, Windows only and is prone to maintainability 
+  problems. Makefiles are better for Real World projects, even though 
+  there may be a hurdle setting them up initially. Fortunately, you 
+  don't have to worry about it that much, because DevkitPro comes with 
+  a <b>template makefile/project</b> (see 
+  <tt>${DEVKITPRO}/examples/gba/template</tt>) 
+  where all you need to do is say in which directories the 
+  source/header/data files are kept. The makefiles I use for the advanced 
+  and lab projects are an adaptation of these.
+  </p>
+</li>
+<li>
+  <b>Thumb-code is good</b>. The standard 
+  sections for code (ROM and EWRAM) have 16bit buses. ARM instructions 
+  will clog the bus and can seriously slow down performance. Thumb 
+  instructions fit better here. Thumb code is often smaller too. Note 
+  that because of the 32bit bus of IWRAM, there is no penalty for 
+  ARM code there.
+</li>
+<li>
+  <b>Enabling interworking, optimizations and warnings are good.</b> 
+  Interworking (<tt>-mthumb-interwork</tt>) allows you to use switch 
+  between ARM and Thumb code; you may want this if you have a few 
+  high-performance routines in ARM/IWRAM that you want to call from 
+  ROM code. Optimizations (<tt>-O<i>#</i></tt>) make GCC not be an 
+  idiot when compiling C into machine code (I'm serious: without them 
+  the output is attrociously bad in every way). It produces faster 
+  code, and usually smaller as well. Warnings <tt>-Wall</tt> should 
+  be enabled because you <i>will</i> do stupid things that will 
+  produce compilable output, but won't do what you expected. Warnings 
+  are reminders that something funky may be going on.
+</li>
+<li>
+  <p>
+  <b>32bit variables are good</b>. Every CPU has a 
+	&lsquo;native&rsquo; datatype, also known as the <b>word</b>, or 
+	in C-speak, the <code>int</code>. Generally speaking, the CPU is 
+	better equipped to deal with that datatype than any other. The GBA 
+	is called a 32bit machine because the CPU's native datatype is 
+	32-bit. The instruction sets are optimised for word-sized chunks. 
+	It <i>likes</i> words, so you'd better feed it words unless you 
+	have no other choice.
+  </p> 
+  <p>In a very real way, the 32bit integer is the <i>only</i> datatype 
+	the GBA has. The rest are essentially emulated, which carries 
+	a small performance penatly (2 extra shift instructions for bytes and 
+	halfwords). Do <b>not</b> use <code>u8</code> or
+	<code>u16</code> for loop-indices for example, doing so can cut the 
+	speed of a loop <i>in half</i>! (The belief that using smaller types 
+	means lower memory-use only holds for aggregates and maybe 
+	globals; for local variables it actually <i>costs</i> memory). 
+	Likewise, if you have memory to copy or fill, using words can be 
+	about twice as fast as halfwords. Just be careful when casting, 
+	because an ARM CPU is very picky when it comes to 
+	<a href="bitmaps.htm#ssec-data-align">alignment</a>.
+  </p>  
+</li>
+<li>
+  <b>Data in header files is <i>bad</i>, very bad</b>. I'll go in a 
+  little detail about it when talking about 
+  <a href="bitmaps.htm#ssec-data-hdr">data</a>. And see also 
+  <a href="http://forum.gbadev.org/viewtopic.php?t=2605" target="_blank">here</a> and 
+  <a href="http://forum.gbadev.org/viewtopic.php?t=3687" target="_blank">here</a>.
+</li>
+</ul>
+
+<p>
+Those are points where other GBA tutorials often err. It's not an 
+exclusive list, but the main points are there I think. There are also a 
+few things on (C) programming in general that I'd like to mention here.
+</p>
+
+<ul>
+<li>
+  <b>Know the language; know the system</b>. It should go without 
+  saying that if you're programming in a certain language or on a 
+  certain system, you should know a little (and preferably a lot) about 
+  both. However, I have seen a good deal of code that was problematic 
+  simply because the author apparently didn't know much about either. 
+  As I said in the beginning of this section, the GBA has a few 
+  interesting quirks that you need to know about when programming for 
+  it. That, of course, is what Tonc is all about. Some things stem 
+  from lack of C skills &ndash; the &lsquo;int&rsquo;-thing is an 
+  example of this. Another <i>very</i> common problem is correct 
+  memory and pointer use, something that I will cover a little later 
+  and also in the section on <a href="bitmaps.htm#sec-data">data</a>.
+  With C, you have different kinds of datatypes, pointers, the 
+  preprocessor and bit-operators at your disposal. Learn what they do 
+  and how to use them effectively.
+</li>
+<li>
+  <p>
+  <b>Think first, code later</b>. <i>Don't</i> open up an editor, type 
+  some code and hope it works correctly. It won't. How can it, if you 
+  haven't even defined what &lsquo;correctly&rsquo; means? Think of 
+  what you want to do first, then what you need to get it done and 
+  <i>then</i> try to implement it.
+  </p>
+  <p>
+  A lot of programming (for me anyway) is not done in a text editor at 
+  all. For example, for anything involving math (which can include 
+  graphics as well), it's better to make a diagram of the situation.
+  I have pages of diagrams and equations for the 
+  <a href="affine.htm">affine transformation</a> and 
+  <a href="mode7.htm">mode 7</a>, just to see what what going on. Pen 
+  and paper are your friends here.
+  </p>
+</li>
+<li>
+  <p>
+  <b>Learn to generalize and simplify</b>. This is actually not about 
+  programming, but problem-solving in general. Specific problems are 
+  often special cases of more general problems. For example, 2D math 
+  is a subset of multi-dimensional math; vector analysis and 
+  transformations such as rotations and scaling are parts of linear 
+  algebra. If you know the general solution, you can always (well, 
+  <i>often</i>, at any rate) work down to the specific case. However, 
+  what is often taught (in school, but in universities as well) are the 
+  specific solutions, not the general ones. While using the special 
+  case solutions are often faster in use, they won't work at all if 
+  the case is <i>just</i> a little different than the example in the 
+  book. If you'd learned the general solution &ndash; better yet, 
+  how to arrive at the general solution &ndash; you'd stand a much 
+  better change of solving the task at hand.
+  </p>
+  <p>
+  A related issue is simplification. For example, if you have long 
+  expressions in a set of equations (or algorithms), you can group 
+  them to together under a new name. This means less writing, less 
+  writing and a lower risk of making a mistake somewhere.
+  </p>
+</li>
+<li>
+  <b>Learn basic optimization strategies</b>. By this I don't mean 
+  that you should know every trick in the book, but there are a few 
+  things that you can use in writing code that can speed things up 
+  (sometimes even significantly) without cost to readbility and 
+  maintainability. In fact, sometimes the code actually becomes 
+  easier to read because of it. A few examples:
+  <ul>
+  <li>
+    <b>Use a better algorithm</b>. Okay, so this one may not always be 
+	simple, but it's still very true. 
+  </li>
+  <li>
+    <b>Use ints</b>. The <code>int</code> is loosely defined as the 
+	native datatype. Processors tend to perform better when they deal 
+	with their native datatype.
+  </li>
+  <li>
+    <b>Use temporary variables for common expressions</b>. If you 
+	use a long expression more than a few times, consider dumping it 
+	in a temp. This means less writing for you, and less reading for 
+	everyone. It can also make your code faster because you don't need 
+	to evaluate the entire expression all the time. This is especially 
+	true for global variables, which have to be reloaded after each 
+	function-call because the values may have changed.
+  </li>
+  <li>
+    <b>Use pointers</b>. Pointers have the reputation of being dangerous, 
+	but they're a <i>very</i> powerful tool if used correctly. Pointer 
+	arithmetic is usually faster than indexing because it's closer to 
+	hardware, and by assigning temp pointers to deeply nested structure 
+	expressions (see above), you can gratly reduce the length of 
+	the expressions, which makes things easier on the compiler and the 
+	reader alike.
+  </li>
+  <li>
+    <b>Precalculate.</b> This is related to the previous two points. If 
+	you have a loop in which things don't depend on the loop-variable, 
+	precalculate that part before the loop. Also, to avoid (complex)  
+	calculations, you could dump the data in a 
+	<a href="fixed.htm#sec-lut">Look-up Table</a> and simply grab a 
+	value from there.
+  </li>
+  <li>
+    <b>Avoid branches</b>. Things that redirect program flow (ifs, loops, 
+	switches) generally cost more than other operations such as 
+	arithmetic. Sometimes it's possible to effectively do the branch with 
+	arithmetic (for example, <code>(int)x&gt;&gt;1</code> gives 
+	&minus;1 or 0, depending on the sign of <i>x</i>)
+  </li>
+  </ul>
+  <p>There are many more optimization techniques, of course. 
+  Wikipedia has a nice 
+  <a href="http://en.wikipedia.org/wiki/Optimization_(computer_science)" target="_blank">overview</a>, 
+  and you can find pages discussing particular techniques 
+  <a href="http://www.abarnett.demon.co.uk/tutorial.html" target="_blank">here</a><em>[b0rked]</em> and 
+  <a href="http://linuxgazette.net/issue71/joshi.html" target="_blank">there</a>. Some 
+  of these techniques will be done by the compiler anyway, but not 
+  always.
+  </p>
+</li>
+<li>
+  <b>Learn to optimize <i>later</i></b>. Also known as &ldquo;premature 
+  optimization is the root of all evil&rdquo;. Optimization should be 
+  done in the final stages, when most code is in pace and you can 
+  actually tell where optimization is necessary (if it's necessary at 
+  all). However, this does <i>not</i> mean you should actually strive 
+  for the slowest solution in the early phases. Often there is a cleaner 
+  and/or faster (sometimes even <i>much</i> faster) algorithm then the 
+  trivial one, which will come to you with just a small amount of 
+  thought. This isn't optimization, it's simply a matter of not being 
+  stupid. A few of the points mentioned above fall in this category.
+</li>
+<li>
+  <b>There are always exceptions</b>. There is no programming 
+  guideline that doesn't have its exception. Except maybe this one.
+</li>
+</ul>
+
+<p>
+I'll leave it at that for now. Entire books have been written on how 
+to code efficiently. Resources are available on the well as well: search 
+for things like &ldquo;optimization&rdquo;, 
+&ldquo;coding standards&rdquo; or &ldquo;coding guidelines&rdquo; should 
+give you more than enough. Also look up 
+<a href="http://en.wikipedia.org/wiki/Design_pattern_%28computer_science%29" target="_blank">Design 
+Pattern</a> and 
+<a href="http://en.wikipedia.org/wiki/Anti-pattern" target="_blank">Anti-pattern</a>. 
+Also fun are books and sites that show how <i>not</i> to code. 
+Sometimes these are even more useful. 
+<a href="http://worsethanfailure.com/Default.aspx" target="_blank">Worse than Failure</a> is 
+one of these (in particular the codeSOD category); The programming 
+section of <a href="http://www.rinkworks.com/stupid/cs_programming.shtml" target="_blank">Computer 
+stupidities</a> is also nice. If you want to see why the use of global 
+variables is generally discouraged, do a search for 
+&lsquo;alpha&rsquo; in the latter page.
+
+</p>
+
+<h3 id="ssec-bad-example">3.3.2.
+  A few examples of good/bad practices</h3>
+<p>
+Here are a few examples of code that, while functional, could be 
+improved in terms of speed, amount of code and/or maintainability.
+</p>
+
+<h4>Ints versus non-ints</h4>
+<p>
+Above, I noted that use of non-ints can be problematic. Because this 
+bad habit is particularly common under GBA and NDS code (both homebrew 
+<i>and</i> commercial), I'd like to show you an example of this.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// Force a number into range [min, max&gt;</span>
+<span class="keyw">#define</span> CLAMP(x, min, max)   \
+    ( (x)&gt;=(max) ? ((max)-<span class="num">1</span>) : <!--
+-->( ((x)&lt;(min)) ? (min) : (x) ) )
+
+<span class="cmt">// Change brightness of a palette (kinda) (70)</span>
+<span class="keyw">void</span> pal_brightness(u16 *pal, <span 
+class="rem">u16</span> size, <span class="rem">s8</span> bright)
+{
+    <span class="rem">u16</span> ii;
+    <span class="rem">s8</span> r, g, b;
+
+    <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;size; ii++)
+    {
+        r= (pal[ii]    )&amp;<span class="num">31</span>;
+        g= (pal[ii] &gt;&gt;<span class="num">5</span>)&amp;<span 
+class="num">31</span>;
+        b= (pal[ii]&gt;&gt;<span class="num">10</span>)&amp;<span 
+class="num">31</span>;
+
+        r += bright;    r= CLAMP(r, <span 
+class="num">0</span>, <span class="num">32</span>);
+        g += bright;    g= CLAMP(g, <span 
+class="num">0</span>, <span class="num">32</span>);
+        b += bright;    b= CLAMP(b, <span 
+class="num">0</span>, <span class="num">32</span>);
+
+        pal[ii]= r |(g&lt;&lt;<span class="num">5</span>) | (b&lt;&lt;<span 
+class="num">10</span>);
+    }
+}
+</pre>
+
+<p>
+This routine brightens or darkens a palette by adding a 
+brightness-factor to the color components, each of which is then clamped 
+to the range [0,31&rang; to avoid funky errors. The basic algorithm is 
+sound, even the implementation is, IMHO, pretty good. What isn't good, 
+however is the datatypes used. Using <code>s8</code> and 
+<code>u16</code> here adds an extra shift-pair practically every 
+time any variable is used! The loop itself compiles to 
+about 90 Thumb instructions. In contrast, when using <code>int</code>s 
+for everything except <code>pal</code> the loop is only 45 instructions 
+long. Of course the increase in size means an 
+increase in time as well: the int-only version is 78% faster than the 
+one given above. To repeat that: <b>the code has doubled in size and 
+slowed down by 78% <i>just</i> by using the wrong datatype</b>!
+</p><br>
+<p>
+I'll admit that this example is particularly nasty because there is a 
+lot of arithmetic in it. Most functions would incur a smaller penalty. 
+However, there is no reason for losing that performance in the first 
+place. There is no benefit of using <code>s8</code> and 
+<code>u16</code>; it does not increase redability &ndash; all it does 
+is cause bloat and slow-down. <b>Use 32-bit variables 
+when you can, the others only when you have to</b>.
+</p><br>
+
+<p>
+Now, before this becomes another 
+<a href="http://www.xkcd.com/292/" target="_blank">goto</a> issue, non-ints do have 
+their place. Variables can be divided into two groups: 
+worker variables (things in registers) and memory variables. Local 
+variables and function parameters are worker variables. These should 
+be 32-bit. Items that are in memory (arrays, globals, structs, and 
+what not) could benefit from being as small as possible. Of course, 
+memory variables still have to be loaded into registers before you 
+can do anything with them. An explicit local variable may be useful 
+here, but it depends on the case at hand. 
+</p>
+
+<h4>Pointer problems</h4>
+<p>
+One of the most common mistakes GBA neophytes make is mixing up 
+array/pointer sizes when copying data. 
+<a href="bitmaps.htm#sec-data">Data is data</a>, but you can access it 
+in different ways. For example, here's code that copies bitmap-data 
+from an array into VRAM.
+</p>
+
+<pre class="proglist">
+<span class="cmt">// An array representing a 240x160@16 bitmap, converted 
+// to an array by some graphics conversion tool.</span>
+<span class="keyw">const</span> u8 fooBitmap[<span 
+class="num">240</span>*<span class="num">160</span>*<span class="num">2</span>]= 
+{
+    <span class="cmt">// Maaaaany, many lines of data.</span>
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    <span class="cmt">// Copy 240x160 pixels to VRAM (ORLY?)</span>
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;<span 
+class="num">240</span>*<span class="num">160</span>; ii++)
+        vid_mem[ii]= fooBitmap[ii];
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+The <code>fooBitmap</code> array represents some bitmap. In order to 
+display that bitmap on the screen, you need to copy its data into VRAM. 
+That's simple enough: we have <code>vid_mem</code> from before, and we 
+can copy from <code>fooBitmap</code> to VRAM  by copying elements using 
+a simple for-loop.
+</p>
+<p>
+However, it's not quite as simple as that. <code>vid_mem</code> is 
+an <code>u16</code> array; so defined because in mode 3 each pixel is 
+an 16-bit color. But <code>fooBitmap</code> is a byte-array: <i>two</i> 
+elements of this array represent <i>one</i> color, and copying 
+bytes-to-halfwords leaves the top-byte of each pixel empty, giving 
+a very skewed result. Such a source-destination is incredibly common, 
+partly because people don't know how pointers and arrays represent 
+memory, but also because they don't pay attention to the datatype.
+</p>
+<p>
+Here's a version that would work:
+</p>
+
+<pre class="proglist">
+<span class="cmt">// An array representing a 240x160@16 bitmap, converted 
+// to an array by some graphics conversion tool.</span>
+<span class="keyw">const</span> u8 fooBitmap[<span 
+class="num">240</span>*<span class="num">160</span>*<span class="num">2</span>]= 
+{
+    <span class="cmt">// Maaaaany, many lines of data.</span>
+}
+
+<span class="keyw">int</span> main()
+{
+    REG_DISPCNT= DCNT_MODE3 | DCNT_BG2;
+
+    u16 *src= (u16*)fooBitmap;  <span 
+class="cmt">// Cast source to u16-array</span>
+
+    <span class="cmt">// Copy 240x160 pixels to VRAM (YARLY!)</span>
+    <span class="keyw">int</span> ii;
+    <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;<span 
+class="num">240</span>*<span class="num">160</span>; ii++)
+        vid_mem[ii]= src[ii];
+
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+By ensuring the source and destinations are of the same type, the 
+copying leaves no gaps. Note that the underlying data hasn't changed 
+&ndash; only how it's used. There are actually a lot more things you 
+need to know about how to use data and memory, which will be covered 
+in a later chapter.
+</p>
+
+<h4>Simplification</h4>
+<p>
+Consider the following function (basically taken from the Rinkworks 
+site mentioned earlier):
+</p>
+
+<pre class="proglist">
+<span class="keyw">int</span> foo(<span class="keyw">int</span> x)
+{
+    <span class="keyw">switch</span>(x)
+    {
+    <span class="keyw">case</span> <span class="num">1</span>: <span 
+class="keyw">return</span> <span class="num">1</span>;
+    <span class="keyw">case</span> <span class="num">2</span>: <span 
+class="keyw">return</span> <span class="num">2</span>;
+    <span class="keyw">case</span> <span class="num">3</span>: <span 
+class="keyw">return</span> <span class="num">3</span>;
+    <span class="keyw">case</span> <span class="num">4</span>: <span 
+class="keyw">return</span> <span class="num">4</span>;
+    <span class="keyw">case</span> <span class="num">5</span>: <span 
+class="keyw">return</span> <span class="num">5</span>;
+    <span class="keyw">case</span> <span class="num">6</span>: <span 
+class="keyw">return</span> <span class="num">6</span>;
+    <span class="keyw">case</span> <span class="num">7</span>: <span 
+class="keyw">return</span> <span class="num">7</span>;
+    }
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+What this function does is this: if <i>x</i> is between 1 and 7, 
+return that number, otherwise return 0. The thing to note is that 
+the case-value and the return code are the same, so instead of the 
+switch-block you could have just returned <i>x</i>.
+</p>
+
+<pre class="proglist">
+<span class="keyw">int</span> foo(<span class="keyw">int</span> x)
+{
+    <span class="keyw">if</span>(x &gt;= <span 
+class="num">1</span> &amp;&amp; x &lt;= <span class="num">7</span>)
+        <span class="keyw">return</span> x;
+    <span class="keyw">else</span>
+       <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+Simplifications like this often present themselves if you just think 
+about what you're doing for a little while, rather than just entering 
+code. Now, this would should be rather obvious, but more difficult 
+switch-blocks can often be replaces by something like this as well. 
+For example, if there is a simple mathematical relation between the 
+input and the return value (some addition or multiplication, for 
+example), you can just use that relation. Even if there is not such 
+a simple relation, there can be possibilities. If you're returning 
+constants, you could put those constants in a table and use <i>x</i> 
+as an index.
+</p><br>
+
+<p>
+The above is a simplification in terms of the algorithm used. Another 
+kind of simplification is in readability. Of course, everybody has 
+their own ideas about what's readable. Personally, I prefer to keep 
+my statements short, especially in the place where the action happens.
+The next function is an example of bounding circle collision 
+detection. Basically, you have two circles at points 
+<b>p</b><sub>1</sub>&nbsp;=&nbsp;(<i>x</i><sub>1</sub>,&nbsp;<i>y</i><sub>1</sub>) 
+and 
+<b>p</b><sub>2</sub>&nbsp;=&nbsp;(<i>x</i><sub>2</sub>,&nbsp;<i>y</i><sub>2</sub>) 
+and radii <i>r</i><sub>1</sub> and <i>r</i><sub>2</sub>. 
+The distance between these two points can be calculated with the 
+<a href="http://en.wikipedia.org/wiki/Pythagorean_theorem" target="_blank">Pythagorean
+theorem</a>. If this distance is smaller than the sum of the 
+two radii, the circles overlap. A function that checks whether the 
+player sprite hits any of the enemy sprites could look something 
+like this:
+</p>
+
+
+<pre class="proglist">
+<span class="cmt">// Some basic structs and a sprite array.
+// #defines for sprite-indices and amounts omitted.</span>
+<span class="keyw">typedef</span> <span class="keyw">struct</span> { <span 
+class="keyw">int</span> x, y; } POINT;
+
+<span class="keyw">typedef</span> <span class="keyw">struct</span>
+{
+    POINT position;
+    <span class="keyw">int</span> radius;
+} TSprite;
+
+TSprite gSprites[SPRITE_MAX];
+
+<span class="cmt">// Collision function.</span>
+
+<span class="keyw">int</span> player_collision()
+{
+    <span class="keyw">int</span> ii;
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;ENEMY_MAX; ii++)
+    {
+        <span class="cmt">// Test for hit between player and enemy ii</span>
+        <span 
+class="keyw">if</span>( (gSprites[ENEMY_ID+ii].position.x - <!--
+-->gSprites[PLAYER_ID].position.x) *
+            (gSprites[ENEMY_ID+ii].position.x - gSprites[PLAYER_ID].position.x) +
+            (gSprites[ENEMY_ID+ii].position.y - gSprites[PLAYER_ID].position.y) *
+            (gSprites[ENEMY_ID+ii].position.y - gSprites[PLAYER_ID].position.y) &lt; 
+            (gSprites[ENEMY_ID+ii].radius + gSprites[PLAYER_ID].radius) *
+            (gSprites[ENEMY_ID+ii].radius + gSprites[PLAYER_ID].radius) )
+        {
+            <span class="keyw">return</span> <span class="num">1</span>;
+        }
+    }
+
+    <span class="cmt">// Not hit</span>
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+Personally, I have a hard time reading what actually goes on 
+inside the if-statement there. Because the expression is 6 lines long, 
+I actually have to sit down and parse what it actually does, and hope 
+that the parentheses are all correct, etc. Now, note that a number of 
+things are used multiple times here: the <code>gSprites</code> 
+accesses (6&times; for the player, 6&times; for the enemy) and then 
+the positions as well. These can all be accessed with less code by 
+using pointers and other local variables. Also, the player's attributes 
+are <a href="http://en.wikipedia.org/wiki/Loop-invariant_code_motion" target="_blank">
+loop invariant</a> (they don't change during the loop), so they can be
+loaded outside the loop.
+</p>
+
+<pre class="proglist">
+<span class="keyw">int</span> player_collision()
+{
+    <span class="keyw">int</span> ii; 
+    <span class="keyw">int</span> r1= gSprites[PLAYER_ID].radius, r2, dx, dy;
+    POINT *pt1= &amp;gSprites[PLAYER_ID].position, *pt2;
+    TSprite *enemy= &amp;gSprites[ENEMY_ID];
+
+    <span class="keyw">for</span>(ii=<span 
+class="num">0</span>; ii&lt;ENEMY_MAX; ii++)
+    {
+        r2= enemy[ii].radius;
+        pt2= &amp;enemy[ii].position;
+        dx= pt2-&gt;x - pt1-&gt;x;
+        dy= pt2-&gt;y - pt1-&gt;y;
+        
+        <span class="cmt">// Test for hit between player and enemy ii</span>
+        <span class="keyw">if</span>( dx*dx + dy*dy &lt; (r1+r2)*(r1+r2) )
+            <span class="keyw">return</span> <span class="num">1</span>;
+    }
+
+    <span class="cmt">// Not hit</span>
+    <span class="keyw">return</span> <span class="num">0</span>;
+}
+</pre>
+
+<p>
+There may not have been a real change in the number of lines, but the lines themselves are 
+shorter and easier to read. Also, instead of a 6-line <code>if</code>-expression, it now fits 
+on a single line and you can actually see what it does. Personally, I'd call that a win. 
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-testing">3.4.
+  Testing your code on a real GBA</h2>
+<p>
+If you're just starting GBA programming, chances are you're using 
+the emulators that are out there, and will be content with those.
+However, if you look through the forums you'll see many people 
+urging you to test on hardware regularly. They are absolutely right.
+</p>
+<p>
+Now, it isn't that the emulators are bad. On the contrary, in fact;
+the most popular emulators have things like tile, map and memory 
+viewers that are essential to debugging. An emulator like VBA is very, 
+very good, but not quite perfect. Take the Tonc demos, for example: 
+they run the same on VBA as on a real GBA in all cases ... mostly.
+For one thing, timing is a real issue on most of them (the exception 
+here is no$gba, which I've never seen off the mark by more than 2%, 
+usually a lot less). Also, in a few rare occasions (like in 
+<a href="regbg.htm#sec-demo"><tt>cbb_demo</tt></a> and 
+<a href="gfx.htm#sec-win"><tt>win_demo</tt></a>) there were small but
+important differences between GBA and emulator outputs, and if you've
+never tested on the real thing, you'd never know. 
+</p>
+<p>
+One other thing that is very different is the colors. Since it's
+not back-lit the GBA screen is much darker than a PC monitor.
+Or maybe that's just my room <code>;)</code>. Also, on an emulator
+you have the luxury of scaling your view; the real GBA is always 
+3&quot; screen. There's world of difference, trust me on this. Take 
+that <tt>first.gba</tt> example I showed above: the pixels are so 
+tiny it's almost impossible to see on a real GBA! Even an 8x8 tile 
+is pretty small. Also, the use of a keyboard in an emu is 
+<i>nothing</i> like holding a real GBA in your hands.
+</p><br>
+
+<p>
+And, of course, the whole idea of creating something that works on a 
+console has an air of coolness that defies description. Well, almost 
+anyway. The word is <a href="http://www.catb.org/~esr/jargon/html/P/progasm.html" target="_blank">
+progasm</a>. Says it all really, doesn't it?
+</p>
+
+<h3 id="ssec-testing-hw">3.4.1.
+  Multiboot &amp; linkers</h3>
+<p>
+OK, so now you know you should test on hardware, how do you do it?
+After all, you can't exactly plug a GBA into your PC like a USB
+memory stick or a printer? Well, yes you can ... with the right
+equipment. The two most common ways are a <dfn>multiboot cable</dfn>
+or a <dfn>flash linker</dfn>.
+</p>
+
+<h4>Flash Card &amp; Linker</h4>
+<p>
+A flash card is a GBA cart with a difference: it is completely 
+rewritable. There are a number of different sets available: 
+different sized carts (64Mbit to 1024Mbit), USB or Parallel port 
+versions; sets that use a separate linker (where you have to take 
+the cart out of the GBA, write to it, and reinsert) or ones that 
+write directly to the cart or transfer through the multiboot port.
+Ideally you'd use one of these. However, they can be rather pricy 
+($60 - $200 (and up?)) and generally only available through online 
+stores, which also means shipping and taxes and such.
+</p>
+
+<h4>Multimedia cards</h4>
+<p>
+A solution that's becoming more and more popular is using standard 
+multimedia cards (eg. SD, CompactFlash) and an adapter like 
+<a href="http://www.gbamovie.com/" target="_blank">GBAMP</a> and 
+<a href="http://eng.supercard.cn" target="_blank">SuperCard</a>. Memory cards can be 
+very cheap (like $10) and bought in most electronics stores; the 
+adapters are genereally $25 and up.
+</p>
+
+<div class="note" id="nt-supercard">
+<div class="nhcare">Supercard vs waitstates.</div>
+<p>
+There is one small technicaly problem with Supercards: they use slow 
+memory that doesn't support what 3/1 ROM waitstates. This is a faster 
+setting than the default 4/2 and anything that uses the former simply 
+won't run. This shouldn't be a problem with most homebrew things, but 
+a handful of binaries will fail and you wouldn't be able to make use 
+of the speed-up yourself either.
+</p>
+</div>
+
+<h4>Multiboot cable</h4>
+<p>
+The other way is a multiboot cable. This is a cable that plugs into 
+the GBA multiboot port (like multiplayer games do) and one of the PC 
+ports, usually the parallel port. These are a lot cheaper than 
+a flash kit. You can even build one yourself <kbd>:)</kbd>! You can 
+find the instructions and necessary software to build an
+Xboo communication cable on <a 
+href="http://www.devkitpro.org">www.devkitpro.org</a>, which works 
+like a charm. Basically all you need to do is connect one end of the 
+link cable to a male parallel port cable. If you shop around you 
+should be able to get all you need for as little as $5.
+</p>
+<p>
+But, like always, there's no such thing as a free lunch. What
+happens in a multiboot game is that the code is written to EWRAM. That's
+how you can use one cart in a multiplayer game. The multiboot cable
+is the same thing, only with the PC as the host. The trouble is that 
+EWRAM is only 256kb in size; you won't be able to fit an entire game 
+on it. And, of course, it runs always through your computer, so unless 
+you have a laptop, forget about taking it outside to show off to your 
+friends.
+</p>
+
+<div class="cblock">
+<table>
+<tbody valign="top">
+<tr>
+<td>
+<div class="cpt" style="width:192px;">
+  <img src="../img/hardware/efa.jpg" id="img-efa" 
+    alt="" width=192><br>
+  <b>Fig 3.2</b>: efa flash card.
+</div>
+<td>
+<div class="cpt" style="width:192px;">
+  <img src="../img/hardware/sc.jpg" id="img-sc" 
+    alt="" width=192><br>
+  <b>Fig 3.3</b>: SuperCard, compact flash version.
+</div>
+<td>
+<div class="cpt" style="width:224px;">
+  <img src="../img/hardware/xboo.jpg" id="img-xboo" 
+    alt="" width=224><br>
+  <b>Fig 3.4</b>: xboo multiboot cable.
+</div>
+</tbody>
+</table>
+</div>
+
+
+<h3 id="ssec-testing-hwbuild">3.4.2.
+  Compiling for real hardware</h3>
+<p>
+This is almost the same as for emulators. The only real things you
+have to worry about are a) that you can only use the binary after 
+the <tt>objcopy</tt> treatment, and b) that you need to have a valid 
+GBA header, which it usually doesn't. If the intro screen shows 
+&ldquo;GameBoy&rdquo; as normal, but the &ldquo;Nintendo&rdquo; at the 
+bottom is garbled, you have a bad header. To get a valid header, use 
+a program called <tt>gbafix.exe</tt>. This is originally by 
+<a href="http://darkfader.net/main/" target="_blank">darkfader</a>, but you can also 
+find it at <a href="http://www.devkitpro.org" target="_blank">www.devkitpro.org</a>. I already 
+mentioned the extra steps for a multiboot game earlier.
+</p>
+<p>
+Flash kits usually come with software that can take care of all this
+stuff for you (or so I'm told, I don't have one). The Xboo zip-file
+also has a little app that sends your binary to the GBA.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Mar 28, 2013</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="setup.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="video.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Set-up</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Video intro</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+

@@ -1,0 +1,1254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="generator" content="Context">
+  <meta name="Author" content="Cearn">
+  <meta name="Created" content="20030329">
+  <meta name="Modified" content="20130324">
+
+  <title>Tonc: Vectors &amp; Matrices</title>
+  <link rel="stylesheet" type="text/css" href="tonc.css">
+  <script type="text/javascript" src="tonc.js"></script>
+</head>
+<body onload="main();">
+
+<!--567890123456789012345678901234567890123456789012345678901234567-->
+
+<!-- [[header]] -->
+<table class="header">
+<tr>
+  <td class="hdr_l"><a href="fixed.htm">Fixed point math</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="makefile.htm">Makefiles</a></td>
+</tr>
+</table>
+<!-- [[/header]] -->
+<hr>
+
+<h1 id="ch-">C.
+  Vectors and Matrices</h1>
+
+<!-- [[toc]] -->
+<ul>
+  <li><a href="#sec-vec">Vectors</a>.
+  <li><a href="#sec-vec-ops">Vector operations</a>.
+  <li><a href="#sec-mat">Matrices</a>.
+  <li><a href="#sec-mat-ops">Matrix operations</a>.
+  <li><a href="#sec-space">Spaces, bases, coordinate transformations</a>
+</ul>
+<!-- [[/toc]] -->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-vec">C.1.
+  Vectors</h2>
+<p>
+Before I go into what a vector is, I'll first tell you what it isn't. 
+Generally, you divided physical quantities into <dfn>scalars</dfn> 
+and <dfn>vectors</dfn>. A <dfn>scalar</dfn> gives the magnitude of a 
+quantity. It's a single number, like the ones you use every day. Mass, 
+energy and volume are examples of scalars. A <dfn>vector</dfn> is
+something with both a magnitude <i>and</i> direction, and is usually 
+represented by multiple numbers: one for every dimension. Position, 
+momentum and force are prime examples. Also, note that velocity is a 
+vector, while speed is not. 50 kph is not a vector. 50 kph down 
+Highway&nbsp;60 is. The notation of a vector is as a bold character, 
+usually lowercase, and either as a set of numbers enclosed by 
+parentheses, <b>u</b>&nbsp;=&nbsp;(1,&nbsp;4,&nbsp;9), or as an 
+M&times;1 column. And yes, I do mean a column, not a row; we'll see why 
+when we get to matrices.
+</p>
+
+<table id="eq-vec-def">
+<tr>
+  <td class="eqnrcell">(C.1)
+  <td class="eqcell"> <b>u</b> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td><i>u</i><sub>1</sub>
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> <b>:</b>
+  <tr>
+    <td><i>u</i><sub>m</sub>
+  </tbody>
+  </table>
+  <td class="eqcell">
+    &nbsp;&equiv;&nbsp; 
+	  <big>(</big>
+	  <i>u</i><sub>1</sub> , &hellip; , <i>u</i><sub>m</sub>
+	  <big>)</big>
+    &nbsp;&ne;&nbsp;
+	  <big>[</big>
+	  <i>u</i><sub>1</sub>  &hellip;  <i>u</i><sub>m</sub>
+	  <big>]</big>
+</table>
+
+<div class="cpt_fr" style="width:128px">
+  <img src="../img/math/crd_vec.png" id="img-vec"
+    alt="vectors and points"><br>
+  <b>Fig C.1</b>: the difference between 
+  vectors and points.
+</div>
+
+<p>
+If you have a coordinate system, vectors are usually used to represent 
+a spatial point in that system, with vectors' elements as the 
+coordinates. However, there is a crucial difference between points and
+vectors. Points are always related to an origin, while vectors can 
+are independent of any origin. Fig C.1 on the right 
+illustrates this. 
+You have points <i>P</i> and <i>Q</i>, and vectors <b>u, v, w</b>. 
+Vectors <b>u</b> and <b>v</b> are equal (they have equal lengths and
+directions). However, while <b>u</b> and the point it points to 
+(<i>P</i>) have the same coordinates, this isn't true for <b>v</b> and 
+<i>Q</i>. In fact, 
+<i>Q</i> = <b>u</b>&nbsp;+&nbsp;<b>w</b>. And, to be 
+even more precise, 
+<i>Q</i> = <i>O</i>&nbsp;+&nbsp;<b>u</b>&nbsp;+&nbsp;<b>w</b>, which explicitly 
+states the origin (<i>O</i>) in the equation.
+</p>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-vec-ops">C.2.
+  Vector operations</h2>
+
+<p>
+Vector operations are similar to scalar operations, but the 
+multi-dimensionality does add some complications, especially in the 
+case of multiplications. Note that there are no less
+than <i>three</i> ways of vector-multiplication, so pay attention.
+On the right you can see examples of vector addition and scalar-vector
+multiplication. <b>u</b>= (8,&nbsp;3), <b>v</b>= (-4&nbsp;,4). With the 
+definitions of the operations given below, you should be able to find 
+the other vectors.
+</p>
+
+<h3 id="ssec-vec-add">C.2.1.
+  Vector-vector addition and subtraction</h3>
+
+<div class="cpt_fr" style="width:160px">
+<img src="../img/math/crd_vec_ops.png" id="img-vec-ops"
+  alt="vector ops"><br>
+<b>Fig C.2</b>: vector addition and 
+scalar-vector multiplication.
+</div>
+
+<p>
+When it comes to addition and subtraction, both operands must be 
+M-dimensional vectors. The result is another vector, also M-dimensional, 
+which elements are the sum or difference of the operands' elements: 
+with <b>w = u + v</b> we have 
+<i>w</i><sub>i</sub> = <i>u</i><sub>i</sub> + <i>v</i><sub>i</sub>.
+</p>
+
+<table id="eq-vec-add">
+<tr>
+  <td class="eqnrcell">(2)
+  <td class="eqcell"> 
+    <b>w</b> &nbsp;=&nbsp; <b>u</b> + <b>v</b> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td><i>u</i><sub>1</sub> + <i>v</i><sub>1</sub>
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> <b>:</b>
+  <tr>
+    <td><i>u</i><sub>m</sub> + <i>v</i><sub>m</sub>
+  </tbody>
+  </table>
+</table>
+
+<h3 id="ssec-vec-scale">C.2.2.
+  Scalar-vector multiplication</h3>
+<p>
+This is the first of the vector multiplications. If you have a
+scalar <i>a</i> and a vector <b>u</b>, the elements of resultant vector 
+after scalar-vector multiplication are the original elements, each 
+multiplied with the scalar. So if <b>v</b> = <i>c</i> <b>u</b>, then 
+<i>v</i><sub>i</sub>= <i>c*u</i><sub>i</sub>. Note that <b>u</b> and
+<b>v</b> lie on the same line &ndash; only the length is different. Also, 
+note that subtraction can also be written as 
+<b>w</b> = <b>u</b>&nbsp;&minus;&nbsp;<b>v</b> = 
+<b>u</b>&nbsp;+&nbsp;(&minus;1)*<b>v</b>.
+</p>
+
+<table id="eq-vec-scale">
+<tr>
+  <td class="eqnrcell">(C.3)
+  <td class="eqcell"> 
+    <b>v</b> &nbsp;=&nbsp; <i>c</i><b>u</b> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td><i>c&middot;u</i><sub>1</sub>
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> <b>:</b>
+  <tr>
+    <td><i>c&middot;u</i><sub>m</sub>
+  </tbody>
+  </table>
+</table>
+
+<h3 id="ssec-vec-dot">C.2.3.
+  The dot-product (aka scalar product)</h3>
+<p>
+The second vector-multiplication is the dot-product, which has two
+vectors as input, but a <i>scalar</i> as its output. The notation 
+for this is <i>c</i> = <b>u&nbsp;·&nbsp;v</b>, where <b>u</b> and 
+<b>v</b> are vectors and <i>c</i> is the resultant scalar. Note the 
+operator is in the form of a dot, which gives this type of 
+multiplication its name. To do the dot-product, multiply the elements 
+of both vectors piecewise and add them all together. In other words:
+</p>
+
+<table id="eq-vec-dot">
+<tr><td class="eqnrcell">(C.4)
+  <td class="eqcell">
+  <i>c</i> = 
+  <b>u · v</b> = <big>&Sigma;</big> 
+    <i>u</i><sub>i</sub>·<i>v</i><sub>i</sub>
+  = <i>u</i><sub>1</sub>·<i>v</i><sub>1</sub> + &hellip; + 
+    <i>u</i><sub>m</sub>·<i>v</i><sub>m</sub>
+</table>
+
+<p>
+Now, this may seem like a silly operation to have, but it's actually 
+very useful. For one thing, the length of the vector is calculated via 
+a dot-product with itself. But you can also find the projection of one 
+vector onto another with the dot-product, which is invaluable when you 
+try to decompose vectors in terms of other vectors or determine the
+base-vectors of an M-dimensional space (do what to the whaaat?!? Don't 
+worry, I'll explain later). One of the most common uses of the dot-product
+is finding the angle between two vectors. If you have vectors <b>u</b> 
+and <b>v</b>, |<b>u</b>| and |<b>v</b>| their lengths and &alpha; 
+the angle between the two, the cosine can be found via
+</p>
+
+<div class="cpt_fr" style="width:112px">
+<img src="../img/math/crd_dot.png" id="img-vec-dot"
+  alt="dot-product"><br>
+<b>Fig C.3</b>: dot product.
+</div>
+
+<table id="eq-vec-cos">
+<tr>
+  <td class="eqnrcell">(C.5)
+  <td class="eqcell"> 
+    cos(&alpha;) &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB"><b>u &middot; v</b>
+  <tr>
+    <td> |<b>u</b>| |<b>v</b>|
+  </tbody>
+  </table>
+</table>
+
+<p>
+Why does this work? Well, you can prove it in a number of ways, but 
+here's is the most elegant (thanks Ash for reminding me). Remember that
+the square of the length of a vector is given by the dot-product with 
+itself. This means that 
+|<b>v&minus;u</b>|<sup>2</sup> =
+  |<b>v</b>|<sup>2</sup> + |<b>u</b>|<sup>2</sup> &minus;
+  2&middot;<b>u·v</b>.
+From the cosine rule for the triangle in 
+fig&nbsp;C.3, we also have 
+|<b>v&minus;u</b>|<sup>2</sup> =
+  |<b>v</b>|<sup>2</sup>&nbsp;+&nbsp;|<b>u</b>|<sup>2</sup> &minus;
+  2&middot;|<b>v</b>|&middot;|<b>u</b>|&nbsp;cos(&alpha;).
+Combined, these relations immediately result in 
+eq&nbsp;C.5. And people say math is hard.
+</p><br>
+
+<!--Well, if you divide a vector by its length
+(like <b>u</b>/|<b>u</b>|), you get a unit vector. The points of all unit
+vectors lie on the unit-circle, by definition. If you place the
+<i>x</i>-axis of your coordinate system along one of the vectors (since 
+the dot-product gives a scalar, thus invariant under rotation, doing this
+is allowed), the other one will make an angle with it. In this case, the 
+dot-product is simply the <i>x</i>-component of that vector, which 
+is the very definition of the cosine. And people say math is hard. 
+-->
+
+<p>
+By the way, not only can you find the angle with this, but it also 
+provides a very simply way to see if something's behind you
+or not. If <b>u</b> is the looking-direction and <b>v</b>
+the vector to an object, <b>u · v</b> is negative if the angle 
+is more than 90&deg;. It's also useful for field-of-view checking, and
+to see if vectors are perpendicular, as 
+<b>u&nbsp;·&nbsp;v</b>&nbsp;=&nbsp;0. You also 
+find the dot-product by the truck-load in physics when yo do things
+like force decomposition, and path-integrals over force to find the 
+potential energy. Basically, every time you find a cosine in an 
+equation in physics, it's probably the result of a dot-product.
+</p>
+
+<h3 id="ssec-vec-cross">C.2.4.
+  The cross-product (aka vector-product)</h3>
+<p>
+The cross product is a special kind of product that only works 
+in 3D space. The cross-product takes two vectors <b>u</b>
+and <b>v</b> and gives the vector perpendicular to both, <b>w</b>,
+as a result. The length of <b>w</b> is the area spanned by the 
+two operand vectors. The notation for it is this: <b>w</b> = 
+<b>u</b> &times; <b>v</b>, which is why it's called the 
+cross-product. The elements of <b>w</b> are <i>w</i><sub>i</sub>=
+ <i>&epsilon;</i><sub>ijk</sub>·<i>u</i><sub>j</sub>·
+<i>v</i><sub>k</sub>, where <i>&epsilon;</i><sub>ijk</sub> is the
+Levi-Cevita symbol ( +1 for even permutations of <i>i,j,k</i>, 
+&minus;1 for odd permutations, and 0 if any of the indices are equal).
+Since you've probably never even seen this thing (for your sanity, 
+keep it that way), it's written down in full in 
+eq&nbsp;C.4.
+</p>
+
+<div class="cpt_fr" style="width:176px">
+<img src="../img/math/crd_cross.png" id="img-vec-cross"
+  alt="cross product"><br>
+<b>Fig C.4</b>: cross product.
+</div>
+
+<table id="eq-vec-cross">
+<tr>
+  <td class="eqnrcell">(C.6)
+  <td class="eqcell"> 
+    <b>w</b> &nbsp;=&nbsp; <b>u</b> &times; <b>v</b> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td><i>u</i><sub>y</sub><i>v</i><sub>z</sub> &minus; 
+      <i>u</i><sub>z</sub><i>v</i><sub>y</sub>
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td><i>u</i><sub>z</sub><i>v</i><sub>x</sub> &minus;
+      <i>u</i><sub>x</sub><i>v</i><sub>z</sub>
+  <tr>
+    <td><i>u</i><sub>x</sub><i>v</i><sub>y</sub> &minus;
+      <i>u</i><sub>y</sub><i>v</i><sub>x</sub>
+  </tbody>
+  </table>
+</table>
+
+
+<p>
+In fig&nbsp;C.4 you can see a picture of 
+what the cross-product does; it's a 3D picture, so you have to use 
+your imagination a bit. Vectors <b>u</b> and <b>v</b> define a 
+parallelogram (in yellow). The cross-product vector <b>w</b> 
+is perpendicular to both of these, a fact that follows from 
+<b>u·w</b> and <b>v·w</b>. The length of <b>w</b> is the 
+area of this parallelogram, <i>A</i> and if you remember 
+your area-calculations, you'll realize that
+</p>
+
+<table id="eq-vec-sin">
+<tr>
+  <td class="eqnrcell">(C.7)
+  <td class="eqcell">
+    <i>A</i> = |<b>u &times; v</b>| = |<b>u</b>|·|<b>v</b>|·sin &alpha; ,
+</table>
+
+<p>
+meaning that you can find the sine of the angle between two vectors 
+with the cross-product. Note that the cross-product is that it is 
+<i>anti</i>-commutative! That means that <b>u &times; v</b> = 
+&minus;<b>v &times; u</b>. Notice the minus sign? This actually brings up
+a good point: the plane defined by <b>u</b> and <b>v</b>, the 
+normal vector to this plane is pointing up; but how do you determine
+what &lsquo;up&rsquo; is? What I usually do is take a normal 3D
+coord-system (like the one in the lower-right part of 
+fig&nbsp;C.4), put
+the <i>x</i>-axis on <b>u</b>, rotate till the <i>y</i>-axis is along
+<b>v</b> (or closest to it), and then <b>w</b> will be along the 
+<i>z</i>-axis. Eq C.6 has all of this sorted 
+out already. I do need a right-handed system for this, though, a 
+left-handed one messes up my mind so bad.
+</p>
+
+<p>
+Now, when the vectors are parallel, 
+<b>u</b> &times; <b>v</b> = 0, which means that <b>w</b> is the 
+null-vector <b>0</b>. It also means that if <b>u</b> is your view
+direction, the object with vector <b>v</b> is dead-center in your 
+sights. However, if <b>u</b> is the velocity of a rocket and 
+<b>v</b> is the relative vector to <i>you</i>, prepare to respawn.
+Basically, whereas the dot-product tells you whether an object is 
+in front or behind (along the tangent), the cross-product gives 
+you the offset from center (the normal). Very useful if you ever want 
+to implement something like red shells (and by that I mean the 
+<i>original</i> SMK red shells, not the wussy instant-homing shells 
+in the later Mario Karts, booo!!). The cross-product also appears 
+abundantly in physics in things like angular momentum 
+(<b>L = r&nbsp;&times;&nbsp;p</b>) and magnetic induction.
+</p><br>
+
+<p>
+That was the 3D case, but the cross-product is also useful for 2D. 
+Everything works exactly the same, except that you only need the 
+<i>z</i>-component of <b>w</b>.
+</p>
+
+<h3 id="ssec-vec-norm">C.2.5.
+  The norm (or length)</h3>
+<p>
+I've used this already a couple of times but never actually defined 
+what the length of a vector is. The norm of vector <b>u</b> is 
+defined as the square root of the dot-product with itself, see 
+eq&nbsp;C.8. 
+The age-old Pythagorean Theorem is just the special case for 2D.
+</p>
+<p>
+The length or norm of a vector is a useful thing to have around. 
+Actually, you often start with the length and use the sine and 
+cosine to decompose the vector in <i>x</i> and <i>y</i> components. 
+A good example of this is the speed. One other thing where the 
+length plays a role is in the creation of <dfn>unit-vectors</dfn>, 
+which have length 1. Many calculations require the length 
+in some way, but if that's one, you won't have to worry about that 
+anymore. To create a normal vector, simply define it by its 
+length: <b>&ucirc;</b> = <b>u</b>&nbsp;/&nbsp;|<b>u</b>}.
+</p>
+
+<table id="eq-vec-norm">
+<tr>
+  <td class="eqnrcell">(C.8)
+  <td class="eqcell">
+    |<b>u</b>| &nbsp;&equiv;&nbsp; 
+	<big>&radic;(</big><b>u &middot; u</b><big>)</big> &nbsp;=&nbsp;
+    <big>(&Sigma;</big> 
+	  <i>u</i><sub>i</sub>&sup2;
+	<big>)<sup>&frac12;</sup></big>
+</table>
+
+<h3 id="ssec-vec-props">C.2.6.
+  Algebraic properties of vectors</h3>
+<p>
+What follows is a list of algebraic properties of vectors. Most will 
+seem obvious, but you need to see them at least once. Take directly 
+from my linear algebra textbook: let <b>u, v, w</b> be
+M-dimensional vectors and <i>c</i> and <i>d</i> scalars, then:
+</p>
+
+<div class="lblock">
+<table>
+<tr><td><b>u + v = v + u</b> <td width=16><td>Commutativity
+<tr><td><b>(u + v) + w = u + (v + w)</b> <td><td>Associativity
+<tr><td><b>u + 0 = 0 + u = u</b>
+<tr><td><b>u + (&minus;u) = &minus;u + u = 0</b> 
+  <td><td>where &minus;<b>u</b> denotes (&minus;1)<b>u</b>
+<tr><td>c·(<b>u + v</b>) = c·<b>u</b> + c·<b>v</b> <td><td>Distributivity
+<tr><td>(c + d)·<b>u</b> = c·<b>u</b> d·<b>u</b>	<td><td>Distributivity
+<tr><td>c·(d·<b>u</b>) = (c·d)·<b>u</b>				<td><td>Associativity
+<tr><td>1·<b>u</b> = <b>u</b>
+</table>
+</div>
+
+<p class="ni"
+>And on the products:
+</p>
+
+<div class="lblock">
+<table>
+<tr><td><b>u · (v + w) = (u + v) · w</b> <td width=16><td>
+<tr><td><b>u ·</b> (c·<b>v</b>) = (c·<b>u</b>)<b> · v</b> = c·(<b>u · v</b>)
+<tr><td>&nbsp;
+<tr><td><b>u &times; v</b> = &minus;(<b>u &times; v</b>)
+  <td><td>Anti-commutativity
+<tr><td><b>u</b> &times; (<b>v + w</b>) = <b>u &times; v + u &times; w</b>
+<tr><td>(<b>u + v</b>) &times; <b>w</b> = <b>u &times; w + v &times; w</b>
+<tr><td><b>u</b> &times; (c·<b>v</b>) = c·<b>u &times; v</b> = 
+   (c·<b>u</b>) &times; <b>v</b>
+<tr><td>&nbsp;
+<tr><td><b>u ·</b> (<b>u &times; v</b>) = 0
+<tr><td><b>u ·</b> (<b>v &times; w</b>) = (<b>u &times; v</b>) <b>· w</b>
+  <td><td>Triple scalar product, gives the volume of parallelepiped
+  defined by <b>u, v, w</b>.
+<tr><td><b>u</b> &times; (<b>v &times; w</b>) = 
+  <b>u</b>(<b>v · w</b>) &minus; <b>w</b>(<b>u · v</b>) <td><td>Triple
+  vector product
+</table>
+</div>
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-mat">C.3.
+  Matrices</h2>
+<p>
+In a nutshell, a matrix is a 2-dimensional grid of numbers. They were 
+initially used as shorthand to solve a system of linear equations. 
+For example, the system using variables <i>x, y, z</i>:
+</p>
+
+<table id="eq-eqset">
+<tr>
+  <td class="eqnrcell">(C.9a)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="right">
+  <tr>
+    <td>  <i>x</i> <td>&minus; <td>2<i>y</i> <td>+ <td>  <i>z</i> 
+	<td>= <td>0
+  <tr>
+    <td>&nbsp;     <td>  <td>2<i>y</i> <td>&minus; <td> 8<i>z</i>
+	<td>= <td>8
+  <tr>
+    <td>&minus;4<i>x</i> <td>+ <td>5<i>y</i> <td>+ <td> 9<i>z</i>
+	<td>= <td>&minus;9
+
+  </tbody>
+  </table>
+</table>
+
+<p>
+can be written down more succinctly using matrices as: 
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">(C.9b)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="right">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td> 1 <td>&nbsp; <td> &minus;2 <td>&nbsp; <td> 1
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> 0 <td>&nbsp; <td> 2 <td>&nbsp; <td> &minus;8
+  <tr>
+    <td> &minus;4 <td>&nbsp; <td> 5 <td>&nbsp; <td> 9
+  </tbody>
+  </table>
+  <td width=64 align="center">or
+  <td class="eqnrcell">(9c)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="right">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td> 1 <td>&nbsp; <td> &minus;2 <td>&nbsp; <td> 1 
+	<td>&nbsp; <td> 0
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> 0 <td>&nbsp; <td> 2 <td>&nbsp; <td> &minus;8 
+	<td>&nbsp; <td> 8
+  <tr>
+    <td> &minus;4 <td>&nbsp; <td> 5 <td>&nbsp; <td> 9
+	<td>&nbsp; <td> &minus;9
+  </tbody>
+  </table>
+</table>
+
+<p>
+Eq C.9b is called the 
+<dfn>coefficient matrix</dfn>, in which only the coefficients of the 
+variables are written down. The <dfn>augmented matrix</dfn> 
+(eq&nbsp;C.9c) also contains the right-hand side 
+of the system of equations. Note that the variables themselves are 
+nowhere in sight, which is more or less the point. Mathematicians 
+are the laziest persons in the world, and if there's a shorthand 
+to be exploited, they will use it. If there isn't, they'll make 
+one up.
+</p>
+<p>
+Anyway, a matrix can be divided into <dfn>rows</dfn>, which run 
+horizontally, or <dfn>columns</dfn>, which run vertically. A matrix is 
+indicated by its size: an M&times;N matrix has M rows and N
+columns. Note that the number of rows comes first; this in contrast
+to image sizes, where width is usually given first. Yeah I know, that
+sucks, but there's not a lot I can do about that. The coefficient
+matrix of eq&nbsp;C.9b is a 3x3 matrix, and the 
+augmented matrix of eq&nbsp;C.9c is 3x4. The whole 
+matrix itself is usually indicated by a bold, capital; the columns 
+of a matrix are simply vectors (which were M&times;1 columns, 
+remember?) and will be denoted as such, with a single index for 
+the column-number; the <dfn>elements</dfn> of the 
+matrix will be indicated by a lowercase (italic) letter with a 
+double index.
+</p>
+
+<table id="eq-mat-def">
+<tr>
+  <td class="eqnrcell">(C.10)
+  <td class="eqcell">
+    <b>A</b> &nbsp;=&nbsp;
+	<big>[</big> 
+	  <b>a</b><sub>1</sub> <b>&hellip; a</b><sub>n</sub>
+	<big>]</big> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="right">
+  <tr>
+    <td class="bdrLL" rowspan=3>&nbsp;
+    <td> <i>a</i><sub>11</sub> <td>&nbsp;
+	<td> <b>&hellip;</b> <td>&nbsp;
+	<td> <i>a</i><sub>1n</sub>
+    <td class="bdrRR" rowspan=3>&nbsp;
+  <tr>
+    <td> <b>:</b> <td>&nbsp; <td> &nbsp; <td>&nbsp; <td> <b>:</b>
+  <tr>
+    <td> <i>a</i><sub>m1</sub> <td>&nbsp;
+	<td> <b>&hellip;</b> <td>&nbsp;
+	<td> <i>a</i><sub>mn</sub>
+</tbody>
+  </table>
+</table>
+
+<p>
+Most computer languages also have the concept of matrices, only they 
+don't always agree in how the things are ordered. Indexing in Visual 
+Basic and C, for example, is row-based, just like 
+eq&nbsp;C.10 is. Fortran, 
+on the other hand, is vector-based, so the indices need to be 
+reversed. Thanks to the C's pointer-type, you can also access a matrix 
+as an array.
+</p>
+
+<pre class="proglist">
+mat(i, j)     <span class="cmt">// VB matrix</span>
+
+mat[i][j]    <span class="cmt">// C matrix</span>
+mat[i+N*j]   <span class="cmt">// C matrix, in array form</span>
+
+mat(j, i)    <span class="cmt">// Fortran matrix</span>
+</pre><br>
+
+<p>
+Let's return to eq&nbsp;C.9 for a while, if we use 
+<b>x</b> = (<i>x,&nbsp;y,&nbsp;z</i>), 
+<b>b</b>= (0,&nbsp;8,&nbsp;&minus;9), and <b>A</b> for the 
+coefficient matrix, we can rewrite eq&nbsp;C.9a to
+</p>
+
+<table>
+<tr>
+  <td class="eqnrcell">(C.9d)
+  <td class="eqcell">
+    <b>a</b><sub>1</sub>·x +
+    <b>a</b><sub>2</sub>·y +
+    <b>a</b><sub>3</sub>·z &nbsp;=&nbsp; <b>b</b> &nbsp;=&nbsp;
+    <b>A · x</b>
+</table>
+
+<p>
+I've used the column-vector notation on the left of <b>b</b>, and the 
+full matrix notation on the right. You will do well to remember this 
+form of equation, as we'll see it later on as well. And yes, that's a 
+matrix-multiplication on the right-hand side there. Although I haven't 
+given a proper definition of it yet, this should give you some 
+hints.
+</p>
+
+<!--
+<p>
+For the remainder I will use only 2x2 matrices, Though in practice size 
+does indeed matter, theorically it's all the same. In particular,
+I will use the following matrix:
+<img src="../img/mat_def.png" alt="default 2x2 matrix">
+</p>
+-->
+
+
+<!-- ============================================================== -->
+
+<h2 id="sec-mat-ops">C.4.
+  Matrix operations</h2>
+
+<h3 id="ssec-mat-transpose">C.4.1.
+  Transpose</h3>
+<p>
+To transpose a matrix is to mirror is across the diagonal. It's a
+handy thing to have around at times. The notation for the transpose is
+a superscript uppercase &lsquo;T&rsquo;, for example, <b>B</b> =
+<b>A</b><sup>T</sup>. If <b>A</b> is an M&times;N matrix, its 
+transpose <b>B</b> will be N&times;M, with the elements
+<i>b</i><sub>ij</sub> = <i>a</i><sub>ji</sub>. Like I said, mirror 
+it across the diagonal. The diagonal itself will, of course, be 
+unaltered.
+</p>
+
+<h3 id="ssec-mat-add">C.4.2.
+  Matrix addition</h3>
+<p>
+Matrix addition is much like vector addition, but in 2 dimensions. 
+If <b>A, B, C</b> are all M&times;N matrices and <b>C = A + B</b>, 
+then the elements of <b>C</b> are 
+<i>c</i><sub>ij</sub> = <i>a</i><sub>ij</sub> + <i>b</i><sub>ij</sub>. 
+Subtraction is no different, of course.
+</p>
+
+<h3 id="ssec-mat-mul">C.4.3.
+  Matrix multiplication</h3>
+<p>
+Aahhh, and now things are getting interesting. There are a number of 
+rules to matrix multiplication, which makes it quite tricky. For our 
+multiplication, we will use <b>C = A · B</b>. The thing is that the 
+number of columns of the first operand (<b>A</b>) <i>must</i> equal 
+the number of rows of the second (<b>B</b>). So if <b>A</b> is a 
+<i>p&times;q</i> matrix, <b>B</b> should be a <i>q&times;r</i> 
+matrix. The size of <b>C</b> will then be <i>p&times;r</i>. Now, 
+the elements of <b>C</b> are given by 
+</p>
+
+<table id="eq-mat-mul-elem">
+<tr>
+  <td class="eqnrcell">(C.11)
+  <td class="eqcell">
+    <i>c</i><sub>ij</sub> &nbsp;&equiv;&nbsp;
+    <big>&Sigma;<sub>k</sub></big> 
+	<i>a</i><sub>ik</sub>·<i>b</i><sub>kj</sub>
+</table>
+
+<p>
+In other words, you take row <i>i</i> of <b>A</b>, column
+<i>j</i> of <b>B</b> and take their dot-product. <i>k</i> in 
+eq&nbsp;C.11 is the summation-index for 
+this dot-product. This is also 
+the reason why the columns of <b>A</b> and the rows of <b>B</b> must 
+be of equal size; if not you'll have a loose end at either vector. 
+Another way of looking at it is this: The whole of <b>A</b> forms the 
+coefficient matrix of a linear system, similar to that of 
+eq&nbsp;C.9b. 
+The columns of <b>B</b> are all vectors of variables which, when 
+processed by the linear system, gives the columns of <b>C</b>:
+</p>
+
+<table id="eq-mat-mul">
+<tr>
+  <td class="eqnrcell">(C.12)
+  <td class="eqcell">
+    <b>C</b> = <b>A · B</b>
+    &equiv; <b>A</b> <big>[</big>
+	  <b>b</b><sub>1</sub> &hellip; <b>b</b><sub>r</sub> 
+	  <big>]</big>
+    &equiv; 
+	  <big>[</big>
+	    <b>A·b</b><sub>1</sub> &hellip; <b>A·b</b><sub>r</sub> 
+	  <big>]</big>
+</table>
+
+<p>
+The value of this way of looking at it will become clear when I
+discuss coordinate transformations. Also, like I said, for 
+matrix-multiplication you take the dot-product of a row of <b>A</b> 
+and a column of <b>B</b>. Since a vector is basically an M&times;1
+matrix, the normal dot-product is actually a special case of the 
+matrix-multiplication. The only thing is that you have to take 
+the transposed of the first vector:
+</p>
+<table id="eq-vec-mul">
+<tr>
+  <td class="eqnrcell">(C.13)
+  <td class="eqcell">
+    <i>c</i> = <b>u · v</b> = [<b>u</b>]<sup>T</sup> · [<b>v</b>].
+</table>
+
+<p>
+There's a wealth of other things you can do with matrix-multiplication, 
+but I'll leave it with the following two notes. First, the operation 
+is <i>not commutative</i>! What that means is that
+<nobr><b>A · B</b></nobr> &ne; <nobr><b>B · A</b></nobr>. you may 
+have guessed that from the row-column requirement, but even if those 
+do match up it is still not commutative. My 
+<a href="affobj.htm#sec-demo">affine sprite demo</a> kind of shows this:
+a rotation-then-scale does not give the same results as 
+scale-then-rotate (which is probably what you wanted). Only in very
+special cases is <nobr><b>A · B</b></nobr> equal to 
+<nobr><b>B · A</b></nobr>.
+<p>
+The other note is that matrix multiplication is expensive. You have 
+to do a dot-product (<i>q</i> multiplications) for each element of 
+<b>C</b>, which leads to <i>p*q*r</i> multiplications. That's an O(3) 
+operation, the nastiest ones around. OK, so for 2x2 matrices it doesn't 
+amount to much, but when you deal with 27x18 matrices (like I do for 
+work), this becomes a problem. Fortunately there are ways of cutting down 
+on the number of calculations, but that's beyond the scope of this 
+tutorial.
+</p>
+
+<h3 id="ssec-mat-det">C.4.4.
+  Determinant</h3>
+<p>
+The determinant is a scalar that you get when you combine the elements of 
+a <dfn>square matrix</dfn> (of size N&times;N) a certain way. I've looked 
+everywhere for a nice, clear-cut definition of the determinant, but with 
+very little luck. It seems it has a number of uses, but it is most often
+used as a simple check to see if a equations of a system (or a set of
+vectors) is linearly independent, and thus if the coefficient matrix is
+invertible. The mathematical definition of the determinant of N&times;N 
+matrix <b>A</b> is a recurrence equation and looks like this.
+</p>
+
+<table id="eq-mat-det">
+<tr><td class="eqnrcell">(C.14)
+  <td class="eqcell">
+  det <b>A</b> = |<b>A</b>| = <big>&Sigma;<sub>j</sub></big>
+    (&minus;1)<sup>1+j</sup> a<sub>1j</sub> det A<sub>1j</sub>
+</table>
+
+<p>
+I could explain this in more detail, but there's actually little point 
+in doing that. I'll just give the formulae for the 2x2 and 3x3 case.
+Actually, I've already done so: in the cross product. If you have 
+matrix <b>A</b> = <nobr>[<b>a</b><sub>1</sub> <b>a</b><sub>2</sub> 
+<b>a</b><sub>3</sub>]</nobr>, then |<b>A</b>| = 
+  <b>a</b><sub>1</sub> · (<b>a</b><sub>2</sub> &times; 
+  <b>a</b><sub>3</sub>). For a 2&times;2 matrix, <b>B</b> = 
+<nobr>[<b>b</b><sub>1</sub> <b>b</b><sub>2</sub>]</nobr> it's 
+  <i>b</i><sub>11</sub>·<i>b</i><sub>22</sub> &minus;
+  <i>b</i><sub>12</sub>·<i>b</i><sub>21</sub>, which in fact also uses
+the cross product. This is not a mere coincidence. Part of what the 
+determinant is used for is determining whether a matrix can 
+be inverted. Basically, if |<b>A</b>|&nbsp;=&nbsp;0, then there is 
+no inverse matrix. Now, remember that the cross-product gives is 
+involved in the calculation of the area between vectors. This can 
+only be 0 if the vectors are colinear. And linear independence is one 
+of the key requirements of having an inverse matrix. Also, notice the 
+notation for the determinant: det&nbsp;<b>A</b> = |<b>A</b>|. Looks a 
+bit like the norm of a vector, doesn't it? Well, the related
+cross-product <i>is</i> related to the area spanned between vectors, 
+so I guess it makes sense then.
+</p>
+
+<h3 id="ssec-mat-inv">C.4.5.
+  Matrix inversion</h3>
+<p>
+Going back to eq&nbsp;C.9 (yet again), we have a 
+system of equations with variables <b>x</b>= (<i>x, y, z</i>) and 
+matrix <b>A</b> such that 
+<b>A · x</b> = <b>b</b>. We'll that's nice and all, but most of the 
+times it's <b>x</b> that's unknown, not <b>b</b>. What we need isn't
+the way from <b>x</b> to <b>b</b> (which is <b>A</b>), but its
+<dfn>inverse</dfn>. What we need is
+<b>x</b> = <b>A</b><sup>&minus;1</sup> <b>· b</b>. 
+<b>A</b><sup>&minus;1</sup> is the notation for the inverse of a 
+matrix. The basic definition of it is 
+<b>A&nbsp;·&nbsp;A</b><sup>&minus;1</sup> = <b>I</b>, where <b>I</b>
+is the <dfn>identity matrix</dfn>, which has 1s on its diagonal and 0s 
+everywhere else. There are a number of ways of calculating an inverse. 
+There's trial-and-error, of course (don't even think about it!), but 
+also the way one usually solves linear systems: through row reduction.
+Since I haven't mentioned how to do that, I'll resort to just giving a
+formula for one, namely the 2x2 case:
+</p>
+
+<table id="eq-2d-inv">
+<tr>
+  <td class="eqnrcell">(C.15)
+  <td class="eqcell"> <b>A</b> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>a</i>
+	<td>&nbsp;
+	<td><i>b</i>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>c</i>
+	<td>&nbsp;
+	<td><i>d</i>
+  </tbody>
+  </table>
+  <td width=32>&nbsp;
+  <td class="eqcell"> <b>A</b><sup>&minus;1</sup> &nbsp;&equiv;&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrB"> 1
+  <tr>
+    <td><i>ad &minus; bc</i>
+  </tbody>
+  </table>
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>d</i>
+	<td>&nbsp;
+	<td><i>&minus;b</i>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>&minus;c</i>
+	<td>&nbsp;
+	<td><i>a</i>
+  </tbody>
+  </table>
+</table>
+
+<p>
+This is the simplest case of an inverse. And, yup, that's a
+determinant as the denominator. You can see what happens if that
+thing's zero. Now, some other things you need to know about matrix
+inverses. Only square matrices have a chance of being invertible.
+You can use the determinant to see if it's actually possible.
+Furthermore, the inverse of the inverse is the original matrix
+again. There's more, of course (oh gawd is there more), but
+this will have to do for now.
+</p>
+
+<h3 id="ssec-mat-props">C.4.6.
+  Algebraic properties of matrices</h3>
+
+<p>
+<b>A</b> and <b>B</b> are M&times;N matrices; <b>C</b> is N&times;P;
+<b>D</b> and <b>E</b> are N&times;N. <b>e</b><sub>i</sub> are the 
+column vectors of <b>E</b>. <i>c</i> is a scalar.
+</p>
+
+<div class="lblock">
+<table cellpadding=2 cellspacing=0>
+<tr>
+  <td><b>A + B</b> = <b>B + A</b>
+<tr>
+  <td>c·(<b>A + B</b>) = c<b>B</b> + c<b>A</b>
+<tr>
+  <td><b>A·I</b> = <b>I·A</b> = <b>A</b>
+<tr>
+  <td><b>A·C</b> = <b>C·A</b> 
+    <i>only</i> if M=P, and then <i>only</i> under very special 
+	conditions
+<tr>
+  <td>If <b>E·F</b> = <b>I</b>, 
+    then <b>E</b><sup>&minus;1</sup> = <b>F</b>
+    and <b>F</b><sup>&minus;1</sup> = <b>E</b>
+<tr>
+  <td>(<b>A</b><sup>T</sup>)<sup>T</sup> = <b>A</b>
+<tr>
+  <td>(<b>A·C</b>)<sup>T</sup> =
+    <b>C</b><sup>T</sup> · <b>A</b><sup>T</sup>
+<tr>
+  <td>(<b>A·C</b>)<sup>&minus;1</sup> =
+    <b>C</b><sup>&minus;1</sup> · <b>A</b><sup>&minus;1</sup>
+<tr>
+  <td>If <b>a</b><sub>i</sub> · <b>a</b><sub>j</sub> =
+    &delta;<sub>ij</sub>, then <b>A</b><sup>&minus;1</sup> =
+	<b>A</b><sup>T</sup> (in other words, if the vectors are unit 
+	vectors and mutually perpendicular, the inverse is the 
+	transposed.)
+</table>
+</div>
+
+<!-- ============================================================== -->
+
+<h2 id="sec-space">C.5.
+  Spaces, bases, coordinate transformations</h2>
+<p>
+The collection of all possible vectors is called a <dfn>vector 
+space</dfn>. The number of dimensions is given by the amount of 
+numbers of the vectors (or was it the other way around?). A 2D space 
+has vectors with 2 elements, 3D vectors have 3, etc. Now, usually, 
+the elements of a vector tell you where in the space you are, but 
+there's more to it than that. For a fully defined position you need 
+</p>
+
+<ul>
+  <li>a base
+  <li>an origin
+  <li>coordinates
+</ul>
+
+<p>
+The vectors you're used to cover the coordinates part, but without 
+the other two coordinates mean nothing, they're just numbers. A set
+of coordinates like (2,&nbsp;1) means as little as, say, a speed of
+1. You need a frame of reference for them to mean anything. For
+physical quantities, that means units (like km/h or miles/h or m/s, 
+see what a difference that makes for speed?); for spaces, that means 
+a base and an origin.
+</p>
+
+<h3 id="ssec-space-sys">C.5.1.
+  Coordinate systems</h3>
+
+<div class="lblock">
+<table id="img-sys">
+<tr>
+<td>
+  <div class="cpt" style="width:192px">
+  <img src="../img/math/crd_cart.png" alt="Cartesian coords."><br>
+  <b>Fig C.5a</b>: a standard coordinate 
+  system S. Point <i>P</i> is given by coordinates <nobr>(3, 2)</nobr>.
+  </div>
+<td>
+  <div class="cpt" style="width:192px">
+  <img src="../img/math/crd_shear.png" alt="Sheared coords"><br>
+  <b>Fig C.5b</b>, a sheared coordinate system S'. 
+  Point <i>P</i> is given by coordinates <nobr>(1, 2)</nobr>.
+  </div>
+</table>
+</div>
+
+<p>
+Fig C.5a shows the 2D Cartesian coordinates 
+system you're probably
+familiar with. You have an horizontal x-axis 
+(<b>i</b> = (1,&nbsp;0) ) and a vertical y-axis 
+(<b>j</b> = (0,&nbsp;1) ). And I have a point <i>P</i>
+in it. If you follow the gridlines, you'll see that x=3 and y=2, 
+so <i>P</i>= (3,&nbsp;2), right? 
+Well, yes. And no. In my opinion, mostly no.
+</p>
+<p>
+The thing is that a point in space <i>has</i> no real coordinates,
+it's just there. The coordinates depend on your frame of reference, 
+which is basically arbitrary. To illustrate this, take a look at 
+fig&nbsp;C.5b;
+In this picture I have a coordinate system S', which still has a
+horizontal x-axis (<b>u</b> = (1,&nbsp;0) ), but the y-axis 
+(<b>v</b> = (1,&nbsp;1) ) is sheared 45&deg;. And in this system, 
+point <i>P</i> is given by coordinates (1,&nbsp;2), and not 
+(3,&nbsp;2). If you use the coordinates of one system directly into 
+another system, bad things happen.
+</p>
+<p>
+Two questions now emerge: why would anyone use a different set of
+coordinates, and how do we convert between two systems. I'll cover
+the latter in the rest of this article. As for the former, while
+a Cartesian system is highly useful, there are many instances 
+where real (or virtual) world calculations are complicated immensely 
+when you stick to it. For one thing, describing planetary orbits or
+things involving magnetism considerably easier in spherical or
+cylindrical coordinates. For another, in texture mapping, you have
+a texture with texels which need to be applied to surfaces that 
+in nearly all cases do not align nicely with your world coordinates.
+The <a href="affine.htm">affine transformations</a> are perfect 
+examples of this. So, yeah, using non-Cartesian coordinates are
+very useful indeed.
+</p>
+
+<h3 id="ssec-space-build">C.5.2.
+  Building a coordinate base</h3>
+<p>
+Stating that there are other coordinate systems besides the Cartesian
+one is nice and all, but how does one really use them? Well, very
+easily, actually. Consider what you are really doing when you're 
+using coordinates in a Cartesian system. Look at 
+fig&nbsp;C.5a again. Suppose you're given a 
+coordinate set, like (x,&nbsp;y)= (3,&nbsp;2). To find its location, 
+you move 3 along the x-axis, 2 along the y-axis, and you have your 
+point <i>P</i>. Now, in system S' (fig&nbsp;C.5b)
+we have (x',&nbsp;y') = (1,&nbsp;2), but the procedure we used in S 
+doesn't work here since we don't have an y-axis. However, we 
+<i>do</i> have vectors <b>u</b> and <b>v</b>. Now if you move 1 
+along <b>u</b> and 2 along <b>v</b>, we're at point <i>P</i> again. 
+Turning back to system S again, the x and y axes are really vectors 
+<i>i</i> and <i>j</i>, respectively, so we've been using the same 
+procedure in both systems after all. Basically, what we do is:
+</p>
+<table id="eq-coords">
+<tr>
+  <td class="eqnrcell">(C.16a)
+  <td class="eqcell">
+    <i>P</i> = <b>i</b>·x + <b>j</b>·y
+<tr>
+  <td class="eqnrcell">(C.16b)
+  <td class="eqcell">
+    <i>P</i> = <b>u</b>·x' + <b>v</b>·y'
+</table>
+
+<p>
+Now, if you've paid attention, you should recognize the structure 
+of these equations. Yes, we've seen them before, in 
+eq&nbsp;C.9d. If we 
+rewrite our vectors and coordinates, to matrices and vectors,
+we get
+</p>
+
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell"> 
+    <b>M</b> &nbsp;=&nbsp;
+	<big>[</big> <b>i &nbsp; j</b> <big>]</big> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>1
+	<td>&nbsp;
+	<td>0
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>0
+	<td>&nbsp;
+	<td>1
+  </tbody>
+  </table>
+  <td class="eqcell">&nbsp; , &nbsp; <b>x</b> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>x</i>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>y</i>
+  </tbody>
+  </table>
+  <td width=32 align="center">;
+  <td class="eqcell">
+    <b>M</b>&prime; &nbsp;=&nbsp;
+	<big>[</big> <b>u &nbsp; v</b> <big>]</big> &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>1
+	<td>&nbsp;
+	<td>1
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>0
+	<td>&nbsp;
+	<td>1
+  </tbody>
+  </table>
+  <td class="eqcell">&nbsp; , &nbsp; <b>x</b>&prime; &nbsp;=&nbsp;
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>x</i>&prime;
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>y</i>&prime;
+  </tbody>
+  </table>
+</table>
+
+<table>
+<tr>
+  <td class="eqnrcell">(C.16c)
+  <td class="eqcell">
+  <i>P</i> = <b>M · x</b> = <b>M&prime;</b> &middot; <b>x&prime;</b>
+</table>
+
+<p>
+Vectors <b>x</b> and <b>x</b>' contain the coordinates, just like
+they always have. What's new is that we have now defined the
+coordinate system in the form matrices <b>M</b> and <b>M'</b>.
+The vectors that the matrices are made of are the <dfn>base
+vectors</dfn> of the coordinate system. Of course, since the base
+vectors of system S are the standard unit vectors, the matrix
+that they form is the identity matrix <b>M == I</b>, which can be
+safely omitted (and usually is), but don't forget it's there 
+behind the curtains. Actually, there's one more thing that's 
+usually implicitly added to the equation, namely the origin
+<i>O</i>. The standard origin is the null vector, but it need
+not be. 
+</p>
+<p>
+Eq C.17 is the full equation for the 
+definition of a point. <i>O</i> is the origin of the coordinate 
+system, <b>M</b> defines the base vectors, <b>x</b> is a 
+coordinate set in that base, starting at the origin. Note that 
+each of these is completely arbitrary; the <b>M</b> and 
+<b>x</b> in the preceding discussion are just examples of these.
+</p>
+
+<table id="eq-pt-def">
+<tr>
+  <td class="eqnrcell">(C.17)
+  <td class="eqcell">
+  <i>P</i> = <i>O</i> + <b>M · x</b>
+</table>
+
+<h3 id="ssec-space-notes">C.5.3.
+  Last notes</h3>
+<p>
+It really is best to think of points in terms of 
+eq&nbsp;C.17 (that is,
+an origin, a base matrix, and a coordinate vector), rather than
+merely a set of coordinates. You'll find that this technique can 
+be applied to an awful lot of problems and having a general
+description for them simplifies solving those problems. For 
+example, rotating and scaling of sprites and backgrounds is 
+nothing more than a change of coordinate systems. There's no
+magic involved in <i>pa-pd</i>, they're just the matrix that
+defines the screen&rarr;texture space transformation.
+</p><br>
+
+<p>
+Be very careful that you understand what does what when dealing 
+with coordinate system changes. When transforming between two systems,
+it is very easy to write down the exact inverse of what you
+meant to do. For example, given the systems S and S' of the
+previous paragraph, we see that <b>x = M · x'</b>, that is 
+<b>M</b> transforms from S' to S. But the base vectors of <b>M</b> 
+are <i>inside</i> system S, so you may be tempted to think 
+it transforms from S to S'. Which it doesn't. A similar thing 
+goes on with the <b>P</b> matrix that the GBA uses. The base 
+vectors of this matrix lie inside texture space (see 
+fig&nbsp;5 in the
+<a href="affine.htm">affine</a> page), meaning that the 
+transformation it does goes from screen to texture space
+and <i>not</i> the other way around.
+</p><br>
+
+<p>
+The base matrix need not be square; you can use any 
+M&times;N matrix. This corresponds to a conversion from N
+dimensions to M dimensions. For example, if M=3 and N=2 (i.e., 
+two 3D vectors), you would have a flat plane inside a 3D world.
+If N&gt;M, you'd have a projection.
+</p>
+
+<br>
+
+<div class="endtag">
+Modified <span class="time">Feb 8, 2007</span>,
+<a href="mailto:cearn@coranac.com">J Vijn</a>.
+Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+</div>
+
+<hr>
+
+
+<!-- [[footer]] -->
+<table class="footer">
+<tr>
+  <td class="hdr_l"><a href="fixed.htm">Prev</a></td>
+  <td class="hdr_c"><a href="toc.htm">Contents</a></td>
+  <td class="hdr_r"><a href="makefile.htm">Next</a></td>
+</tr>
+<tr>
+  <td class="hdr_l">Fixed point math</td>
+  <td class="hdr_c"></td>
+  <td class="hdr_r">Makefiles</td>
+</tr>
+</table>
+<!-- [[/footer]] -->
+
+</body>
+</html>
+
+
