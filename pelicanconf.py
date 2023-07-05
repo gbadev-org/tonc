@@ -1,5 +1,5 @@
 AUTHOR = 'J. Vijn & gbadev.net community'
-SITENAME = 'Tonc CE'
+SITENAME = 'Tonc'
 SITEURL = ''
 
 PATH = 'content'
@@ -15,19 +15,12 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
-# Blogroll
-LINKS = (('Pelican', 'https://getpelican.com/'),
-         ('Python.org', 'https://www.python.org/'),
-         ('Jinja2', 'https://palletsprojects.com/p/jinja/'),
-         ('You can modify those links in your config file', '#'),)
-
-# Social widget
-SOCIAL = (('You can add links in your config file', '#'),
-          ('Another social link', '#'),)
-
 THEME = 'theme'
 
 STATIC_PATHS = ['img']
+
+# PAGE_URL = 'pages/{slug}.html'
+# PAGE_URL = '{slug}.html'
 
 # use filenames for slug
 SLUGIFY_SOURCE = 'basename'
@@ -43,3 +36,6 @@ PLUGINS = [
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
+
+# DIRECT_TEMPLATES = ['index', 'authors', 'categories', 'tags', 'archives']
+DIRECT_TEMPLATES = ['index']
