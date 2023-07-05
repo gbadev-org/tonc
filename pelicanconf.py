@@ -37,7 +37,7 @@ DEFAULT_PAGINATION = False
 PLUGIN_PATHS = ['plugins']
 
 PLUGINS = [
-  # 'headerid',
+  'headerid',
   'asciidoc3_reader',
 ]
 
