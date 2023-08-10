@@ -8,7 +8,7 @@ You'll need Python 3 + pip.
 
 ```sh
 # get dependencies
-pip install pelican
+pip install pelican asciidoc3
 
 # clone the repo
 git clone git@github.com:gbadev-org/tonc.git
