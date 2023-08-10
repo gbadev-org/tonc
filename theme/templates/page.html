@@ -13,15 +13,56 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{{ page.title }}</h1>
+  
+    {% set (prev_num, prev_slug, prev_name) = PREV(page) %}
+    {% set (next_num, next_slug, next_name) = NEXT(page) %}
+    
+    <table class="header">
+      <tr>
+        <td class="hdr_l">
+          {% if prev_num != None %}
+          <a href="{{ prev_slug }}.html">{{ prev_name }}</a>
+          {% endif %}
+        </td>
+        <td class="hdr_c"><a href="toc.html">Contents</a></td>
+        <td class="hdr_r">
+          {% if next_num != None %}
+          <a href="{{ next_slug }}.html">{{ next_name }}</a>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+    
+    <hr>
+    
+    <!-- <h1>{{ page.title }}</h1> -->
+    
     {% import 'translations.html' as translations with context %}
     {{ translations.translations_for(page) }}
 
     {{ page.content }}
 
-    {% if page.modified %}
-        <p>
-        Last updated: {{ page.locale_modified }}
-        </p>
-    {% endif %}
+    <br>
+    
+    <div class="endtag">
+      Modified: {{ page.locale_modified }},
+      <a href="mailto:cearn@coranac.com">J Vijn</a>.
+      Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+    </div>
+    
+    <hr>
+    
+    <table class="footer">
+      <tr>
+        <td class="hdr_l"><a href="{{ prev_slug }}.html">Prev</a></td>
+        <td class="hdr_c"><a href="toc.html">Contents</a></td>
+        <td class="hdr_r"><a href="{{ next_slug }}.html">Next</a></td>
+      </tr>
+      <tr>
+        <td class="hdr_l">{{ prev_name }}</td>
+        <td class="hdr_c"></td>
+        <td class="hdr_r">{{ next_name }}</td>
+      </tr>
+    </table>
+    
 {% endblock %}
