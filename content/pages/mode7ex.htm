@@ -31,7 +31,7 @@
 <h2 id="sec-intro">21.1.
   Introduction</h2>
 <p>
-<a href="mode7.htm">Mode 7: part 1</a> covered the basics of how to 
+<a href="mode7.html">Mode 7: part 1</a> covered the basics of how to 
 get an affine background to look like a 3D plane, and discussed some 
 of the trickier parts of the fixed point arithmetic involved. Getting
 the basic look of a 3D plane is only the first step.
@@ -55,7 +55,7 @@ theory, and can be applied to 3D games that use sprites in some way.
 <p>
 The theory part of the chapter is going to be very math-heavy, as 3D 
 theory always is. Knowing a little bit about 
-<a href="matrix.htm">linear algebra</a> certainly wouldn't hurt. The 
+<a href="matrix.html">linear algebra</a> certainly wouldn't hurt. The 
 full story about geometry is beyond the scope of Tonc, but this stuff 
 is quite general; most books on 3D programming will have a chapter on 
 geometric transformations, so you can look at those if you get a little 
@@ -63,9 +63,9 @@ lost here.
 </p>
 <p>
 This chapter touches on almost all of the topics covered so far. It 
-uses <a href="affobj.htm">affine objects</a>, backgrounds (both
-<a href="regbg.htm">regular</a> and <a href="affbg.htm">affine</a>),
-<a href="interrupts.htm">interrupts</a>, 
+uses <a href="affobj.html">affine objects</a>, backgrounds (both
+<a href="regbg.html">regular</a> and <a href="affbg.html">affine</a>),
+<a href="interrupts.html">interrupts</a>, 
 <a href="gfx.htm#blend">color effects</a> and a few more. If your 
 understanding of any of these is lacking, you could be in for a rough
 time here.
@@ -139,13 +139,13 @@ we have a camera located at
 world coordinate system. What we have to do is find the transformation 
 that links screen point <b>x</b><sub>s</sub> to world point
 <b>x</b><sub>w</sub>. There are a number of ways to do this. You
-already saw one in the <a href="mode7.htm">first mode 7 chapter</a>,
+already saw one in the <a href="mode7.html">first mode 7 chapter</a>,
 where we I had the GBA hardware in mind from the start. You could
 extend this to the general mode 7 case (with a non-zero pitch) with 
 some effort. You could also use pure trigonometry, which is a
 minefield of minus signs and potential sine-cosine mix-ups. Still,
 it is possible. What I'll use here, though, is
-<a href="matrix.htm">linear algebra</a>. There are several reasons 
+<a href="matrix.html">linear algebra</a>. There are several reasons 
 for this choice. Firstly, linear algebra has a very concise notation, 
 so you can write down the final solution in just a few lines (in fact, 
 once you get through the definitions, the solution that covers all 
@@ -1794,7 +1794,7 @@ class="num">768</span>        <span class="cmt">//!&lt; Far plane (floor)</span>
 Mode 7 would be a wonderful place to use classes, but since I'm 
 working in C, not C++, I'm sticking to structs. Apart from the 
 <code>BG_AFFINE</code>
-struct I presented in the <a href="affbg.htm">affine background</a> 
+struct I presented in the <a href="affbg.html">affine background</a> 
 page, you need one struct for the camera and one struct for the mode 7 
 objects. I'm also using a mode 7 container struct to keep track of 
 all the parts that go into the mode 7 functionality, so that you 

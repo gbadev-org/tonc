@@ -254,14 +254,14 @@ the names.
 The word at 0400:0000 contains the main bits for the display control. 
 By writing <code>0x0403</code> into it, we tell the GBA to use video 
 mode 3 and activate background 2. What this actually means will be 
-explained in the <a href="video.htm">video</a> and 
-<a href="bitmaps.htm">bitmap mode </a> chapters. 
+explained in the <a href="video.html">video</a> and 
+<a href="bitmaps.html">bitmap mode </a> chapters. 
 </p>
 <p>
 In mode 3, VRAM is a 16-bit bitmap; when we make a halfword 
 pointer for it, each entry is a pixel. This bitmap itself is the 
 same size as the screen (240x160) and because of the way 
-<a href="bitmaps.htm">bitmaps</a> and C matrices work, by using 
+<a href="bitmaps.html">bitmaps</a> and C matrices work, by using 
 something of the form 
 &lsquo;array[<i>y</i>*<i>width</i> + <i>x</i>]&rsquo; are the contents 
 of coordinates (<i>x</i>, <i>y</i>) on screen. That gives us our 3 
@@ -537,10 +537,10 @@ more convenient to use #defines instead.
 The toolbox header lists a number of the #defines I use for 
 REG_DISPCNT. The full list can be found in <tt>vid.h</tt> of 
 tonclib, and the register itself is described in the 
-<a href="video.htm">video</a> chapter. For now, we only need 
+<a href="video.html">video</a> chapter. For now, we only need 
 DCNT_MODE3 and DCNT_BG2. The former sets the video mode to 
 mode 3, which is simplest of the 3 available 
-<a href="bitmaps.htm">bitmap modes</a>, and the latter activates 
+<a href="bitmaps.html">bitmap modes</a>, and the latter activates 
 background 2. Out of a total of four, bg 2 is the only one available 
 in the bitmap modes and you have to switch it on if you want 
 anything to show up. You have to admit that these names are a lot 
@@ -775,7 +775,7 @@ when designing your GBA software.
 Another thing that you need to remember is that the GBA has a tendency 
 to do things just a tiny bit different than you may expect. The 
 primary example of this is the matrix used for 
-<a href="affine.htm">affine transformations</a> like rotation and 
+<a href="affine.html">affine transformations</a> like rotation and 
 scaling. All of the popular tutorials give the wrong matrix for 
 a rotation-scale transformation, even though the reference documents 
 give the correct description of each element. Other good examples 
@@ -942,8 +942,8 @@ few things on (C) programming in general that I'd like to mention here.
   all. For example, for anything involving math (which can include 
   graphics as well), it's better to make a diagram of the situation.
   I have pages of diagrams and equations for the 
-  <a href="affine.htm">affine transformation</a> and 
-  <a href="mode7.htm">mode 7</a>, just to see what what going on. Pen 
+  <a href="affine.html">affine transformation</a> and 
+  <a href="mode7.html">mode 7</a>, just to see what what going on. Pen 
   and paper are your friends here.
   </p>
 </li>

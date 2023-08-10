@@ -79,7 +79,7 @@ the indication &lsquo;.<i>f</i>&rsquo;.
 </p>
 <p>
 The GBA uses fixed-point math in a number of cases. The
-<a href="affine.htm">affine 
+<a href="affine.html">affine 
 parameters</a>, for example, are all .8 fixed-point numbers 
 (&ldquo;<dfn>fixeds</dfn>&rdquo;, for short). Effectively, this means 
 you're counting in 1/2<sup>8</sup> = 1/256ths, giving you a 0.004 
@@ -1217,7 +1217,7 @@ For accuracy, you need to think of the range of the function.
 As said, the sine range is [&minus;1, +1] and using 8.8 fixeds 
 would waste 6 bits that could have been used for more significant bits.. 
 For a division LUT like the one I'm using for the 
-<a href="mode7.htm">first mode 7 chapter</a>, I need 1/1 up to 1/160, 
+<a href="mode7.html">first mode 7 chapter</a>, I need 1/1 up to 1/160, 
 which would <i>not</i> work well with .8 fixeds, so I'm using .16 
 fixeds there, which may still not be enough, but more might give 
 overflow problems. 
@@ -1377,7 +1377,7 @@ attempt those if you really, really have to.
 <p>
 While the most obvious use of lookup tables is for precalculated 
 mathematical functions, LUTs aren't restricted to mathematics. In my 
-<a href="text.htm">text systems</a>, for example, I'm using a 
+<a href="text.html">text systems</a>, for example, I'm using a 
 look-up table for the character&rarr;tile-index conversion. This 
 offers me a greater range in the distribution of tiles that 
 otherwise would be possible. The default font uses ASCII 

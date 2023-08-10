@@ -473,7 +473,7 @@ it is fast, it doesn't quite blow every other transfer routine out of
 the water. CpuFastSet() comes within 10% of it for copies and is 
 actually 10% faster for fills. The speed gain isn't that big a deal. 
 Another problem is that it stops the CPU, which can screw up 
-<a href="interrupts.htm">interrupts</a>, causing seemingly random 
+<a href="interrupts.html">interrupts</a>, causing seemingly random 
 bugs. It does have its specific uses, usually in conjunction with 
 timers or interrupts, but for general copies, you might consider 
 other things as well. CpuFastSet() is a good routine, but tonclib 

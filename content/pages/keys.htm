@@ -120,7 +120,7 @@ Just about everything you will ever need in terms of key-handling can
 be done with <code>REG_KEYINPUT</code>. That said, you might like to know 
 there is another key-register for some extra control. The register in 
 question is <code>REG_KEYCNT</code>, the key control register. This
-register is used for keypad <a href="interrupts.htm">interrupts</a>, 
+register is used for keypad <a href="interrupts.html">interrupts</a>, 
 much like <code>REG_DISPSTAT</code> was used for video interrupts. The
 layout is the same as for <code>REG_KEYINPUT</code>, except for the top two 
 bits, see the table below. With <code>REG_KEYCNT</code>{14} you can
@@ -132,7 +132,7 @@ will raise the interrupt; if set, then they must all be down for the
 interrupt to be raised. I wouldn't be surprised if this is how you can 
 reset most games by pressing Start+Select+B+A. Of course, to make use 
 of this register you need to know how to work with 
-<a href="interrupts.htm">interrupts</a> first.
+<a href="interrupts.html">interrupts</a> first.
 </p><br>
 
 <div class="reg">

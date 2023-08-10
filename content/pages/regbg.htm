@@ -211,7 +211,7 @@ enter some coordinates in the right registers.
 As I said in the overview, there are three
 stages to setting up a tiled background: control, mapping and 
 image-data. I've already covered most of the image-data in the 
-<a href="objbg.htm">overview</a>, as well as some of the control 
+<a href="objbg.html">overview</a>, as well as some of the control 
 and mapping parts that are shared by sprites and backgrounds alike;
 this chapter covers only things specific to backgrounds in general 
 and regular backgrounds in particular. I'm assuming you've read the 
@@ -249,8 +249,8 @@ you have tiles, a tile-map and a few control registers. But that's
 where the similarity ends. Affine backgrounds use more and different
 registers than regular ones, and even the maps are formatted 
 differently. This page only covers the regular backgrounds. I'll
-leave the <a href="affbg.htm">affine ones</a> till after the page 
-on the <a href="affine.htm">affine matrix</a>.
+leave the <a href="affbg.html">affine ones</a> till after the page 
+on the <a href="affine.html">affine matrix</a>.
 </p>
 
 <div class="lblock">
@@ -1583,7 +1583,7 @@ The second reason is to show how you can output text, which is
 obviously an important ability to have. Tonclib has an extensive 
 list of options for text rendering &ndash; too much to explain 
 here &ndash; but its interface is pretty easy. For details, 
-visit the <a href="tte.htm">Tonc Text Engine chapter</a>.
+visit the <a href="tte.html">Tonc Text Engine chapter</a>.
 </p>
 <p>
 Anyway, here's the example.
@@ -1656,7 +1656,7 @@ From this point on, I'll make liberal use of tonclib's text
 capabilities in examples for displaying values and the like. This will 
 mostly happen without explanation, because that won't be part of the 
 demo. Again, to see the internals, go to the 
-<a href="tte.htm">TTE chapter</a>.
+<a href="tte.html">TTE chapter</a>.
 </p>
 
 
@@ -1718,7 +1718,7 @@ in there. You might wonder if all of it is linked when you add a
 library to your project. The answer is no, it is not. The linker is 
 smart enough to use only the files which functions you're actually 
 referencing. In the case of this demo, for example, I'm using various 
-text functions, but none of the <a href="affine.htm">affine</a> 
+text functions, but none of the <a href="affine.html">affine</a> 
 functions or tables, so those are excluded. Note that the exclusion 
 goes by <i>file</i>, not by <i>function</i>. If you only have one file 
 in the library (or #included everything, which amounts to the same 
@@ -1766,7 +1766,7 @@ class="keyw">const void</span> *src, uint wcount) IWRAM_CODE;
 These routines are optimized assembly so they are 
 <a href="text.htm#ssec-demo-se2">fast</a>. They 
 are also safer than the <a href="dma.htm#sec-func">dma routines</a>, 
-and the <a href="swi.htm">BIOS routine</a> <code>CpuFastSet()</code>. 
+and the <a href="swi.html">BIOS routine</a> <code>CpuFastSet()</code>. 
 Basically, I highly recommend them, and I will use them wherever 
 I can.
 </p>
