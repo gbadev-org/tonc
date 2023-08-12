@@ -366,6 +366,11 @@ li {
   margin: 4px 0 4px 0;
 }
 em {
+  color: inherit;
+  font-style: italic;
+  font-weight: normal;
+}
+.emphasis {
   color: var(--highlight);
   font-weight: 600;
 }
