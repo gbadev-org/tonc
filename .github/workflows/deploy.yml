@@ -13,8 +13,8 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
     - run: |
-      pip install -r requirements.txt
-      pip install ghp-import
-      pelican content -o output -s publishconf.py
-      ghp-import output -b gh-pages
-      git push origin gh-pages
+        pip install -r requirements.txt
+        pip install ghp-import
+        pelican content -o output -s publishconf.py
+        ghp-import output -b gh-pages
+        git push origin gh-pages
