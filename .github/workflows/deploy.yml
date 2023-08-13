@@ -17,9 +17,4 @@ jobs:
         pip install ghp-import
         pelican content -o output -s publishconf.py
         ghp-import output -b gh-pages
-        mkdir -m 700 ~/.ssh
-        echo "${{ secrets.SSH_KEY_SECRET }}" > ~/.ssh/id_ed25519
-        chmod 0600 ~/.ssh/id_ed25519
-        git config --local user.name "GitHub Action"
-        git config --global user.email "community@gbdev.io"
-        git push origin gh-pages
+        git push --force origin gh-pages
