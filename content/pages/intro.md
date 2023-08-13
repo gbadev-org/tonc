@@ -10,7 +10,7 @@ Authors: Cearn
 ## ii.1. Organisation {#sec-org}
 
 <div class="cpt_fr" style="width:120px;">
-<img src="../img/toncdirs.png" id="img-toncdirs"
+<img src="img/toncdirs.png" id="img-toncdirs"
   alt="Tonc directory structure"><br>
 <b>Fig ii.1</b>: directories.
 </div>
