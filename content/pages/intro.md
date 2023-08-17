@@ -129,7 +129,7 @@ Getting the GBA to do things often involves the use of the so-called <dfn>IO reg
 
 Each register (or register-like address) is mapped to a dereferenced pointer, usually 16bits long. For example, the display status register is
 
-``` proglist
+```c
 #define  REG_DISPSTAT *(u16*)0x04000004     
 ```
 
@@ -200,7 +200,7 @@ The text and code have been created and found to work under the following condit
 
     To write and manage my code I use Visual C++ 6.0, but I am not using its native make tool (`NMAKE`), because it's not very portable and seems to be pretty weak as well. Instead, I use `GNU make`, which usually comes with any of the devkits.
 
--   **Binaries**. You'll also need something that can run the binaries. On the emu side, I use either [VisualBoy Advance](http://vba.ngemu.com){target="_blank"} (VBA) v1.7 or higher, and [no\$gba](http://nocash.emubase.de/gba.htm){target="_blank"}, freeware edition. But as nice as these emulators are, you *must* be able to test on a real GBA too if you're serious about this stuff. Get yourself a flash card or, if you're on a budget, you can always build a multiboot cable like Xboo yourself. If you shop around you should be able to get the components for about \$5.
+-   **Binaries**. You'll also need something that can run the binaries. On the emu side, I use either [VisualBoy Advance](http://vba.ngemu.com){target="_blank"} (VBA) v1.7 or higher, and [no$gba](http://nocash.emubase.de/gba.htm){target="_blank"}, freeware edition. But as nice as these emulators are, you *must* be able to test on a real GBA too if you're serious about this stuff. Get yourself a flash card or, if you're on a budget, you can always build a multiboot cable like Xboo yourself. If you shop around you should be able to get the components for about $5.
 
 -   **OS**. I use the Windows operation system (Win 98 and WinXP) and when referring to commands or programs I'm more or less assuming you are too. The GBA and devkits couldn't care less. However, a Linux user, for example, would have little use for a Visual C project and wouldn't be able to use [Usenti](http://www.coranac.com/projects/#usenti){target="_blank"} (my bitmap editor) or [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} (my Excel LUT builder).
 
