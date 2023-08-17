@@ -51,14 +51,30 @@
     
     <table class="footer">
       <tr>
-        <td class="hdr_l"><a href="{{ prev_slug }}.html">Prev</a></td>
+        <td class="hdr_l">
+          {% if prev_num != None %}
+          <a href="{{ prev_slug }}.html">Prev</a>
+          {% endif %}
+        </td>
         <td class="hdr_c"><a href="toc.html">Contents</a></td>
-        <td class="hdr_r"><a href="{{ next_slug }}.html">Next</a></td>
+        <td class="hdr_r">
+          {% if next_num != None %}
+          <a href="{{ next_slug }}.html">Next</a>
+          {% endif %}
+        </td>
       </tr>
       <tr>
-        <td class="hdr_l">{{ prev_name }}</td>
+        <td class="hdr_l">
+          {% if prev_num != None %}
+          {{ prev_name }}
+          {% endif %}
+        </td>
         <td class="hdr_c"></td>
-        <td class="hdr_r">{{ next_name }}</td>
+        <td class="hdr_r">
+          {% if next_num != None %}
+          {{ next_name }}
+          {% endif %}
+        </td>
       </tr>
     </table>
     
