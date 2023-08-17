@@ -26,7 +26,8 @@ MARKDOWN = {
   ],
   'extension_configs': {
     'markdown.extensions.toc': {
-      'toc_depth': 2,
+      'anchorlink': True,
+      'toc_depth': '2-2',
     },
   },
 }
@@ -139,7 +140,6 @@ DEFAULT_PAGINATION = False
 PLUGIN_PATHS = ['plugins']
 
 PLUGINS = [
-  'headerid',
   'asciidoc3_reader',
 ]
 

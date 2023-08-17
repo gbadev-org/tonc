@@ -505,3 +505,25 @@ pre .sh { color: #66DD88 } /* Literal.String.Heredoc */
 pre .sx { color: #66DD88 } /* Literal.String.Other */
 pre .s1 { color: #66DD88 } /* Literal.String.Single */
 pre .il { color: #57b5d4 } /* Literal.Number.Integer.Long */
+
+.toclink {
+  text-decoration: none;
+  color: var(--text-main);
+}
+.toclink:hover {
+  text-decoration: underline;
+}
+
+.toclink::before {
+  color: var(--text-muted);
+  content: '¶';
+  display: inline-block;
+  margin-left: -1.1em;
+  text-decoration: none;
+  width: 1.1em;
+  visibility: hidden;
+}
+.toclink:hover::before {
+  visibility: visible;
+}
+
