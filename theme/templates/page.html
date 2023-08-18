@@ -13,7 +13,12 @@
 {% endblock %}
 
 {% block content %}
-  
+    
+    <div style="color: var(--text-muted)">
+      This site is work in progress and pending approval from Cearn, please don't share yet!
+    </div>
+    <br>
+    
     {% set (prev_num, prev_slug, prev_name) = PREV(page) %}
     {% set (next_num, next_slug, next_name) = NEXT(page) %}
     
@@ -42,9 +47,9 @@
     <br>
     
     <div class="endtag">
-      Modified: {{ page.locale_modified }},
-      <a href="mailto:cearn@coranac.com">J Vijn</a>.
-      Get all Tonc files <a href="http://www.coranac.com/projects/#tonc" target="_blank">here</a>
+      By <a href="mailto:cearn@coranac.com">J Vijn</a> + <a href="https://gbadev.net">gbadev.net</a> community.
+      Modified: {{ page.modified.strftime("%Y-%m-%d") }}.
+      Get Tonc example code <a href="https://github.com/gbadev-org/libtonc-examples" target="_blank">here</a>.
     </div>
     
     <hr>
