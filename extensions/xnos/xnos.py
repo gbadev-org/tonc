@@ -12,9 +12,10 @@ class XNosPreprocessor(Preprocessor):
     def run(self, lines):
         
         r_prefix = re.compile(r'^# (\w+\.)')
-        r_def = re.compile(r'#(fig|tbl|eq|sec):([\w-]+)')
-        r_ref1 = re.compile(r'\\?([!+*]?)@(fig|tbl|eq|sec):([\w-]+)')
-        r_ref2 = re.compile(r'{([!+*]?)@(fig|tbl|eq|sec):([\w-]+)}')
+        r_def1 = re.compile(r'#(fig|tbl|eq|sec):([\w-]+)')             # Matches #fig:foo
+        r_def2 = re.compile(r'id="(fig|tbl|eq|sec):([\w-]+)"')         # Matches id="fig:foo"
+        r_ref1 = re.compile(r'\\?([!+*]?)@(fig|tbl|eq|sec):([\w-]+)')  # Matches @fig:foo
+        r_ref2 = re.compile(r'{([!+*]?)@(fig|tbl|eq|sec):([\w-]+)}')   # Matches {@fig:foo}
         
         # If the page heading is "# 12. Some Chapter" then "12." is used as a prefix.
         prefix = ''
@@ -23,36 +24,27 @@ class XNosPreprocessor(Preprocessor):
             if m != None:
                 prefix = m.group(1)
                 break
-        # assert(prefix != None)
         
         # Find all defined figure IDs and assign them a figure number.
         
-        counts = {
-            'fig': 0,
-            'tbl': 0,
-            'eq': 0,
-        }
-        id_to_num = {} # e.g. "fig:foo": "12.1"
+        counts = { 'fig': 0, 'tbl': 0, 'eq': 0 }
+        
+        id_to_num = {}  # e.g. "fig:foo" --> "12.1"
+        
+        def add_id(match):
+            kind = match.group(1)
+            id = (kind + ':' + match.group(2))
+            counts[kind] += 1
+            id_to_num[id] = prefix + str(counts[kind])
         
         for i, s in enumerate(lines):
-            for match in r_def.finditer(s):
-                kind = match.group(1)
-                id = (kind + ':' + match.group(2))
-                counts[kind] += 1
-                id_to_num[id] = prefix + str(counts[kind])
+            for match in r_def1.finditer(s): add_id(match)
+            for match in r_def2.finditer(s): add_id(match)
         
         # Replace references to figure IDs with the appropriate figure number.
         
-        plus_names = {
-            'fig': 'fig',
-            'tbl': 'table',
-            'eq': 'eq',
-        }
-        star_names = {
-            'fig': 'Fig',
-            'tbl': 'Table',
-            'eq': 'Eq',
-        }
+        plus_names = { 'fig': 'fig', 'tbl': 'table', 'eq': 'eq' }
+        star_names = { 'fig': 'Fig', 'tbl': 'Table', 'eq': 'Eq' }
         
         clever_refs = True
         clever_names = plus_names
