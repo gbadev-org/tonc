@@ -1,3 +1,7 @@
+import sys
+sys.path.append('.')
+from extensions.xnos import XNosExtension
+
 AUTHOR = 'J. Vijn & gbadev.net community'
 SITENAME = 'Tonc'
 SITEURL = ''
@@ -22,7 +26,8 @@ MARKDOWN = {
     'toc',
     'attr_list',
     'md_in_html',
-    'codehilite'
+    'codehilite',
+    XNosExtension(),
   ],
   'extension_configs': {
     'markdown.extensions.toc': {

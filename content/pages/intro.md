@@ -9,13 +9,12 @@ Authors: Cearn
 
 ## ii.1. Organisation {#sec-org}
 
-<div class="cpt_fr" style="width:120px;">
-<img src="img/toncdirs.png" id="img-toncdirs"
-  alt="Tonc directory structure"><br>
-<b>Fig ii.1</b>: directories.
+<div class="cpt_fr" style="width:120px;" markdown>
+![Tonc directory structure](img/toncdirs.png){#fig:toncdirs}
+**{*@fig:toncdirs}**: directories.
 </div>
 
-TONC consists of three parts: a <dfn>text</dfn> section, the actual tutorial, a <dfn>code</dfn> section, which contains all the source code and makefiles of the various demos, and a <dfn>bin</dfn> section that contains binaries of the demo. Though they are separate zip files, they work best when used together. You can find the zip files further down this page. If you unzip them in one directory, say `tonc`, you'll get the structure depicted in fig ii.1.
+TONC consists of three parts: a <dfn>text</dfn> section, the actual tutorial, a <dfn>code</dfn> section, which contains all the source code and makefiles of the various demos, and a <dfn>bin</dfn> section that contains binaries of the demo. Though they are separate zip files, they work best when used together. You can find the zip files further down this page. If you unzip them in one directory, say `tonc`, you'll get the structure depicted in @fig:toncdirs.
 
 ### ii.1.1. Tonc text {#ssec-org-text}
 
