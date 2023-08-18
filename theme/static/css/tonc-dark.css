@@ -514,7 +514,7 @@ pre .il { color: #57b5d4 } /* Literal.Number.Integer.Long */
   text-decoration: underline;
 }
 
-.toclink::before {
+:not(h1) > .toclink::before {
   color: var(--text-muted);
   content: '¶';
   display: inline-block;
@@ -523,7 +523,7 @@ pre .il { color: #57b5d4 } /* Literal.Number.Integer.Long */
   width: 1.1em;
   visibility: hidden;
 }
-.toclink:hover::before {
+:not(h1) > .toclink:hover::before {
   visibility: visible;
 }
 
