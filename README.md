@@ -27,7 +27,7 @@ Conversion can be done one page at a time.
 
 You can use `pandoc` to get you started:
 
-### Initial conversion
+### 1. Initial conversion
 
 ```sh
 cd content/pages
@@ -52,7 +52,7 @@ Authors: Cearn
 [TOC]
 ```
 
-### Cleanup
+### 2. Cleanup
 
 Next, go through the page and fix anything that's broken.
 
@@ -64,8 +64,6 @@ For example:
 
 *   Tables and Figures should be replaced with the raw HTML from Tonc.
 
-    * Their `id` attributes should be updated to work with autonumbering. (see next heading)
-
 *   Code blocks should have the correct language set on them (`c`, `asm`, `makefile`)
 
 *   Container tags may need a `markdown` attribute adding to them, otherwise the Markdown within won't be rendered properly. e.g.
@@ -76,25 +74,26 @@ For example:
 
 Once it's in good shape, you can delete the original .htm file.
 
-### Figures, tables, equations
+### 3. Figures, tables, equations
 
 For autonumbering and cross-referencing of figures, tables and equations, we use a syntax based on [pandoc-xnos](https://github.com/tomduck/pandoc-xnos).
 
-* The figure prefix is defined by the page title. For example, if your title is `# 3. My first GBA demo`, the figure/table/equation prefix will be `3.`
 
-* The `id` attribute is used define a figure, e.g. `id="fig:foobar"` or `{#fig:foobar}`.
+* The `id` attribute is used to define a figure, e.g. `id="fig:foobar"` or `{#fig:foobar}`.
 
 * Possible ID kinds are `fig:`, `tbl:` and `eq:` to define figures, tables, and equations respectively.
 
 * Use `@fig:foobar` to refer to a figure.
 
-* Use `*@fig:foobar` to refer to a figure when the first letter should be capitalised.
+* Use `*@fig:foobar` when the first letter should be capitalised.
 
 * Use `!@fig:foobar` to print only the number (without the word 'fig').
 
 * Use `{@fig:foobar}` to avoid clashing with surrounding syntax.
 
-For example, on the page *ii. Introduction to Tonc*, the following Markdown:
+* The figure/table/equation prefix is defined by the page title.
+
+For example, on the page *'ii. Introduction to Tonc'*, the following Markdown:
 
 ```html
 <img src="img/toncdirs.png" id="fig:toncdirs" alt="Tonc directory structure">  
