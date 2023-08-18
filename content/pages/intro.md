@@ -7,7 +7,7 @@ Authors: Cearn
 
 [TOC]
 
-## ii.1. Organisation {#sec-org}
+## Organisation {#sec-org}
 
 <div class="cpt_fr" style="width:120px;" markdown>
 ![Tonc directory structure](img/toncdirs.png){#fig:toncdirs}
@@ -16,7 +16,7 @@ Authors: Cearn
 
 TONC consists of three parts: a <dfn>text</dfn> section, the actual tutorial, a <dfn>code</dfn> section, which contains all the source code and makefiles of the various demos, and a <dfn>bin</dfn> section that contains binaries of the demo. Though they are separate zip files, they work best when used together. You can find the zip files further down this page. If you unzip them in one directory, say `tonc`, you'll get the structure depicted in @fig:toncdirs.
 
-### ii.1.1. Tonc text {#ssec-org-text}
+### Tonc text {#ssec-org-text}
 
 The text section covers the principles of GBA programming in detail. The focus here is not so much on how to get something done, but how things actually *work*, and why it's done the way it's done. After that the how often comes naturally. Every chapter has one of more demonstrations of the covered theory, and a brief discussion of the demo itself. Please, do not make the mistake of only reading the demo discussion: to properly understand how things work you need to read the text in full. While there are optional parts, and whole pages of boring text that seem to have little to do with actual GBA coding, they are there for a reason, usually there's extra conceptual information or gotchas.
 
@@ -34,7 +34,7 @@ Individual html: [tonc-text.zip](http://www.coranac.com/files/tonc-text.zip){tar
 Compiled html (CHM, v1.4 version): [tonc.chm](http://www.coranac.com/files/tonc.chm){target="_blank"} (1.2 MB).  
 PDF: [tonc.pdf](http://www.coranac.com/files/tonc.pdf){target="_blank"} (3.1 MB)
 
-### ii.1.2. Tonc code {#ssec-org-code}
+### Tonc code {#ssec-org-code}
 
 The source code to all the demos mentioned in the text can be found in the `code` directory. Like the text, the code is divided into 3 main parts: basic, extended and advanced. The basic projects are (hopefully) pretty newbie friendly. They're completely self-contained so you can toy with them and not worry about screwing up other parts. The extended projects take their GBA-related code from <dfn>tonclib</dfn>, a library with all my #defines and important functions. The advanced demos also use `tonclib` liberally and will use some assembly files, even if it is just for data. There is also a `lab` directory with a few interesting projects, but which might not be quite ready. Still interesting to look at, though.
 
@@ -46,7 +46,7 @@ Pretty much all of the general functions used in tonc can be found in `tonclib`.
 
 Download [tonc-code.zip](http://www.coranac.com/files/tonc-code.zip){target="_blank"} (198 kb).
 
-### ii.1.3. Tonc binaries {#ssec-org-bin}
+### Tonc binaries {#ssec-org-bin}
 
 The **`bin`** directory contains the binaries of the demos. Each of them has been tested on a number of emulators, and on hardware using a homemade Xboo communication cable (see [www.devkitpro.org](http://www.devkitpro.org){target="_blank"} for instructions on how to make one). In most instances they behave exactly the same. The readme `tonc_bins.txt` indicates when and where hardware and emulators disagree.
 
@@ -54,7 +54,7 @@ The **`bin`** directory contains the binaries of the demos. Each of them has bee
 
 Download [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip){target="_blank"} (167 kb).
 
-### ii.1.4. Statement of Purpose {#ssec-org-sop}
+### Statement of Purpose {#ssec-org-sop}
 
 I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You often see things in a different light when you write things down and learn from that experience. Secondly, there is a lot of *very bad* information in other tutorials out there (the only exceptions I know of are the [new PERN](http://www.drunkencoders.com/index.php?system_id=2&page=Tutorials){target="_blank"} and [Deku's sound tutorial](http://deku.gbadev.org){target="_blank"}*\[b0rked\]*). Yes, I am aware of how that sounds, but unfortunately it happens to be true. A number of examples:
 
@@ -70,7 +70,7 @@ I've tried to go for completeness first, simplicity second. As a certain wild-ha
 
 In short, Tonc is *not* “GBA Programming for Dummies”, never was, never will be. There's far too much of stuff for Dummies already anyway. If you consider yourself a dummy (and I do mean dummy, not newbie), maybe Tonc isn't the right place. If you're serious about learning GBA programming, however, accept no substitute.
 
-## ii.2. Terminology and Notation {#sec-nota}
+## Terminology and Notation {#sec-nota}
 
 I'm a physicist by training which means that I know my math and its notational conventions. I use both quite often in Tonc, as well as a number of html-tag conventions. To make sure we're all on the same page here's a list:
 
@@ -122,7 +122,7 @@ I also make liberal use of shorthand for primitive C types like `char` and `int`
 
 Finally, there are a number of different notations for hex that I will switch between, depending on the situation. The C notation (‘0x’ prefix, 0x0400) is common for normal numbers, but I'll also use the assembly affix at times (‘h’, 0400:0000h). The colon here is merely for ease of reading. It's hard to tell the number of zeros without it.
 
-### ii.2.1. Register names and descriptions {#ssec-note-reg}
+### Register names and descriptions {#ssec-note-reg}
 
 Getting the GBA to do things often involves the use of the so-called <dfn>IO registers</dfn>. Certain bits at certain addresses of memory can be used as switches for the various effects that the GBA is capable of. Each register is aliased as a normal variable, and you need to set/clear bits using bit operations. We'll get to where these registers are and what bit does what later; right now I want to show you how I will *present* these, and refer to them in the text.
 
@@ -189,7 +189,7 @@ The full list of REG_DISPSTAT can be found [here](video.htm#tbl-reg-dispstat). T
 
 Lastly, as shorthand for a specific bit in a register, I will use accolades. The number will be a hexadecimal number. For example, REG_DISPCNT{0} is the VBlank status bit (VbS above), and REG_DISPCNT{8-F} would be the whole byte for the VCount trigger.
 
-## ii.3. Prerequisites {#sec-cnd}
+## Prerequisites {#sec-cnd}
 
 The text and code have been created and found to work under the following conditions. If you find you have a problem, show me yours and maybe we can find and fix it.
 
@@ -205,7 +205,7 @@ The text and code have been created and found to work under the following condit
 
 -   **Browser**. I've tested these pages with MSIE 6 and 7, Firefox, and sometimes Opera too. With one or two exceptions, (\<nobr\>), everything is valid HTML 4.01 and CSS 2. However, IE isn't a compliant browser so there are one or two minor glitches. Firefox on the other hand is *too* compliant and pretty much ignores column-based layout in tables (CSS and HTML standards conflict on this issue). But again, these situations aren't too significant. In case you want a print-out, it'll come out as if the browser window was roughly 640 pixels wide. Personally, I prefer setting the font to ‘smaller’; I feel that I lose the perspective in the ‘normal’ font-size. Note that the entire text is roughly 300 pages long, so consider shrinking the pages and don't forget to fill the tray when you're done.
 
-## ii.4. On errors, suggestions {#sec-feedback}
+## On errors, suggestions {#sec-feedback}
 
 As much as I've tried to weed out things like spelling/grammar errors and broken links, I'm sure some have slipped by. If you find some, mail [me](mailto:cearn@coranac.com) about it. That's right, I'm actually asking for spell-flames. Currently, I'm refitting the pages to fit my HTML auto-numbering tool, but it's a lot stuff to go through (over 1M in plain text), and I may miss something; if you see things like *\[\[ref:foo\]\]* in unfinished sections, those probably shouldn't be there. Of course, if things are unclear or \*gasp\* incorrect, or if you have suggestions, I'd like to know that as well.
 
@@ -218,8 +218,6 @@ And, of course:
 > Both text and code can be modified by me at any time. Check in once in a while to see if anything's changed. Time stamps are at the bottom of every page, and at the top of all source-files. There is also a [log](log.html) in the appendices.
 
 OK that's it. Have fun.
-
-  
 
 <div style="margin-left:1.2cm;" markdown>
 
