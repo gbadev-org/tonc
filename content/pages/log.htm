@@ -25,12 +25,12 @@ Maintaince update. also includes things from the
     with the latest devkitArm (currently 40) for asm compatilibity. The examples and 
     tonclib should all work again. I still have to adjust the text to match though.
   </li>
-  <li> <tt>asm.htm</tt>: fixed non-matching variable names in <a href="asm.htm#ssec-gas-dsec">data sections</a>'s code snippet. Thanks, Gdogg</li>
-  <li> <tt>gfx.htm</tt>: removed a lost semicolon in the <a href="gfx.htm#ssec-bld-demo">blending demo</a>.
+  <li> <tt>asm.htm</tt>: fixed non-matching variable names in <a href="asm.html#ssec-gas-dsec">data sections</a>'s code snippet. Thanks, Gdogg</li>
+  <li> <tt>gfx.htm</tt>: removed a lost semicolon in the <a href="gfx.html#ssec-bld-demo">blending demo</a>.
   <li><tt>hardware.htm</tt>: IO-ram upper limit was given as <code>0401:03FF</code>, which should be <code>0400:03FF</code>. Thanks, G M.
   </li>
   <li>code: Fixed links to grit for <tt>m7_demo</tt>, <tt>m7_ex</tt>, <tt>tte_demo</tt>.</li>
-  <li><a href="objaff.htm#sec-combo">objaff.htm 11.5</a>: fixed spurious <code>sina</code> and <code>cosa</code> calculations in <code>obj_rotscale_ex()</code> and <code>oac_rotscale()</code>. Thanks, dasi.
+  <li><a href="objaff.html#sec-combo">objaff.htm 11.5</a>: fixed spurious <code>sina</code> and <code>cosa</code> calculations in <code>obj_rotscale_ex()</code> and <code>oac_rotscale()</code>. Thanks, dasi.
   </li>
   <li>GNU assembler manual has moved to <a href="http://sourceware.org/binutils/docs/as/index.html">http://sourceware.org/binutils/docs/as/index.html</a> (thanks, Joseph).
   </li>
@@ -51,12 +51,12 @@ Maintaince update. also includes things from the
 
 <ul>
   <li class="fix">text: the <code>se_index_fast()</code> function in 
-    <a href="regbg.htm#ssec-map-layout">regbg:map-layout</a> was wrong; 
+    <a href="regbg.html#ssec-map-layout">regbg:map-layout</a> was wrong; 
 	the second condition should have used 
     `<code>(bgcnt&amp;BG_REG_64x64) == BG_REG_64x64</code>'. Fixed.
   </li>
   <li class="fix">text: the <code>ldm</code> example in 
-    <a href="asm.htm#ssec-arm-mem">asm:memory</a> did not list the right 
+    <a href="asm.html#ssec-arm-mem">asm:memory</a> did not list the right 
     values for <code>ldmda</code> and <code>ldmdb</code>. Fixed.
   </li>
   <li class="fix">code: removed <code>void*</code> arithmetic in 
@@ -156,7 +156,7 @@ I think that'll be all then.
 <h3>Dec 2007 (1.3b)</h3>
 <ul>
 <li class="new">
-  Upgraded the <a href="first.htm#sec-notes">recommendations</a> 
+  Upgraded the <a href="first.html#sec-notes">recommendations</a> 
   section with a longer list and examples. If you've read other 
   tutorials then <b>please read this</b>!
 </li>
@@ -358,7 +358,7 @@ things here.
 <li class="fix">Added alignment attributes to most structs, as
   those are now pretty much <i>required</i> if you want struct-copies 
   to work properly. For more, see
-  <a href="bitmaps.htm#ssec-data-align">here</a>
+  <a href="bitmaps.html#ssec-data-align">here</a>
 </ul>
 
 <h3>Apr 28, 2006 (v1.2.2)</h3>
@@ -401,7 +401,7 @@ things here.
 <li class="new">
   Added gfx2gba and grit conversion instructions in a few places.
 <li>More notes in bitmaps.htm's 
-  <a href="bitmaps.htm#sec-data">data section</a>. 
+  <a href="bitmaps.html#sec-data">data section</a>. 
 </ul>
 <br>
 
@@ -456,24 +456,24 @@ More non-final updates. Quite a lot actually.
   tonclib's text so that it's clearer what you're changing.
 <li class="upgr">Replaced copiers/fillers with tonclib's 
   <code>memcpy16/32</code> and <code>memset16/32</code> in most demos 
-  after <a href="regbg.htm#ssec-demo-hello">its introduction</a>.
+  after <a href="regbg.html#ssec-demo-hello">its introduction</a>.
 <li class="upgr">Added
-  <a href="intro.htm#ssec-note-reg">field defines</a> 
+  <a href="intro.html#ssec-note-reg">field defines</a> 
   to a lot of register tables.
 <li class="upgr">Restructed part of <a href="keys.html">keys.htm</a> 
   for better explanations of the various functions I use.
 <li class="new">Added a nasty piece on
-  <a href="fixed.htm#sec-rmdiv">division by reciprocal multiplication</a>.
+  <a href="fixed.html#sec-rmdiv">division by reciprocal multiplication</a>.
   Not for the squeemish.
 <li>Added a simple template makefile and discussion
-  for the <a href="first.htm#ssec-2nd-make">second demo</a>.
+  for the <a href="first.html#ssec-2nd-make">second demo</a>.
 <li class="new">Added a subsection on 
-  <a href="keys.htm#ssec-adv-tri">tribool keystates</a>. In fact, 
+  <a href="keys.html#ssec-adv-tri">tribool keystates</a>. In fact, 
   nearly all of the demos that might benefit from these have been 
   altered to use them. One line of code instead of four lines, 
   and faster to boot. Seems like a win to me.
 <li class="new">Added a subsection on the
-  <a href="bitmaps.htm#ssec-data-proc">proper build procedure</a>, 
+  <a href="bitmaps.html#ssec-data-proc">proper build procedure</a>, 
   which was still missing from that whole section. This is pretty 
   much <b>required reading</b> for anyone how has been following
   non-tonc tutorials and adopted their coding standards.
@@ -504,7 +504,7 @@ Heh, so that wasn't not the final update after all <kbd>:P</kbd>.
   one for sound.
 <li class="swap">More name changes. This time in demo-names only, 
   though, so don't worry there.
-<li>Added/moved a section on <a href="bitmaps.htm#sec-data">How
+<li>Added/moved a section on <a href="bitmaps.html#sec-data">How
   to deal with data</a>. This explains some of the nastiness you 
   may or may not encounter. But if you do, it's nice to know 
   why they happen and how to fix it, no?
@@ -577,7 +577,7 @@ original one last time.
   for linking too and (maybe) automatic numbering if I figure out how.
 <li class="upgr"><tt>int_demo</tt> now uses a separate file for the
   direct isr and makes proper use of sections and ARM/THUMB code. See 
-  the <a href="interrupts.htm#sec-demo">demo description</a> for more.
+  the <a href="interrupts.html#sec-demo">demo description</a> for more.
 </ul>
 
 <p>
@@ -710,7 +710,7 @@ blasting through my stereo, excccellent! <kbd>=)</kbd>
 
 <ul>
 <li class="upgr">Added <tt>-Map</tt> and <tt>-Wl</tt> command-line 
-  options to the <a href="makefile.htm#sec-flags">flags list</a>.
+  options to the <a href="makefile.html#sec-flags">flags list</a>.
 <li class="swap">Moved the graphics data that is only used once into 
   the demo-folder where they are used; the gfx directory now only 
   has shared graphics in it. 
@@ -768,7 +768,7 @@ and minimizing a window takes a few seconds. Man, this sucks.
 
 <h3>June 3, 2004 (v0.99)</h3>
 <ul>
-<li class="fix">Found out about the <a href="affobj.htm#sec-wrap">wrapping
+<li class="fix">Found out about the <a href="affobj.html#sec-wrap">wrapping
   artifact</a>, and changed the sprite pages accordingly. 
   <tt>obj_aff</tt> now allows moving the sprite so you can see
   this artifact for yourself.
@@ -777,7 +777,7 @@ and minimizing a window takes a few seconds. Man, this sucks.
   separate directories. Now, if only I could get over my ifphobia as 
   well...
 <li>Added a section on vsyncing with interrupts in 
-  <a href="swi.htm#sec-vsync2">swi.htm</a> and an accompanying demo, 
+  <a href="swi.html#sec-vsync2">swi.htm</a> and an accompanying demo, 
   <tt>swi_vsync</tt>. You need to see these.
 <li>Added <code>int_enable_ex</code> and <code>int_disable_ex</code>, 
   which should make working with interrupts easier. However, I am not 
@@ -837,7 +837,7 @@ sssslssszzzzzzz....
   use the object tileblocks for backgrounds after all <tt>:(</tt>.
   Added my early experiences with hardware tests on a number of the
   pages.
-<li class="fix">Including in the <a href="gfx.htm#sec-win">windowing</a> 
+<li class="fix">Including in the <a href="gfx.html#sec-win">windowing</a> 
   section. It
   seems that you need to be really careful with the vertical
   settings of windowing. Updated the windowing demo to not use 
@@ -862,7 +862,7 @@ sssslssszzzzzzz....
   Added the demo-code of <code>bm_mode.c</code>, to show the basic steps
   of loading a picture and using keys. I should still post full code
   that earlier in the tutorials. Added an example of a fixed point
-  identity matrix on <a href="affine.htm#sec-finish">affine.htm</a> to
+  identity matrix on <a href="affine.html#sec-finish">affine.htm</a> to
   make sure people don't try to use floats.
 <li class="fix">Fixed <a href="swi.html">swi.htm</a>. <i>Again!</i> I swear, if 
   I find one more error here some somebody is gonna get hurt. And it

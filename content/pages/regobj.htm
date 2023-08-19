@@ -131,7 +131,7 @@ It may seem that calculating those tile addresses can be annoying,
 and it would be if you had to do it manually. That's why I have mapped 
 the whole of VRAM with a charblock/tile matrix called 
 <code>tile_mem</code>, as discussed in the 
-<a href="objbg.htm#ssec-img-cbb">overview</a>. Need tile #123 of OVRAM? 
+<a href="objbg.html#ssec-img-cbb">overview</a>. Need tile #123 of OVRAM? 
 That'd be <code>tile_mem[4][123]</code>. Need its address? Use the 
 address operator: <code>&amp;tile_mem[4][123]</code>. Quick, easy, safe.
 </p>
@@ -374,7 +374,7 @@ For that reason, I will force word-alignment on many of my
 structs with &lsquo;<code>ALIGN4</code>&rsquo;, which is a macro for 
 &lsquo;<code>__attribute__((aligned(4)))</code>&rsquo;. For 
 more on this, see the section on 
-<a href="bitmaps.htm#ssec-data-align">data alignment</a>.
+<a href="bitmaps.html#ssec-data-align">data alignment</a>.
 </p>
 </div>
 
@@ -446,7 +446,7 @@ palette).
     <ul>
       <li><b>00</b>. Normal rendering.
       <li><b>01</b>. Enables alpha blending. Covered 
-        <a href="gfx.htm#sec-blend">here</a>.
+        <a href="gfx.html#sec-blend">here</a>.
       <li><b>10</b>. Object is part of the object window. The sprite 
         itself isn't rendered, but serves as a mask for bgs and other 
         sprites. (I think, haven't used it yet)
@@ -455,7 +455,7 @@ palette).
 <tr class="bg1">	
   <td>C<td class="rclr5">Mos
   <td>ATTR0_MOSAIC
-  <td>Enables mosaic effect. Covered <a href="gfx.htm#sec-mos">here</a>. 
+  <td>Enables mosaic effect. Covered <a href="gfx.html#sec-mos">here</a>. 
 <tr class="bg0">	
   <td>D<td class="rclr2">CM
   <td>ATTR0_4BPP, ATTR0_8BPP
@@ -1163,7 +1163,7 @@ you put things in the bitmap modes, as you can't use tiles 0-512 there.
 <p>
 As I said, loading the sprites happens at <b>point (1)</b> in the code. 
 If you paid attention to the 
-<a href="objbg.htm#ssec-img-cbb">overview</a>, you'll remember that 
+<a href="objbg.html#ssec-img-cbb">overview</a>, you'll remember that 
 <code>tile_mem[][]</code> is a two dimensional array, mapping 
 charblocks and 4-bit tiles. You'll also remember that object VRAM is 
 charblocks 4 and 5, so 
@@ -1246,7 +1246,7 @@ ranges wrap around, so you could also say that these are signed
 integers, with the ranges <i>x</i> &isin; [-256, 255] and <i>y</i> &isin; 
 [-128, 127]. Yes, that would make the highest <i>y</i>-value smaller than 
 the height of the screen, but thanks to the wrapping it all works out. 
-Well, <a href="affobj.htm#ssec-wrap">almost</a>. Anyway, thanks to the 
+Well, <a href="affobj.html#ssec-wrap">almost</a>. Anyway, thanks to the 
 2s-complement nature of integers, simply masking the <i>x</i> and 
 <i>y</i> values by <code>0x01FF</code> and <code>0x00FF</code>, 
 respectively, will give proper 9 and 8 bit signed values. You can 
@@ -1298,7 +1298,7 @@ when the time is right, these are fed to <code>oam_set_pos()</code>
 to update the sprite.
 </p>
 <p>
-Also, note the use of my <a href="keys.htm#ssec-adv-tri">tribool 
+Also, note the use of my <a href="keys.html#ssec-adv-tri">tribool 
 key functions</a> to update the positions. Input processing often 
 follows a pattern of &ldquo;key X pressed: increment, 
 key opposite of Y pressed, decrement&rdquo; The tribool functions 

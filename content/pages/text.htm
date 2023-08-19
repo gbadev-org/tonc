@@ -1637,7 +1637,7 @@ itself, namely the items 1, 2 and 3. There's a call to
 to the sprite text initializer, <code>txt_init_obj()</code>. The second 
 argument is the base for attribute 2 (if you don't remember what 
 attribute 2 is, see the chapter on 
-<a href="regobj.htm#ssec-obj-attr2">sprites</a> again); 
+<a href="regobj.html#ssec-obj-attr2">sprites</a> again); 
 <code>0xF200</code> means I'm using the sub-palette 15 and start 
 the character tiles at tile-index 512 (because of the bitmap mode). 
 The font color will be yellow, and out at index 255. That's 240 from
@@ -2244,7 +2244,7 @@ The methods are:
   <li><b><code>memcpy()</code></b>. The standard C copy routine, the one 
     I'm using in the earlier demos. Well, nowadays I am.
   <li><b><code>memcpy32()</code></b>. Home grown assembly, explained 
-    in detail <a href="asm.htm#sec-cpy">here</a>. Basically 
+    in detail <a href="asm.html#sec-cpy">here</a>. Basically 
     does what <code>CpuFastSet()</code> does, only without the restriction 
 	that the number of words must be a multiple of 8.
   <li><b><code>dma_memcpy()</code></b>. Copy via 32-bit DMA.
@@ -2509,7 +2509,7 @@ would be slower by about 20%; try it and you'll see). The GBA is a
 sets are better at dealing with 32-bit chunks. Let go of the u16 
 fetish you may have picked up elsewhere. Use word-sized data if 
 you can, the others only if you have to. That said, do watch your
-<a href="bitmaps.htm#ssec-data-align">data alignment</a>! u8 or u16
+<a href="bitmaps.html#ssec-data-align">data alignment</a>! u8 or u16
 arrays aren't always word-aligned, which will cause trouble with
 casting.
 </p>

@@ -44,7 +44,7 @@ The vast majority uses the GBA's <dfn>hardware graphics</dfn>,
 which come in the forms of <dfn>sprites</dfn> and 
 <dfn>tiled backgrounds</dfn> (simply &ldquo;background&rdquo; or 
 &ldquo;bg&rdquo; for short). As I said in the 
-<a href="video.htm#sec-vid-types">video introduction</a>, a tiled 
+<a href="video.html#sec-vid-types">video introduction</a>, a tiled 
 background is composed of a matrix of tiles (hence the name) and each 
 tile contains an index to an 8x8 pixel bitmap known as a
 <dfn>tile</dfn>. So what ends up on screen is a matrix of tiles. There 
@@ -93,7 +93,7 @@ things themselves, whether to use 16 or 256 color tiles, and effects
 like alpha-blending and transformations. First up is whether or not 
 you want to use the things in the first place. This is done by setting 
 the right bits in the display control register 
-<a href="video.htm#tbl-reg-dispcnt"><code>REG_DISPCNT</code></a>. 
+<a href="video.html#tbl-reg-dispcnt"><code>REG_DISPCNT</code></a>. 
 Once you've done that there are further control registers for backgrounds: 
 the <code>REG_BGxCNT</code> registers 
 (<code>0400:0008h</code>-<code>0400:000Fh</code>). For sprites there's
@@ -141,7 +141,7 @@ For sprites, it's s a bit different, but the basic steps remain.
 You give <i>one</i> tile-index for the whole sprite; the GBA then
 figures out the other tiles to use by looking at the shape and 
 size of the sprite and the <dfn>sprite mapping-mode</dfn>. I'll explain 
-what this means <a href="regobj.htm#sec-oam">later</a>; suffice to 
+what this means <a href="regobj.html#sec-oam">later</a>; suffice to 
 say that the mapping mode is either 1D or 2D, depending on 
 <code>REG_DISPCNT{6}</code>. In this case, I've 
 used 1D mapping, which states that the tiles that a sprite should use 
@@ -375,8 +375,8 @@ reasons why you <i>need</i> to test on real hardware. <!--Since hardware
 testing has available to me only recently, earlier versions of Tonc 
 (prior to May 17, 2004) incorrectly stated that accessing the sprite 
 blocks was possible. Apologies.--> For more on this subject see the 
-<a href="regbg.htm#ssec-map-subtle">background tile subtleties</a> and the
-<a href="regbg.htm#sec-demo"><tt>cbb_demo</tt></a>.
+<a href="regbg.html#ssec-map-subtle">background tile subtleties</a> and the
+<a href="regbg.html#sec-demo"><tt>cbb_demo</tt></a>.
 <p>
 Another thing you need to know about available charblocks is 
 that in one of the <a href="bitmaps.html">bitmap</a> modes, the 

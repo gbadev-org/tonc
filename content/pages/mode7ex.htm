@@ -66,7 +66,7 @@ This chapter touches on almost all of the topics covered so far. It
 uses <a href="affobj.html">affine objects</a>, backgrounds (both
 <a href="regbg.html">regular</a> and <a href="affbg.html">affine</a>),
 <a href="interrupts.html">interrupts</a>, 
-<a href="gfx.htm#blend">color effects</a> and a few more. If your 
+<a href="gfx.html#blend">color effects</a> and a few more. If your 
 understanding of any of these is lacking, you could be in for a rough
 time here.
 </p>
@@ -222,7 +222,7 @@ general relativity you have something called the Riemann tensor,
 which has <i>four</i> indices), you'll see that this equation makes
 sense. If you don't get it right away, think of them as arrays and
 matrices. An observant reader will also recognise the structure 
-in the <a href="affbg.htm#sec-aff-ofs">screen&harr;map 
+in the <a href="affbg.html#sec-aff-ofs">screen&harr;map 
 transformation</a> we had for affine maps: 
 <b>P·q</b>&nbsp;=&nbsp;<b>p &minus; dx</b>. 
 Eq 21.1 is a very 
@@ -1185,7 +1185,7 @@ lines near the horizon are usually not much to look at anyway.
 </p>
 <p>
 By the way, note that I said <i>orange</i> fog. If you'd paid 
-attention in the <a href="gfx.htm#sec-blend">graphics effects</a> 
+attention in the <a href="gfx.html#sec-blend">graphics effects</a> 
 chapter will know that the GBA only has fading modes for white and
 black. Nevertheless, fades to an arbitrary color are very much
 possible, but I'll explain once we get to the implementation. 
@@ -1215,7 +1215,7 @@ sprite's pixels to work around that, it kind of defeats the purpose
 of using sprites in the first place. Instead, we'll link one point on 
 the object to the world coordinate of the sprite and set the OAM 
 position and matrix to accommodate this. This is basically the theory
-of <a href="affobj.htm#sec-combo">anchoring</a> discussed in the 
+of <a href="affobj.html#sec-combo">anchoring</a> discussed in the 
 affine object chapter. 
 </p>
 <p>
@@ -1357,7 +1357,7 @@ specify OAM coordinates rather than anchor coords, so there is
 some math involved in how to express the OAM coordinates <b>x</b> in 
 terms of the texture anchor <b>p</b><sub>0</sub> and the screen 
 anchor <b>q</b><sub>0</sub>. This theory was covered in the
-<a href="affobj.htm#sec-combo">affine object</a> chapter, which led
+<a href="affobj.html#sec-combo">affine object</a> chapter, which led
 to eq&nbsp;21.16.
 The other quantities there are size of the objects, 
 <b>s</b>&nbsp;=&nbsp;(<i>w</i>,&nbsp;<i>h</i>), and <i>m</i> which 
@@ -1744,7 +1744,7 @@ itself <tt>m7_ex.c</tt>; and three for mode 7 specific stuff,
 iwram functions too; some of these things are going to be computation 
 extensive and I want them as fast as possible right off the bat. 
 I'm also borrowing the object sorter from the 
-<a href="lab.htm##ssec-prio-objsort">priority demo</a>.
+<a href="lab.html##ssec-prio-objsort">priority demo</a>.
 </p>
 <p>
 There are three main areas of interest here: the <b>camera</b>, 
@@ -1893,7 +1893,7 @@ does require an actual <codE>m7_level</code> variable to exist for
 the HBlank interrupt. <code>SPR_COUNT</code> is the number of sprites, 
 which is <i>definitely</i> demo specific. There are 161 entries 
 in <code>m7_bgaffs</code> rather than just 160 for the same reason 
-as in the <a href="dma.htm#sec-demo">DMA demo</a>: HBlank sets up 
+as in the <a href="dma.html#sec-demo">DMA demo</a>: HBlank sets up 
 the next line, rather than the current one, and having this is 
 better (and faster) than the alternative with if/else blocks.
 </p>
@@ -2131,7 +2131,7 @@ We begin by getting the scanline to begin calculating at
 all of the temporaries are necessary, but they make the code more 
 readable. Names aside, the code within the loop is very similar to 
 that of <code>hbl_mode7_c</code> in the 
-<a href="mode7.htm#ssec-order-code">first mode 7 demo</a>, except 
+<a href="mode7.html#ssec-order-code">first mode 7 demo</a>, except 
 that in calculating &lambda; we use a rotated 
 <i>y</i><sub>s</sub>-value, and in calculating the offsets a rotated 
 <i>z</i><sub>s</sub> (=&nbsp;&minus;<i>D</i>) value. Annnd, that's 
@@ -2394,7 +2394,7 @@ already described in the theory. The  <code>pos2</code> member of
 the sprites is set by <code>m7_prep_sprite()</code> to contain the 
 sprite's position in camera space. The sorting routine 
 <code>id_sort_shell()</code> is the index-table sorter described in 
-the <a href="lab.htm#sec-prio">priority section</a>.
+the <a href="lab.html#sec-prio">priority section</a>.
 </p>
 <p>
 If I had wanted to have more advanced animation or sprite things, 

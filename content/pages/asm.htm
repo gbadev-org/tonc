@@ -1052,7 +1052,7 @@ logical right-shift (<code>lsr</code>),
 arithmetic right-shift (<code>asr</code>) and 
 rotate-right (<code>ror</code>). The difference between arithmetic 
 and logical shift right is one of signed/unsigned numbers; see the
-<a href="numbers.htm#ssec-bitops-false">bit ops section</a> for 
+<a href="numbers.html#ssec-bitops-false">bit ops section</a> for 
 details.
 
 These operations are attached to the last register in an operation, 
@@ -2475,7 +2475,7 @@ benefit over other methods. Now, before you blame GCC for slow loops,
 it's also often the C programmer that forces GCC to produce slow 
 code. In the introduction, you could see the major difference that 
 inlining makes, and in the 
-<a href="text.htm#ssec-demo-se2">profiling</a> demo 
+<a href="text.html#ssec-demo-se2">profiling</a> demo 
 I showed how much difference using the wrong datatype makes.
 </p><br>
 
@@ -2707,7 +2707,7 @@ cover instruction speeds and what an instruction actually looks like
 in binary, i.e., what the processor actually processes. Neither 
 section is necessary in the strictest sense, but still informative. 
 If you do not want to be informed, move on to the next section: 
-<a href="asm.htm#sec-thumb">the THUMB instruction set</a>.
+<a href="asm.html#sec-thumb">the THUMB instruction set</a>.
 </p>
 
 <h3 id="ssec-misc-cycles">Cycle counting</h3>
@@ -3025,7 +3025,7 @@ is an <code>add</code> instruction), the registers to use
 <code>Rs</code> too) and a few others. We have seen this thing a 
 number of times by now, so there should be no real difficulty in 
 understanding here. The assembly instructions are little more than 
-the <a href="regobj.htm#cd-oe-build">BUILD macros</a> I've used a 
+the <a href="regobj.html#cd-oe-build">BUILD macros</a> I've used a 
 couple of times, only this time it's the assembler that turn them 
 into raw numbers instead of the preprocessor. Having said that, 
 it <i>is</i> possible to construct the instructions manually, 
@@ -3328,7 +3328,7 @@ A very important and sneaky issue is alignment. <b>You</b> are
 responsible for aligning code and data, not the assembler. In 
 C, the compiler did this for you and the only times you might have 
 had problems was with
-<a href="bitmaps.htm#ssec-data-align">alignment mismatches</a> 
+<a href="bitmaps.html#ssec-data-align">alignment mismatches</a> 
 when casting, but here both code <i>and</i> data can be misaligned; 
 in assembly, the assembler just strings your code and data together 
 as it finds it, so as soon as you start using anything other than 

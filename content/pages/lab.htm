@@ -46,9 +46,9 @@ This section covers the last of the bits in the background and object
 control that I haven't discussed yet: <dfn>priority</dfn>. 
 There are four priority levels, 0-3, and you can set the priority for 
 backgrounds in 
-<a href="regbg.htm#tbl-reg-bgxcnt">REG_BGxCNT</a> bits 0 and 1, 
+<a href="regbg.html#tbl-reg-bgxcnt">REG_BGxCNT</a> bits 0 and 1, 
 and for objects in 
-<a href="regobj.htm#tbl-oe-attr2">attribute 2</a>, bits 10 and 11. 
+<a href="regobj.html#tbl-oe-attr2">attribute 2</a>, bits 10 and 11. 
 The concept of priority 
 is simple: higher priorities are rendered first, so they appear behind
 things with a lower priority. This will allow you to 
@@ -270,7 +270,7 @@ one.
 Now, I'll be the first to admit that the current design isn't exactly 
 optimal anyway. Using linked lists instead of an index table may work 
 faster, and there are other things too (the division isn't a problem, 
-as <a href="fixed.htm#sec-rmdiv">it can be faked</a>). 
+as <a href="fixed.html#sec-rmdiv">it can be faked</a>). 
 However, then it wouldn't be quite as simple anymore, which is what 
 I was going for here. 
 </p>

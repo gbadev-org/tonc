@@ -246,7 +246,7 @@ capacity by setting <code>r3</code> to 8 instead of 2. The
 second is that the routine can also be used to set up multiple arrays 
 via <code>r2</code>. However, <i>be careful</i> when you do this 
 with devkitPro 19. <code>ObjAffineSet()</code> expects its source 
-structs to be <a href="bitmaps.htm#ssec-data-align">word-aligned</a>, 
+structs to be <a href="bitmaps.html#ssec-data-align">word-aligned</a>, 
 which they won't be unless you add the alignment attributes yourself.
 </p>
 
@@ -740,7 +740,7 @@ class="num">0</span>; ix&lt;SCREEN_WIDTH; ix++)
 <p>
 Until now, all demos used the function <code>vid_vsync</code> to 
 synchronize the action to the VBlank (see the 
-<a href="video.htm#sec-vsync1">graphics introduction</a>). What this 
+<a href="video.html#sec-vsync1">graphics introduction</a>). What this 
 did was to check <code>REG_VCOUNT</code> and stay in a while loop 
 until the next VBlank came along. While it works, it's really a 
 pretty poor way of doing things for two reasons. First, because of 
@@ -771,7 +771,7 @@ little bit of information is a little hard to find elsewhere (in part
 because few tutorials cover BIOS calls); for more info, see <a 
 href="http://nocash.emubase.de/gbatek.htm#bioshaltfunctions">GBATek,
 BIOS Halt Functions</a>. Fortunately for us, the switchboard presented 
-in the <a href="interrupts.htm#sec-switch">interrupts</a> section has 
+in the <a href="interrupts.html#sec-switch">interrupts</a> section has 
 this built in.
 </p>
 <p>

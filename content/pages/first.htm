@@ -71,7 +71,7 @@ Don't worry about the code just yet, there's time for that later.
 And don't leave just yet, I'll give a nicer version later on. 
 All that matters now is that you're able to compile and run it. 
 The makefile to build the project was given in the
-<a href="setup.htm#ssec-cli-make">setup</a>, but I'll repeat it here.
+<a href="setup.html#ssec-cli-make">setup</a>, but I'll repeat it here.
 You can also find it on Tonc's examples folder under 
 <tt>code/basic/first</tt>.
 </p>
@@ -165,7 +165,7 @@ or double-clicking <tt>build.bat</tt>. This will
 After the makefile has run, you should have a file called 
 <tt>first.gba</tt>, if you don't there's a problem with your 
 set-up because the code sure isn't wrong. I've made a list 
-of potential problems <a href="setup.htm#ssec-dkp-error">setup:dkp</a>; 
+of potential problems <a href="setup.html#ssec-dkp-error">setup:dkp</a>; 
 check if yours is one of them.
 </p>
 <p>
@@ -231,7 +231,7 @@ be given later.
 As I said, GBA programming is low-level programming and sometimes goes 
 right down to the bit. The <code>0x04000000</code> and 
 <code>0x06000000</code> are parts of the accessible 
-<a href="hardware.htm#sec-memory">memory sections</a>. These numbers 
+<a href="hardware.html#sec-memory">memory sections</a>. These numbers 
 themselves don't mean much, by the way; they just refer to different 
 sections. There aren't really <code>0x02000000</code> between these 
 two sections. As you can see in the memory map, these two 
@@ -427,7 +427,7 @@ a waste now, but this is only because it's such a small demo. None of
 the contents of <tt>toolbox.h</tt> is actually compiled, so there is 
 no cost in terms of memory use. In fact, if it did it wouldn't 
 belong in a header file, but that's a discussion I'll go into 
-<a href="bitmaps.htm#ssec-data-hdr">another time</a>. Right now, let's 
+<a href="bitmaps.html#ssec-data-hdr">another time</a>. Right now, let's 
 see what we actually have in <tt>toolbox.h</tt>
 </p>
 
@@ -639,9 +639,9 @@ essential reference to GBA programming. For every IO register I use
 in these pages I'll give a description of the bits and a list of 
 #defines as they're defined in tonclib. The formats for these 
 descriptions were given in the 
-<a href="intro.htm#ssec-note-reg">preface</a>, and the table for 
+<a href="intro.html#ssec-note-reg">preface</a>, and the table for 
 REG_DISPCNT can be found in the 
-<a href="video.htm#sec-vid-regs">video chapter</a>.
+<a href="video.html#sec-vid-regs">video chapter</a>.
 </p>
 <p>
 Actually plotting the pixels is now done 
@@ -780,12 +780,12 @@ scaling. All of the popular tutorials give the wrong matrix for
 a rotation-scale transformation, even though the reference documents 
 give the correct description of each element. Other good examples 
 are the end result of trying to 
-<a href="bitmaps.htm#ssec-intro-details">write 
+<a href="bitmaps.html#ssec-intro-details">write 
 a single byte to VRAM</a>, the fact that 
-<a href="keys.htm#ssec-reg-keys">bits
+<a href="keys.html#ssec-reg-keys">bits
 for key-states</a> are actually <i>set</i> when the button's unpressed 
 instead of the other way around, or what the timer register 
-<a href="timers.htm#ssec-reg-tmxd">REG_TMxD</a> <i>really</i> does.
+<a href="timers.html#ssec-reg-tmxd">REG_TMxD</a> <i>really</i> does.
 </p>
 <p>
 I've tried to be complete in my explanations of all these things, but 
@@ -893,13 +893,13 @@ to adopt.
 	Likewise, if you have memory to copy or fill, using words can be 
 	about twice as fast as halfwords. Just be careful when casting, 
 	because an ARM CPU is very picky when it comes to 
-	<a href="bitmaps.htm#ssec-data-align">alignment</a>.
+	<a href="bitmaps.html#ssec-data-align">alignment</a>.
   </p>  
 </li>
 <li>
   <b>Data in header files is <i>bad</i>, very bad</b>. I'll go in a 
   little detail about it when talking about 
-  <a href="bitmaps.htm#ssec-data-hdr">data</a>. And see also 
+  <a href="bitmaps.html#ssec-data-hdr">data</a>. And see also 
   <a href="http://forum.gbadev.org/viewtopic.php?t=2605" target="_blank">here</a> and 
   <a href="http://forum.gbadev.org/viewtopic.php?t=3687" target="_blank">here</a>.
 </li>
@@ -924,7 +924,7 @@ few things on (C) programming in general that I'd like to mention here.
   from lack of C skills &ndash; the &lsquo;int&rsquo;-thing is an 
   example of this. Another <i>very</i> common problem is correct 
   memory and pointer use, something that I will cover a little later 
-  and also in the section on <a href="bitmaps.htm#sec-data">data</a>.
+  and also in the section on <a href="bitmaps.html#sec-data">data</a>.
   With C, you have different kinds of datatypes, pointers, the 
   preprocessor and bit-operators at your disposal. Learn what they do 
   and how to use them effectively.
@@ -1011,7 +1011,7 @@ few things on (C) programming in general that I'd like to mention here.
 	you have a loop in which things don't depend on the loop-variable, 
 	precalculate that part before the loop. Also, to avoid (complex)  
 	calculations, you could dump the data in a 
-	<a href="fixed.htm#sec-lut">Look-up Table</a> and simply grab a 
+	<a href="fixed.html#sec-lut">Look-up Table</a> and simply grab a 
 	value from there.
   </li>
   <li>
@@ -1160,7 +1160,7 @@ here, but it depends on the case at hand.
 <p>
 One of the most common mistakes GBA neophytes make is mixing up 
 array/pointer sizes when copying data. 
-<a href="bitmaps.htm#sec-data">Data is data</a>, but you can access it 
+<a href="bitmaps.html#sec-data">Data is data</a>, but you can access it 
 in different ways. For example, here's code that copies bitmap-data 
 from an array into VRAM.
 </p>
@@ -1432,8 +1432,8 @@ they run the same on VBA as on a real GBA in all cases ... mostly.
 For one thing, timing is a real issue on most of them (the exception 
 here is no$gba, which I've never seen off the mark by more than 2%, 
 usually a lot less). Also, in a few rare occasions (like in 
-<a href="regbg.htm#sec-demo"><tt>cbb_demo</tt></a> and 
-<a href="gfx.htm#sec-win"><tt>win_demo</tt></a>) there were small but
+<a href="regbg.html#sec-demo"><tt>cbb_demo</tt></a> and 
+<a href="gfx.html#sec-win"><tt>win_demo</tt></a>) there were small but
 important differences between GBA and emulator outputs, and if you've
 never tested on the real thing, you'd never know. 
 </p>

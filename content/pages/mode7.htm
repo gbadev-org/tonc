@@ -116,7 +116,7 @@ using either the HBlank DMA or the HBlank interrupt.
 </p><br>
 
 <p>In this tutorial, I will use the 64x64t affine background
-from the <a href="affbg.htm#sec-demo">sbb_aff</a> demo (which looks 
+from the <a href="affbg.html#sec-demo">sbb_aff</a> demo (which looks 
 a bit like fig&nbsp;20.1), do the Mode7 mojo 
 and turn it into something like depicted in 
 fig&nbsp;20.2. The focus will be on showing, 
@@ -418,7 +418,7 @@ background point <b>p</b>:
 <p>
 that is, <u>one</u> translation and <u>one</u> transformation. We have 
 to combine the pre- and post-translations to make it work. We've seen 
-this before in eq&nbsp;4 in the <a href="affbg.htm#sec-aff-ofs">affine 
+this before in eq&nbsp;4 in the <a href="affbg.html#sec-aff-ofs">affine 
 background page</a>, only with different names. Anyway, what you need 
 is:
 </p>
@@ -460,7 +460,7 @@ So for each scanline you do the calculations for the zoom, put the
 <code>REG_BGxY</code> and presto! Instant Mode 7.
 </p>
 <p>
-Well, almost. <a href="affbg.htm#ssec-ao-refpts">Remember</a> what 
+Well, almost. <a href="affbg.html#ssec-ao-refpts">Remember</a> what 
 happens when writing to <code>REG_BGxY</code> inside an HBlank
 interrupt: the <i>current</i> scanline is perceived as the 
 screen's origin null-line. In other words, it does the 

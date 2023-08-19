@@ -69,7 +69,7 @@ way.
   GBA fixed-point usage</h3>
 <p>
 Because computers use the 
-<a href="numbers.htm#ssec-num-basen">binary system</a>, using decimals 
+<a href="numbers.html#ssec-num-basen">binary system</a>, using decimals 
 would be silly as a basis for fixed-points would be silly. Fortunately, 
 you can do fixed-point math in any base, including binary. The basic 
 format is <i>i</i>.<i>f</i>, where <i>i</i> is number of integer 
@@ -114,7 +114,7 @@ class="cmt">// 0x280/256 = 640/256 = 2.50</span>
 <p>
 The affine registers aren't the only places fixed-points are used, 
 though that's where they are the most recognizable. The 
-<a href="gfx.htm#sec-blend">blend weights</a> are essentially 
+<a href="gfx.html#sec-blend">blend weights</a> are essentially 
 fixed-point numbers as well, only they are 1.4 fixeds, 
 not .8 fixeds. This is an important point, actually: the position 
 you set the fixed-point to is arbitrary, and you can even switch 
@@ -144,7 +144,7 @@ floating-point numbers, which would include negative numbers as well.
 This means that they're supposed to be <i>signed</i>. Or at least, 
 usually. For example, the affine registers use signed 8.8 fixeds, but 
 the blend weights are unsigned 1.4 fixeds. You may think it hardly 
-matters, but <a href="numbers.htm#bits-int-sign">signs</a> can really 
+matters, but <a href="numbers.html#bits-int-sign">signs</a> can really 
 mess things up if you're not careful. Say you're using fixed-points 
 for positions and velocities. Even if your positions are always 
 positive, the velocities won't be, so signed numbers would be more 
@@ -162,7 +162,7 @@ This is meant to indicate one sign bit, <i>n</i> integer bits and
 <i>f</i> fractional bits. Technically speaking, this is <b>false</b>. 
 Fixed-point numbers are just plain integers, just interpreted as 
 fractions. That means they follow 
-<a href="numbers.htm#bits-int-neg">twos' complement</a> and that, 
+<a href="numbers.html#bits-int-neg">twos' complement</a> and that, 
 while a set top bit does indicate a negative number, it isn't 
 <i>the</i> sign bit. As I already mentioned, &lsquo;&minus;1&rsquo; 
 is <code>0xFFFFFFFF</code>, not <code>0x80000001</code> as would 

@@ -24,7 +24,7 @@ At first, the text part had only very little code in it, because I figured the d
 
 The main language will be C, and a smidgeon of assembly. These are the two main languages used in GBA programming even though there are others around. Since the basics of programming are independent of language, it should be possible to adapt them for your chosen language easily.
 
-GBA programming is done close to the hardware, so I hope you know your pointers, [hexadecimal numbers](numbers.htm#sec-num) and [boolean algebra/bit-operations](numbers.htm#sec-bitops). There's also a fair amount of math here, mostly [vector and matrix](matrix.html) stuff so I hope your linear algebra is up to speed. Lastly, I am assuming your intellectual capacities exceed those of a random lab monkey, so I won't elaborate on what I consider trivial matters too much.
+GBA programming is done close to the hardware, so I hope you know your pointers, [hexadecimal numbers](numbers.html#sec-num) and [boolean algebra/bit-operations](numbers.html#sec-bitops). There's also a fair amount of math here, mostly [vector and matrix](matrix.html) stuff so I hope your linear algebra is up to speed. Lastly, I am assuming your intellectual capacities exceed those of a random lab monkey, so I won't elaborate on what I consider trivial matters too much.
 
 Aside from the introduction and appendices, the text is divided into 3 parts. First there's ‘basics’, which explains the absolute essentials for getting anything done. This includes setting up the development environment, basic use of graphics and buttons. It also contains text on what it means to do low level programming and programming efficiently; items that in my view you'd better learn sooner rather than later. The second part covers most of the other items of the GBA like special graphic effects, timers and interrupts. The final section covers more advanced items that uses elements from all chapters.This includes writing text (yes, that's an advanced topic on the GBA), mode 7 graphics and a chapter on ARM assembly.
 
@@ -60,7 +60,7 @@ I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You
 
 -   Only very basic information given, sometimes even [incorrect info](affine.html).
 -   Strong focus on bitmap modes, which are hardly ever used for serious GBA programming.
--   [Bad programming habits](first.htm#ssec-notes-bad). Adding code/data to projects by [#including the files](bitmaps.htm#ssec-data-hdr), Using ancient [toolchains](setup.htm#sec-env), non-optimal compiler settings and data-types, and inefficient (sometimes *very* inefficient) code.
+-   [Bad programming habits](first.html#ssec-notes-bad). Adding code/data to projects by [#including the files](bitmaps.html#ssec-data-hdr), Using ancient [toolchains](setup.html#sec-env), non-optimal compiler settings and data-types, and inefficient (sometimes *very* inefficient) code.
 
 If you are new and have followed the other tutorials, everything will seem to work fine, so what's the problem? Well, that's part of the problem actually. Everything will *seem* fine, until you start bigger projects, at which time you'll find hidden errors and that slow code really bogs things down and you'll have unlearn all the bad habits you picked up and redo everything from the start. The GBA is one of the few platforms where efficient coding still means something, and sometimes all it takes is a change of datatype or compiler switch. These things are better done right from the start.
 
@@ -179,7 +179,7 @@ The table lists the register's name (`REG_DISPSTAT`, its address (0400:0000h) an
 </table>
 </div>
 
-The full list of REG_DISPSTAT can be found [here](video.htm#tbl-reg-dispstat). The #defines are usually specific to tonc, by the way. Each site and API has its own terminology here. This is possible because it's not the names that are important, but the numbers they stand for. That goes for the names of the registers themselves too, of course. One last point on the #defines: some of the ones listed have a hash (‘#’) affix. This is a shorthand notation to indicate that that field has *foo*`_SHIFT` and *foo*`_MASK` #defines, and a *foo*`()` macro. For example, the display register has an 8-bit trigger VCount field, which has ‘*DSTAT_VCT#*’ listed in the define column. This means that the following three things exist in the tonc headers:
+The full list of REG_DISPSTAT can be found [here](video.html#tbl-reg-dispstat). The #defines are usually specific to tonc, by the way. Each site and API has its own terminology here. This is possible because it's not the names that are important, but the numbers they stand for. That goes for the names of the registers themselves too, of course. One last point on the #defines: some of the ones listed have a hash (‘#’) affix. This is a shorthand notation to indicate that that field has *foo*`_SHIFT` and *foo*`_MASK` #defines, and a *foo*`()` macro. For example, the display register has an 8-bit trigger VCount field, which has ‘*DSTAT_VCT#*’ listed in the define column. This means that the following three things exist in the tonc headers:
 
 ```c
 #define DSTAT_VCT_MASK      0xFF00
@@ -193,7 +193,7 @@ Lastly, as shorthand for a specific bit in a register, I will use accolades. The
 
 The text and code have been created and found to work under the following conditions. If you find you have a problem, show me yours and maybe we can find and fix it.
 
--   **Programming language**. The language we'll be using is **C** with a dash of assembly (but *not* C++). I am working under the assumption that you are familiar with this language. If not, go learn it first because I'm not going to show you; this is not a C course. I do have some links to C tutorials in the [references](refs.htm#ssec-tut).
+-   **Programming language**. The language we'll be using is **C** with a dash of assembly (but *not* C++). I am working under the assumption that you are familiar with this language. If not, go learn it first because I'm not going to show you; this is not a C course. I do have some links to C tutorials in the [references](refs.html#ssec-tut).
 
 -   **Compiler**. Obviously, you need a compiler that can turn C code into a GBA binary. I'm using the completely **free** [devkitARM](http://www.devkitpro.org){target="_blank"} (dkARM) toolchain, which is based on the [GNU compiler collection (GCC)](http://www.gnu.org){target="_blank"}. Setup instructions and samples can be found on the site, and in my [setup](setup.html) section, of course. dkARM has become the standard over the past year or so; if you are still using the older DevKit Advance, you might think about switching. I can't say how difficult it would be to get [HAM](http://www.ngine.de){target="_blank"}*b0rked* to accept my code/makefiles, but it shouldn't be too hard. If you use the official Arm ADS, sorry but you're on your own there.
 

@@ -156,7 +156,7 @@ type size. This is why windows BMPs' scanlines are always aligned to
 <p>
 Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4
 or 5 in the lowest bits of 
-<a href="video.htm#tbl-reg-dispcnt">REG_DISPCNT</a> and 
+<a href="video.html#tbl-reg-dispcnt">REG_DISPCNT</a> and 
 enable <code>BG2</code>. You may wonder why we start with mode 3, 
 rather than mode 0. The reason for this is that bitmaps are a lot 
 easier to come to terms with than tilemaps. And this is the 
@@ -714,7 +714,7 @@ somehow springs to mind at the thought of this.
 Aside from that, bitmap modes can use only one background and have no 
 hardware scrolling to speak of. Also, though this is jumping the
 gun a bit, it overlaps the memory that contains the sprite
-<a href="objbg.htm#sec-img"> tiles</a>, 
+<a href="objbg.html#sec-img"> tiles</a>, 
 which starts at <code>0601:0000h</code>. For that reason, you will 
 only be able to use sprite-tiles 512 to 1023 when in modes 3-5.
 </p>
@@ -822,7 +822,7 @@ The second page of the GBA is located at location <code>0600:A000h</code>.
 If you look at the size required for mode 3, you'll see why it doesn't
 have page-flipping capabilities: there's no room for a second page. To set 
 the GBA to display the second page, set 
-<a href="video.htm#tbl-reg-dispcnt"><code>REG_DISPCNT</code></a>{4}. 
+<a href="video.html#tbl-reg-dispcnt"><code>REG_DISPCNT</code></a>{4}. 
 My page flipping function looks a little like this:
 </p>
 
@@ -1265,7 +1265,7 @@ Well, that's not <i>quite</i> true. Only with u32-arrays is proper
 <a href="#ssec-data-align">data alignment</a> guaranteed, which is 
 a good thing. More importantly, you have to be careful with the 
 byte-order of multi-byte types. This is called the <a 
-href="numbers.htm#ssec-bits-endian">endianness</a> of types. In 
+href="numbers.html#ssec-bits-endian">endianness</a> of types. In 
 a <dfn>little endian</dfn> scheme, least significant bytes will go 
 first and in a <dfn>big endian</dfn>, most significant bytes will go 
 first. See table 2 for an example using <code>0x01</code>, 
@@ -1607,7 +1607,7 @@ These you then link together. In batch files, you'd need to
 add extra commands for each file, but a properly setup makefile 
 uses a list of object files, and the makefile's rules will then 
 take care of the rest automatically. Using the makefile of the 
-<a href="first.htm#ssec-2nd-make">second demo</a> as a reference, 
+<a href="first.html#ssec-2nd-make">second demo</a> as a reference, 
 you'll get something like this:
 </p>
 
@@ -1935,7 +1935,7 @@ The best example of breaking the rules is pointer casting. For example,
 most graphics converters will output the data as u16-arrays, so you 
 can copy it to VRAM with a simple for-loop. You can speed up copying 
 by roughly 160% if you copy by words (32-bit) rather than 
-halfwords (16-bit). Run the <a href="text.htm#ssec-demo-se2">txt_se2</a> 
+halfwords (16-bit). Run the <a href="text.html#ssec-demo-se2">txt_se2</a> 
 demo and see for yourself. All you have to do for this is one or two 
 pointer casts, as shown here.
 </p>
@@ -2152,7 +2152,7 @@ struct-copies, standard copiers like <code>memcpy()</code>, and GBA
 specific routines like <code>CpuFastSet()</code> and DMA. All of these 
 have their own strengths and weaknesses. All of them can be affected by 
 misalignment and the no-byte-write rule. I discuss some of them in the
-<a href="text.htm#ssec-demo-se2">txt_se2</a> demo.
+<a href="text.html#ssec-demo-se2">txt_se2</a> demo.
 </p>
 <p>
 I've chosen to use <code>memcpy()</code> in the early demos for 

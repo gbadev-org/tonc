@@ -991,7 +991,7 @@ it'll be 160/8=20, so it's somewhere between blue and red: purple.
 Now, you may notice that the first scanline is actually red and not 
 blue: this is because a) the HBlank interrupt occurs <i>after</i> 
 the scanline (which has caused trouble before in the 
-<a href="dma.htm#sec-demo">DMA demo</a>) and b) because HBlanks 
+<a href="dma.html#sec-demo">DMA demo</a>) and b) because HBlanks 
 happen during the VBlank as well, so that the color for line 0 is 
 set at <code>REG_VCOUNT</code>=227, which will give a bright red color.
 <p>
