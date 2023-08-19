@@ -143,10 +143,7 @@ SLUGIFY_SOURCE = 'basename'
 DEFAULT_PAGINATION = False
 
 PLUGIN_PATHS = ['plugins']
-
-PLUGINS = [
-  'asciidoc3_reader',
-]
+PLUGINS = []
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
