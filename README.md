@@ -58,7 +58,7 @@ Next, go through the page and fix anything that's broken.
 
 For example:
 
-*   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up)
+*   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
 
 *   Section numbers should be removed from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
 
