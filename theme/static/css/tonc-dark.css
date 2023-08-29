@@ -139,7 +139,7 @@ time {
 }
 
 pre > code {
-  padding: 10px;
+  /* padding: 10px; */
   display: block;
   overflow-x: auto;
 }
@@ -330,6 +330,8 @@ div.nhcare {
 }
 
 pre.proglist, div.codehilite code {
+	width: 92%; 
+	margin: 0.6em auto;
   background-color: var(--background);
   border: none;
   box-shadow: none;
@@ -508,7 +510,7 @@ pre .il { color: #57b5d4 } /* Literal.Number.Integer.Long */
 
 .toclink {
   text-decoration: none;
-  color: var(--text-main);
+  color: var(--text-bright);
 }
 .toclink:hover {
   text-decoration: underline;
