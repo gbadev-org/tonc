@@ -371,8 +371,8 @@ You will see this use of tribools a couple of times as well.
 ## A simple key demo {#sec-demo}
 
 <div class="cpt_fr" style="width:120px;" markdown>
-![key_demo screenshot](img/demo/gba_sm.png){#img-key-demo}
-**Fig 6.1**: key_demo screenshot, with L and B held.
+![key_demo screenshot](img/demo/gba_sm.png){#fig:key-demo}
+**{*@fig:key-demo}**: key_demo screenshot, with L and B held.
 </div>
 
 I have the `key_demo` demo illustrates how these key functions can be used. It shows a mode 4
