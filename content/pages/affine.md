@@ -3,13 +3,9 @@ Date: 2003-09-01
 Modified: 2023-09-06
 Authors: Cearn
 
-# 10. The Affine Transformation Matrix (a.k.a. **P**) {#ch-}
+# 10. The Affine Transformation Matrix (a.k.a. **P**)
 
--   [About this page](#sec-intro).
--   [Texture mapping and affine transformations](#sec-texmap).
--   ["Many of the truths we cling to depend greatly upon our own point of view."](#sec-pov).
--   [Finishing up](#sec-finish).
--   [Tonc's affine functions](#sec-aff-fun).
+[TOC]
 
 ## 10.1. About this page {#sec-intro}
 
@@ -55,7 +51,7 @@ There are two ways of interpreting these numbers. The first is to think of each 
 
 *s*~y~·cos(α)
 
-Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <span class="rem">wrong one</span>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of *s*~x~= 1.5, *s*~y~= 1.0 and a rotation of α= 45. You'd probably expect something like fig 10.1a, but what you'd actually get is 10.1b. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
+Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of *s*~x~= 1.5, *s*~y~= 1.0 and a rotation of α= 45. You'd probably expect something like fig 10.1a, but what you'd actually get is 10.1b. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
 
 <div class="lblock">
 
@@ -148,7 +144,7 @@ A forward texture mapping via affine matrix **A**.
 
 ### 10.2.2. Affine transformations {#ssec-tex-aff}
 
-The transformations you can do with a 2D matrix are called <span class="dfn">[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</span> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see fig 10.2b).
+The transformations you can do with a 2D matrix are called <dfn>[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see fig 10.2b).
 
 Affine transformations include rotation and scaling, but *also* shearing. This is why I object to the name “Rot/Scale”: that term only refers to a special case, not the general transformation. It is akin to calling colors shades of red: yes, reds are colors too, but not all colors are reds, and to call them that would give a distorted view of the subject.
 
@@ -482,9 +478,9 @@ Knowing what the **P**-matrix is used for is one thing, knowing how to use them 
 
 Affine transformations are part of mathematics and, generally speaking, math numbers will be real numbers. That is to say, floating point numbers. However, if you were to use floating points for the **P** elements, you'd be in for two rude surprises.
 
-The first one is that the matrix elements are not floats, but integers. The reason behind this is that <span class="ack">the GBA has no floating point unit!</span> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
+The first one is that the matrix elements are not floats, but integers. The reason behind this is that <ack>the GBA has no floating point unit!</ack> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
 
-This strategy of representing real numbers with scaled integers is known as <span class="dfn">fixed point arithmetic</span>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](http://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
+This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](http://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
 
 ``` proglist
     // Floating point == Bad!!
@@ -524,7 +520,7 @@ Only in the final step to hardware should you go to 8.8 format. Before that, use
 
 So fixed point math is used because floating point math is just to slow for efficient use. That's all fine and good for your own math, but what about mathematical functions like sin() and cos()? Those are still floating point internally (even worse, *`double`s*!), so those are going to be ridiculously slow.
 
-Rather than using the functions directly, we'll use a time-honored tradition to weasel our way out of using costly math functions: we're going to build a <span class="dfn">look-up table</span> (LUT) containing the sine and cosine values. There are a number of ways to do this. If you want an easy strategy, you can just declare two arrays of 360 8.8f numbers and fill them at initialization of your program. However, this is a poor way of doing things, for reasons explained in the [section on LUTs](fixed.html#sec-lut) in the appendix.
+Rather than using the functions directly, we'll use a time-honored tradition to weasel our way out of using costly math functions: we're going to build a <dfn>look-up table</dfn> (LUT) containing the sine and cosine values. There are a number of ways to do this. If you want an easy strategy, you can just declare two arrays of 360 8.8f numbers and fill them at initialization of your program. However, this is a poor way of doing things, for reasons explained in the [section on LUTs](fixed.html#sec-lut) in the appendix.
 
 Tonclib has a single sine lut which can be used for both sine and cosine values. The lut is called `sin_lut`, a `const short` array of 512 4.12f entries (12 fractional bits), created by my [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} lut creator. In `tonc_math.h` you can find two inline functions that retrieve sine and cosine values:
 
