@@ -36,7 +36,6 @@ Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <r
 ![](img/affine/metr_rs_good.png){#fig:rotatescale_good}
 **{*@fig:rotatescale_good}**: when you say ‘rotate and scale’, you probably expect this…
 </div>
-
 <div class="cpt" style="width:160px" markdown>
 ![](img/affine/metr_rs_bad.png){#fig:rotatescale_bad}
 **{*@fig:rotatescale_bad}**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
@@ -49,15 +48,11 @@ In this chapter, I'll provide the **correct** interpretation of the **P**-matrix
 This is going to be a purely theoretical page: you will find nothing that relates directly to sprites or backgrounds here; that's what the next two sections are for. Once again, we will be assisted by the lovely metroid (keep in cold storage for safe use). Please mind the direction of the y-axis and the angles, and do *not* leave without reading the [finishing up](#sec-finish) paragraph. This contains several key implementation details that will be ignored in the text preceding it, because they will only get in the way at that point.
 
 <div class="note">
-
 <div class="nhcare">
-
 Be wary of documents covering affine parameters
-
 </div>
 
 It's true. Pretty much every document I've seen that deals with this subject is problematic in some way. A lot of them give the wrong rotate-scale matrix (namely, the one in {@eq:incorrect_transform_matrix}), or misname and/or misrepresent the matrix and its elements.
-
 </div>
 
 ## Texture mapping and affine transformations.
@@ -80,14 +75,10 @@ So how do you find **A**? Well, that's actually not that hard. The matrix is for
 </div>
 
 <div class="lblock" markdown>
-
 A forward texture mapping via affine matrix **A**.
-
 <div class="cpt" style="width:128px;" markdown>
-
 ![A metroid texture...](img/affine/metr_tex.png){#fig:metroid_texture}
 **{*@fig:metroid_texture}**: a texture.
-
 </div>
 
 **A** →
@@ -96,7 +87,6 @@ A forward texture mapping via affine matrix **A**.
 ![ ... mapped](img/affine/metr_texmapA.png){#fig:metroid_texture_mapped}
 **{*@fig:metroid_texture_mapped}**: a texture mapped
 </div>
-
 </div>
 
 ### Affine transformations
@@ -158,38 +148,28 @@ We can now use these definitions to find the correct matrix for enlargements by 
 … ermm, wait a sec … I'm having this strange sense of déja-vu here …
 
 <div class="note" markdown>
-
 <div class="nh" markdown>
-
 Clockwise vs counterclockwise
-
 </div>
 
 It's a minor issue, but I have to mention it. If the definition of **R** uses a clockwise rotation, why am I suddenly using a counter-clockwise one? Well, traditionally **R** is given as that particular matrix, in which the angle runs from the x-axis towards the y-axis. Because *y* is downward, this comes down to clockwise. However, the affine routines in BIOS use a counter-clockwise rotation, and I thought it'd be a good idea to use that as a guideline for my functions.
-
 </div>
 
 <div class="note" markdown>
-
 <div class="nh" markdown>
-
 Nomenclature: Affine vs Rot/Scale
-
 </div>
 
 The matrix **P** is not a rotation matrix, not a scaling matrix, but a general affine transformation matrix. Rotation and scaling may be what the matrix is mostly used for, but that does not mean they're the only things possible, as the term ‘Rot/Scale’ would imply.
 
 To set them apart from regular backgrounds and sprites, I suppose ‘Rotation’ or ‘Rot/Scale’ are suitable enough, just not entirely accurate. However, calling the **P**-matrix by those names is simply wrong.
-
 </div>
 
 ## “Many of the truths we cling to depend greatly upon our own point of view.”
 
 <div class="cpt_fr" style="width:160px" markdown>
-
 ![Human view](img/affine/metr_texmapA.png){#fig:human_pov}  
 **{*@fig:human_pov}**: Mapping process as seen by humans. **u** and **v** are the columns of **A** (in screen space).
-
 </div>
 
 As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect_transform_matrix}, which I said was incorrect. So what gives? Well, if you enter this matrix into the `pa-pd` elements you do indeed get something different than what you'd expect. Only now I've proven what you were supposed to expect in the first place (namely a scaling by *s*~x~ and *s*~y~, followed by a counter-clockwise rotation by α). The *real* question is of course, why doesn't this work? To answer this I will present two different approaches to the 2D mapping process.
@@ -201,10 +181,8 @@ As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect
 ### Computer point of view
 
 <div class="cpt_fr" style="width:160px" markdown>
-
 ![puter view](img/affine/metr_texmapB.png){#fig:comp_pov}  
 **{*@fig:comp_pov}**: Mapping process as seen by computers. **u** and **v** (in texture space) are the columns of **B** and are mapped to the principle axes in screen space.
-
 </div>
 
 “Hello, I am Cearn's GBA. I'm a lean, mean gaming machine that fits in your pocket, and I can push pixels like no one else. Except perhaps my owner's GeForce 4 Ti4200, the bloody show-off. Anyway, one of the things I do is texture mapping. And not just ordinary texture-mapping, I can do cool stuff like rotation and scaling as well. What I do is fill pixels, all I need to know is for you to tell me where I should get the pixel's color from. In other words, to fill screen pixel **q**, I need a matrix **B** that gives me the proper texel **p** via **p = B · q**. I'll happily use any matrix you give me; I have complete confidence in your ability to supply me with the matrix for the transformation you require.”
@@ -229,7 +207,6 @@ Using the inverse matrices given earlier, we find
 </div>
 
 <div class="note" markdown>
-
 Just to make it perfectly clear:
 
 The affine matrix **P** maps from screen space *to* texture space, not the other way around!
@@ -243,7 +220,6 @@ In other words:
 *p*~c~ : texture *y*-increment / pixel
 
 *p*~d~ : texture *y*-increment / scanline
-
 </div>
 
 ## Finishing up
@@ -283,17 +259,13 @@ Now, fixed point numbers are still just integers, but there are different types 
   
 
 <div class="note" markdown>
-
 <div class="nhgood" markdown>
-
 Use 32-bit signed ints for affine temporaries
-
 </div>
 
 Of course you should use 32bit variables for everything anyway (unless you actually *want* your code to bloat and slow down). If you use 16bit variables (`short` or `s16`), not only will your code be slower because of all the extra instructions that are added to keep the variables 16bit, but overflow problems can occur much sooner.
 
 Only in the final step to hardware should you go to 8.8 format. Before that, use the larger types for both speed and accuracy.
-
 </div>
 
 ### LUTs
