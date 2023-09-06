@@ -14,7 +14,7 @@ As you probably know, the GBA is capable of applying geometric transformations l
 There are two ways of interpreting these numbers. The first is to think of each of them as individual offsets to the sprite and background data. This is how the reference documents like [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} and [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm){target="_blank"} describe them. The other way is to see them as the elements of a 2x2 matrix which I will refer to as **P**. This is how pretty much all tutorials describe them. These tutorials also give the following matrix for rotation and scaling:
 
 **{*@eq:incorrect_transform_matrix}**:
-<div id={#eq:incorrect_transform_matrix} markdown>
+<div id="eq:incorrect_transform_matrix" markdown>
 **P**   = 
 
 *p*~a~
@@ -30,7 +30,7 @@ There are two ways of interpreting these numbers. The first is to think of each 
 *s*~y~·cos(α)
 </div>
 
-Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of *s*~x~= 1.5, *s*~y~= 1.0 and a rotation of α= 45. You'd probably expect something like fig 10.1a, but what you'd actually get is 10.1b. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
+Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of *s*~x~= 1.5, *s*~y~= 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale_good}, but what you'd actually get is {@fig:rotatescale_bad}. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
 
 <div class="cpt" style="width:160px;" markdown>
 ![](img/affine/metr_rs_good.png){#fig:rotatescale_good}
@@ -65,7 +65,7 @@ What the GBA does to get sprites and tiled backgrounds on screen is very much li
 
 So how do you find **A**? Well, that's actually not that hard. The matrix is formed by lining up the transformed base vectors, which are **u** and **v** (this works in any number of dimensions, btw), so that gives us:
 
-<div id={#eq:correct_transform_matrix} markdown>
+<div id="eq:correct_transform_matrix" markdown>
 **A** =
 
 *u*~x~
@@ -99,7 +99,7 @@ As I said, there are three basic 2d transformations, though you can always descr
 
   
 {*@eq:transformation_matrix_and_inverse}
-<div id={#eq:transformation_matrix_and_inverse}>
+<div id="eq:transformation_matrix_and_inverse">
 **A**  = 
 
 *a*
@@ -120,7 +120,7 @@ As I said, there are three basic 2d transformations, though you can always descr
 *a*
 </div>
 
-<div class="cblock" id={#tbl:transformation_matrices_and_their_inverses} markdown>
+<div class="cblock" id="tbl:transformation_matrices_and_their_inverses" markdown>
 
 {@tbl:transformation_matrices_and_their_inverses}: transformation matrices and their inverses.
 
@@ -134,7 +134,7 @@ As I said, there are three basic 2d transformations, though you can always descr
 
 We can now use these definitions to find the correct matrix for enlargements by *s*~x~ and *s*~y~, followed by a **counter-clockwise** rotation by α (=−θ), by matrix multiplication.
 
-<div id={#eq:inverse_transform}>
+<div id="eq:inverse_transform">
 {@eq:inverse_transform}
 
 **A** = **R**(-α) · **S**(s~x~ , s~y~) =
@@ -201,7 +201,7 @@ In case you're curious, the proper matrix for scale by (*s*~x~, *s*~x~) and coun
 
 Using the inverse matrices given earlier, we find
 
-<div id={#eq:correct_matrix} markdown>
+<div id="eq:correct_matrix" markdown>
 {*@eq:correct_matrix}
 **P** = *p*~a~ *p*~b~ *p*~c~ *p*~d~ = cos(α) / *s*~x~ −sin(α) / *s*~x~ sin(α) / *s*~y~ cos(α) / *s*~y~
 </div>
@@ -222,7 +222,7 @@ In other words:
 *p*~d~ : texture *y*-increment / scanline
 </div>
 
-## Finishing up
+## Finishing up {#sec-finish}
 
 Knowing what the **P**-matrix is used for is one thing, knowing how to use them properly is another. There are three additional points you need to remember when you're going to deal with affine objects/backgrounds and the affine matrices.
 
@@ -268,7 +268,7 @@ Of course you should use 32bit variables for everything anyway (unless you actua
 Only in the final step to hardware should you go to 8.8 format. Before that, use the larger types for both speed and accuracy.
 </div>
 
-### LUTs
+### LUTs {#sec-luts}
 
 So fixed point math is used because floating point math is just to slow for efficient use. That's all fine and good for your own math, but what about mathematical functions like sin() and cos()? Those are still floating point internally (even worse, *`double`s*!), so those are going to be ridiculously slow.
 
@@ -299,7 +299,7 @@ When flagging a background or object as affine, you *must* enter at least some v
 
 Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in `tonc_obj_affine.c` for objects, `tonc_bg_affine.c` for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
-<div class="cblock" id={#tbl:affine_functions} markdown>
+<div class="cblock" id="tbl:affine_functions" markdown>
 
   Function                                                                        | Description
   ------------------------------------------------------------------------------- | -----------------------------------------------------------------------------
