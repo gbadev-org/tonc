@@ -14,23 +14,41 @@ As you probably know, the GBA is capable of applying geometric transformations l
 There are two ways of interpreting these numbers. The first is to think of each of them as individual offsets to the sprite and background data. This is how the reference documents like [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} and [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm){target="_blank"} describe them. The other way is to see them as the elements of a 2x2 matrix which I will refer to as **P**. This is how pretty much all tutorials describe them. These tutorials also give the following matrix for rotation and scaling:
 
 **{*@eq:incorrect_transform_matrix}**:
-<div id="eq:incorrect_transform_matrix" markdown>
-**P**   = 
+<math id="eq:incorrect_transform_matrix">
+    <mi>P</mi>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><msub><mi>p</mi><mi>a</mi></msub></mtd>
+                <mtd><msub><mi>p</mi><mi>b</mi></msub></mtd>
+            </mtr>
+            <mtr>
+                <mtd><msub><mi>p</mi><mi>c</mi></msub></mtd>
+                <mtd><msub><mi>p</mi><mi>d</mi></msub></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><msub><mi>s</mi><mi>x</mi></msub><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+                <mtd><msub><mi>s</mi><mi>y</mi></msub><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+            </mtr>
+            <mtr>
+                <mtd><mo>-</mo><msub><mi>s</mi><mi>x</mi></msub><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+                <mtd><msub><mi>s</mi><mi>y</mi></msub><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+</math>
 
-*p*~a~
-*p*~b~
-*p*~c~
-*p*~d~
-
- = 
-
-*s*~x~·cos(α)
-*s*~y~·sin(α)
-−*s*~x~·sin(α)
-*s*~y~·cos(α)
-</div>
-
-Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of *s*~x~= 1.5, *s*~y~= 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale_good}, but what you'd actually get is {@fig:rotatescale_bad}. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
+Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of <math><msub><mi>s</mi><mi>x</mi></msub></math> = 1.5, <math><msub><mi>s</mi><mi>y</mi></msub></math> = 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale_good}, but what you'd actually get is {@fig:rotatescale_bad}. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
 
 <div class="cpt" style="width:160px;" markdown>
 ![](img/affine/metr_rs_good.png){#fig:rotatescale_good}
@@ -59,20 +77,30 @@ It's true. Pretty much every document I've seen that deals with this subject is 
 
 ### General 2D texture mapping
 
-What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {fig:rotscale_good}, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors **e**~x~ and **e**~y~ (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
+What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:rotscale_good}, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
 
-**q**= **A · p**.
+**q** = **A · p**.
 
 So how do you find **A**? Well, that's actually not that hard. The matrix is formed by lining up the transformed base vectors, which are **u** and **v** (this works in any number of dimensions, btw), so that gives us:
 
-<div id="eq:correct_transform_matrix" markdown>
-**A** =
-
-*u*~x~
-*v*~x~
-*u*~y~
-*v*~y~
-</div>
+<math id="eq:correct_transform_matrix">
+    <mi>A</mi>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><msub><mi>u</mi><mi>x</mi></msub></mtd>
+                <mtd><msub><mi>v</mi><mi>x</mi></msub></mtd>
+            </mtr>
+            <mtr>
+                <mtd><msub><mi>u</mi><mi>x</mi></msub></mtd>
+                <mtd><msub><mi>v</mi><mi>y</mi></msub></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+</math>
 
 <div class="lblock" markdown>
 A forward texture mapping via affine matrix **A**.
@@ -99,51 +127,252 @@ As I said, there are three basic 2d transformations, though you can always descr
 
   
 {*@eq:transformation_matrix_and_inverse}
-<div id="eq:transformation_matrix_and_inverse">
-**A**  = 
-
-*a*
-*b*
-*c*
-*d*
-
-
-**A**^−1^  ≡ 
-
-1
-
-*ad − bc*
-
-*d*
-*−b*
-*−c*
-*a*
-</div>
-
-<div class="cblock" id="tbl:transformation_matrices_and_their_inverses" markdown>
+<math id="eq:transformation_matrix_and_inverse">
+    <mi>A</mi>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><mi>a</mi></mtd>
+                <mtd><mi>b</mi></mtd>
+            </mtr>
+            <mtr>
+                <mtd><mi>c</mi></mtd>
+                <mtd><mi>d</mi></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+    <mspace width="30px"/>
+    <msup>
+        <mi>A</mi>
+        <mn>-1</mn>
+    </msup>
+    <mo>≡</mo>
+    <mfrac>
+        <mn>1</mn>
+        <mrow>
+            <mi>a</mi><mi>d</mi><mo>-</mo><mi>b</mi><mi>c</mi>
+        <mrow>
+    </mfrac>
+        <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><mi>d</mi></mtd>
+                <mtd><mo>-</mo><mi>b</mi></mtd>
+            </mtr>
+            <mtr>
+                <mtd><mo>-</mo><mi>c</mi></mtd>
+                <mtd><mi>a</mi></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+</math>
 
 {@tbl:transformation_matrices_and_their_inverses}: transformation matrices and their inverses.
+<table id="tbl:transformation_matrices_and_their_inverses">
+    <thead>
+        <tr>
+            <th>Identity</th>
+            <th>Rotation</th>
+            <th>Scaling</th>
+            <th>Shear</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td markdown><img alt="Normal metroid" src="img/affine/metr_id.png" /></td>
+            <td markdown><img alt="Rotated metroid" src="img/affine/metr_rot.png" /></td>
+            <td markdown><img alt="Scaled metroid" src="img/affine/metr_scale.png" /></td>
+            <td markdown><img alt="Sheared metroid" src="img/affine/metr_shear.png" /></td>
+        </tr>
+        <tr>
+            <td>
+                <math>
+                    <mi>I</mi>
+                    <mo>=</mo>
+                    <mrow>
+                        <mo>[</mo>
+                        <mtable>
+                            <mtr>
+                                <mtd><mn>1</mn></mtd>
+                                <mtd><mn>0</mn></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd><mn>0</mn></mtd>
+                                <mtd><mn>1</mn></mtd>
+                            </mtr>
+                        </mtable>
+                        <mo>]</mo>
+                    </mrow>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <mi>R</mi>
+                    <mo>(</mo>
+                    <mn>&theta;</mn>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mrow>
+                        <mo>[</mo>
+                        <mtable>
+                            <mtr>
+                                <mtd><mi>cos</mi><mo>(</mo><mn>&theta;</mn><mo>)</mo></mtd>
+                                <mtd><mo>-</mo><mi>sin</mi><mo>(</mo><mn>&theta;</mn><mo>)</mo></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd><mi>sin</mi><mo>(</mo><mn>&theta;</mn><mo>)</mo></mtd>
+                                <mtd><mi>cos</mi><mo>(</mo><mn>&theta;</mn><mo>)</mo></mtd>
+                            </mtr>
+                        </mtable>
+                        <mo>]</mo>
+                    </mrow>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <mi>S</mi>
+                    <mo>(</mo>
+                    <msub><mi>s</mi><mi>x</mi></msub>
+                    <mo>,</mo>
+                    <msub><mi>s</mi><mi>y</mi></msub>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mrow>
+                        <mo>[</mo>
+                        <mtable>
+                            <mtr>
+                                <mtd><msub><mi>s</mi><mi>x</mi></msub></mtd>
+                                <mtd><mn>0</mn></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd><mn>0</mn></mtd>
+                                <mtd><msub><mi>s</mi><mi>y</mi></msub></mtd>
+                            </mtr>
+                        </mtable>
+                        <mo>]</mo>
+                    </mrow>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <mi>H</mi>
+                    <mo>(</mo>
+                    <msub><mi>h</mi><mi>x</mi></msub>
+                    <mo>,</mo>
+                    <msub><mi>h</mi><mi>y</mi></msub>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mrow>
+                        <mo>[</mo>
+                        <mtable>
+                            <mtr>
+                                <mtd><mn>1</mn></mtd>
+                                <mtd><msub><mi>h</mi><mi>x</mi></msub></mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd><msub><mi>h</mi><mi>y</mi></msub></mtd>
+                                <mtd><mn>1</mn></mtd>
+                            </mtr>
+                        </mtable>
+                        <mo>]</mo>
+                    </mrow>
+                </math>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <math>
+                    <msup><mi>I</mi><mn>-1</mn></msup>
+                    <mo>=</mo>
+                    <mi>I</mi>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <msup><mi>R</mi><mn>-1</mn></msup><mo>(</mo><mn>&theta;</mn><mo>)</mo>
+                    <mo>=</mo>
+                    <mi>R</mi><mo>(</mo><mn>-&theta;</mn><mo>)</mo>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <msup><mi>S</mi><mn>-1</mn></msup>
+                    <mo>(</mo>
+                    <msub><mi>s</mi><mi>x</mi></msub>
+                    <mo>,</mo>
+                    <msub><mi>s</mi><mi>y</mi></msub>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mi>S</mi>
+                    <mo>(</mo>
+                    <mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac>
+                    <mo>,</mo>
+                    <mfrac><mn>1</mn><msub><mi>s</mi><mi>y</mi></msub></mfrac>
+                    <mo>)</mo>
+                </math>
+            </td>
+            <td>
+                <math>
+                    <msup><mi>H</mi><mn>-1</mn></msup>
+                    <mo>(</mo>
+                    <msub><mi>h</mi><mi>x</mi></msub>
+                    <mo>,</mo>
+                    <msub><mi>h</mi><mi>y</mi></msub>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mfrac>
+                        <mrow>
+                            <mi>H</mi>
+                            <mo>(</mo>
+                            <mn>-</mn><msub><mi>h</mi><mi>x</mi></msub>
+                            <mo>,</mo>
+                            <mn>-</mn><msub><mi>h</mi><mi>y</mi></msub>
+                            <mo>)</mo>
+                        </mrow>
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>-</mo>
+                            <msub><mi>h</mi><mi>x</mi></msub>
+                            <msub><mi>h</mi><mi>y</mi></msub>
+                        </mrow>
+                    </mfrac>
+                </math>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-  Identity                                  | Rotation                                    | Scaling                                      | Shear
-  --- | --- | --- | ---
-  ![Normal metroid](img/affine/metr_id.png) | ![Rotated metroid](img/affine/metr_rot.png) | ![Scaled metroid](img/affine/metr_scale.png) | ![Sheared metroid](img/affine/metr_shear.png)
-  **I** = 1 0 0 1 | **R**(θ) = cos(θ) −sin(θ) sin(θ) cos(θ) | **S**(*s*~x~ , *s*~y~) = *s*~x~ 0 0 *s*~y~ | **H**(*h*~x~ , *h*~y~) = 1 *h*~x~ *h*~y~ 1
-  **I**^−1^ = **I** | **R**^−1^(θ) = **R**(−θ) |**S**^−1^(s~x~ , s~y~) = **S**(1/s~x~ , 1/s~y~) | **H**^−1^(h~x~ , h~y~) = **H**(−h~x~ , −h~y~) / (1−h~x~h~y~)
+We can now use these definitions to find the correct matrix for enlargements by <math><msub><mi>s</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math>, followed by a **counter-clockwise** rotation by α (=−θ), by matrix multiplication.
 
-</div>
-
-We can now use these definitions to find the correct matrix for enlargements by *s*~x~ and *s*~y~, followed by a **counter-clockwise** rotation by α (=−θ), by matrix multiplication.
-
-<div id="eq:inverse_transform">
 {@eq:inverse_transform}
 
-**A** = **R**(-α) · **S**(s~x~ , s~y~) =
-
-*s*~x~·cos(α)
-*s*~y~·sin(α)
-−*s*~x~·sin(α)
-*s*~y~·cos(α)
-</div>
+<math id="eq:inverse_transform">
+    <mi>A</mi>
+    <mo>=</mo>
+    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+    <mo>&middot;</mo>
+    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><msub><mi>s</mi><mi>x</mi></msub><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+                <mtd><msub><mi>s</mi><mi>y</mi></msub><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+            </mtr>
+            <mtr>
+                <mtd><mo>-</mo><msub><mi>s</mi><mi>x</mi></msub><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+                <mtd><msub><mi>s</mi><mi>y</mi></msub><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+</math>
 
 … ermm, wait a sec … I'm having this strange sense of déja-vu here …
 
@@ -172,7 +401,7 @@ To set them apart from regular backgrounds and sprites, I suppose ‘Rotation’
 **{*@fig:human_pov}**: Mapping process as seen by humans. **u** and **v** are the columns of **A** (in screen space).
 </div>
 
-As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect_transform_matrix}, which I said was incorrect. So what gives? Well, if you enter this matrix into the `pa-pd` elements you do indeed get something different than what you'd expect. Only now I've proven what you were supposed to expect in the first place (namely a scaling by *s*~x~ and *s*~y~, followed by a counter-clockwise rotation by α). The *real* question is of course, why doesn't this work? To answer this I will present two different approaches to the 2D mapping process.
+As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect_transform_matrix}, which I said was incorrect. So what gives? Well, if you enter this matrix into the `pa-pd` elements you do indeed get something different than what you'd expect. Only now I've proven what you were supposed to expect in the first place (namely a scaling by <math><msub><mi>s</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math>, followed by a counter-clockwise rotation by α). The *real* question is of course, why doesn't this work? To answer this I will present two different approaches to the 2D mapping process.
 
 ### Human point of view
 
@@ -193,18 +422,88 @@ I hope you spotted the crucial difference between the two points of view. **A** 
 
 So now you can figure out **P**'s elements in two ways. You can stick to the human POV and invert the matrix at the end. That's why I gave you the inverses of the affine transformations as well. You could also try to see things in the GBA's way and get the right matrix directly. Tonc's main affine functions (`tonc_video.h`, `tonc_obj_affine.c` and `tonc_bg_affine.c`) do things the GBA way, setting **P** directly; but inverted functions are also available using an "`_inv`" affix. Mind you, these are a little slower. Except for when scaling is involved; then it's a *lot* slower.
 
-In case you're curious, the proper matrix for scale by (*s*~x~, *s*~x~) and counter-clockwise rotation by α is:
+In case you're curious, the proper matrix for scale by (<math><msub><mi>s</mi><mi>x</mi></msub></math>, <math><msub><mi>s</mi><mi>y</mi></msub></math>) and counter-clockwise rotation by α is:
 
-**A** = **R**(−α)·**S**(*s*~x~ , *s*~y~)
+<math>
+    <mi>A</mi>
+    <mo>=</mo>
+    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+    <mo>&middot;</mo>
+    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+</math>
 
-**P** = **A**^−1^ = ( **R**(−α)·**S**(*s*~x~ , *s*~y~) )^−1^ = **S**(*s*~x~, *s*~y~)^−1^ · **R**(−α)^−1^
+<math>
+    <mi>P</mi>
+    <mo>=</mo>
+    <msup><mi>A</mi><mn>-1</mn></msup>
+    <mo>=</mo>
+    <mo>(</mo>
+    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+    <mo>&middot;</mo>
+    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+    <msup><mo>)</mo><mn>-1</mn></msup>
+    <mo>=</mo>
+    <msup><mi>S</mi><mn>-1</mn></msup><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+    <mo>&middot;</mo>
+    <msup><mi>R</mi><mn>-1</mn></msup><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+</math>
 
 Using the inverse matrices given earlier, we find
 
-<div id="eq:correct_matrix" markdown>
 {*@eq:correct_matrix}
-**P** = *p*~a~ *p*~b~ *p*~c~ *p*~d~ = cos(α) / *s*~x~ −sin(α) / *s*~x~ sin(α) / *s*~y~ cos(α) / *s*~y~
-</div>
+<math id="eq:correct_matrix">
+    <mi>P</mi>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd><msub><mi>p</mi><mi>a</mi></msub></mtd>
+                <mtd><msub><mi>p</mi><mi>b</mi></msub></mtd>
+            </mtr>
+            <mtr>
+                <mtd><msub><mi>p</mi><mi>c</mi></msub></mtd>
+                <mtd><msub><mi>p</mi><mi>d</mi></msub></mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+    <mo>=</mo>
+    <mrow>
+        <mo>[</mo>
+        <mtable>
+            <mtr>
+                <mtd>
+                    <mfrac>
+                        <mrow><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mrow>
+                        <msub><mi>s</mi><mi>x</mi></msub>
+                    </mfrac>
+                </mtd>
+                <mtd>
+                    <mfrac>
+                        <mrow><mn>-</mn><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mrow>
+                        <msub><mi>s</mi><mi>x</mi></msub>
+                    </mfrac>
+                </mtd>
+            </mtr>
+            <mtr>
+                <mtd>
+                    <mfrac>
+                        <mrow><mi>sin</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mrow>
+                        <msub><mi>s</mi><mi>y</mi></msub>
+                    </mfrac>
+                </mtd>
+                <mtd>
+                    <mfrac>
+                        <mrow><mi>cos</mi><mo>(</mo><mn>&alpha;</mn><mo>)</mo></mrow>
+                        <msub><mi>s</mi><mi>y</mi></msub>
+                    </mfrac>
+                </mtd>
+            </mtr>
+        </mtable>
+        <mo>]</mo>
+    </mrow>
+</math>
 
 <div class="note" markdown>
 Just to make it perfectly clear:
@@ -213,13 +512,13 @@ The affine matrix **P** maps from screen space *to* texture space, not the other
 
 In other words:  
 
-*p*~a~ : texture *x*-increment / pixel
+<math><msub><mi>p</mi><mi>a</mi></msub></math> : texture *x*-increment / pixel
 
-*p*~b~ : texture *x*-increment / scanline
+<math><msub><mi>p</mi><mi>b</mi></msub></math> : texture *x*-increment / scanline
 
-*p*~c~ : texture *y*-increment / pixel
+<math><msub><mi>p</mi><mi>c</mi></msub></math> : texture *y*-increment / pixel
 
-*p*~d~ : texture *y*-increment / scanline
+<math><msub><mi>p</mi><mi>d</mi></msub></math> : texture *y*-increment / scanline
 </div>
 
 ## Finishing up {#sec-finish}
@@ -299,25 +598,61 @@ When flagging a background or object as affine, you *must* enter at least some v
 
 Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in `tonc_obj_affine.c` for objects, `tonc_bg_affine.c` for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
-<div class="cblock" id="tbl:affine_functions" markdown>
-
-  Function                                                                        | Description
-  ------------------------------------------------------------------------------- | -----------------------------------------------------------------------------
-  void *foo*\_copy(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src, uint count);   | Copy affine parameters
-  void *foo*\_identity(*FOO*\_AFFINE \*oaff);                                     | **P** = **I**
-  void *foo*\_postmul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);            | Post-multiply: **D** = **D**·**S**
-  void *foo*\_premul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);             | Pre-multiply: **D** = **S**·**D**
-  void *foo*\_rotate(*FOO*\_AFFINE \*aff, u16 alpha);                             | Rotate counter-clockwise by α·π/8000h.
-  void *foo*\_rotscale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy, u16 alpha);       | Scale by 1/*s*~x~ and 1/*s*~y~, then rotate counter-clockwise by α·π/8000h.
-  void *foo*\_rotscale2(*FOO*\_AFFINE \*aff, const AFF_SRC \*as);                 | As *`foo`*`_rotscale()`, but input stored in an `AFF_SRC` struct.
-  void *foo*\_scale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy);                     | Scale by 1/*s*~x~ and 1/*s*~y~
-  void *foo*\_set(*FOO*\_AFFINE \*aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);   | Set **P**'s elements
-  void *foo*\_shearx(*FOO*\_AFFINE \*aff, FIXED hx);                              | Shear top-side right by *h*~x~
-  void *foo*\_sheary(*FOO*\_AFFINE \*aff, FIXED hy);                              | Shear left-side down by *h*~y~
-
-  : **{*@tbl:affine_functions}**: affine functions
-
-</div>
+<table class="cblock" id="tbl:affine_functions">
+    <thead>
+        <tr>
+            <th>Function</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>void foo_copy(FOO_AFFINE *dst, const FOO_AFFINE *src, uint count);</td>
+            <td>Copy affine parameters</td>
+        </tr>
+        <tr>
+            <td>void foo_identity(FOO_AFFINE *oaff);</td>
+            <td><math><mi>P</mi><mo>=</mo><mi>I</mi></td>
+        </tr>
+        <tr>
+            <td>void foo_postmul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
+            <td>Post-multiply: <math><mi>D</mi><mo>=</mo><mi>D</mi><mo>&middot;</mo><mi>S</mi></math></td>
+        </tr>
+        <tr>
+            <td>void foo_premul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
+            <td>Pre-multiply: <math><mi>D</mi><mo>=</mo><mi>S</mi><mo>&middot;</mo><mi>D</mi></math></td>
+        </tr>
+        <tr>
+            <td>void foo_rotate(FOO_AFFINE *aff, u16 alpha);</td>
+            <td>Rotate counter-clockwise by α·π/8000h.</td>
+        </tr>
+        <tr>
+            <td>void foo_rotscale(FOO_AFFINE *aff, FIXED sx, FIXED sy, u16 alpha);</td>
+            <td>Scale by <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac></math> and <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>y</mi></msub></mfrac></math>, then rotate counter-clockwise by α·π/8000h.</td>
+        </tr>
+        <tr>
+            <td>void foo_rotscale2(FOO_AFFINE *aff, const AFF_SRC *as);</td>
+            <td>As foo_rotscale(), but input stored in an AFF_SRC struct.</td>
+        </tr>
+        <tr>
+            <td>void foo_scale(FOO_AFFINE *aff, FIXED sx, FIXED sy);</td>
+            <td>Scale by <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac></math> and <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>y</mi></msub></mfrac></math></td>
+        </tr>
+        <tr>
+            <td>void foo_set(FOO_AFFINE *aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);</td>
+            <td>Set P's elements</td>
+        </tr>
+        <tr>
+            <td>void foo_shearx(FOO_AFFINE *aff, FIXED hx);</td>
+            <td>Shear top-side right by <math><msub><mi>h</mi><mi>x</mi></msub></math></td>
+        </tr>
+        <tr>
+            <td>void foo_sheary(FOO_AFFINE *aff, FIXED hy);</td>
+            <td>Shear left-side down by <math><msub><mi>h</mi><mi>y</mi></msub></math></td>
+        </tr>
+    </tbody>
+</table>
+**{*@tbl:affine_functions}**: affine functions
 
 ### Sample rot/scale function
 
