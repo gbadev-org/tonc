@@ -547,21 +547,21 @@ When flagging a background or object as affine, you *must* enter at least some v
 
 Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In table 10.2 you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in `tonc_obj_affine.c` for objects, `tonc_bg_affine.c` for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
-<div class="cblock">
+<div class="cblock" markdown>
 
-  Function                                                                        Description
-  ------------------------------------------------------------------------------- -----------------------------------------------------------------------------
-  void *foo*\_copy(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src, uint count);   Copy affine parameters
-  void *foo*\_identity(*FOO*\_AFFINE \*oaff);                                     **P** = **I**
-  void *foo*\_postmul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);            Post-multiply: **D** = **D**·**S**
-  void *foo*\_premul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);             Pre-multiply: **D** = **S**·**D**
-  void *foo*\_rotate(*FOO*\_AFFINE \*aff, u16 alpha);                             Rotate counter-clockwise by α·π/8000h.
-  void *foo*\_rotscale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy, u16 alpha);       Scale by 1/*s*~x~ and 1/*s*~y~, then rotate counter-clockwise by α·π/8000h.
-  void *foo*\_rotscale2(*FOO*\_AFFINE \*aff, const AFF_SRC \*as);                 As *`foo`*`_rotscale()`, but input stored in an `AFF_SRC` struct.
-  void *foo*\_scale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy);                     Scale by 1/*s*~x~ and 1/*s*~y~
-  void *foo*\_set(*FOO*\_AFFINE \*aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);   Set **P**'s elements
-  void *foo*\_shearx(*FOO*\_AFFINE \*aff, FIXED hx);                              Shear top-side right by *h*~x~
-  void *foo*\_sheary(*FOO*\_AFFINE \*aff, FIXED hy);                              Shear left-side down by *h*~y~
+  Function                                                                        | Description
+  ------------------------------------------------------------------------------- | -----------------------------------------------------------------------------
+  void *foo*\_copy(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src, uint count);   | Copy affine parameters
+  void *foo*\_identity(*FOO*\_AFFINE \*oaff);                                     | **P** = **I**
+  void *foo*\_postmul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);            | Post-multiply: **D** = **D**·**S**
+  void *foo*\_premul(*FOO*\_AFFINE \*dst, const *FOO*\_AFFINE \*src);             | Pre-multiply: **D** = **S**·**D**
+  void *foo*\_rotate(*FOO*\_AFFINE \*aff, u16 alpha);                             | Rotate counter-clockwise by α·π/8000h.
+  void *foo*\_rotscale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy, u16 alpha);       | Scale by 1/*s*~x~ and 1/*s*~y~, then rotate counter-clockwise by α·π/8000h.
+  void *foo*\_rotscale2(*FOO*\_AFFINE \*aff, const AFF_SRC \*as);                 | As *`foo`*`_rotscale()`, but input stored in an `AFF_SRC` struct.
+  void *foo*\_scale(*FOO*\_AFFINE \*aff, FIXED sx, FIXED sy);                     | Scale by 1/*s*~x~ and 1/*s*~y~
+  void *foo*\_set(*FOO*\_AFFINE \*aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);   | Set **P**'s elements
+  void *foo*\_shearx(*FOO*\_AFFINE \*aff, FIXED hx);                              | Shear top-side right by *h*~x~
+  void *foo*\_sheary(*FOO*\_AFFINE \*aff, FIXED hy);                              | Shear left-side down by *h*~y~
 
   : **Table 10.2**: affine functions
 
