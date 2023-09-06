@@ -27,7 +27,6 @@ MARKDOWN = {
     'attr_list',
     'md_in_html',
     'codehilite',
-    'tables',
     XNosExtension(),
   ],
   'extension_configs': {
