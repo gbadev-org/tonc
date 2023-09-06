@@ -7,7 +7,7 @@ Authors: Cearn
 
 [TOC]
 
-## 10.1. About this page
+## About this page
 
 As you probably know, the GBA is capable of applying geometric transformations like rotating and/or scaling to sprites and backgrounds. To set them apart from the regular items, the transformable ones are generally referred to as Rot/Scale sprites and backgrounds. The transformations are described by four parameters, `pa`, `pb`, `pc` and `pd`. The locations and exact names differ for sprites and backgrounds but that doesn't matter for now.
 
@@ -60,9 +60,9 @@ It's true. Pretty much every document I've seen that deals with this subject is 
 
 </div>
 
-## 10.2. Texture mapping and affine transformations.
+## Texture mapping and affine transformations.
 
-### 10.2.1. General 2D texture mapping
+### General 2D texture mapping
 
 What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In fig 10.2a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors **e**~x~ and **e**~y~ (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
 
@@ -99,7 +99,7 @@ A forward texture mapping via affine matrix **A**.
 
 </div>
 
-### 10.2.2. Affine transformations
+### Affine transformations
 
 The transformations you can do with a 2D matrix are called <dfn>[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see {@eq:transformation_matrix_and_inverse}).
 
@@ -183,7 +183,7 @@ To set them apart from regular backgrounds and sprites, I suppose ‘Rotation’
 
 </div>
 
-## 10.3. “Many of the truths we cling to depend greatly upon our own point of view.”
+## “Many of the truths we cling to depend greatly upon our own point of view.”
 
 <div class="cpt_fr" style="width:160px" markdown>
 
@@ -194,11 +194,11 @@ To set them apart from regular backgrounds and sprites, I suppose ‘Rotation’
 
 As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect_transform_matrix}, which I said was incorrect. So what gives? Well, if you enter this matrix into the `pa-pd` elements you do indeed get something different than what you'd expect. Only now I've proven what you were supposed to expect in the first place (namely a scaling by *s*~x~ and *s*~y~, followed by a counter-clockwise rotation by α). The *real* question is of course, why doesn't this work? To answer this I will present two different approaches to the 2D mapping process.
 
-### 10.3.1. Human point of view
+### Human point of view
 
 “Hello, I am Cearn's brain. I grok geometry and can do matrix- transformations in my head. Well, his head actually. When it comes to texture mapping I see the original map (in texture space) and then visualize the transformation. I look at the original map and look at where the map's pixels end up on screen. The transformation matrix for this is **A**, which ties texel **p** to screen pixel **q** via **q**= **A · p**. The columns of **A** are simply the transformed unit matrices. Easy as π.”
 
-### 10.3.2. Computer point of view
+### Computer point of view
 
 <div class="cpt_fr" style="width:160px" markdown>
 
@@ -209,7 +209,7 @@ As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect
 
 “Hello, I am Cearn's GBA. I'm a lean, mean gaming machine that fits in your pocket, and I can push pixels like no one else. Except perhaps my owner's GeForce 4 Ti4200, the bloody show-off. Anyway, one of the things I do is texture mapping. And not just ordinary texture-mapping, I can do cool stuff like rotation and scaling as well. What I do is fill pixels, all I need to know is for you to tell me where I should get the pixel's color from. In other words, to fill screen pixel **q**, I need a matrix **B** that gives me the proper texel **p** via **p = B · q**. I'll happily use any matrix you give me; I have complete confidence in your ability to supply me with the matrix for the transformation you require.”
 
-### 10.3.3. Resolution
+### Resolution
 
 I hope you spotted the crucial difference between the two points of view. **A** maps *from* texture space *to* screen space, while **B** does the exact opposite (i.e., **B = A**^-1^). I think you know which one you should give the GBA by now. That's right: **P = B**, not **A**. This one bit of information is the crucial piece of the affine matrix puzzle.
 
@@ -246,7 +246,7 @@ In other words:
 
 </div>
 
-## 10.4. Finishing up
+## Finishing up
 
 Knowing what the **P**-matrix is used for is one thing, knowing how to use them properly is another. There are three additional points you need to remember when you're going to deal with affine objects/backgrounds and the affine matrices.
 
@@ -254,7 +254,7 @@ Knowing what the **P**-matrix is used for is one thing, knowing how to use them 
 2.  Luts
 3.  Initialisation
 
-### 10.4.1. Data types of affine elements
+### Data types of affine elements
 
 Affine transformations are part of mathematics and, generally speaking, math numbers will be real numbers. That is to say, floating point numbers. However, if you were to use floating points for the **P** elements, you'd be in for two rude surprises.
 
@@ -296,7 +296,7 @@ Only in the final step to hardware should you go to 8.8 format. Before that, use
 
 </div>
 
-### 10.4.2. LUTs
+### LUTs
 
 So fixed point math is used because floating point math is just to slow for efficient use. That's all fine and good for your own math, but what about mathematical functions like sin() and cos()? Those are still floating point internally (even worse, *`double`s*!), so those are going to be ridiculously slow.
 
@@ -319,11 +319,11 @@ INLINE s32 lu_cos(uint theta)
 
 Now, note the angle range: 0-10000h. Remember you don't *have* to use 360 degrees for a circle; in fact, on computers it's better to divide the circle in a power of two instead. In this case, the angle is in 2^16^ parts for compatibility with BIOS functions, which is brought down to a 512 range inside the look-up functions.
 
-### 10.4.3. Initialization
+### Initialization
 
 When flagging a background or object as affine, you *must* enter at least some values into `pa-pd`. Remember that these are zeroed out by default. A zero-offset means it'll use the first pixel for the whole thing. If you get a single-colored background or sprite, this is probably why. To avoid this, set **P** to the identity matrix or any other non-zero matrix.
 
-## 10.5. Tonc's affine functions
+## Tonc's affine functions
 
 Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in `tonc_obj_affine.c` for objects, `tonc_bg_affine.c` for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
@@ -347,7 +347,7 @@ Tonclib contains a number of functions for manipulating the affine parameters of
 
 </div>
 
-### 10.5.1. Sample rot/scale function
+### Sample rot/scale function
 
 My code for a object version of the scale-then-rotate function (à la {@eq:transformation_matrix}) is given below. Note that it is from the computer's point of view, so that `sx` and `sy` scale down. Also, the alpha `alpha` uses 10000h/circle (i.e., the unit of α is π/8000h = 0.096 mrad, or 180/8000h = 0.0055°) and the sine lut is in .12f format, which is why the shifts by 12 are required. The background version is identical, except in name and type. If this were C++, templates would have been mighty useful here.
 
