@@ -1,10 +1,11 @@
+Title: Introduction to Tonc
+Date: 2003-09-01
+Modified: 2023-09-05
+Authors: Cearn
+
 # 5. The Bitmap modes (mode 3, 4, 5) {#ch-}
 
--   [Introduction](#sec-intro).
--   [GBA bitmap modes, for real](#sec-modes)
--   [Page flipping](#sec-page).
--   [On data and how to use it](#sec-data).
--   [Conclusions](ssec-conc).
+[TOC]
 
 ## Introduction {#sec-intro}
 
@@ -51,11 +52,11 @@ Fig 5.2 shows how this works. This is a *w*=24 by *h*=24 bitmap, at 8bpp (8 <spa
 
 Note, however, that when you use another bitdepth, the addresses change too. For example, at 16bpp (2 bytes per pixel), you'd need to multiply the pixel-number by 2. Or use another datatype for your array. The general formula is left as an exercise for the reader.
 
-Usually it's not actually the width (i.e., the number of pixels in a row) that's important, but the <dfn>pitch</dfn>. The pitch is defined as the number of bytes in a scanline. For 8bpp images the pitch and width will usually be the same, but for, say, 16bpp images (2 bytes per pixel) the pitch is the width times two. There's another catch: memory alignment. Alignment will be covered in a [later section](#ssec-data-align), but the upshot is that systems generally have a ‘preferred’ type size and can better deal with data if the addresses are a multiple of that type size. This is why windows BMPs' scanlines are always aligned to 32bit boundaries.
+Usually it's not actually the width (i.e., the number of pixels in a row) that's important, but the <dfn>pitch</dfn>. The pitch is defined as the number of bytes in a scanline. For 8bpp images the pitch and width will usually be the same, but for, say, 16bpp images (2 bytes per pixel) the pitch is the width times two. There's another catch: memory alignment. Alignment will be covered in a [later section](#ssec-data-align), but the upshot is that systems generally have a ‘preferred’ type size and can better deal with data if the addresses are a multiple of that type size. This is why scanlines in some bitmap file formats are always aligned to 32-bit boundaries.
 
 ## The GBA bitmap modes {#sec-modes}
 
-Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4 or 5 in the lowest bits of [REG_DISPCNT](video.html#tbl-reg-dispcnt) and enable `BG2`. You may wonder why we start with mode 3, rather than mode 0. The reason for this is that bitmaps are a lot easier to come to terms with than tilemaps. And this is the *only* reason. The truth of the matter is that the bitmap modes are just too slow to be used for most conventional GBA games. I can't give an exact figure, but if someone told me 90% or more of GBA games used tilemodes and not bitmap modes, I wouldn't be surprised. The only time when bitmap modes would be beneficial would be either for very static screens (introductory demos) or very dynamic screens (3D games like Starfox or Doom).
+Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4 or 5 in the lowest bits of [REG_DISPCNT](video.html#tbl-reg-dispcnt) and enable `BG2`. You may wonder why we start with mode 3, rather than mode 0. The reason for this is that bitmaps are a lot easier to come to terms with than tilemaps. And this is the *only* reason. The truth of the matter is that the bitmap modes are just too slow to be used for most conventional GBA games. I can't give an exact figure, but if someone told me 90% or more of GBA games used tile modes and not bitmap modes, I wouldn't be surprised. The only time when bitmap modes would be beneficial would be either for very static screens (introductory demos) or very dynamic screens (3D games like *Star Fox* or *Doom*).
 
 The bitmap modes have the following characteristics:
 
@@ -69,11 +70,11 @@ The bitmap modes have the following characteristics:
 <tr>
   <th>mode<th>width<th>height<th>bpp<th>size     <th>page-flip
 <tr>
-  <td>3   <td>240  <td>160   <td>16 <td>1x 12C00h <td>No
+  <td>3   <td>240  <td>160   <td>16 <td>1× 12C00h <td>No
 <tr>
-  <td>4   <td>240  <td>160   <td>8  <td>2x 9600h <td>Yes
+  <td>4   <td>240  <td>160   <td>8  <td>2× 9600h <td>Yes
 <tr>
-  <td>5   <td>160  <td>128   <td>16 <td>2x A000h <td>Yes
+  <td>5   <td>160  <td>128   <td>16 <td>2× A000h <td>Yes
 </table>
 </div>
 
@@ -81,19 +82,17 @@ What width, height and bpp mean should be clear by now; the size that the bitmap
 
 ### Drawing primitives in mode 3 {#ssec-modes-m3}
 
-We've already seen how to plot pixels, now it's time for some lines and rectangles. Horizontal lines are piss-easy: because the pixels are in adjacent memory, all you need is a simple loop from the starting *x* to the final *x*. Vertical lines are nearly as easy: while the pixels aren't right next to each other, they do have a fixed offset between them, namely the pitch. So again a simple loop is all you need. Rectangles are essentially multiple horizontal lines, so those are easy as well.
+We've already seen how to plot pixels, now it's time for some lines and rectangles. Horizontal lines are nearly trivial: because the pixels are in adjacent memory, all you need is a simple loop from the starting *x* to the final *x*. Vertical lines are nearly as easy: while the pixels aren't right next to each other, they do have a fixed offset between them, namely the pitch. So again a simple loop is all you need. Rectangles are essentially multiple horizontal lines, so those are easy as well.
 
 Diagonal lines are a little trickier, for a number of reasons. Diagonal lines have a slope that indicates how many horizontal steps you need to take before moving to the next scanline. That would only work if the absolute value were lower than one, otherwise you'd get gaps between pixels. For higher slopes, you need to increment vertically, and plot horizontally.
 
-Another point is how to make the routine fast enough to be of real use. Fortunately, these things have all been figured out in the past already, so we'll just use the results here. In this case, we'll use a [Bresenham Midpoint](http://en.wikipedia.org/wiki/Bresenham's_line_algorithm){target="_blank"} algorithm for the line drawing, modified to deal with horizontal and vertical lines separately. While I could explain what the routine does exactly, it is out of the scope of the chapter, really.
+Another point is how to make the routine fast enough to be of real use. Fortunately, these things have all been figured out in the past already, so we'll just use the results here. In this case, we'll use a [Bresenham Midpoint](https://en.wikipedia.org/wiki/Bresenham's_line_algorithm){target="_blank"} algorithm for the line drawing, modified to deal with horizontal and vertical lines separately. While I could explain what the routine does exactly, it is out of the scope of the chapter, really.
 
-Two points I have ignored here are normalization and clipping. <dfn>Normalization</dfn> means making sure the routine runs in the right direction. For example, when implementing a line drawing routine that runs from `x1` to `x2` via an incrementing for loop, you'd best be sure that `x2` is actually higher than `x1` in the first place. <dfn>Clipping</dfn> means cutting the primitive down to fit inside the viewport. While this is a good thing to do, we will omit it because it can get really hairy to do it well.
+Two points I have ignored here are normalization and clipping. <dfn>Normalization</dfn> means making sure the routine runs in the right direction. For example, when implementing a line drawing routine that runs from `x1` to `x2` via an incrementing `for` loop, you'd best be sure that `x2` is actually higher than `x1` in the first place. <dfn>Clipping</dfn> means cutting the primitive down to fit inside the viewport. While this is a good thing to do, we will omit it because it can get really hairy to do it well.
 
-  
+The code below is an excerpt from *toolbox.c* from the *m3_demo* and contains functions for drawing lines, rectangles and frames on a 16bpp canvas, like in mode 3 and mode 5. `dstBase` is the base-pointer to the canvas and `dstPitch` is the pitch. The rest of the parameters should be obvious.
 
-The code below is an excerpt from toolbox.c from the m3_demo and contains functions for drawing lines, rectangles and frames on a 16bpp canvas, like in mode 3 and mode 5. `dstBase` is the base-pointer to the canvas and `dstPitch` is the pitch. The rest of the parameters should be obvious.
-
-``` proglist
+```c
 #include "toolbox.h"
 
 //! Draw a line on a 16bpp canvas
@@ -140,7 +139,7 @@ void bmp16_line(int x1, int y1, int x2, int y2, u32 clr,
 
             dd += 2*dy;
             dst += xstep;
-        }               
+        }
     }
     else                // Diagonal, slope > 1
     {
@@ -154,7 +153,7 @@ void bmp16_line(int x1, int y1, int x2, int y2, u32 clr,
 
             dd += 2*dx;
             dst += ystep;
-        }       
+        }
     }
 }
 
@@ -190,9 +189,9 @@ void bmp16_frame(int left, int top, int right, int bottom, u32 clr,
 }
 ```
 
-These functions are very general: they will work for anything that has 16bit colors. That said, it may be annoying to have to add the canvas pointer and pitch all the time, so you could create an <dfn>interface layer</dfn> specifically for mode 3 and mode 5. The ones for mode 3 would look something like this:
+These functions are very general: they will work for anything that has 16-bit colors. That said, it may be annoying to have to add the canvas pointer and pitch all the time, so you could create an <dfn>interface layer</dfn> specifically for mode 3 and mode 5. The ones for mode 3 would look something like this:
 
-``` proglist
+```c
 typedef u16 COLOR;
 
 #define vid_mem         ((COLOR*)MEM_VRAM)
@@ -237,10 +236,10 @@ INLINE void m3_frame(int left, int top, int right, int bottom, COLOR clr)
 
 Finally, there is a `m3_fill()` function, that fills the entire mode 3 canvas with a single color.
 
-``` proglist
+```c
 //! Fill the mode 3 background with color \a clr.
-void m3_fill(COLOR clr) 
-{   
+void m3_fill(COLOR clr)
+{
     int ii;
     u32 *dst= (u32*)vid_mem;
     u32 wd= (clr<<16) | clr;
@@ -251,20 +250,17 @@ void m3_fill(COLOR clr)
 ```
 
 <div class="cpt_fr" style="width:240px">
-  <img src="img/demo/m3_demo.png" id="img-m3-demo"
-    alt="mode3 screen">
+  <img src="img/demo/m3_demo.png" id="img-m3-demo" alt="mode3 screen">
   <b>Fig 5.3a</b>: drawing in mode 3.
 </div>
 
-Now, note what I'm doing here: instead of treating VRAM as an array of 16bit values which are appropriate for 16bpp colors, I'm using a 32bit pointer and filling VRAM with a 32bit variable containing two colors. When filling large chunks of memory, it makes no difference if I fill it in *N* 16bit chunks, or ½*N* 32bit chunks. However, because you only use half the number of iterations in the latter case, it's roughly twice as fast. In C, it's perfectly legal to do something like this and often actually useful. This is why it's important to know the principles of [data and memory](#sec-data). Also note that I'm using pointer arithmetic here instead of array indices. While the compiler generally make the conversion itself, doing it manually is still often a little faster.
+Now, note what I'm doing here: instead of treating VRAM as an array of 16-bit values which are appropriate for 16bpp colors, I'm using a 32-bit pointer and filling VRAM with a 32-bit variable containing two colors. When filling large chunks of memory, it makes no difference if I fill it in *N* 16-bit chunks, or ½*N* 32-bit chunks. However, because you only use half the number of iterations in the latter case, it's roughly twice as fast. In C, it's perfectly legal to do something like this (provided that strict aliasing is satisfied) and often actually useful. This is why it's important to know the principles of [data and memory](#sec-data). Also note that I'm using pointer arithmetic here instead of array indices. While the compiler generally make the conversion itself, doing it manually is still often a little faster. (When in doubt, read the assembly language that GCC generates.)
 
 While this method is already twice as fast as the ‘normal’ method, there are actually much faster methods as well. We will meet these later, when we stop using separate toolkit files and start using tonclib, the code library for tonc. Tonclib contains the functions described above (only faster), as well as 8bpp variations of the `bmp16_` routines and interfaces for mode 4 and mode 5.
 
-  
+Below you can find the main code for *m3_demo*, which uses the `m3_` functions to draw some items on the screen. Technically, it's bad form to use this many magic numbers, but for demonstration purposes it should be okay. The result can be seen in fig 5.3.
 
-Below you can find the main code for m3_demo, which uses the `m3_` functions to draw some items on the screen. Technically, it's bad form to use this many magic numbers, but for demonstration purposes it should be okay. The result can be seen in fig 5.3.
-
-``` proglist
+```c
 #include "toolbox.h"
 
 int main()
@@ -311,13 +307,13 @@ int main()
 
 Mode 4 is another bitmap mode. It also has a 240×160 frame-buffer, but instead of 16bpp pixels it uses 8bpp pixels. These 8 bits are a <dfn>palette index</dfn> to the background palette located at `0500:0000`. The color you'll see on screen is the color found in the palette at that location.
 
-Pixels of a bitdepth of 8 mean you can only have 256 colors at a time (instead of 32678 in the case of 15bpp), but there are benefits as well. For one, you can manipulate the colors of many pixels by simply changing the color in the palette. An 8bpp frame-buffer also takes up half as much memory as a 16bpp buffer. Not only is it faster to fill (well, in principle anyway), but there is now also room for a second buffer to allow [page flipping](#sec-page). Why that's useful will be covered in a minute.
+Pixels of a bitdepth of 8 mean you can only have 256 colors at a time (instead of 32768 in the case of 15bpp), but there are benefits as well. For one, you can manipulate the colors of many pixels by simply changing the color in the palette. An 8bpp frame-buffer also takes up half as much memory as a 16bpp buffer. Not only is it faster to fill (well, in principle anyway), but there is now also room for a second buffer to allow [page flipping](#sec-page). Why that's useful will be covered in a minute.
 
-There is, however, one major downsize to using mode 4, which stems from a hardware limitation. With 8bit pixels, it'd make sense to map VRAM as an array of bytes. This would be fine if it weren't for the rather annoying fact that VRAM does not allow byte-writes! Now, because this is a very important point, let me repeat that: **<span class="rem">You cannot write to VRAM in byte-sized chunks!!!</span>**. Byte-reads are ok, but writes have to be done in 16-bit or 32-bit bit chunks. If you *do* write in bytes to VRAM, the halfword you're accessing will end up with that byte in both its bytes: you're setting two pixels at once. Note that this no-byte-write rule also extends to PALRAM and OAM, but there it doesn't cause trouble because you won't be using that as bytes anyway.
+There is, however, one major downsize to using mode 4, which stems from a hardware limitation. With 8-bit pixels, it'd make sense to map VRAM as an array of bytes. This would be fine if it weren't for the rather annoying fact that VRAM does not allow byte-writes! Now, because this is a very important point, let me repeat that: **<span class="rem">You cannot write to VRAM in byte-sized chunks!!!</span>**. Byte reads are ok, but writes have to be done in 16-bit or 32-bit chunks. If you *do* write in bytes to VRAM, the halfword you're accessing will end up with that byte duplicated into both the lower and upper bytes: you're setting two pixels at once. Note that this no-byte-write rule also extends to palette memory and OAM, but there it doesn't cause trouble because you won't be using that as bytes anyway.
 
 So how to plot single-pixels then? Well, you have to read the whole halfword you're trying to access, mask off the bits you don't want to overwrite, insert your pixels and then write it back. In code:
 
-``` proglist
+```c
 #define M4_WIDTH    240     // Width in mode 4
 u16 *vid_page= vid_mem;     // Point to current frame buffer
 
@@ -333,7 +329,7 @@ INLINE void m4_plot(int x, int y, u8 clrid)
 
 As you can see, it's a little more complicated than `m3_plot()`. It takes a lot longer to run as well. Still, once you have a pixel plotter, you can create other rendering routines with ease. The basic code for drawing lines, rectangles, circles and the like are pretty much independent of how pixels are formatted. For example, drawing a rectangle is basically plotting pixels in a double loop.
 
-``` proglist
+```c
 void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 {
     int ix, iy;
@@ -343,34 +339,24 @@ void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 }
 ```
 
-This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out tonc_bmp8.c in tonclib.
+This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in tonclib.
 
-<div class="note">
-
+<div class="note" markdown>
 <div class="nhcare">
-
-VRAM vs byte writes
-
+VRAM vs. byte writes
 </div>
 
-You cannot write individual bytes into VRAM (or PALRAM or OAM for that matter). Halfwords or words only, please. If you want to write single bytes, you have to read the full (half)word, insert the byte, and put it back.
-
-  
+You cannot write individual bytes into VRAM (or the palette or OAM for that matter). Halfwords or words only, please. If you want to write single bytes, you have to read the full (half)word, insert the byte, and put it back.
 
 Please don't skip this note, and make yourself aware of the full ramifications of this. Errors due to pointer-type mismatches are very easy to make, and [you may be writing to VRAM as bytes more often than you think](#ssec-data-memcpy).
-
 </div>
 
-<div class="note">
-
+<div class="note" markdown>
 <div class="nhcare">
-
-Generic vs specific rendering routines
-
+Generic vs. specific rendering routines
 </div>
 
-Every kind of graphics surface needs its own pixel plottet. In principle, more complicated (multi-pixel) shapes are surface independent. For example, a line routine follows the same algorithm, but simply uses a different plotter for drawing pixels. These generic forms are great in terms of re-usability and maintainability, but can be *disastrous* when it comes to speed. Creating surface-specific renderers may be extra work, but can on occasion save you up to a factor 100 in speed.
-
+Every kind of graphics surface needs its own pixel plotter. In principle, more complicated (multi-pixel) shapes are surface independent. For example, a line routine follows the same algorithm, but simply uses a different plotter for drawing pixels. These generic forms are great in terms of re-usability and maintainability, but can be *disastrous* when it comes to speed. Creating surface-specific renderers may be extra work, but can on occasion save you up to a factor of 100 in speed.
 </div>
 
 ### Complications of bitmap modes {#ssec-modes-details}
@@ -385,16 +371,12 @@ Page flipping can alleviate some of these items, but that's not available in mod
 
 So basically, use the bitmap modes for testing and/or static images, but not much else unless you know the tilemodes can't do what you want.
 
-<div class="note">
-
+<div class="note" markdown>
 <div class="nhbad">
-
 Bitmap modes are not for gaming
-
 </div>
 
-Do not get too comfortable with bitmap modes. They're nice for gbadev introductory sections because they are easier to work with than tile modes, they are *not* suitable for most types of games because the GBA simply can't push pixels fast enough. Tinker with them to get a feel for IO registers and the like, then move on.
-
+Do not get too comfortable with bitmap modes. Though they're nice for gbadev introductory sections because they are easier to work with than tile modes, and they have advantages for 3D games, they are *not* suitable for most types of games because the GBA simply can't push pixels fast enough. Tinker with them to get a feel for IO registers and the like, then move on.
 </div>
 
 ## Page flipping {#sec-page}
@@ -415,25 +397,22 @@ While the procedure works great, there are some snares. For the first, consider 
 
 The second problem concerns a little nasty in the age-old method of animation. The canonical animation does this. Frame1: draw object. Frame2: erase old object, draw object in new state. This doesn't work for page flipping since Frame2 is written on an entirely different bitmap than Frame1, so trying to erase Frame1's old object doesn't. What you need to erase is the object from 2 frames ago. Again, easy solution, but you have be aware of the problem. (Of course, erasing the entire frame each time would work too, but who's got the time?)
 
-<div class="note">
-
+<div class="note" markdown>
 <div class="nhgood">
-
 Pageflipping, not double buffering
-
 </div>
 
 Another method of smoother animation is double buffering: draw on a secondary buffer (the backbuffer) and copy it to the screen when finished. This is a fundamentally different technique than page flipping! Even though both use two buffers, in page flipping you don't copy the backbuffer to the display buffer, you *make* backbuffer the display buffer.
 
 What the GBA does is page flipping, so refer to it as such.
-
 </div>
 
 ### GBA page flipping {#ssec-page-gba}
 
 The second page of the GBA is located at location `0600:A000h`. If you look at the size required for mode 3, you'll see why it doesn't have page-flipping capabilities: there's no room for a second page. To set the GBA to display the second page, set [`REG_DISPCNT`](video.html#tbl-reg-dispcnt){4}. My page flipping function looks a little like this:
 
-``` {#cd-vid-flip .proglist}
+<div id="cd-vid-flip" markdown>
+```c
 u16 *vid_flip()
 {
     // toggle the write_buffer's page
@@ -442,22 +421,24 @@ u16 *vid_flip()
     return vid_page;
 }
 ```
+</div>
 
 The code is relatively straightforward. `vid_page` is the pointer that always points to the write-page. I had to pull a little casting trickery to get the `XOR` to work (C doesn't like it when you try it on pointers). On the GBA, the steps for page flipping are perfectly xorrable operations. Sure, you *could* just put the equivalent in an `if-else` block, but where's the fun in that :P?
 
 ### Page flipping demo {#ssec-page-demo}
 
-What follows is the code (sans data) for the pageflip demo. The actual part concerned with page flipping is very small. In fact, the actual flip is merely a call to `vid_flip()` once every 60 frames = 1 second (point 3). We'll also have to set the video mode to something that actually has pages to flip, which in this case is mode 4.
+What follows is the code (sans data) for the *pageflip* demo. The actual part concerned with page flipping is very small. In fact, the actual flip is merely a call to `vid_flip()` once every 60 frames = 1 second (point 3). We'll also have to set the video mode to something that actually has pages to flip, which in this case is mode 4.
 
 What we'll have to do as well is load the data that will be displayed on these two pages. I'm using the standard C routine `memcpy()` for the copy, because that's the standard way of copying things in C. While it's faster than manual loops, it does come with a [few snares](#ssec-data-memcpy) that you need to be aware of before using it everywhere. Tonclib comes with faster and safer routines, but we'll get to those when it's time.
 
-Loading a bitmap is very simple in theory, but the bitmap(s) I'm using are only 144x16 in size, while the VRAM page's pitch is 240 pixels wide. This means that we'll have to copy each scanline separately, which is done at point (1). Note that I'm copying `frontBitmap` to `vid_mem_front` and `backBitmap` to `vid_mem_back`, because those are the starting locations of the two pages.
+Loading a bitmap is very simple in theory, but the bitmap(s) I'm using are only 144×16 in size, while the VRAM page's pitch is 240 pixels wide. This means that we'll have to copy each scanline separately, which is done at point (1). Note that I'm copying `frontBitmap` to `vid_mem_front` and `backBitmap` to `vid_mem_back`, because those are the starting locations of the two pages.
 
-Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `frontPal`, but instead of using `memcpy()` to copy it to the background palette memory, I'm using a u32-array because … well, just because I guess.
+Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `frontPal`, but instead of using `memcpy()` to copy it to the background palette memory, I'm using a `u32` array because … well, just because I guess.
 
-Lastly, you can pause and unpause the demo by holding down start.
+Lastly, you can pause and unpause the demo by holding the Start Button.
 
-``` {#cd-pageflip .proglist}
+<div id="cd-pageflip" markdown>
+```c
 #include <string.h>
 
 #include <toolbox.h>
@@ -506,6 +487,7 @@ int main()
     return 0;
 }
 ```
+</div>
 
 <div class="lblock">
 <div class="cpt" style="width:352px" id="img-flipdemo">
@@ -524,45 +506,35 @@ This section is a little boring (ok, very boring) but it needs to be said. While
 
 The first two subsections are about how to get graphics into your game, something that you'll really need to know. After that I'll discuss a few nasty and highly technical things that may or may not cause problems later on. These are optional and you can skip to the [data-loading/interpreting demo](#ssec-data-demo) at any time. That said, I urge you to read them anyway because they may save you a lot of debugging time.
 
-<div class="note">
-
+<div class="note" markdown>
 <div class="nhgood">
-
 Relax, it's only 1s and 0s
-
 </div>
 
 When you get right down to it, everything on computers is merely a big mess of bits without any purpose by itself. It is the interaction between hardware and software that makes sequences of bits appear as valid executable code, a bitmap, music or whatever.
-
 </div>
 
 ### Yes, we have no files {#ssec-data-files}
 
 This may be a good point to say a few words on data. Strictly speaking, *everything* is data, but in this case I'm referring to data that on PC games would be separate from the executable: graphics, music, maybe scripts and text-files and what not. This all works fine on a PC, but not so fine on the GBA because there *is no file system*. This means that you cannot use the standard file I/O routines (`fscanf()`, `fread()`, etc) to read the data, because there are no files to read them from.
 
-All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C-arrays and #including them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be #included and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](http://www.pineight.com/gba/#gbfs){target="_blank"} by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C-arrays because they are the easiest to use.
+All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C arrays and using `#include` on them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be `#include`d and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](https://pineight.com/gba/#gbfs){target="_blank"} by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C arrays because they are the easiest to use.
 
-  
-
-<div class="note">
-
-<div class="nh">
-
+<div class="note" markdown>
+<div class="nh" markdown>
 Ahem. Actually, we *do* have files
-
 </div>
 
-There *were* no files in the past, but in July of 2006, [Chishm](http://chishm.drunkencoders.com/){target="_blank"} gave us libfat, which is a FAT-like file system for GBA and NDS. It is distributed via DKP as well, so chances are you have it already.
-
+There *were* no files in the past, but in July of 2006, [Chishm](https://web.archive.org/web/20120201074338/http://chishm.drunkencoders.com/){target="_blank"} gave us libfat, which is a FAT-like file system for GBA and Nintendo DS. It is distributed via devkitPro Updater as well, so chances are you have it already.
 </div>
 
 #### Where do my arrays go?
 
-By default, arrays go into IWRAM. You know, the one that's only 32 kb long. Now, a mode 3 bitmap is 240x160x2 = 77 kb. Obviously, trying to put a 77 kb object into a 32kb section would fit nicely into the bad things category. To avoid this, put it in the read-only section (ROM), which is much larger. All you have to do for this is add the ‘`const`’ keyword to the definition if you're using C, or the ‘`.rodata`’ directive in assembly. Note that for multiboot programs ROM actually means EWRAM, which is only 256 kb long. The latter would fit three mode 3 bitmaps; more would again be bad unless you use compression.
+By default, arrays go into IWRAM. You know, the one that's only 32 KiB long. Now, a mode 3 bitmap is 240×160×2 = 77 kB. Obviously, trying to put a 77 kB object into a 32 KiB section would fit nicely into the bad things category. To avoid this, put it in the read-only section (ROM), which is much larger. All you have to do for this is add the `const` keyword to the definition if you're using C, or the `.rodata` directive in assembly. Note that for multiboot programs, ROM actually means EWRAM, which is only 256 KiB long. The latter would fit three mode 3 bitmaps; more would again be bad unless you use compression.
 
-Note that what I said about arrays is true for *all* arrays, not just data arrays: if you want any kind of large array (like a backbuffer for mode 3), it would also default to and *kill* IWRAM. But you can't make it const because then you'd not be able to write on it. GCC has attributes that lets you choose where things are put – in EWRAM for instance. Here are the commonly seen #defines for the attributes that can be used for specific section placement.
+Note that what I said about arrays is true for *all* arrays, not just data arrays: if you want any kind of large array (like a backbuffer for mode 3), it would also default to and *overfill* IWRAM. But you can't make it `const` because then you'd not be able to write on it. GCC has attributes that lets you choose where things are put – in EWRAM for instance. Here are the commonly seen `#define` macros for the attributes that can be used for specific section placement.
 
-``` proglist
+```c
 #define EWRAM_DATA __attribute__((section(".ewram")))
 #define IWRAM_DATA __attribute__((section(".iwram")))
 #define  EWRAM_BSS __attribute__((section(".sbss")))
@@ -571,23 +543,19 @@ Note that what I said about arrays is true for *all* arrays, not just data array
 #define IWRAM_CODE __attribute__((section(".iwram"), long_call))
 ```
 
-<div class="note">
-
-<div class="nhgood">
-
+<div class="note" markdown>
+<div class="nhgood" markdown>
 Const is good
-
 </div>
 
-Data that you don't expect to change in your game should be defined as constant data using the ‘`const`’ keyword, lest it trashes your IWRAM.
-
+Data that you don't expect to change in your game should be defined as constant data using the `const` keyword, lest it trashes your IWRAM.
 </div>
 
 #### Converted and const arrays in C++
 
-There are two little snags that you can trip on if you're using (converted) data arrays in C++. The first is that tools that generate the arrays will output C-files, not C++-files. This is not a problem in itself because those files will be compiled just the same. What *is* a problem is that C++ uses something known as [Name mangling](http://en.wikipedia.org/wiki/Name_mangling){target="_blank"} to allow overloading and stuff like that. C doesn't and as a result, the name that the C++ file looks for isn't the same one as in the C file and you get undefined references. To fix this, use \``extern "C"`' in front or around the declarations of the stuff in the C files.
+There are two little snags that you can trip on if you're using (converted) data arrays in C++. The first is that tools that generate the arrays will output C files, not C++ files. This is not a problem in itself because those files will be compiled just the same. What *is* a problem is that C++ uses something known as [Name mangling](https://en.wikipedia.org/wiki/Name_mangling){target="_blank"} to allow overloading and stuff like that. C doesn't and as a result, the name that the C++ file looks for isn't the same one as in the C file and you get undefined references. To fix this, use `extern "C"` in front or around the declarations of the stuff in the C files.
 
-``` proglist
+```c
 // This:
 
 extern "C" const unsigned char C_array[];
