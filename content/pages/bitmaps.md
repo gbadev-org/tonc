@@ -15,10 +15,9 @@ The chapter will close with a section on how to deal with data and computer memo
 ### Bitmap 101 {#ssec-intro-101}
 
 <div class="cpt_fr" style="width:96px">
-
-![a 24x24 bitmap of Link.](img/bitmaps/link_lttp_sm.png){#img-link-sm width="72"}  
-**Fig 5.1**: Link (24x24 bitmap).
-
+  <img src="img/bitmaps/link_lttp_sm.png" width=72 id="img-link-sm" 
+    alt="a 24x24 bitmap of Link."><br>
+  <b>Fig 5.1</b>: Link (24x24 bitmap).
 </div>
 
 In fig 5.1 you can find a bitmap of one of the game characters that made Nintendo great. This is probably how most people think of bitmaps: a grid of colored pixels. In order to use bitmaps in a program we need to know how they're arranged in memory. For that we use fig 5.2 (below); this is a zoomed out version of fig 5.1, with a pixel grid imposed over it and some numbers.
@@ -28,15 +27,26 @@ A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), whe
 Fig 5.2 shows how this works. This is a *w*=24 by *h*=24 bitmap, at 8bpp (8 <span class="underline">B</span>its <span class="underline">P</span>er <span class="underline">P</span>ixel (=1 byte)). The numbers in yellow indicate the memory locations; you can count them for yourself if you don't believe me. The first pixel, (0, 0), can be found at location 0. The *last* pixel of the *first* row (23, 0) is at *w*−1 (=23 in this case). The first pixel of the second row (0, 1) is at *w* (=24) etc, etc, till the last pixel at *w×h*−1.
 
 <div class="cblock">
-
-+--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| <div class="cpt" style="width:310px">                                                                  | <div class="cpt" style="width:348px">                                                                                                                                                 |
-|                                                                                                        |                                                                                                                                                                                       |
-| ![zoom out of Fig 1](img/bitmaps/link_lttp.png) **Fig 5.2a**: zoom out of fig 5.1, with pixel offsets. | ![zoom out of Fig 1, with pixel values.](img/bitmaps/link_lttp_mem.png) **Fig 5.2b**: zoom out of fig 5.1, with pixel values. Zero omitted for clarity. Palette on the lefthand side. |
-|                                                                                                        |                                                                                                                                                                                       |
-| </div>                                                                                                 | </div>                                                                                                                                                                                |
-+--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
+<table id="img-link-big">
+<tr><td>
+  <div class="cpt" style="width:310px">
+  <img src="img/bitmaps/link_lttp.png"
+    alt="zoom out of Fig 1">
+    <b>Fig 5.2a</b>: zoom out of 
+    fig&nbsp;5.1, with pixel offsets.
+  </div>
+  </td>
+  <td>
+  <div class="cpt" style="width:348px">
+  <img src="img/bitmaps/link_lttp_mem.png"
+    alt="zoom out of Fig 1, with pixel values.">
+    <b>Fig 5.2b</b>: zoom out of 
+    fig&nbsp;5.1, with pixel values. 
+	Zero omitted for clarity. Palette on the lefthand side.
+  </div>
+  </td>
+</tr>
+</table>
 </div>
 
 Note, however, that when you use another bitdepth, the addresses change too. For example, at 16bpp (2 bytes per pixel), you'd need to multiply the pixel-number by 2. Or use another datatype for your array. The general formula is left as an exercise for the reader.
@@ -50,57 +60,21 @@ Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4 or 5 in the l
 The bitmap modes have the following characteristics:
 
 <div class="lblock">
-
-**Table 5.1**: Bitmap mode characteristics
-
-mode
-
-width
-
-height
-
-bpp
-
-size
-
-page-flip
-
-3
-
-240
-
-160
-
-16
-
-1x 12C00h
-
-No
-
-4
-
-240
-
-160
-
-8
-
-2x 9600h
-
-Yes
-
-5
-
-160
-
-128
-
-16
-
-2x A000h
-
-Yes
-
+<table id="tbl-bm-types"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 5.1</b>: Bitmap mode 
+  characteristics
+</caption>
+<tr>
+  <th>mode<th>width<th>height<th>bpp<th>size     <th>page-flip
+<tr>
+  <td>3   <td>240  <td>160   <td>16 <td>1x 12C00h <td>No
+<tr>
+  <td>4   <td>240  <td>160   <td>8  <td>2x 9600h <td>Yes
+<tr>
+  <td>5   <td>160  <td>128   <td>16 <td>2x A000h <td>Yes
+</table>
 </div>
 
 What width, height and bpp mean should be clear by now; the size that the bitmap requires is simply *width × height × bpp/8*. Page flipping may need some more explanation, but first we'll look at some examples of mode 3 graphics.
@@ -277,9 +251,9 @@ void m3_fill(COLOR clr)
 ```
 
 <div class="cpt_fr" style="width:240px">
-
-![mode3 screen](img/demo/m3_demo.png){#img-m3-demo} **Fig 5.3a**: drawing in mode 3.
-
+  <img src="img/demo/m3_demo.png" id="img-m3-demo"
+    alt="mode3 screen">
+  <b>Fig 5.3a</b>: drawing in mode 3.
 </div>
 
 Now, note what I'm doing here: instead of treating VRAM as an array of 16bit values which are appropriate for 16bpp colors, I'm using a 32bit pointer and filling VRAM with a 32bit variable containing two colors. When filling large chunks of memory, it makes no difference if I fill it in *N* 16bit chunks, or ½*N* 32bit chunks. However, because you only use half the number of iterations in the latter case, it's roughly twice as fast. In C, it's perfectly legal to do something like this and often actually useful. This is why it's important to know the principles of [data and memory](#sec-data). Also note that I'm using pointer arithmetic here instead of array indices. While the compiler generally make the conversion itself, doing it manually is still often a little faster.
@@ -426,10 +400,11 @@ Do not get too comfortable with bitmap modes. They're nice for gbadev introducto
 ## Page flipping {#sec-page}
 
 <div class="cpt_fr" style="width:216px;">
-
-![Page flipping procedure](img/bitmaps/pageflip.png){#img-flip}  
-**Fig 5.4**: Page flipping procedure. No data is copied, only the ‘display’ and ‘write’ pointers are swapped.
-
+  <img src="img/bitmaps/pageflip.png" id="img-flip" 
+    alt="Page flipping procedure"><br>
+  <b>Fig 5.4</b>: Page flipping procedure. 
+  No data is copied, only the &lsquo;display&rsquo; and 
+  &lsquo;write&rsquo; pointers are swapped.
 </div>
 
 Page flipping is a technique that eliminates nasty artifacts like tearing in animation. There are two things going on at the same time in an animation: placing the pixels on bitmap (writing), and drawing the bitmap on screen (displaying). Software takes care of writing, updating the positions of characters etc; hardware does the displaying: it simply takes the bitmap and copies it to the screen. The problem is that both these processes take time. What's worse, they happen at the same time. And when the game state changes in mid draw, the bottom section will be of the current state, while the top section will represent the previous state. Needless to say, this is bad.
@@ -533,16 +508,15 @@ int main()
 ```
 
 <div class="lblock">
-
-<div id="img-flipdemo" class="cpt" style="width:352px">
-
-![Flip A](img/demo/flip_front.png)    ![Flip B](img/demo/flip_back.png)  
-
-**Fig 5.5**: the page flipping demo switches between these two blocks.
-
-</div>
-
-</div>
+<div class="cpt" style="width:352px" id="img-flipdemo">
+<center>
+<img src="img/demo/flip_front.png" alt="Flip A">
+&nbsp;&nbsp;
+<img src="img/demo/flip_back.png" alt="Flip B"><br>
+</center>
+<b>Fig 5.5</b>: the page flipping demo switches 
+between these two blocks.
+</div></div>
 
 ## On data and how to use it {#sec-data}
 
@@ -683,39 +657,25 @@ There are many command-line interfaces available for graphics conversion, but to
 </div>
 
 <div class="cpt_fr" style="width:222px;">
-
-**Table 5.2**: Big endian vs little endian interpretation of byte-sequence 01h, 02h, 03h, 04h
-
-big u32
-
-0x01020304
-
-big u16
-
-0x0102
-
-0x0304
-
-u8
-
-0x01
-
-0x02
-
-0x03
-
-0x04
-
-little u16
-
-0x0201
-
-0x0403
-
-little u32
-
-0x04030201
-
+<table id="tbl-endian"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>Table 5.2</b>: Big endian vs little 
+  endian interpretation of byte-sequence 01h, 02h, 03h, 04h
+</caption>
+<tbody align="center">
+<tr>
+  <th>big u32     <td colspan=4> 0x01020304
+<tr>
+  <th>big u16     <td colspan=2> 0x0102 <td colspan=2> 0x0304
+<tr>
+  <th>u8          <th> 0x01 <th> 0x02   <th> 0x03 <th> 0x04
+<tr>
+  <th>little u16  <td colspan=2> 0x0201 <td colspan=2> 0x0403
+<tr>
+  <th>little u32  <td colspan=4> 0x04030201
+</tbody>
+</table>
 </div>
 
 Below, you can see a partial listing of modes.c, which contains the bitmap and the palette used in the bm_modes demo discussed at the end of this section, as exported by Usenti. It is only a very small part of the file because at over 2700 lines it is way too long to display here, which wouldn't serve much of a purpose anyway. Note that both are u32-arrays, rather than the u8 or u16-arrays you might encounter elsewhere. What you need to remember is that **it doesn't matter** in what kind of an array you put the data: in memory it'll come out the same anyway.
@@ -779,10 +739,9 @@ It is vital that you understand what data is, how the different datatypes work. 
 ### #including code or data considered harmful {#ssec-data-hdr}
 
 <div class="cpt_fr" style="width:240px;">
-
-![Lines](img/bitmaps/bart_data.png){#img-bart-data}  
-**Fig 5.6**: even Bart knows …
-
+  <img src="img/bitmaps/bart_data.png" id="img-bart-data" 
+    alt="Lines"><br>
+  <b>Fig 5.6</b>: even Bart knows &hellip;
 </div>
 
 Most non-trivial projects will have multiple files with code and data. The standard way of dealing with these is to compile these separately and then link the results to the final binary. This is the recommended strategy. However, most other tutorials and many of the example code you can find on the web do something else: they #include everything into the main source file and compile that. This is *not* a recommended practice and should be avoided.
@@ -1138,28 +1097,28 @@ int main()
 ```
 
 <div class="lblock">
-
-<div class="cpt" style="width:240px">
-
-![mode3 screen](img/demo/bm_modes_3.png) **Fig 5.7a**: bm_modes in mode 3.
-
+<table id="img-bm-modes">
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="img/demo/bm_modes_3.png" alt="mode3 screen">
+  <b>Fig 5.7a</b>: <tt>bm_modes</tt> in mode 3.
+  </div>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="img/demo/bm_modes_4.png" alt="mode4 screen">
+  <b>Fig 5.7b</b>: <tt>bm_modes</tt> in mode 4.
+  </div>
+<tr>
+<td>
+  <div class="cpt" style="width:240px">
+<img src="img/demo/bm_modes_5.png" alt="mode5 screen">
+  <b>Fig 5.7c</b>: <tt>bm_modes</tt> in mode 5.
+  </div>
+<td>&nbsp;
+</table>
 </div>
 
-<div class="cpt" style="width:240px">
-
-![mode4 screen](img/demo/bm_modes_4.png) **Fig 5.7b**: bm_modes in mode 4.
-
-</div>
-
-<div class="cpt" style="width:240px">
-
-![mode5 screen](img/demo/bm_modes_5.png) **Fig 5.7c**: bm_modes in mode 5.
-
-</div>
-
- 
-
-</div>
 
 ## Conclusions {#sec-conc}
 
