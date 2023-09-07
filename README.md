@@ -7,12 +7,14 @@ This is a community-maintained version of Tonc, the GBA programming tutorial ori
 You need Python 3. Dependencies can be installed via `pip` or your package manager.
 
 ```sh
-# install dependencies
-pip install pelican markdown
-
 # clone the repo
 git clone git@github.com:gbadev-org/tonc.git
 cd tonc
+
+# install dependencies
+# (if your operating system distributor provides Python, follow the
+# PEP 668 instructions to set up a venv first)
+pip install pelican markdown
 
 # run the development server
 make devserver
@@ -59,16 +61,27 @@ Next, go through the page and fix anything that's broken.
 For example:
 
 *   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
+    
+    ```
+    sed -i -E 's,<span class="dfn">([^<]+)</span>,<dfn>\1</dfn>,g' pagename.md
+    ```
 
 *   Section numbers should be removed from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
+    
+    ```
+    sed -i -E 's,^(##+) [0-9]+\.[0-9.]+,\1,g' pagename.md
+    ```
 
-*   Tables and Figures should be replaced with the raw HTML from Tonc.
+*   Tables and Figures should be replaced with the raw HTML from the `-old.htm` file.
 
-*   Code blocks should have the correct language set on them (`c`, `asm`, `makefile`)
+*   Code blocks should have the correct language set on them (`c`, `asm`, `sh`, `makefile`)
 
-*   Container tags may need a `markdown` attribute adding to them, otherwise the Markdown within won't be rendered properly. e.g.
+*   Use backticks (`` ` ``) around code keywords and italics (`*`) around file names in the text.
+
+*   Container tags may need a `markdown` attribute adding to them, otherwise the Markdown within won't be rendered properly. For example:
     
     ```html
+    <div class="note" markdown> ... </div>
     <div style="margin-left:1.2cm;" markdown> ... </div>
     ```
 
