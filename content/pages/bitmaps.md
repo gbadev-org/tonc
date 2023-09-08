@@ -1,4 +1,4 @@
-Title: Introduction to Tonc
+Title: 5. The Bitmap modes (mode 3, 4, 5)
 Date: 2003-09-01
 Modified: 2023-09-05
 Authors: Cearn
@@ -16,33 +16,33 @@ The chapter will close with a section on how to deal with data and computer memo
 ### Bitmap 101 {#ssec-intro-101}
 
 <div class="cpt_fr" style="width:96px">
-  <img src="img/bitmaps/link_lttp_sm.png" width=72 id="img-link-sm" 
+  <img src="img/bitmaps/link_lttp_sm.png" width=72 id="fig:link-sm" 
     alt="a 24x24 bitmap of Link."><br>
-  <b>Fig 5.1</b>: Link (24x24 bitmap).
+  <b>{*@fig:link-sm}</b>: Link (24x24 bitmap).
 </div>
 
-In fig 5.1 you can find a bitmap of one of the game characters that made Nintendo great. This is probably how most people think of bitmaps: a grid of colored pixels. In order to use bitmaps in a program we need to know how they're arranged in memory. For that we use fig 5.2 (below); this is a zoomed out version of fig 5.1, with a pixel grid imposed over it and some numbers.
+In {@fig:link-sm} you can find a bitmap of one of the game characters that made Nintendo great. This is probably how most people think of bitmaps: a grid of colored pixels. In order to use bitmaps in a program we need to know how they're arranged in memory. For that we use fig 5.2 (below); this is a zoomed out version of {@fig:link-sm}, with a pixel grid imposed over it and some numbers.
 
 A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), where *w* is the number of columns (the width) and *h* the number of rows (the height). A particular pixel can be referred to with a coordinate pair: (*x*, *y*). By the way, the y-axis of the GBA points *down*, not up. So pixel (0, 0) is in the top-left corner. In memory, the lines of the bitmap are laid out sequentially, so that the following rule holds: in a *w×h* bitmap, the pixel (*x, y*) is the (*w×y + x*)-th pixel. This is true for all C matrices, by the way.
 
-Fig 5.2 shows how this works. This is a *w*=24 by *h*=24 bitmap, at 8bpp (8 <span class="underline">B</span>its <span class="underline">P</span>er <span class="underline">P</span>ixel (=1 byte)). The numbers in yellow indicate the memory locations; you can count them for yourself if you don't believe me. The first pixel, (0, 0), can be found at location 0. The *last* pixel of the *first* row (23, 0) is at *w*−1 (=23 in this case). The first pixel of the second row (0, 1) is at *w* (=24) etc, etc, till the last pixel at *w×h*−1.
+{*@fig:link-big} shows how this works. This is a *w*=24 by *h*=24 bitmap, at 8bpp (8 <span class="underline">B</span>its <span class="underline">P</span>er <span class="underline">P</span>ixel (=1 byte)). The numbers in yellow indicate the memory locations; you can count them for yourself if you don't believe me. The first pixel, (0, 0), can be found at location 0. The *last* pixel of the *first* row (23, 0) is at *w*−1 (=23 in this case). The first pixel of the second row (0, 1) is at *w* (=24) etc, etc, till the last pixel at *w×h*−1.
 
 <div class="cblock">
-<table id="img-link-big">
+<table id="fig:link-big">
 <tr><td>
   <div class="cpt" style="width:310px">
   <img src="img/bitmaps/link_lttp.png"
-    alt="zoom out of Fig 1">
-    <b>Fig 5.2a</b>: zoom out of 
-    fig&nbsp;5.1, with pixel offsets.
+    alt="zoom out of {@fig:link-sm}">
+    <b>{*@fig:link-big}a</b>: zoom out of 
+    {@fig:link-sm}, with pixel offsets.
   </div>
   </td>
   <td>
   <div class="cpt" style="width:348px">
   <img src="img/bitmaps/link_lttp_mem.png"
-    alt="zoom out of Fig 1, with pixel values.">
-    <b>Fig 5.2b</b>: zoom out of 
-    fig&nbsp;5.1, with pixel values. 
+    alt="zoom out of {@fig:link-sm}, with pixel values.">
+    <b>{*@fig:link-big}b</b>: zoom out of 
+    {@fig:link-sm}, with pixel values. 
 	Zero omitted for clarity. Palette on the lefthand side.
   </div>
   </td>
@@ -250,15 +250,15 @@ void m3_fill(COLOR clr)
 ```
 
 <div class="cpt_fr" style="width:240px">
-  <img src="img/demo/m3_demo.png" id="img-m3-demo" alt="mode3 screen">
-  <b>Fig 5.3a</b>: drawing in mode 3.
+  <img src="img/demo/m3_demo.png" id="fig:m3-demo" alt="mode3 screen">
+  <b>{*@fig:m3-demo}</b>: drawing in mode 3.
 </div>
 
 Now, note what I'm doing here: instead of treating VRAM as an array of 16-bit values which are appropriate for 16bpp colors, I'm using a 32-bit pointer and filling VRAM with a 32-bit variable containing two colors. When filling large chunks of memory, it makes no difference if I fill it in *N* 16-bit chunks, or ½*N* 32-bit chunks. However, because you only use half the number of iterations in the latter case, it's roughly twice as fast. In C, it's perfectly legal to do something like this (provided that strict aliasing is satisfied) and often actually useful. This is why it's important to know the principles of [data and memory](#sec-data). Also note that I'm using pointer arithmetic here instead of array indices. While the compiler generally make the conversion itself, doing it manually is still often a little faster. (When in doubt, read the assembly language that GCC generates.)
 
 While this method is already twice as fast as the ‘normal’ method, there are actually much faster methods as well. We will meet these later, when we stop using separate toolkit files and start using tonclib, the code library for tonc. Tonclib contains the functions described above (only faster), as well as 8bpp variations of the `bmp16_` routines and interfaces for mode 4 and mode 5.
 
-Below you can find the main code for *m3_demo*, which uses the `m3_` functions to draw some items on the screen. Technically, it's bad form to use this many magic numbers, but for demonstration purposes it should be okay. The result can be seen in fig 5.3.
+Below you can find the main code for *m3_demo*, which uses the `m3_` functions to draw some items on the screen. Technically, it's bad form to use this many magic numbers, but for demonstration purposes it should be okay. The result can be seen in {@fig:m3-demo}.
 
 ```c
 #include "toolbox.h"
@@ -382,9 +382,9 @@ Do not get too comfortable with bitmap modes. Though they're nice for gbadev int
 ## Page flipping {#sec-page}
 
 <div class="cpt_fr" style="width:216px;">
-  <img src="img/bitmaps/pageflip.png" id="img-flip" 
+  <img src="img/bitmaps/pageflip.png" id="fig:flip" 
     alt="Page flipping procedure"><br>
-  <b>Fig 5.4</b>: Page flipping procedure. 
+  <b>{*@fig:flip}</b>: Page flipping procedure. 
   No data is copied, only the &lsquo;display&rsquo; and 
   &lsquo;write&rsquo; pointers are swapped.
 </div>
@@ -457,8 +457,8 @@ void load_gfx()
 
     // (2) You don't have to do everything with memcpy.
     // In fact, for small blocks it might be better if you didn't.
-    // Just mind your types, though. No sense in copying from a 32bit 
-    // array to a 16bit one.
+    // Just mind your types, though. No sense in copying from a 32-bit 
+    // array to a 16-bit one.
     u32 *dst= (u32*)pal_bg_mem;
     for(ii=0; ii<8; ii++)
         dst[ii]= frontPal[ii];
@@ -490,13 +490,13 @@ int main()
 </div>
 
 <div class="lblock">
-<div class="cpt" style="width:352px" id="img-flipdemo">
+<div class="cpt" style="width:352px" id="fig:flipdemo">
 <center>
 <img src="img/demo/flip_front.png" alt="Flip A">
 &nbsp;&nbsp;
 <img src="img/demo/flip_back.png" alt="Flip B"><br>
 </center>
-<b>Fig 5.5</b>: the page flipping demo switches 
+<b>{*@fig:flipdemo}</b>: the page flipping demo switches 
 between these two blocks.
 </div></div>
 
@@ -568,9 +568,9 @@ const unsigned char C_array2[];
 }
 ```
 
-Another problem with C++ is that const-arrays are considered static (local to the file that contains it) unless you add an external declaration to it. So if you just have \``const u8 foo[]= { etc }`' in a file, the array will be invisible to other files.The solution here would be to add the declaration inside the file itself as well.
+Another problem with C++ is that const-arrays are considered static (local to the file that contains it) unless you add an external declaration to it. So if you just have `const u8 foo[]= { etc }` in a file, the array will be invisible to other files.The solution here would be to add the declaration inside the file itself as well.
 
-``` proglist
+```c
 // foo.cpp. Always have an external declaration 
 // inside the file as well.
 
@@ -582,8 +582,6 @@ const unsigned char foo[]=
 };
 ```
 
-  
-
 ### Data conversion {#ssec-data-format}
 
 It's rather easy to write a tool that converts a binary file to a C or asm array. In fact, devkitARM comes with two that do just that: raw2c.exe and bin2s.exe. It also comes with the basic tools for gbfs by the way. But being able to attach binary files to your game is only part of the story. Consider a bitmap, for example. In principle, a bitmap is a binary file just like any other. There's nothing inherently graphical about it, and it doesn't magically appear as a bitmap whenever you use it by itself. Yes, when you double-click on it, an image viewer may pop up and display it, but that's only because there's some serious work by the OS going on underneath. Which we don't have here.
@@ -592,21 +590,18 @@ Most files will follow a certain format to tell it what it is, and how to use it
 
 There are many conversion tools, one might almost say too many. Some are one-trick ponies: a single file-type to a single graphics mode for example. Some are very powerful and can handle multiple file-types, multiple files, different conversion modes with lots of options on the side, and compression. It should be obvious which are of the most value.
 
-A good one is [gfx2gba](http://www.coranac.com/files/gba/gfx2gba.zip){target="_blank"}. This is a command-line tool so that it can be used in a makefile, but there is a GUI front-end for it as well. This tool has the Good Things I mentioned earlier, plus some map-exporting options and palette merging, but the input file must be 8bit and I hear that while it does compress data, the array-size is still given as its uncompressed size for some unfortunate reason. This tool comes with the HAM installation, and is quite common, so definitely recommended. Unfortunately, there seems to be another tool with the same name. You'll want the v0.13 version by Markus, not the other one.
+A good one is [gfx2gba](https://www.coranac.com/files/gba/gfx2gba.zip){target="_blank"}. This is a command-line tool so that it can be used in a makefile, but there is a GUI front-end for it as well. This tool has the Good Things I mentioned earlier, plus some map-exporting options and palette merging, but the input file must be 8-bit and I hear that while it does compress data, the array-size is still given as its uncompressed size for some unfortunate reason. This tool comes with the HAM installation, and is quite common, so definitely recommended. Unfortunately, there seems to be another tool with the same name. You'll want the v0.13 version by Markus, not the other one.
 
-Personally, I use [Usenti](http://www.coranac.com/projects/#usenti){target="_blank"}, but then I pretty much have to because its my own tool. This is actually a bitmap editor with exporting options thrown in. It allows different file-types, different bitdepths, different output files, all modes, some map-exporting stuff, meta-tiling, compression and a few others. It may not be as powerful as big photo-editing tools as PhotoShop, Gimp and the like, but it gets the job done. If you're still drawing your graphics with MS-Paint, please stop that and use this one instead. The exporter is also available separately in the form of the open source project called [(win)grit](http://www.coranac.com/projects/#grit){target="_blank"}, which comes in a command-line interface (grit) and a GUI (wingrit). As of January 2007, it is also part of the devkitPro distribution.
+Personally, I use [Usenti](https://www.coranac.com/projects/#usenti){target="_blank"}, which is my own tool. This is a bitmap editor (paint program) with exporting options thrown in. It allows different file-types, different bitdepths, different output files, all modes, some map-exporting stuff, meta-tiling, compression and a few others. It may not be as powerful as big photo-editing tools as Photoshop, GIMP, Aseprite, and the like, but it gets the job done. If you're still drawing your graphics with Microsoft Paint, please stop that and use this one instead. The exporter is also available separately in the form of the open source project called [(win)grit](https://www.coranac.com/projects/#grit){target="_blank"}, which comes in a command-line interface (grit) and a GUI (wingrit). As of January 2007, it is also part of the devkitPro distribution.
 
 <div class="note">
-
 <div class="nh">
-
 Bitmap conversion via CLI
-
 </div>
 
-There are many command-line interfaces available for graphics conversion, but to make them function you need the correct flags. Here are examples for gfx2gba and grit, converting a bitmap foo.bmp to a C array for modes 3, 4 and 5. This is just an example, because this is not the place for a full discussion on them. Look in their respective readme's for more details.
+There are many command-line interfaces available for graphics conversion, but to make them function you need the correct flags. Here are examples for gfx2gba and grit, converting a bitmap *foo.bmp* to a C array for modes 3, 4 and 5. This is just an example, because this is not the place for a full discussion on them. Look in their respective readme's for more details.
 
-``` proglist
+```sh
 # gfx2gba
 # mode 3, 5 (C array; u16 foo_Bitmap[]; foo.raw.c)
     gfx2gba -fsrc -c32k foo.bmp
@@ -614,14 +609,13 @@ There are many command-line interfaces available for graphics conversion, but to
     gfx2gba -fsrc -c256 foo.bmp
 ```
 
-``` proglist
+```sh
 # grit
 # mode 3, 5 (C array; u32 fooBitmap[]; foo.c foo.h)
     grit foo.bmp -gb -gB16
 # mode 4 (C array; u32 fooBitmap[], u16 fooPal[]; foo.c foo.h)
     grit foo.bmp -gb -gB8
 ```
-
 </div>
 
 <div class="cpt_fr" style="width:222px;">
@@ -646,15 +640,15 @@ There are many command-line interfaces available for graphics conversion, but to
 </table>
 </div>
 
-Below, you can see a partial listing of modes.c, which contains the bitmap and the palette used in the bm_modes demo discussed at the end of this section, as exported by Usenti. It is only a very small part of the file because at over 2700 lines it is way too long to display here, which wouldn't serve much of a purpose anyway. Note that both are u32-arrays, rather than the u8 or u16-arrays you might encounter elsewhere. What you need to remember is that **it doesn't matter** in what kind of an array you put the data: in memory it'll come out the same anyway.
+Below, you can see a partial listing of modes.c, which contains the bitmap and the palette used in the *bm_modes* demo discussed at the end of this section, as exported by Usenti. It is only a very small part of the file because at over 2700 lines it is way too long to display here, which wouldn't serve much of a purpose anyway. Note that both are `u32` arrays, rather than the `u8` or `u16` arrays you might encounter elsewhere. What you need to remember is that **it doesn't matter** in what kind of an array you put the data: in memory it'll come out the same anyway.
 
-Well, that's not *quite* true. Only with u32-arrays is proper [data alignment](#ssec-data-align) guaranteed, which is a good thing. More importantly, you have to be careful with the byte-order of multi-byte types. This is called the [endianness](numbers.html#ssec-bits-endian) of types. In a <dfn>little endian</dfn> scheme, least significant bytes will go first and in a <dfn>big endian</dfn>, most significant bytes will go first. See table 2 for an example using `0x01`, `0x02`, `0x03` and `0x04`. The GBA is a little endian machine, so the first word of the `modesBitmap` array, `0x7FE003E0` is the halfwords `0x03E0` (green) followed by `0x7FE0` (cyan). If you want more examples of this, open up VBA's memory viewer and play around with the 8-bit, 16-bit and 32-bit settings.
+Well, that's not *quite* true. Only with `u32` arrays is proper [data alignment](#ssec-data-align) guaranteed, which is a good thing. More importantly, you have to be careful with the byte-order of multi-byte types. This is called the [endianness](numbers.html#ssec-bits-endian) of types. In a <dfn>little endian</dfn> scheme, least significant bytes will go first and in a <dfn>big endian</dfn>, most significant bytes will go first. See table 2 for an example using `0x01`, `0x02`, `0x03` and `0x04`. The GBA is a little endian machine, so the first word of the `modesBitmap` array, `0x7FE003E0` is the halfwords `0x03E0` (green) followed by `0x7FE0` (cyan). If you want more examples of this, open up VBA's memory viewer and play around with the 8-bit, 16-bit and 32-bit settings.
 
-The key point here: the data itself doesn't change when you use different data-types for the arrays, only the way you *represent* it does. That was also the point of the bm_modes demo: it's the same data in VRAM all the time; it's just used in a different way.
+The key point here: the data itself doesn't change when you use different data-types for the arrays, only the way you *represent* it does. That was also the point of the *bm_modes* demo: it's the same data in VRAM all the time; it's just used in a different way.
 
 <div style="font-size:95%;">
 
-``` {#cd-modes-bm .proglist}
+```c
 //======================================================================
 //
 //  modes, 240x160@16, 
@@ -690,51 +684,47 @@ const unsigned int modesPal[8]=
 
 </div>
 
-Those 2700 lines represent a 77kb bitmap. One *single* bitmap. In all likelihood, you'll need at least a couple of them to make anything worthwhile. Most games have lots of data in them, not only graphics but maps and sound and music as well. All this adds up to a huge amount of data, certainly too much for just EWRAM and maybe even for a full cart. That is why <dfn>compression</dfn> is also important. The [GBA BIOS](swi.html) has decompression routines for bit-packing, run-length encoding, LZ77 and Huffman. Converters sometimes have the appropriate compressors for these routines, which can drastically shrink the amount of memory used. Usenti and (win)grit support these compressors. So does gfx2gba, which even has some more. A tool that just does compression on binary files (but does it very well) is [GBACrusher](http://www.coranac.com/files/gba/GBACrusher.zip){target="_blank"}. I won't go into compression that much (or at all), but you can read up on the subject [here](http://members.iinet.net.au/~freeaxs/gbacomp/){target="_blank"}.
+Those 2700 lines represent a 77 kB bitmap. One *single* bitmap. In all likelihood, you'll need at least a couple of them to make anything worthwhile. Most games have lots of data in them, not only graphics but maps and sound and music as well. All this adds up to a huge amount of data, certainly too much for just EWRAM and maybe even for a full cart. That is why <dfn>compression</dfn> is also important. The [GBA BIOS](swi.html) has decompression routines for bit-packing, run-length encoding, LZ77 and Huffman. Converters sometimes have the appropriate compressors for these routines, which can drastically shrink the amount of memory used. Usenti and (win)grit support these compressors. So does gfx2gba, which even has some more. A tool that just does compression on binary files (but does it very well) is [GBACrusher](https://www.coranac.com/files/gba/GBACrusher.zip){target="_blank"}. I won't go into compression that much (or at all), but you can read up on the subject [here](https://web.archive.org/web/20180820012154/http://members.iinet.net.au/~freeaxs/gbacomp/){target="_blank"}.
 
 <div class="note">
-
 <div class="nhgood">
-
 Understanding data
-
 </div>
 
 It is vital that you understand what data is, how the different datatypes work. Preferably endianness and alignment too. Emulators and hex editors can help you with this. Once you have compilation working, just make a few random arrays and see what they look like in the VBA memory viewer for a while.
-
 </div>
 
-### #including code or data considered harmful {#ssec-data-hdr}
+### `#include` code or data considered harmful {#ssec-data-hdr}
 
 <div class="cpt_fr" style="width:240px;">
-  <img src="img/bitmaps/bart_data.png" id="img-bart-data" 
+  <img src="img/bitmaps/bart_data.png" id="fig:bart-data" 
     alt="Lines"><br>
-  <b>Fig 5.6</b>: even Bart knows &hellip;
+  <b>{*@fig:bart-data}</b>: even Bart knows &hellip;
 </div>
 
-Most non-trivial projects will have multiple files with code and data. The standard way of dealing with these is to compile these separately and then link the results to the final binary. This is the recommended strategy. However, most other tutorials and many of the example code you can find on the web do something else: they #include everything into the main source file and compile that. This is *not* a recommended practice and should be avoided.
+Most non-trivial projects will have multiple files with code and data. The standard way of dealing with these is to compile these separately and then link the results to the final binary. This is the recommended strategy. However, most other tutorials and many of the example code you can find on the web do something else: a [unity build](https://en.wikipedia.org/wiki/Unity_build){target="_blank"}. They `#include` everything into the main source file and compile that. This is *not* a recommended practice and should be avoided.
 
 ”But why not? It seems to work fine, and it's so easy!”
 
-Yes, it is easy; and it does seem to work. The main problem is that it isn't [scalable](http://en.wikipedia.org/wiki/Scalability){target="_blank"}. For small projects (a handful of files) you probably won't notice, but as projects grow to hundreds and perhaps thousands of files, you will run into some very annoying problems. The main issue is what #include actually does. It copies the whole included file into the includer to form a single larger file. This leads to the following issues.
+Yes, it is easy; and it does seem to work. The main problem is that a unity build isn't [scalable](https://en.wikipedia.org/wiki/Scalability){target="_blank"}. For small projects (a handful of files) you probably won't notice, but as projects grow to hundreds and perhaps thousands of files, you will run into some very annoying problems. The main issue is what #include actually does. It copies the whole included file into the includer to form a single larger file. This leads to the following issues.
 
--   **Massive files to compile**. So, #including creates one big file. If you have a lot of stuff, you'll have one *very* big file. This will cost large amounts of memory and slows down compilation. As the project grows, what starts as a compile time of a second can grow to several, then minutes and perhaps even hours.
+-   **Massive files to compile**. So, `#include` creates one big file. If you have a lot of stuff, you'll have one *very* big file. This will cost large amounts of memory and slows down compilation. As the project grows, what starts as a compile time of a second can grow to several, then minutes and perhaps even hours.
 
-    At some point, there was also the problem that the compiler couldn't handle files exceeding 4MB, putting a limit on how much you could #include in a C file. I'm not sure if this is still an issue.
+    At some point, there was also the problem that the compiler couldn't handle files exceeding 4 MB, putting a limit on how much you could `#include` in a C file. I'm not sure if this is still an issue.
 
--   **Recompiling the world**. The main problem is that when you #include everything, you need to recompile everything as well. If you make one change *anywhere*, no matter how small, causes *everything* to be compiled. For small projects (say, a handful of files), a full rebuild would take a few seconds so it's not a problem. But larger projects can have hundreds or thousands of files, and the time is not measured in seconds, but in minutes or perhaps hours. Sure it's a good excuse to go [sword fighting](http://xkcd.com/303/){target="_blank"}, but terribly annoying if you want to do something productive.
+-   **Recompiling the world**. The main problem is that when you `#include` everything, you need to recompile everything as well. If you make one change *anywhere*, no matter how small, causes *everything* to be compiled. For small projects (say, a handful of files), a full rebuild would take a few seconds so it's not a problem. But larger projects can have hundreds or thousands of files, and the time is not measured in seconds, but in minutes or perhaps hours. Sure it's a good excuse to go [sword fighting](https://xkcd.com/303/){target="_blank"}, but terribly annoying if you want to do something productive.
 
 -   **Bloat**. Even if your own code and data are relatively small in number, you're probably using some code library for API functions. Normally, these are pre-compiled and only the functions used are linked into your binary. But if those worked by #include as well (in other words, if their creators had followed the practice I'm warning against), every function in that library would be included as well, including the ones you're not using. This increases the filesize, *and* increases the problems mentioned above.
 
--   **Undeclared identifiers, multiple definitions and circular dependencies**. In a nutshell, C requires that you declare an identifier before it's referenced, and it can only be defined once. The first point means that the order of inclusions starts to matter: if, say, fileB.c needs something from fileA.c, the latter needs to be included before the former to get a compile. The second means that you could only #include a file once in the whole project: if fileB.c and fileC.c both need stuff from fileA.c, you can't #include it in them both because when they're #included in main.c, fileA.c is effectively #included twice and the compiler will balk.
+-   **Undeclared identifiers, multiple definitions and circular dependencies**. In a nutshell, C requires that you declare an identifier before it's referenced, and it can only be defined once. The first point means that the order of inclusions starts to matter: if, say, *fileB.c* needs something from *fileA.c*, the latter needs to be included before the former to get a compile. The second means that you could only `#include` a file once in the whole project: if *fileB.c* and *fileC.c* both need stuff from *fileA.c*, you can't `#include` it in them both because when they're `#include`d in *main.c*, *fileA.c* is effectively `#include`d twice and the compiler will balk.
 
-    These points can technically be overcome by being careful. But, again, when projects grow, things can get increasingly more difficult to keep track of which comes before what and why. There is, however, one point at which it *will* go wrong, namely when there are circular dependencies: fileB.c needs fileA.c and vice versa. Each file would require the other to go first, which simply isn't possible because it'd cause multiple definitions.
+    These points can technically be overcome by being careful, such as using an [include guard](https://en.wikipedia.org/wiki/Include_guard){target="_blank"}. But, again, when projects grow, things can get increasingly more difficult to keep track of which comes before what and why. There is, however, one point at which it *will* go wrong, namely when there are circular dependencies: *fileB.c* needs *fileA.c* and vice versa. Each file would require the other to go first, which simply isn't possible because it'd cause multiple definitions.
 
 -   **Data alignment**. I'll get to what this means in a minute, but right now know that copy routines work better if the data is aligned to 32-bit boundaries (even for byte and halfword arrays). Some of them won't even work properly if this isn't the case. This is usually guaranteed if you compile separately, but if the arrays are #included and no steps have been taken to force alignment, you simply never know.
 
-    It's not much of a problem nowadays because most graphics converters force data-alignment, but you still need to know about it. Because data alignment is a fairly esotheric concept, it's next to impossible to track down unless you're aware of the problems it can bring.
+    It's not much of a problem nowadays because most graphics converters force data alignment, but you still need to know about it. Because data alignment is a fairly esotheric concept, it's next to impossible to track down unless you're aware of the problems it can bring.
 
-So please, do yourself a favor and do not #include every file you have into main.c or its moral equivalent. Put function and variable definitions in separate source files to be compiled separately and linked later. The #include directive is only to be used for files with preprocessor directives and declaractions and type definitions. Oh, and inline functions. Those are okay there too.
+So please, do yourself a favor and do not `#include` every file you have into *main.c* or its counterpart in your project. Put function and variable definitions in separate source files to be compiled separately and linked later. The `#include` directive is only to be used for files with preprocessor directives, declarations, type definitions, and `inline` functions.
 
 ### Proper build procedure {#ssec-data-proc}
 
@@ -742,7 +732,7 @@ So please, do yourself a favor and do not #include every file you have into main
 
 So what do you do instead? Well, for starters keep all the code and data in separate source files. Compile these separately by invoking gcc on each file. This gives you a list of object files. These you then link together. In batch files, you'd need to add extra commands for each file, but a properly setup makefile uses a list of object files, and the makefile's rules will then take care of the rest automatically. Using the makefile of the [second demo](first.html#ssec-2nd-make) as a reference, you'll get something like this:
 
-``` proglist
+```c
 # partial makefile for using multiple source files
 # some steps omitted for clarity
 
@@ -758,13 +748,13 @@ $(OBJS) : %.o : %.c
     $(CC) -c $< $(CFLAGS) -o $@
 ```
 
-The `OBJS` variable contains the names of three object files, which would be the targets of compiling foo.c, bar.c and boo.c. Remember, makefiles list rules by target, not by prerequisite. The compilation step uses a static pattern rule, which for each ‘.o’ file in `OBJS` compiles the ‘.c’ file with the same title. This is what runs the compiler for our three source files. In the linking step the automatic variable `$^` expands to the prerequisites of the rule, which is the list of all object files, and this is how the files are all linked together. If you need more files, add them to the `OBJS` list.
+The `OBJS` variable contains the names of three object files, which would be the targets of compiling *foo.c*, *bar.c* and *boo.c*. Remember, makefiles list rules by target, not by prerequisite. The compilation step uses a static pattern rule, which for each object file (`.o`) in `OBJS` compiles the source file (`.c`) file with the same title. This is what runs the compiler for our three source files. In the linking step, the automatic variable `$^` expands to the prerequisites of the rule, which is the list of all object files, and this is how the files are all linked together. If you need more files, add them to the `OBJS` list.
 
-Note that the devkitPro and tonc template files take care of these things automatically. Just put the source files into the right directory and you're good to go.
+Note that the devkitARM and tonc template files take care of these things automatically. Just put the source files into the right directory and you're good to go.
 
 #### Symbols, declarations and definitions
 
-If you have been doing everything via #include, you should consider refactoring all of your stuff to separate source files. No, let me rephrase that, you *need* to do this because you'll benefit from it in the end. If you're already well in your project, this is going to suck because it's boring and time consuming and most likely it's not even going to *work* properly when you try the first build afterwards. I expect you'll get a whole slew of errors, particularly these three:
+If you have been doing everything via `#include`, you should consider refactoring all of your stuff to separate source files. No, let me rephrase that, you *need* to do this because you'll benefit from it in the end. If you're already well in your project, this is going to suck because it's boring and time consuming and most likely it's not even going to *work* properly when you try the first build afterwards. I expect you'll get a whole slew of errors, particularly these three:
 
 -   \`foo' undeclared
 -   redefinition of \`foo'
@@ -772,13 +762,11 @@ If you have been doing everything via #include, you should consider refactoring 
 
 To understand what these mean, you need to know a little bit more about how C (and indeed programs) actually works.
 
-  
-
 As I said before, there aren't really things like programs, bitmaps, sound on computers; it's all just bits. Bits, bits and more bits. What makes a sequence of bits work as a program is the way it is fed to the CPU, VRAM, and other sections. Somewhere in the build process, there has to be a translation of all the C code to data and machine instructions. This, of course, is the compiler's job.
 
 But wait, there's more. C allows you to compile each file separately, and then link them later into the actual program. This is a good idea, because it allows you to save time by only compiling the files that you have recently modified, as well as the use of code <dfn>libraries</dfn>, which are little more than a bunch of precompiled source files. If you're not convinced that this is a good idea, consider what it would take without it. You'd have to have *all* the source code that you wanted to use (including for things like `printf()` and all the API code), and compile all those megabytes of source files each time. Sounds like fun? No, I didn't think so either.
 
-However, you need a little more bookkeeping to make this all work. Because everything is just bits, you'd need a way to find out where the function or data you want to use actually is. The contents of the compiled files (the object files) isn't just raw binary, it contains <dfn>symbols</dfn>. This is just a word for the group of things that have actual binary information attached to them. Among other things, the object file keeps track of the symbol's name, section, size, and where its content is in the object file. A function is a symbol, because it contains instructions. A variable is also a symbol, as is data for bitmaps, sound, maps et cetera. Preprocessor #defines, typedefs and struct/class declarations are *not* symbols, because they only don't have actual content in them, but allow you to structure your code better.
+However, you need a little more bookkeeping to make this all work. Because everything is just bits, you'd need a way to find out where the function or data you want to use actually is. The contents of the compiled files (the object files) isn't just raw binary, it contains <dfn>symbols</dfn>. This is just a word for the group of things that have actual binary information attached to them. Among other things, the object file keeps track of the symbol's name, section, size, and where its content is in the object file. A function is a symbol, because it contains instructions. A variable is also a symbol, as is data for bitmaps, sound, maps et cetera. Preprocessor `#define`s, `typedef`s and `struct`/`class` declarations are *not* symbols, because they only don't have actual content in them, but allow you to structure your code better.
 
 The other bookkeeping note is that each source/object file is a separate entity. In principle, it knows nothing about the outside world. This makes sense because it limits the dependency on other files, but it does create a little problem when you want to make files work together. This is where <dfn>declarations</dfn> come in.
 
@@ -786,7 +774,7 @@ You may have noticed that C is pretty strict when it comes to names of stuff. Be
 
 The code snippet below gives an example of when a reference is and is not declared, and why it's important to have a declaration. Function `a()` calls `foo()`, which is not known at the time, so an error is produced. Function `b()` also calls `foo()`, which *is* known at that time, but still gives an error because `foo()` just happens to require an integer as an argument. If the declaration wasn't mandatory and the call in `a()` was allowed, `foo()` would have been processing the wrong kind of information at runtime. There are ways around such problems, of course, languages like PHP, VB and others work fine without mandatory declarations, but the cost for that is speed and possibly a lot more runtime errors.
 
-``` proglist
+```c
 //# C requires identifiers to be declared or defined before first use.
 
 // ERROR: `foo' is undefined.
@@ -818,7 +806,7 @@ Now back to our separate files, and the difference between declarations and defi
 
 You should be familiar with what a definition looks like. A declaration looks very similar. The basic variable declaration is the variable name and attributes (type, const, section) preceded by `extern`. For functions, replace the code block by a semi-colon. You can also add `extern` there, but it's not required.
 
-``` proglist
+```c
 // --------------------------------------------------------------------
 // DECLARATIONS. Put these in source (.c) or header (.h) files.
 // --------------------------------------------------------------------
@@ -846,11 +834,11 @@ void foo(int x)
 }
 ```
 
-Now, a definition is also a declaration, but this does *not* work the other way. How can it, the declaration is supposed to be empty. The distinction is subtle, but it's the reason you might get multiple definition errors when linking the files together. Think of what would happen if you have the definition of function `foo()` in multiple files. Each file itself would know what `foo()` is because definitions are also declarations, so it would pass the compilation stage. So now you have multiple object files, each containing a symbol called `foo`. But then you try to link them into one file. The linker sees different versions of `foo`, and stops because it doesn't know which one you are actually trying to use. The moral here is that you can have as many declarations as you want, but there can be only *one* definition.
+Now, a definition is also a declaration, but this does *not* work the other way. How can it, the declaration is supposed to be empty. The distinction is subtle, but it's the reason you might get multiple definition errors when linking the files together. Think of what would happen if you have the definition of function `foo()` in multiple files. Each file itself would know what `foo()` is because definitions are also declarations, so it would pass the compilation stage. So now you have multiple object files, each containing a symbol called `foo`. But then you try to link them into one file. The linker sees different versions of `foo`, and stops because it doesn't know which one you are actually trying to use. The moral here is that you can have as many declarations as you want, but there can be [only *one* definition](https://en.wikipedia.org/wiki/One_Definition_Rule){target="_blank"}.
 
-Another point I should raise is that the declaration defines how a symbol is to be dealt with, as it is the only point of reference if the definition is in another file. This means that, in theory, you could have a variable `var` defined as an int, but declared as a short, or even a function! While not exactly recommended, but it is an interesting item.
+Another point I should raise is that the declaration defines how a symbol is to be dealt with, as it is the only point of reference if the definition is in another file. This means that, in theory, you could have a variable `var` defined as an `int`, but declared as a `short`, or even a function! While not exactly recommended, but it is an interesting item.
 
-Lastly: the distinction of what should go in source files, and what in headers. Source files can actually contain anything, so that's an easy one. Remember that they will contain everything after the preprocessor step anyway, because that's what #include really does. So what matters is what you put in headers. The purpose of header files is to have a place for all the **non-symbol** stuff that you want to use in different source files. That means declarations, #defines, macros, typedefs, struct/class descriptions. It also means (static) inline functions, because these don't form symbols either, but are integrated in the functions that call them.
+Lastly: the distinction of what should go in source files, and what in headers. Source files can actually contain anything, so that's an easy one. Remember that they will contain everything after the preprocessor step anyway, because that's what `#include` really does. So what matters is what you put in headers. The purpose of header files is to have a place for all the **non-symbol** stuff that you want to use in different source files. That means declarations, `#define`s, macros, `typedef`s, `struct`/`class` descriptions. It also means `static inline` functions, because these don't form symbols either, but are integrated in the functions that call them.
 
 #### Summary
 
@@ -859,13 +847,13 @@ All this stuff about separate compilation, declarations, and definitions is rath
 -   **Symbols**. Symbols are those parts of the code that form actual binary content in the final program. This includes functions, variables, data, but not preprocessor or type description stuff.
 -   **Declarations/definitions**. A definition of a symbol is where the actual content is. A declaration just says that something of a certain name exists, but will be added to the project later. Multiple (identical) declarations may exist, but there can be only one definition in the project. Definitions are also declarations.
 -   **Source/object files are selfcontained entities**. They contain the definitions of the symbols that are in the code, and a list of references to outside symbols, as indicated by the declarations.
--   **Header files contain meta-data, not symbols**. Header files cannot be compiled, but are intended contain the ‘glue’ that allow difference sources to work together (i.e., declarations) and stuff that makes writing the sources easier (like #defines and macros). They are meant to be included in multiple files, so they cannot create symbols because that would lead to multiple definitions.
+-   **Header files contain meta-data, not symbols**. Header files cannot be compiled, but are intended contain the ‘glue’ that allow difference sources to work together (i.e., declarations) and stuff that makes writing the sources easier (like `#define`s and macros). They are meant to be included in multiple files, so they cannot create symbols because that would lead to multiple definitions.
 
 Potential problems during compilation or linking:
 
--   **\`foo' undeclared**. Compiler error. The identifier \`foo' is not known at this point. Check the spelling, or add the appropriate declaration or header file containing the declaration.
+-   **\`foo' undeclared**. Compiler error. The identifier `foo` is not known at this point. Check the spelling, or add the appropriate declaration or header file containing the declaration.
 -   **redefinition of \`foo'**. Compiler error. The identifier as a previous declaration or definition conflicting with the current one in the same file or included headers. Usually accompanied by a message of the previous definition.
--   **multiple definition of 'foo'**. Linker error. The symbol name \`foo' is shared by multiple object files. Replace all but one definitions of \`foo' in the source files with the appropriate declarations. Usually accompanied with a message indicating the object file with the other definition(s).
+-   **multiple definition of 'foo'**. Linker error. The symbol name `foo` is shared by multiple object files. Replace all but one definitions of `foo` in the source files with the appropriate declarations. Usually accompanied with a message indicating the object file with the other definition(s).
 
 ### Data alignment {#ssec-data-align}
 
@@ -873,9 +861,10 @@ Data alignment is about the ‘natural’ memory addresses of variables. It is o
 
 In most cases, the compiler will align things for you. It will put all halfwords on even boundaries and words on quad-byte boundaries. As long as you stick to the normal programming rules, you can remain completely oblivious to this alignment stuff. Except that you *won't* always stick to the rules. In fact, C is a language that allows you to break the rules whenever you feel like it. It trusts you to know what you're doing. Whether that trust is always justified is another matter <span class="kbd">:P</span>
 
-The best example of breaking the rules is pointer casting. For example, most graphics converters will output the data as u16-arrays, so you can copy it to VRAM with a simple for-loop. You can speed up copying by roughly 160% if you copy by words (32-bit) rather than halfwords (16-bit). Run the [txt_se2](text.html#ssec-demo-se2) demo and see for yourself. All you have to do for this is one or two pointer casts, as shown here.
+The best example of breaking the rules is pointer casting. For example, most graphics converters will output the data as `u16` arrays, so you can copy it to VRAM with a simple `for` loop. You can speed up copying by roughly 160% if you copy by words (32-bit) rather than halfwords (16-bit). Run the *[txt_se2](text.html#ssec-demo-se2)* demo and see for yourself. All you have to do for this is one or two pointer casts, as shown here.
 
-``` {#cd-array-cpy .proglist}
+<div id="cd-array-cpy">
+```c
 #define fooSize ...
 const u16 fooData[]= { ... };
 
@@ -889,14 +878,15 @@ u32 *dst= (u32*)vid_mem, *src= (u32*)fooData;
 for(ii=0; ii<fooSize/4; ii++)
      dst[ii]= src[ii];
 ```
+</div>
 
-Both these routines copy `fooSize` bytes from `fooData` to VRAM. Only the second version is much faster because there are half as many loop iterations and also because the ARM CPU is just better at dealing with 32-bit chunks. The only danger here is that while `fooData` will be halfword aligned, it need *not* be word aligned, which is a requirement for the second version. For those readers that think casts like this and mis-alignment only happen to other people, think again: the faster copy routines (`memcpy()`, `CpuFastSet()`, and DMA too) cast to word-pointers implicitly. Use them (and you should) and you run the risk of misalignment.
+Both these routines copy `fooSize` bytes from `fooData` to VRAM. Only the second version is much faster because there are half as many loop iterations and also because the ARM CPU is just better at dealing with 32-bit chunks. The only danger here is that while `fooData` will be halfword aligned, it need *not* be word aligned, which is a requirement for the second version. For those readers that think casts like this and mis-alignment only happen to other people, think again: the faster copy routines (`memcpy()`, `CpuFastSet()`, and DMA too) cast to word pointers implicitly. Use them (and you should) and you run the risk of misalignment.
 
-There are many ways of ensuring proper alignment. The easiest way is to not mix converted data with the rest of your stuff. That is, don't #include data-files. This should suffice. Another method is to convert to u32-arrays in the first place. In assembly files, you can control alignment by using the ‘.align *n*’ directive, where *n* aligns to 2^n^ bytes. C itself doesn't allow manual alignment, but there is an extension for this in GCC: ‘`__attribute__(( aligned(4) ))`’. Add that to the definition and it'll be word aligned. This is often #defined as `ALIGN4` in some headers. Files in GBFS are also always correctly aligned.
+There are many ways of ensuring proper alignment. The easiest way is to not mix converted data with the rest of your stuff. That is, don't #include data-files. This should suffice. Another method is to convert to `u32` arrays in the first place. In assembly files, you can control alignment by using the `.p2align *n*` directive, where *n* aligns to 2^n^ bytes. C itself doesn't allow manual alignment, but there is an extension for this in GCC: `__attribute__(( aligned(4) ))`. Add that to the definition and it'll be word aligned. This is often `#define`d as `ALIGN4` in some headers. Files in GBFS are also always correctly aligned.
 
 #### Struct alignment
 
-One other area where alignment can cause problems is in struct definitions. Look at the following code. Here we have a struct named `FOO` consisting of one byte, *b*, one word *w* and one halfword *h*. So that's 1+4+2=7 bytes for the struct right? Wrong. Because of the alignment requirement, *w* doesn't immediately follow *b* but leaves 3 bytes of padding. When defining arrays of this type, you'll also see that there are also two padding bytes after *h*, because otherwise later array-entries would run into trouble.
+One other area where alignment can cause problems is in `struct` definitions. Look at the following code. Here we have a `struct` named `FOO` consisting of one byte, *b*, one word *w* and one halfword *h*. So that's 1+4+2=7 bytes for the `struct` right? Wrong. Because of the alignment requirement, *w* doesn't immediately follow *b* but leaves 3 bytes of padding. When defining arrays of this type, you'll also see that there are also two padding bytes after *h*, because otherwise later array entries would run into trouble.
 
 ``` {#cd-struct-align .proglist}
 // one byte, one word, one halfword. 7 byte struct? 
@@ -924,21 +914,18 @@ struct FOO foos[4]=
 // 40 00 00 00 | 41 42 43 44 | 45 46 00 00
 ```
 
-The *real* size is actually 12 bytes. Not only is this almost twice the size, if you ever try to copy the array using a hard-coded 7 rather than `sizeof(struct FOO)`, you completely mess it up. Take this lesson to heart. It's a very easy mistake to make and difficult to detect after the fact. If you were unaware of this fact and you've already done some GBA coding, check your structs (or classes) now; chances are there are gaps that shouldn't be there. Simply rearranging some of the members should suffice to make them fit better. Note that this is not specific to the GBA: structs on PCs may behave the same way, as I noticed when I was writing my TGA functions.
+The *real* size is actually 12 bytes. Not only is this almost twice the size, if you ever try to copy the array using a hard-coded 7 rather than `sizeof(struct FOO)`, you completely mess it up. Take this lesson to heart. It's a very easy mistake to make and difficult to detect after the fact. If you were unaware of this fact and you've already done some GBA coding, check your `struct` (or `class`) declarations now; chances are there are gaps that shouldn't be there. Simply rearranging some of the members should suffice to make them fit better. Note that this is not specific to the GBA: `struct`s on PCs may behave the same way, as I noticed when I was writing my TGA functions.
 
-There are ways of forcing packing, using the ‘`__attribute__((packed))`’ attribute. If the `FOO` struct had that, it really would be 7 bytes long. The downside of this is that the non-byte members could be mis-aligned and have to be put together byte for byte (the compiler does this for you). This is very much slower than the non-packed version, so only use this attribute if you have no other choice. What happens with mis-aligned (half)words then I can't tell you though, but I'm sure it's not pretty.
+There are ways of forcing packing, using the ‘`__attribute__((packed))`’ attribute. If `struct FOO` had that, it really would be 7 bytes long. The downside of this is that the non-byte members could be mis-aligned, and the compiler emits code to put the value together byte for byte. This is very much slower than the non-packed version, so only use this attribute if you have no other choice. What happens with mis-aligned (half)words then I can't tell you though, but I'm sure it's not pretty.
 
 <div class="note">
-
 <div class="nh">
-
 Forcing alignment and packing
-
 </div>
 
-GCC has two attributes that allow you to force alignment of arrays, and remove member-alignment in structs.
+GCC has two attributes that allow you to force alignment of arrays, and remove member-alignment in `struct`s.
 
-``` proglist
+```c
 // Useful macros
 #define ALIGN(n)    __attribute__((aligned(n)))
 #define PACKED      __attribute__((packed))
@@ -956,11 +943,11 @@ struct FOO {...} PACKED;
 
 #### Devkits and struct alignment {#sssec-devkit-align}
 
-As far as I've been able to tell, structs have always had word alignment. This was useful because it made copying structs faster. C allows you to copy structs with a single assignment, just like the standard data types. Because of the word-alignment, these copies are fast because GCC will make use of ARM's block-copy instructions, which are much faster than copying member by member.
+As far as I've been able to tell, `struct`s have always had word alignment. This was useful because it made copying `struct`s faster. C allows you to copy structs with a single assignment, just like the standard data types. Because of the word-alignment, these copies are fast because GCC will make use of ARM's block-copy instructions, which are much faster than copying member by member.
 
-However, this does not seem to be true under devkitARM r19 (and presumably higher) anymore. The new rule seems to be “structs are aligned to their largest member”. This does make more sense as a struct of two bytes would actually be two bytes long. However, it does mean that GCC will now call `memcpy()` for non-aligned structs. Apart from it being a function with quite a bit of overhead (i.e., it's *very* slow if you want to copy a single small struct), it will actually **fail** to produce correct results in some cases. The problem is that low-number copies it will copy by the byte, which is something you cannot do for VRAM, PALRAM or OAM. For example, objects that we'll see later use a struct of four halfwords; using a struct-copy there, something I am very fond of doing, screws up everything. The only way to make it work properly is to force word-alignment on the struct.
+However, this does not seem to be true under devkitARM r19 (and presumably higher) anymore. The new rule seems to be that `struct`s are aligned to their largest member. This does make more sense as a struct of two bytes would actually be two bytes long. However, it does mean that GCC will now call `memcpy()` for non-aligned `struct`s. Apart from it being a function with quite a bit of overhead (i.e., it's *very* slow if you want to copy a single small `struct`), it will actually **fail** to produce correct results in some cases. The problem is that low-length copies it will copy by the byte, which is something you cannot do for VRAM, OAM, or the palette. For example, objects that we'll see later use a `struct` of four halfwords; using a `struct` copy there, something I am very fond of doing, screws up everything. The only way to make it work properly is to force word alignment on the `struct`.
 
-``` proglist
+```c
 // This doesn't work on devkitARM r19 anymore
 typedef struct OBJ_ATTR 
 { 
@@ -983,20 +970,16 @@ b= a;   // No memcpy == no fail and over 10 times faster
 ```
 
 <div class="note">
-
 <div class="nhgood">
-
-Forcing struct-alignment on devkitARM r19 is a Good Thing
-
+Forcing struct-alignment is a Good Thing
 </div>
 
-The rules for struct alignment have changed since devkitARM r19. Instead of being always word-aligned, they are now aligned as well as their members will allow. If this means they're not necessarily word-aligned, then they will use `memcpy()` for struct-copies, which is slow for small structs, and may even be wrong (see [next section](#ssec-data-memcpy)). If you want to be able to do struct copies fast and safe, either force alignment or cast to other datatypes.
-
+The rules for `struct` alignment have changed since devkitARM r19. Instead of being always word-aligned, they are now aligned as well as their members will allow. If this means they're not necessarily word-aligned, then they will use `memcpy()` for `struct` copies, which is slow for small structs, and may even be wrong (see [next section](#ssec-data-memcpy)). If you want to be able to do `struct` copies fast and safe, either force alignment or cast to other datatypes.
 </div>
 
 ### Copying, memcpy() and sizeof {#ssec-data-memcpy}
 
-There are many different ways of copying data on this platform. Arrays, struct-copies, standard copiers like `memcpy()`, and GBA specific routines like `CpuFastSet()` and DMA. All of these have their own strengths and weaknesses. All of them can be affected by misalignment and the no-byte-write rule. I discuss some of them in the [txt_se2](text.html#ssec-demo-se2) demo.
+There are many different ways of copying data on this platform. Arrays, `struct` copies, standard copiers like `memcpy()`, and GBA specific routines like `CpuFastSet()` and DMA. All of these have their own strengths and weaknesses. All of them can be affected by misalignment and the no-byte-write rule. I discuss some of them in the [txt_se2](text.html#ssec-demo-se2) demo.
 
 I've chosen to use `memcpy()` in the early demos for a number of reasons. The main one is that it is part of the standard C library, meaning that C programmers should already be familiar with it. Secondly, it is somewhat optimized (see the txt_se2 demo for details). However, there are two potential pitfalls with the routine. The first is data alignment (yes, *that* again). If *either* the source *or* the destination is not word-aligned, you're in trouble. Secondly, if the number of bytes is too small, you're in trouble too.
 
@@ -1009,27 +992,23 @@ This is usually the case so I figured it'd be safe enough for the demos. There a
 
 On a related subject, there is also `memset()` for memory fills. Be careful with that one, because that will *only* work with bytes. Tonclib also includes 16- and 32-bit versions of this routine, but also in assembly.
 
-  
-
 The last thing I want to discuss is the `sizeof()` operator. In other tutorials you will see this being used to find the size in bytes of arrays, which is then used in `memcpy()`. It's a good procedure but will not always work. First, `sizeof()` actually gives the size of the *variable*, which need not always be the array itself. For example, if you use it on a pointer to the array, it'll give the size of the pointer and *not* of the array. The compiler never complains, but you might when hardly anything is copied. Secondly, `sizeof()` is an *operator*, not a function. It is resolved at compile-time, so it needs to be able to find the size at that time as well. To do this, either the declaration (in the header) should indicate the size, or the array definition (in the source file) should be visible.
 
 Bottom line: you can use `sizeof()`, just pay attention to what you use it on.
-
-  
 
 Okay, that was the long and boring –yet necessary– section on data. Congratulations if you've managed to stay awake till this point, especially if you've actually understood all of it. It's okay if you didn't though, in most cases you won't run into the problems discussed here. But just remember this section for if you do run into trouble when copying and you can't find it in the code; it might save you a few hours of debugging.
 
 ### Data interpretation demo {#ssec-data-demo}
 
-The bm_modes is an example of how the same data can result in different results depending on interpretation (in this case, modes 3, 4 and 5). In the code below, I make *one* copy into VRAM, and switch between the modes using Left and Right. The results can be seen in figs 5.7a-c.
+The *bm_modes* is an example of how the same data can result in different results depending on interpretation (in this case, modes 3, 4 and 5). In the code below, I make *one* copy into VRAM, and switch between the modes using Left and Right. The results can be seen in {*@fig:bm-modes}a-c.
 
-I've arranged the data of the bitmap in such a way that the name of the current mode can be read clearly, as well as indicated the mode's boundaries in memory. Because the data intended for the other modes is still present, but not interpreted as intended, that part of the bitmap will look a little shitty. And that's partly the point of the demo: when filling VRAM, you need to know how the GBA will use the data in it, and make sure it'll be used. If the bitmap ends up being all garbled, this is the likely suspect; check the bitdepth, dimensions and format (linear, tiled, compressed, etc) and if something conflicts, fix it.
+I've arranged the data of the bitmap in such a way that the name of the current mode can be read clearly, as well as indicated the mode's boundaries in memory. Because the data intended for the other modes is still present, but not interpreted as intended, that part of the bitmap will look a little distorted. And that's partly the point of the demo: when filling VRAM, you need to know how the GBA will use the data in it, and make sure it'll be used. If the bitmap ends up being all garbled, this is the likely suspect; check the bitdepth, dimensions and format (linear, tiled, compressed, etc) and if something conflicts, fix it.
 
-Now, sometimes this is not as easy as it sounds. The general procedure for graphics is to create it on the PC, then use an exporter tool to convert it to a raw binary format, then copy it to VRAM. If the exporter has been given the wrong options, or if it can't handle the image in the first place, you'll get garbage. This can happen with some of the older tools. In some cases, it's the bitmap editor that is the culprit. For paletted images, a lot depends on the exact layout of the palette, and therefore it is **vital** that you have a bitmap editor that allows total control over the palette, and leaves it intact when saving. MS-Paint for example does neither. Even very expensive photo editing tools don't, so be careful.
+Now, sometimes this is not as easy as it sounds. The general procedure for graphics is to create it on the PC, then use an exporter tool to convert it to a raw binary format, then copy it to VRAM. If the exporter has been given the wrong options, or if it can't handle the image in the first place, you'll get garbage. This can happen with some of the older tools. In some cases, it's the bitmap editor that is the culprit. For paletted images, a lot depends on the exact layout of the palette, and therefore it is **vital** that you have a bitmap editor that allows total control over the palette, and leaves it intact when saving. Microsoft Paint and Pyxel Edit for example do neither. Even very expensive photo editing tools don't, so be careful.
 
-For this image, I used \<plug\>my own bitmap editor [Usenti](http://www.coranac.com/projects/#usenti){target="_blank"}\</plug\>, which not only has some nice palette control options, and tiling functions, but a built-in GBA graphics exporter as well. To make the background be the same color in all modes, the two bytes of the 16bit background color of modes 3 and 5 had to serve as palette entries for mode 4, both using that 16bit color again. In this case, the color is `0x080F`, sort of a brownish color. The bytes are 8 and 15, so that's the palette entries where the color goes too. Normally you don't have to worry about switching bitdepths mid-game, but knowing how to read data like this is a useful debugging skill.
+For this image, I used \<plug\>my own bitmap editor [Usenti](https://www.coranac.com/projects/#usenti){target="_blank"}\</plug\>, which not only has some nice palette control options, and tiling functions, but a built-in GBA graphics exporter as well. To make the background be the same color in all modes, the two bytes of the 16-bit background color of modes 3 and 5 had to serve as palette entries for mode 4, both using that 16-bit color again. In this case, the color is `0x080F`, sort of a brownish color. The bytes are 8 and 15, so that's the palette entries where the color goes too. Normally you don't have to worry about switching bitdepths mid-game, but knowing how to read data like this is a useful debugging skill.
 
-``` proglist
+```c
 #include <string.h>
 #include "toolbox.h"
 #include "modes.h"
@@ -1065,28 +1044,27 @@ int main()
 ```
 
 <div class="lblock">
-<table id="img-bm-modes">
+<table id="fig:bm-modes">
 <tr>
 <td>
   <div class="cpt" style="width:240px">
   <img src="img/demo/bm_modes_3.png" alt="mode3 screen">
-  <b>Fig 5.7a</b>: <tt>bm_modes</tt> in mode 3.
+  <b>{*@fig:bm-modes}a</b>: <tt>bm_modes</tt> in mode 3.
   </div>
 <td>
   <div class="cpt" style="width:240px">
   <img src="img/demo/bm_modes_4.png" alt="mode4 screen">
-  <b>Fig 5.7b</b>: <tt>bm_modes</tt> in mode 4.
+  <b>{*@fig:bm-modes}b</b>: <tt>bm_modes</tt> in mode 4.
   </div>
 <tr>
 <td>
   <div class="cpt" style="width:240px">
 <img src="img/demo/bm_modes_5.png" alt="mode5 screen">
-  <b>Fig 5.7c</b>: <tt>bm_modes</tt> in mode 5.
+  <b>{*@fig:bm-modes}c</b>: <tt>bm_modes</tt> in mode 5.
   </div>
 <td>&nbsp;
 </table>
 </div>
-
 
 ## Conclusions {#sec-conc}
 
@@ -1095,7 +1073,5 @@ Now we've seen some of the basics of the GBA bitmap modes: the properties of mod
 This chapter also discussed a few things about handling data, a very important topic when you're this close to the hardware. Datatypes matter, especially when accessing memory through pointers, and you need to be aware of the differences between them, and the opportunities and dangers of each. Even if you don't remember every little detail in the data section, at least remember where to look when things go screwy.
 
 Before continuing with further chapters, this may be a good time to do some experimenting with data: try changing the data arrays and see what happens. Look at the different data interpretations, different casts, and maybe some intentional errors as well, just to see what kinds of problems you might face at some point. It's better to make mistakes early, while programs are still short and simple and you have less potential problems.
-
-  
 
 Or not, of course <span class="kbd">:P</span>. Maybe it's worth waiting a little longer with that; or at least until we've covered basic input, which allows for much more interesting things than just passive images.
