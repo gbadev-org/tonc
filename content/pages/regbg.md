@@ -1,110 +1,93 @@
+Title: 9. Regular tiled backgrounds
+Date: 2003-09-01
+Modified: 2023-08-13
+Authors: Cearn
+
 # 9. Regular tiled backgrounds {#ch-}
 
--   [Tilemap introduction](#sec-intro).
--   [Background control](#sec-ctrl).
--   [Regular background tile-maps](#sec-map).
--   [Tilemap demos](#sec-demo).
--   [In conclusion](#sec-conc).
+[TOC]
 
 ## Tilemap introduction {#sec-intro}
 
 Tilemaps are the bread and butter for the GBA. Almost every commercial GBA game makes use of tilemodes, with the bitmap modes seen only in 3D-like games that use ray-tracing. Everything else uses tiled graphics.
 
-The reason why tilemaps are so popular is that they're implemented in hardware and require less space than bitmap graphics. Consider fig 9.1a. This is a 512 by 256 image, which even at 8bpp would take up 131 kB of VRAM, and we simply don't have that. If you were to make one big bitmap of a normal level in a game, you can easily get up to 1000×1000 pixels, which is just not practical. And *then* there's the matter of scrolling through the level, which means updating all pixels each frame. Even when your scrolling code is fully optimized that'd take quite a bit of time.
+The reason why tilemaps are so popular is that they're implemented in hardware and require less space than bitmap graphics. Consider {@fig:map}a. This is a 512 by 256 image, which even at 8bpp would take up 131 kB of VRAM, and we simply don't have that. If you were to make one big bitmap of a normal level in a game, you can easily get up to 1000×1000 pixels, which is just not practical. And *then* there's the matter of scrolling through the level, which means updating all pixels each frame. Even when your scrolling code is fully optimized that'd take quite a bit of time.
 
-Now, notice that there are many repeated elements in this image. The bitmap seems to be divided into groups of 16×16 pixels. These are the <dfn>tiles</dfn>. The list of unique tiles is the <dfn>tileset</dfn>, which is given in fig 9.1b. As you can see, there are only 16 unique tiles making up the image. To create the image from these tiles, we need a <dfn>tilemap</dfn>. The image is divided into a matrix of tiles. Each element in the matrix has a <dfn>tile index</dfn> which indicates which tile should be rendered there; the tilemap can be seen in fig 9.1c.
+Now, notice that there are many repeated elements in this image. The bitmap seems to be divided into groups of 16×16 pixels. These are the <dfn>tiles</dfn>. The list of unique tiles is the <dfn>tileset</dfn>, which is given in {@fig:map}b. As you can see, there are only 16 unique tiles making up the image. To create the image from these tiles, we need a <dfn>tilemap</dfn>. The image is divided into a matrix of tiles. Each element in the matrix has a <dfn>tile index</dfn> which indicates which tile should be rendered there; the tilemap can be seen in {@fig:map}c.
 
 Suppose both the tileset and map used 8bit entries, the sizes are 16×(16×16) = 4096 bytes for the tileset and 32×16 = 512 bytes for the tilemap. So that's 4.6 kB for the whole scene rather than the 131 kB we had before; a size reduction of a factor 28.
 
 <div class="cblock">
+<table width=70% id="fig:map">
+<tbody valign="top">
+<tr>
+<td colspan=2 align="center">
+  <div class="cpt" style="width:512px">
+  <img src="img/bgs/brin3-full.png" alt="Brinstar map">
+  <b>{*@fig:map}a</b>: image on screen.
+  </div>
+<tr>
+<td colspan=2>
+  The tile mapping process. Using the tileset of 
+  {@fig:map}b, and the tile map of 
+  {@fig:map}c, the end-result is 
+  {@fig:map}a. 
+<tr>
+<td>
+  <div class="cpt" style="width:48px">
+  <img src="img/bgs/brin3-meta-2x.png" height=264
+    alt="(meta)tileset for the map"><br>
+  <b>{*@fig:map}b</b>: the tile set.
+  </div>		
+<td>
+  <div class="cpt" style="width:528px">
+  <img src="img/bgs/brin3-map-2x.png" width=528
+	alt="Superimposed tile-map"><br>
+  <b>{*@fig:map}c</b>: the tile map (with the proper 
+    tiles as a backdrop).
+  </div>
+</tbody>
+</table></div>
 
-<div class="cpt" style="width:512px">
-
-![Brinstar map](img/bgs/brin3-full.png) **Fig 9.1a**: image on screen.
-
-</div>
-
-The tile mapping process. Using the tileset of fig 9.1b, and the tile map of fig 9.1c, the end-result is fig 9.1a.
-
-<div class="cpt" style="width:48px">
-
-![(meta)tileset for the map](img/bgs/brin3-meta-2x.png){height="264"}  
-**Fig 9.1b**: the tile set.
-
-</div>
-
-<div class="cpt" style="width:528px">
-
-![Superimposed tile-map](img/bgs/brin3-map-2x.png){width="528"}  
-**Fig 9.1c**: the tile map (with the proper tiles as a backdrop).
-
-</div>
-
-</div>
-
-That's basically how tilemaps work. You don't define the whole image, but group pixels together into tiles and describe the image in terms of those groups. In the fig 9.1, the tiles were 16×16 pixels, so the tilemap is 256 times smaller than the bitmap. The unique tiles are in the tileset, which can (and usually will) be larger than the tilemap. The size of the tileset can vary: if the bitmap is highly variable, you'll probably have many unique tiles; if the graphics are nicely aligned to tile boundaries already (as it is here), the tileset will be small. This is why tile-engines often have a distinct look to them.
+That's basically how tilemaps work. You don't define the whole image, but group pixels together into tiles and describe the image in terms of those groups. In the {@fig:map}, the tiles were 16×16 pixels, so the tilemap is 256 times smaller than the bitmap. The unique tiles are in the tileset, which can (and usually will) be larger than the tilemap. The size of the tileset can vary: if the bitmap is highly variable, you'll probably have many unique tiles; if the graphics are nicely aligned to tile boundaries already (as it is here), the tileset will be small. This is why tile-engines often have a distinct look to them.
 
 ### Tilemaps for the GBA {#ssec-intro-gba}
 
-In the tiled video-modes (0, 1 and 2) you can have up to four backgrounds that display tilemaps. The size of the maps is set by the control registers and can be between 128×128 and 1024×1024 pixels. The size of each tile is always 8×8 pixels, so fig 9.1 isn't *quite* the way it'd work on the GBA. Because accessing the tilemaps is done in units of tiles, the map sizes correspond to 16×16 to 128×128 tiles.
+In the tiled video-modes (0, 1 and 2) you can have up to four backgrounds that display tilemaps. The size of the maps is set by the control registers and can be between 128×128 and 1024×1024 pixels. The size of each tile is always 8×8 pixels, so {@fig:map} isn't *quite* the way it'd work on the GBA. Because accessing the tilemaps is done in units of tiles, the map sizes correspond to 16×16 to 128×128 tiles.
 
 Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charblocks</dfn> and <dfn>screenblocks</dfn>. The tileset is stored in the charblocks and the tilemap goes into the screenblocks. In the common vernacular, the word “tile” is used for both the graphical tiles and the entries of the tilemaps. Because this is somewhat confusing, I'll use the term <dfn>screen entry</dfn> (<dfn>SE</dfn> for short) as the items in the screenblocks (i.e., the map entries) and restrict tiles to the tileset.
 
-64 kB of VRAM is set aside for tilemaps (`0600:0000h`-`0600:FFFFh`). This is used for both screenblocks *and* charblocks. You can choose which ones to use freely through the control registers, but be careful that they can overlap (see table 9.1). Each screenblock is 2048 (`800h`) bytes long, giving 32 screenblocks in total. All but the smallest backgrounds use multiple screenblocks for the full tilemap. Each charblock is 16 kB (`4000h` bytes) long, giving four blocks overall.
+64 kB of VRAM is set aside for tilemaps (`0600:0000h`-`0600:FFFFh`). This is used for both screenblocks *and* charblocks. You can choose which ones to use freely through the control registers, but be careful that they can overlap (see {@tbl:cbb-sbb}). Each screenblock is 2048 (`800h`) bytes long, giving 32 screenblocks in total. All but the smallest backgrounds use multiple screenblocks for the full tilemap. Each charblock is 16 kB (`4000h` bytes) long, giving four blocks overall.
 
 <div class="cblock">
+<table id="tbl:cbb-sbb"
+  border=1 cellpadding=3 cellspacing=0 rules=groups>
+<caption align="bottom">
+  <b>{*@tbl:cbb-sbb}</b>:
+  charblock and screenblock overlap.
+</caption>
+<colgroup span=1 style="background-color:#D0D0D0;"></colgroup>
+<colgroup span=3 style="background-color:#B0B0B0;"></colgroup>
+<colgroup span=3 style="background-color:#D0D0D0;"></colgroup>
+<colgroup span=3 style="background-color:#B0B0B0;"></colgroup>
+<colgroup span=3 style="background-color:#D0D0D0;"></colgroup>
 
-**Table 9.1**: charblock and screenblock overlap.
-
-Memory
-
-0600:0000
-
-0600:4000
-
-0600:8000
-
-0600:C000
-
-charblock
-
-0
-
-1
-
-2
-
-3
-
-screenblock
-
-0
-
-…
-
-7
-
-8
-
-…
-
-15
-
-16
-
-…
-
-23
-
-24
-
-…
-
-31
-
+<tbody align="left"><tr>
+  <th>Memory
+  <th colspan=3> 0600:0000 <th colspan=3> 0600:4000
+  <th colspan=3> 0600:8000 <th colspan=3> 0600:C000
+</tbody>
+<tbody align="center"><tr>
+  <th>charblock
+  <td colspan=3> 0 <td colspan=3> 1 <td colspan=3> 2 <td colspan=3> 3 
+</tbody>
+<tbody><tr>
+  <th>screenblock
+  <td>0 <td>&hellip; <td>7		<td>8 <td>&hellip; <td>15
+  <td>16 <td>&hellip; <td> 23	<td>24 <td>&hellip; <td>31
+</tbody>
+</table>
 </div>
-
-
 
 <div class="note" markdown>
 <div class="nhcare">
@@ -149,52 +132,26 @@ Essential tilemap steps
 
 ### Background types {#ssec-ctrl-bgs}
 
-Just like sprites, there are two types of tiled backgrounds: regular and affine; these are also known as text and rotation backgrounds, respectively. The type of the background depends of the video mode (see table 9.2). At their cores, both regular and affine backgrounds work the same way: you have tiles, a tile-map and a few control registers. But that's where the similarity ends. Affine backgrounds use more and different registers than regular ones, and even the maps are formatted differently. This page only covers the regular backgrounds. I'll leave the [affine ones](affbg.html) till after the page on the [affine matrix](affine.html).
+Just like sprites, there are two types of tiled backgrounds: regular and affine; these are also known as text and rotation backgrounds, respectively. The type of the background depends of the video mode (see {@tbl:bg-types}). At their cores, both regular and affine backgrounds work the same way: you have tiles, a tile-map and a few control registers. But that's where the similarity ends. Affine backgrounds use more and different registers than regular ones, and even the maps are formatted differently. This page only covers the regular backgrounds. I'll leave the [affine ones](affbg.html) till after the page on the [affine matrix](affine.html).
 
 <div class="lblock">
-
-**Table 9.2**: video modes and background type
-
-mode
-
-BG0
-
-BG1
-
-BG2
-
-BG3
-
-0
-
-reg
-
-reg
-
-reg
-
-reg
-
-1
-
-reg
-
-reg
-
-aff
-
-\-
-
-2
-
-\-
-
-\-
-
-aff
-
-aff
-
+<table id="tbl:bg-types"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>{*@tbl:bg-types}</b>: video modes and 
+  background type
+</caption>
+<tbody align="center">
+<tr>
+  <th>mode	<th>BG0	<th>BG1	<th>BG2	<th>BG3
+<tr>
+  <td>0     <td>reg	<td>reg	<td>reg	<td>reg
+<tr>
+  <td>1     <td>reg	<td>reg	<td>aff	<td> -
+<tr>
+  <td>2     <td>-	<td>-	<td>aff	<td>aff
+</tbody>
+</table>
 </div>
 
 ### Control registers {#ssec-ctrl-regs}
@@ -204,242 +161,133 @@ All backgrounds have 3 primary control registers. The primary control register i
 Each of these is a 16it register. `REG_BG0CNT` can be found at `0400:0008`, with the other controls right behind it. The offsets are paired by background, forming coordinate pairs. These start at `0400:0010`
 
 <div class="lblock">
-
-**Table 9.3**: Background register addresses
-
-Register
-
-length
-
-address
-
-REG_BGxCNT
-
-2
-
-0400:0008h + 2·*x*
-
-REG_BGxHOFS
-
-2
-
-0400:0010h + 4·*x*
-
-REG_BGxVOFS
-
-2
-
-0400:0012h + 4·*x*
-
+<table id="tbl:ctrl-ofs"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align= bottom>
+  <b>{*@tbl:ctrl-ofs}</b>: Background register 
+    addresses
+</caption>
+<col span=2 align="right">
+  <tr><th>Register      <th>length  <th>address
+  <tr><th>REG_BGxCNT    <td>2       <td>0400:0008h + 2·<i>x</i>
+  <tr><th>REG_BGxHOFS   <td>2       <td>0400:0010h + 4·<i>x</i>
+  <tr><th>REG_BGxVOFS   <td>2       <td>0400:0012h + 4·<i>x</i>
+</table>
 </div>
 
-The description of `REG_BGxCNT` can be found in table 9.4. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right #defines.
+The description of `REG_BGxCNT` can be found in {@tbl:reg-bgxcnt}. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right #defines.
 
 <div class="reg">
+<table class="reg" id="tbl:reg-bgxcnt"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  {*@tbl:reg-bgxcnt}: REG_BGxCNT @ <code>0400:0008</code> + 2<i>x</i>
+</caption>
+<tr class="bits">
+	<td>F E<td>D<td> C B A 9 8
+	<td>7<td>6<td>5 4<td>3 2<td>1 0
+<tr class="bf">
+	<td class="rclr2">Sz
+	<td class="rclr6">Wr
+	<td class="rclr1">SBB
+	<td class="rclr3">CM
+	<td class="rclr5">Mos
+	<td>-
+	<td class="rclr0">CBB
+	<td class="rclr4">Pr
+</table>
 
-REG_BGxCNT @ `0400:0008` + 2*x*
-
-F E
-
-D
-
-C B A 9 8
-
-7
-
-6
-
-5 4
-
-3 2
-
-1 0
-
-Sz
-
-Wr
-
-SBB
-
-CM
-
-Mos
-
-\-
-
-CBB
-
-Pr
-
-bits
-
-name
-
-define
-
-description
-
-0-1
-
-Pr
-
-*BG_PRIO#*
-
-**Priority**. Determines drawing order of backgrounds.
-
-2-3
-
-CBB
-
-*BG_CBB#*
-
-**Character Base Block**. Sets the charblock that serves as the base for character/tile indexing. Values: 0-3.
-
-6
-
-Mos
-
-BG_MOSAIC
-
-**Mosaic** flag. Enables mosaic effect.
-
-7
-
-CM
-
-BG_4BPP, BG_8BPP
-
-**Color Mode**. 16 colors (4bpp) if cleared; 256 colors (8bpp) if set.
-
-8-C
-
-SBB
-
-*BG_SBB#*
-
-**Screen Base Block**. Sets the screenblock that serves as the base for screen-entry/map indexing. Values: 0-31.
-
-D
-
-Wr
-
-BG_WRAP
-
-**Affine Wrapping** flag. If set, affine background wrap around at their edges. Has no effect on regular backgrounds as they wrap around by default.
-
-E-F
-
-Sz
-
-*BG_SIZE#*, *see below*
-
-**Background Size**. Regular and affine backgrounds have different sizes available to them. The sizes, in tiles and in pixels, can be found in table 9.5.
-
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-1<td class="rclr4">Pr
+  <td><i>BG_PRIO#</i>
+  <td><b>Priority</b>. Determines drawing order of backgrounds.
+<tr class="bg1">	
+  <td>2-3<td class="rclr0">CBB
+  <td><i>BG_CBB#</i>
+  <td><b>Character Base Block</b>. Sets the charblock that serves as 
+    the base for character/tile indexing. Values: 0-3.
+<tr class="bg0">	
+  <td> 6 <td class="rclr5">Mos
+  <td>BG_MOSAIC
+  <td><b>Mosaic</b> flag. Enables mosaic effect.
+<tr class="bg1">	
+  <td> 7 <td class="rclr3">CM
+  <td>BG_4BPP, BG_8BPP
+  <td><b>Color Mode</b>. 16 colors (4bpp) if cleared; 
+    256 colors (8bpp) if set. 
+<tr class="bg0">	
+  <td>8-C<td class="rclr1">SBB
+  <td><i>BG_SBB#</i>
+  <td><b>Screen Base Block</b>. Sets the screenblock that serves as 
+    the base for screen-entry/map indexing. Values: 0-31.
+<tr class="bg1">	
+  <td> D <td class="rclr6">Wr
+  <td>BG_WRAP
+  <td><b>Affine Wrapping</b> flag. If set, affine background wrap 
+    around at their edges. Has no effect on regular backgrounds as 
+    they wrap around by default.
+<tr class="bg0">	
+  <td>E-F<td class="rclr2">Sz
+  <td><i>BG_SIZE#</i>, <i class="mini">see below</i>
+  <td><b>Background Size</b>. Regular and affine backgrounds have 
+      different sizes available to them. The sizes, in tiles and in 
+      pixels, can be found in {@tbl:bg-size}.
+</tbody>
+</table>
 </div>
 
 <div class="cblock">
-
-**Table 9.5a**: regular bg sizes
-
-Sz-flag
-
-define
-
-(tiles)
-
-(pixels)
-
-00
-
-BG_REG_32x32
-
-32x32
-
-256x256
-
-01
-
-BG_REG_64x32
-
-64x32
-
-512x256
-
-10
-
-BG_REG_32x64
-
-32x64
-
-256x512
-
-11
-
-BG_REG_64x64
-
-64x64
-
-512x512
-
-**Table 9.5b**: affine bg sizes
-
-Sz-flag
-
-define
-
-(tiles)
-
-(pixels)
-
-00
-
-BG_AFF_16x16
-
-16x16
-
-128x128
-
-01
-
-BG_AFF_32x32
-
-32x32
-
-256x256
-
-10
-
-BG_AFF_64x64
-
-64x64
-
-512x512
-
-11
-
-BG_AFF_128x128
-
-128x128
-
-1024x1024
-
-</div>
-
-
+<table width="100%" id="tbl:bg-size">
+<tr align="center">
+<td>
+  <table id="tbl-reg-size" border=1 cellpadding=2  cellspacing=0>
+  <caption align="bottom">
+    <b>{*@tbl:bg-size}a</b>: regular bg sizes
+  </caption>
+  <col><col class="def">
+  <tbody align="center">
+    <tr><th>Sz-flag	<th>define    <th>(tiles)<th>(pixels)
+    <tr><td> 00   <td>BG_REG_32x32 <td> 32x32 <td> 256x256 
+    <tr><td> 01   <td>BG_REG_64x32 <td> 64x32 <td> 512x256 
+    <tr><td> 10   <td>BG_REG_32x64 <td> 32x64 <td> 256x512 
+    <tr><td> 11   <td>BG_REG_64x64  <td> 64x64 <td> 512x512 
+  </tbody>
+  </table>
+<td>
+  <table id="tbl-aff-size" border=1 cellpadding=2 cellspacing=0>
+  <caption align="bottom">
+    <b>{*@tbl:bg-size}b</b>: affine bg sizes
+  </caption>
+  <col><col class="def">
+  <tbody align="center">
+    <tr><th>Sz-flag	<th>define    <th>(tiles) <th>(pixels)
+    <tr><td> 00   <td>BG_AFF_16x16 <td> 16x16  <td> 128x128 
+    <tr><td> 01   <td>BG_AFF_32x32  <td> 32x32  <td> 256x256 
+    <tr><td> 10   <td>BG_AFF_64x64  <td> 64x64  <td> 512x512 
+    <tr><td> 11   <td>BG_AFF_128x128 <td>128x128 <td>1024x1024
+  </tbody>
+  </table>
+</table>
+</div><br>
 
 Each background has two 16bit scrolling registers to offset the rendering (`REG_BGxHOFS` and `REG_BGxVOFS`). There are a number of interesting points about these. First, because regular backgrounds wrap around, the values are essentially modulo *mapsize*. This is not really relevant at the moment, but you can use this to your benefit once you get to more advanced tilemaps. Second, these registers are **write-only**! This is a little annoying, as it means that you can't update the position by simply doing \``REG_BG0HOFS++`' and the like.
 
 And now the third part, which may be the most important, namely what the values actually *do*. The simplest way of looking at them is that they give the coordinates of the screen on the map. Read that again, carefully: it's the position of the screen on the map. It is *not* the position of the map on the screen, which is how sprites work. The difference is only a minus sign, but even something as small as a sign change can wreak havoc on your calculations.
 
 <div class="lblock">
-
-<div class="cpt" style="width:520px;">
-
-![map-ofs-a](img/bgs/brin3-ofs-2x.png){#img-map-ofs width="520"}  
-**Fig 9.2a**: Scrolling offset **dx** sets is the position of the screen on the map. In this case, **dx** = (192, 64).
-
-</div>
-
+  <div class="cpt" style="width:520px;">
+    <img src="img/bgs/brin3-ofs-2x.png" id="fig:map-ofs" width=520
+      alt="map-ofs-a"><br>
+    <b>{*@fig:map-ofs}</b>: 
+	Scrolling offset <b>dx</b> sets is the position of the screen 
+	on the map. In this case, <b>dx</b> = (192, 64).
+  </div>
 </div>
 
 So, if you increase the scrolling values, you move the screen to the right, which corresponds to the map moving *left* on the screen. In mathematical terms, if you have map position **p** and screen position **q**, then the following is true:
@@ -482,7 +330,7 @@ The offset registers are **write-only**! That means that direct arithmetic like 
 
 Tonc's code has several useful extra types and macros that can make life a little easier.
 
-``` proglist
+```c
 // === Additional types (tonc_types.h) ================================
 
 //! Screen entry conceptual typedef
@@ -529,62 +377,46 @@ In theory, it is also useful create a sort of background API, with a struct with
 
 ## Regular background tile-maps {#sec-map}
 
-The screenblocks form a matrix of screen entries that describe the full image on the screen. In the example of fig 9.1 the tilemap entries just contained the tile index. The GBA screen entries bahave a little differently.
+The screenblocks form a matrix of screen entries that describe the full image on the screen. In the example of {@fig:map} the tilemap entries just contained the tile index. The GBA screen entries bahave a little differently.
 
-For regular tilemaps, each screen entry is 16bits long. Besides the tile index, it contains flipping flags and a palette bank index for 4bpp / 16 color tiles. The exact layout can be found in table 9.7. The affine screen entries are only 8 bits wide and just contain an 8bit tile index.
+For regular tilemaps, each screen entry is 16bits long. Besides the tile index, it contains flipping flags and a palette bank index for 4bpp / 16 color tiles. The exact layout can be found in {@tbl:se}. The affine screen entries are only 8 bits wide and just contain an 8bit tile index.
 
 <div class="reg">
+<table class="reg" id="tbl:se"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  {*@tbl:se}: Screen entry format for regular backgrounds
+</caption>
+<tr class="bits">
+	<td>F E D C<td>B<td>A<td>9 8 7 6 5 4 3 2 1 0
+<tr class="bf">
+	<td class="rclr1">PB
+	<td class="rclr2">VF
+	<td class="rclr2">HF
+	<td class="rclr0">TID
+</table>
 
-Screen entry format for regular backgrounds
-
-F E D C
-
-B
-
-A
-
-9 8 7 6 5 4 3 2 1 0
-
-PB
-
-VF
-
-HF
-
-TID
-
-bits
-
-name
-
-define
-
-description
-
-0-9
-
-TID
-
-*SE_ID#*
-
-**Tile-index** of the SE.
-
-A-B
-
-HF, VF
-
-SE_HFLIP, SE_VFLIP. *SE_FLIP#*
-
-**Horizontal/vertical flipping** flags.
-
-C-F
-
-PB
-
-*SE_PALBANK#*
-
-**Palette bank** to use when in 16-color mode. Has no effect for 256-color bgs (`REG_BGxCNT{6}` is set).
-
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width=12%>
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-9<td class="rclr0">TID
+  <td><i>SE_ID#</i>
+  <td><b>Tile-index</b> of the SE.
+<tr class="bg1">	
+  <td>A-B<td class="rclr2">HF, VF
+  <td>SE_HFLIP, SE_VFLIP. <i>SE_FLIP#</i>
+  <td><b>Horizontal/vertical flipping</b> flags. 
+<tr class="bg0">	
+  <td>C-F<td class="rclr1">PB
+  <td><i>SE_PALBANK#</i>
+  <td><b>Palette bank</b> to use when in 16-color mode. Has no effect 
+    for 256-color bgs (<code>REG_BGxCNT{6}</code> is set).
+</tbody>
+</table>
 </div>
 
 ### Map layout {#ssec-map-layout}
@@ -593,57 +425,59 @@ VRAM contains 32 screenblocks to store the tilemaps in. Each screenblock is 800h
 
 Now, suppose you have a tilemap that's *tw*×*th* tiles/SEs in size. You might expect that the screen entry at tile-coordinates (*tx*, *ty*) could be found at SE-number *n* = *tx*+*ty*·*tw*, because that's how matrices always work, right? Well, you'd be wrong. At least, you'd be *partially* wrong.
 
-Within each screenblock the equation works, but the bigger backgrounds don't simply *use* multiple screenblocks, they're actually accessed as four separate maps. How this works can be seen in table 9.8: each numbered block is a contingent block in memory. This means that to get the SE-index you have to find out which screenblock you are in and then find the SE-number inside that screenblock.
+Within each screenblock the equation works, but the bigger backgrounds don't simply *use* multiple screenblocks, they're actually accessed as four separate maps. How this works can be seen in {@tbl:reg-layout}: each numbered block is a contingent block in memory. This means that to get the SE-index you have to find out which screenblock you are in and then find the SE-number inside that screenblock.
 
 <div class="lblock">
-
-**Table 9.8**: screenblock layout of regular backgrounds.
-
-32x32
-
-64x32
-
-32x64
-
-64x64
-
-**0**
-
-**0**
-
-**1**
-
-**0**
-
-**1**
-
-**0**
-
-**1**
-
-**2**
-
-**3**
-
+<table class="reg" id="tbl:reg-layout"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption align="bottom">
+  <b>{*@tbl:reg-layout}</b>: screenblock layout of 
+  regular backgrounds.
+ </caption>
+<col span=4 align="center">
+<tr><th>32x32<th>64x32<th>32x64<th>64x64
+<tr>
+<td>
+  <table border=frame cellpadding= 8 cellspacing=0>
+    <tr><td bgcolor=red><b>0</b>
+  </table>
+<td>
+  <table border=frame cellpadding= 8 cellspacing=0>
+    <tr><td bgcolor=red><b>0</b><td bgcolor= green><b>1</b>
+  </table>
+<td>
+  <table border=frame cellpadding= 8 cellspacing=0>
+    <tr><td bgcolor=red><b>0</b>
+    <tr><td bgcolor=blue><b>1</b>
+  </table>
+<td>
+  <table border=frame cellpadding= 8 cellspacing=0>
+    <tr><td bgcolor=red><b>0</b><td bgcolor= green><b>1</b>
+    <tr><td bgcolor=blue><b>2</b><td bgcolor= gray><b>3</b>
+  </table>
+</table>
 </div>
 
 This kind of nesting problem isn't as hard as it looks. We know how many tiles fit in a screenblock, so to get the SBB-coordinates, all we have to do divide the tile-coords by the SBB width and height: *sbx*=*tx*/32 and *sby*=*ty*/32. The SBB-number can then be found with the standard matrix→array formula. To find the in-SBB SE-number, we have to use *tx*%32 and *ty*%32 to find the in-SBB coordinates, and then again the conversion from 2D coords to a single element. This is to be offset by the SBB-number tiles the size of an SBB to find the final number. The final form would be:
 
-``` {#cd-se-index .proglist}
+<div id="cd-se-index" markdown>
+```c
 //! Get the screen entry index for a tile-coord pair
 //  And yes, the div and mods will be converted by the compiler
 uint se_index(uint tx, uint ty, uint pitch)
-{   
+{
     uint sbb= (ty/32)*(pitch/32) + (tx/32);
     return sbb*1024 + (ty%32)*32 + tx%32;
 }
 ```
+</div>
 
 The general formula is left as an exercise for the reader – one that is well worth the effort, in my view. This kind of process crops up in a number of places, like getting the offset for bitmap coordinates in tiles, and tile coords in 1D object mapping.
 
 If all those operations make you queasy, there's also a faster version specifically for a 2×2 arrangement. It starts with calculating the number as if it's a 32×32t map. This will be incorrect for a 64t wide map, which we can correct for by adding 0x0400−0x20 (i.e., tiles/block − tiles per row). We need another full block correction is the size is 64×64t.
 
-``` {#cd-se-index-fast .proglist}
+<div id="cd-se-index-fast" markdown>
+```
 //! Get the screen entry index for a tile-coord pair.
 /*! This is the fast (and possibly unsafe) way.
 *   \param bgcnt    Control flags for this background (to find its size)
@@ -659,6 +493,7 @@ uint se_index_fast(uint tx, uint ty, u16 bgcnt)
     return n;
 }
 ```
+</div>
 
 I would like to remind you that *n* here is the SE-number, not the address. Since the size of a regular SE is 2 bytes, you need to multiply *n* by 2 for the address. (Unless, of course, you have a pointer/array of `u16`s, in which case *n* will work fine.) Also, this works for regular backgrounds only; affine backgrounds use a linear map structure, which makes this extra work unnecessary there. By the way, both the screen-entry and map layouts are different for affine backgrounds. For their formats, see the [map format](affbg.html#sec-map) section of the affine background page.
 
@@ -667,51 +502,21 @@ I would like to remind you that *n* here is the SE-number, not the address. Sinc
 There are two additional things you need to be aware of when using tiles for tile-maps. The first concerns tile-numbering. For sprites, numbering went according to 4bit tiles (s-tiles); for 8bit tiles (d-tiles) you'd have use multiples of 2 (a bit like u16 addresses are always multiples of 2 in memory). In tile-maps, however, d-tiles are numbered by the d-tile. To put it in other words, for sprites, using index *id* indicates the same tile for both 4 and 8bit tiles, namely the one that starts at *id*·20h. For tile-maps, however, it starts at *id*·20h for 4bit tiles, but at *id*·40h for 8bit tiles.
 
 <div class="lblock">
-
-**Table 9.9**: tile counting for backgrounds, sticks to its bit-depth.
-
-memory offset
-
-000h
-
-020h
-
-040h
-
-060h
-
-080h
-
-100h
-
-...
-
-4bpp tile
-
-0
-
-1
-
-2
-
-3
-
-4
-
-5
-
-...
-
-8bpp tile
-
-0
-
-1
-
-2
-
-...
-
+<table id="tbl:bg-tids"
+  border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  {*@tbl:bg-tids}: tile counting 
+  for backgrounds, sticks to its bit-depth.
+</caption>
+<tbody align="center">
+<tr>
+  <th>memory offset<th>000h<th>020h <th>040h<th>060h <th>080h<th>100h <th>...
+<tr>
+  <th>4bpp tile <td>0      <td>1  <td>2    <td>3  <td>4    <td>5 <td>...
+<tr>
+  <th>8bpp tile <td colspan=2>0   <td colspan=2>1 <td colspan=2>2<td>...
+</tbody>
+</table>
 </div>
 
 The second concerns, well, also tile-numbering, but more how many tiles you can use. Each map entry for regular backgrounds has 10 bits for a tile index, so you can use up to 1024 tiles. However, a quick calculation shows that a charblock contains 4000h/20h= 512 s-tiles, or 4000h/40h= 256 d-tiles. So what's the deal here? Well, the charblock index you set in `REG_BGxCNT` is actually only the block where tile-counting starts: its <dfn>character base block</dfn>. You can use the ones after it as well. Cool, huh? But wait, if you can access subsequent charblocks as well; does this mean that, if you set the base charblock to 3, you can use the sprite blocks (which are basically blocks 4 and 5) as well?
@@ -738,16 +543,16 @@ Tilemap data conversion via CLI
 
 </div>
 
-A converter that can tile images (for objects), can also create a tileset for tilemaps, although there will likely be many redundant tiles. A few converters can also reduce the tileset to only the unique tiles, and provide the tilemap that goes with it. The Brinstar bitmap from fig 9.1 is a 512×256 image, which could be tiled to a 64x32 map with a 4bpp tileset reduced for uniqueness in tiles, including palette info and mirroring.
+A converter that can tile images (for objects), can also create a tileset for tilemaps, although there will likely be many redundant tiles. A few converters can also reduce the tileset to only the unique tiles, and provide the tilemap that goes with it. The Brinstar bitmap from {@fig:map} is a 512×256 image, which could be tiled to a 64x32 map with a 4bpp tileset reduced for uniqueness in tiles, including palette info and mirroring.
 
-``` proglist
+```sh
 # gfx2gba
 # (C array; u8 foo_Tiles[], u16 foo_Map[], 
 # u16 master_Palette[]; foo.raw.c, foo.map.c, master.pal.c)
     gfx2gba -fsrc -c16 -t8 -m foo.bmp
 ```
 
-``` proglist
+```sh
 # grit
 # (C array; u32 fooTiles[], u16 fooMap[], u16 fooPal[]; foo.c, foo.h)
     grit foo.bmp -gB4 -mRtpf
@@ -770,15 +575,16 @@ There are a few map editors out there that you can use. Two good ones are Nessie
 In this cause, however, I haven't used any editor at all. Some of the graphics converters can convert to a tileset+tilemap – it's not the standard method, but for small maps it may well be easier. In this case I've used Usenti to do it, but grit and gfx2gba work just as well. Note that because the map here is 64×32 tiles, which requires splitting into screenblocks. In Usenti this is called the ‘sbb’ layout, in grit it's ‘-mLs’ and for gfx2gba you'd use ‘-mm 32’ … I think. In any case, after a conversion you'd have a palette, a tileset and a tilemap.
 
 <div class="cblock">
-
-<div class="cpt">
-
-![](img/demo/brin_demo_pal.png)  
-**Fig 9.3a**: brin_demo palette.
-
-</div>
-
-``` proglist
+<table id="fig:brin" width=100%>
+<tr>
+  <td valign="top" width=160>
+    <div class="cpt">
+    <img src="img/demo/brin_demo_pal.png" 
+      alt=""><br>
+    <b>{*@fig:brin}a</b>: <tt>brin_demo</tt> palette.
+	</div>
+  <td rowspan=2 markdown>
+```c
 const unsigned short brinMap[2048]=
 {
     // Map row 0
@@ -798,17 +604,16 @@ const unsigned short brinMap[2048]=
     0x3001,0x3002,0x3005,0x3006,0x3007,0x3008,
     // ... etc
 ```
-
-<div class="cpt">
-
-![](img/demo/brin_demo_tiles.png)  
-**Fig 9.3b**: brin_demo tileset.
-
+<tr>
+  <td valign="bottom">
+    <div class="cpt">
+    <img src="img/demo/brin_demo_tiles.png" alt=""><br>
+    <b>{*@fig:brin}b</b>: <tt>brin_demo</tt> tileset.
+    </div>
+</table>
 </div>
 
-</div>
-
-In fig 9.3 you can see the full palette, the tileset and part of the map. Note that the tileset of fig 9.3b is not the same as that of fig 9.1b because the former uses 8×8 tiles while the latter used 16×16 tiles. Note also that the screen entries you see here are either 0 (i.e., the empty tile) or of the form `0x3xxx`. The high nybble indicates the palette bank, in this case three. If you'd look to the palette (fig 9.3a) you'd see that this gives bluish colors.
+In {@fig:brin} you can see the full palette, the tileset and part of the map. Note that the tileset of {@fig:brin}b is not the same as that of {@fig:map}b because the former uses 8×8 tiles while the latter used 16×16 tiles. Note also that the screen entries you see here are either 0 (i.e., the empty tile) or of the form `0x3xxx`. The high nybble indicates the palette bank, in this case three. If you'd look to the palette ({@fig:brin}a) you'd see that this gives bluish colors.
 
 Now on to using these data. Remember the essential steps here:
 
@@ -819,9 +624,10 @@ Now on to using these data. Remember the essential steps here:
 
 If you do it correctly, you should have something showing on screen. If not, go to the tile/map/memory viewers of your emulator; they'll usually give you a good idea where the problem is. A common one is having a mismatch between the CBB and SBB in `REG_BGxCNT` and where you put the data, which most likely would leave you with an empty map or empty tileset.
 
-The full code of brin_demo is given below. The three calls to `memcpy()` load up the palette, tileset and tilemap. For some reason, it's become traditional to place the maps in the last screenblocks. In this case, that's 30 rather than 31 because we need two blocks for a 64×32t map. For the scrolling part, I'm using two variables to store and update the positions because the scrolling registers are write-only. I'm starting at (192, 64) here because that's what I used for the scrolling picture of fig 9.2 earlier.
+The full code of brin_demo is given below. The three calls to `memcpy()` load up the palette, tileset and tilemap. For some reason, it's become traditional to place the maps in the last screenblocks. In this case, that's 30 rather than 31 because we need two blocks for a 64×32t map. For the scrolling part, I'm using two variables to store and update the positions because the scrolling registers are write-only. I'm starting at (192, 64) here because that's what I used for the scrolling picture of {@fig:map-ofs} earlier.
 
-``` {#cd-brin-demo .proglist}
+<div id="cd-brin-demo" markdown>
+```c
 #include <string.h>
 
 #include "toolbox.h"
@@ -859,43 +665,45 @@ int main()
     return 0;
 }
 ```
+</div>
 
 <div class="cblock">
-
-<div class="cpt" style="width:240px;">
-
-![](img/demo/brin_demo.png)  
-**Fig 9.4a**: brin_demo at **dx**=(192, 64).
-
-</div>
-
-<div class="cpt" style="width:240px;">
-
-![](img/demo/brin_demo0.png)  
-**Fig 9.4b**: brin_demo at **dx**=(0, 0).
-
-</div>
-
+<table id="fig:brin-demo">
+<tr>
+  <td>
+	<div class="cpt" style="width:240px;">
+	  <img src="img/demo/brin_demo.png"
+		alt=""><br>
+	  <b>{*@fig:brin-demo}a</b>: <tt>brin_demo</tt> 
+	    at <b>dx</b>=(192, 64).
+	</div>
+  <td>
+	<div class="cpt" style="width:240px;">
+	  <img src="img/demo/brin_demo0.png"
+		alt=""><br>
+	  <b>{*@fig:brin-demo}b</b>: <tt>brin_demo</tt> 
+	    at <b>dx</b>=(0, 0).
+	</div>
+</table>
 </div>
 
 #### Interlude: Fast-copying of non sbb-prepared maps
 
-This is not exactly required knowledge, but should make for an interesting read. In this demo I use a multi-sbb map that was already prepared for that. The converter made sure that the left block of the map came before the right block. If this weren't the case then you couldn't load the whole map in one go because the second row of the left block would use the first row of the right block and so on (see fig 9.5).
+This is not exactly required knowledge, but should make for an interesting read. In this demo I use a multi-sbb map that was already prepared for that. The converter made sure that the left block of the map came before the right block. If this weren't the case then you couldn't load the whole map in one go because the second row of the left block would use the first row of the right block and so on (see {@fig:brin-bad}).
 
 <div class="lblock">
-
-<div class="cpt" style="width:512px;">
-
-![](img/demo/brin_demo_bad.png){#img-brin-bad}  
-**Fig 9.5** brin_demo without blocking out into SBB's first.
-
-</div>
-
+	<div class="cpt" style="width:512px;">
+	  <img src="img/demo/brin_demo_bad.png" id="fig:brin-bad"
+		alt=""><br>
+	  <b>{*@fig:brin-bad}</b> <tt>brin_demo</tt> 
+	  without blocking out into SBB's first.
+	</div>
 </div>
 
 There are few simple and slow ways and one simple and fast way of copying a non sbb-prepared map to a multiple screenblocks. The slow way would be to perform a double loop to go row by row of each screenblock. The fast way is through struct-copies and pointer arithmetic, like this:
 
-``` {#lin2sbb-fast .proglist}
+<div id="lin2sbb-fast" markdown>
+```c
 typedef struct { u32 data[8]; } BLOCK;
 
 int iy;
@@ -919,7 +727,8 @@ A `BLOCK` struct-copy takes care of half a row, so two takes care of a whole scr
 
 The second demo, sbb_reg uses a 64x64t background to indicate how multiple screenblocks are used for bigger maps in more detail. While the brin_demo used a multi-sbb map as well, it wasn't easy to see what's what because the map was irregular; this demo uses a very simple tileset so you can clearly see the screenblock boundaries. It'll also show how you can use the `REG_BG_OFS` registers for scrolling rather than `REG_BGxHOFS` and `REG_BGxVOFS`.
 
-``` {#cd-demo-sbb .proglist}
+<div id="cd-demo-sbb" markdown>
+```
 #include "toolbox.h"
 #include "input.h"
 
@@ -934,7 +743,7 @@ SCR_ENTRY *bg0_map= se_mem[SBB_0];
 
 
 uint se_index(uint tx, uint ty, uint pitch)
-{   
+{
     uint sbb= ((tx>>5)+(ty>>5)*(pitch>>5));
     return sbb*1024 + ((tx&31)+(ty&31)*32);
 }
@@ -949,9 +758,9 @@ void init_map()
     REG_BG0VOFS= 0;
 
     // (1) create the tiles: basic tile and a cross
-    const TILE tiles[2]= 
+    const TILE tiles[2]=
     {
-        {{0x11111111, 0x01111111, 0x01111111, 0x01111111, 
+        {{0x11111111, 0x01111111, 0x01111111, 0x01111111,
           0x01111111, 0x01111111, 0x01111111, 0x00000001}},
         {{0x00000000, 0x00100100, 0x01100110, 0x00011000,
           0x00011000, 0x01100110, 0x00100100, 0x00000000}},
@@ -1010,21 +819,21 @@ int main()
     return 0;
 }
 ```
-
-<div class="cpt_fr" style="width:240px">
-
-![sbb_reg](img/demo/sbb_reg.png){#img-sbb-reg}  
-**Fig 9.6**: sbb_reg. Compare table 9.8, 64x64t background. Note the little cross in the top left corner.
-
 </div>
 
-The `init_map()` contains all of the initialization steps: setting up the registers, tiles, palettes and maps. Unlike the previous demo, the tiles, palette and the map are all created manually because it's just easier in this case. At point (1), I define two tiles. The first one looks a little like a pane and the second one is a rudimentary cross. You can see them clearly in the screenshot (fig 9.6). The pane-like tile is loaded into tile 0, and is therefore the ‘default’ tile for the map.
+<div class="cpt_fr" style="width:240px">
+<img src="img/demo/sbb_reg.png" id="fig:sbb-reg"
+  alt="sbb_reg"><br>
+<b>{*@fig:sbb-reg}</b>: <tt>sbb_reg</tt>. 
+  Compare {@tbl:reg-layout}, 64x64t background. 
+  Note the little cross in the top left corner.
+</div>
 
-The palette is set at point (2). The colors are the same as in table 9.8: red, green, blue and grey. Take note of which palette entries I'm using: the colors are in different palette banks so that I can use palette swapping when I fill the map. Speaking of which …
+The `init_map()` contains all of the initialization steps: setting up the registers, tiles, palettes and maps. Unlike the previous demo, the tiles, palette and the map are all created manually because it's just easier in this case. At point (1), I define two tiles. The first one looks a little like a pane and the second one is a rudimentary cross. You can see them clearly in the screenshot ({@fig:brin-demo}). The pane-like tile is loaded into tile 0, and is therefore the ‘default’ tile for the map.
 
-Loading the map itself (point (3)) happens through a double loop. The outer loop sets the palette-bank for the screen entries. The inner loop fills 1024 SEs with palette-swapped tile-0's. Now, if big maps used a flat layout, the result would be a big map in four colored bands. However, what actually happens is that you see *blocks*, not bands, proving that indeed regular maps are split into screenblocks just like table 9.8 said. Yes, it's annoying, but that's just the way it is.
+The palette is set at point (2). The colors are the same as in {@tbl:reg-layout}: red, green, blue and grey. Take note of which palette entries I'm using: the colors are in different palette banks so that I can use palette swapping when I fill the map. Speaking of which …
 
-
+Loading the map itself (point (3)) happens through a double loop. The outer loop sets the palette-bank for the screen entries. The inner loop fills 1024 SEs with palette-swapped tile-0's. Now, if big maps used a flat layout, the result would be a big map in four colored bands. However, what actually happens is that you see *blocks*, not bands, proving that indeed regular maps are split into screenblocks just like {@tbl:reg-layout} said. Yes, it's annoying, but that's just the way it is.
 
 That was creating the map, now we turn to the main loop in `main()`. The keys (point (4)) let you scroll around the map. The RIGHT button is tied to a positive change in *x*, but the map itself actually scrolls to the *left*! When I say it like that it may seem counter-intuitive, but if you look at the demo you see that it actually makes sense. Think of it from a hypothetical player sprite point of view. As the sprite moves through the world, you need to update the background to keep the sprite from going off-screen. To do that, the background's movement should be the opposite of the sprite's movement. For example, if the sprite moves to the *right*, you have to move the background to the *left* to compensate.
 
@@ -1034,7 +843,8 @@ Finally, there's one more thing to discuss: the cross that appears centered on t
 
 The third demo, cbb_demo covers some of the details of charblocks and the differences in 4bpp and 8bpp tiles. The backgrounds in question are BG 0 and BG 1. Both will be 32x32t backgrounds, but BG 0 will use 4bpp tiles and CBB 0 and BG 2 uses 8bpp tiles and CBB 2. The exact locations and contents of the screenblocks are not important; what is important is to load the tiles to the starts of all 6 charblocks and see what happens.
 
-``` {#cd-cbb-demo .proglist}
+<div id="cd-cbb-demo" markdown>
+```c
 #include <toolbox.h>
 #include "cbb_ids.h"
 
@@ -1107,33 +917,32 @@ int main()
     return 0;
 }
 ```
+</div>
 
 The tilesets can be found in cbb_ids.c. Each tile contains two numbers: one for the charblock I'm putting it and one for the tile-index in that block. For example, the tile that I want in charblock 0 at tile 1 shows ‘01’, CBB 1 tile 0 shows ‘10’, CBB 1, tile 1 has ‘11’, etc. I have twelve tiles in total, 4 s-tiles to be used for BG 0 and 8 d-tiles for BG 1.
 
 Now, I have six pairs of tiles and I intend to place them in the first tiles of each of the 6 charblock (except for CBBs 0 and 2, where tile 0 would be used as default tiles for the background, which I want to keep empty). Yes six, I'm loading into the sprite charblocks as well. I could do this by hand, calculating all the addresses manually (`0600:0020` for CBB 0, tile 1, etc) and hope I don't make a mistake and can remember what I'm doing when revisiting the demo later, or I can just use my `tile_mem` and `tile8_mem` memory map matrices and get the addresses quickly and without any hassle. Even better, C allows struct assignments so I can load the individual tiles with a simple assignment! That is exactly what I'm doing in `load_tiles()`. The source tiles are cast to TILE and TILE8 arrays for 4bpp and 8bpp tiles respectively. After that, loading the tiles is very simple indeed.
 
-
-
-The maps themselves are created in `init_maps()`. The only thing I'm interested in for this demo is to show how and which charblocks are used, so the particulars of the map aren't that important. The only thing I want them to do is to be able to show the tiles that I loaded in `load_tiles()`. The two pointers I create here, `se4` and `se8`, point to screen-entries in the screenblocks used for BG 0 and BG 1, respectively. BG 0's map, containing s-tiles, uses 1 and 512 offsets; BG 1's entries, 8bpp tiles, carries 1 and 256 offsets. If what I said before about tile-index for different bitdepths is true, then you should see the contents of all the loaded tiles. And looking at the result of the demo (fig 9.7), it looks as if I did my math correctly: background tile-indices follow the bg's assigned bitdepth, in contrast to sprites which always counts in 32 byte offsets.
+The maps themselves are created in `init_maps()`. The only thing I'm interested in for this demo is to show how and which charblocks are used, so the particulars of the map aren't that important. The only thing I want them to do is to be able to show the tiles that I loaded in `load_tiles()`. The two pointers I create here, `se4` and `se8`, point to screen-entries in the screenblocks used for BG 0 and BG 1, respectively. BG 0's map, containing s-tiles, uses 1 and 512 offsets; BG 1's entries, 8bpp tiles, carries 1 and 256 offsets. If what I said before about tile-index for different bitdepths is true, then you should see the contents of all the loaded tiles. And looking at the result of the demo ({@fig:cbb-demo}), it looks as if I did my math correctly: background tile-indices follow the bg's assigned bitdepth, in contrast to sprites which always counts in 32 byte offsets.
 
 There is, however, one point of concern: on hardware, you won't see the tiles that are actually in object VRAM (blocks 4 and 5). While you might expect to be able to use the sprite blocks for backgrounds due to the addresses, the actual wiring in the GBA seems to forbid it. This is why you should test on hardware is important: emulators aren't always perfect. But if hardware testing is not available to you, test on multiple emulators; if you see different behaviour, be wary of the code that produced it.
 
 <div class="lblock">
-
-<div class="cpt" style="width:240px">
-
-![cbb_demo on VBA](img/demo/cbb_demo_vba.png)  
-**Fig 9.7a**: cbb_demo on VBA (and Boycott Adv and Mappy well, almost) ).
-
-</div>
-
-<div class="cpt" style="width:240px">
-
-![cbb_demo on hardware](img/demo/cbb_demo_hw.png)  
-**Fig 9.7b**: cbb_demo on hardware. Spot the differences!
-
-</div>
-
+<table id="fig:cbb-demo">
+<tr valign="top">
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
+  <b>{*@fig:cbb-demo}a</b>: <tt>cbb_demo</tt> on 
+  VBA (and Boycott Adv and Mappy well, almost) ).
+  </div>
+<td>
+  <div class="cpt" style="width:240px">
+  <img src="img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
+  <b>{*@fig:cbb-demo}b</b>: <tt>cbb_demo</tt> on 
+    hardware. Spot the differences!
+  </div>
+</table>
 </div>
 
 ### Bonus demo: the 'text' in text bg and introducing tonclib {#ssec-demo-hello}
@@ -1144,7 +953,8 @@ The second reason is to show how you can output text, which is obviously an impo
 
 Anyway, here's the example.
 
-``` {#cd-hello .proglist}
+<div id="cd-hello" markdown>
+```c
 #include <stdio.h>
 #include <tonc.h>
 
@@ -1163,30 +973,29 @@ int main()
     return 0;
 }
 ```
+</div>
 
 <div class="lblock">
-
-<div class="cpt" style="width:112px;">
-
-![](img/demo/hello.png)  
-**Fig 9.8a**: hello demo.
-
-</div>
-
-<div class="cpt" style="width:256px;">
-
-![](img/demo/hello_tiles.png)  
-**Fig 9.8b**: tileset of the hello demo.
-
-</div>
-
+<table id="fig:hello">
+<tbody valign="top">
+<tr>
+  <td>
+    <div class="cpt" style="width:112px;">
+      <img src="img/demo/hello.png" alt=""><br>
+      <b>{*@fig:hello}a</b>: <tt>hello</tt> demo.
+    </div>
+  <td>
+    <div class="cpt" style="width:256px;">
+      <img src="img/demo/hello_tiles.png" alt=""><br>
+      <b>{*@fig:hello}b</b>: tileset of the <tt>hello</tt> demo.
+    </div>
+</tbody>
+</table>
 </div>
 
 Yes, it is indeed a “hello world” demo, the starting point of nearly every introductory C/C++ tutorial. However, those are usually for meant for PC platforms, which have native console functionality like `printf()` or `cout`. These do not exist for the GBA. (Or “didn't”, I should say; there are ways to make use of them nowadays. See [tte:conio](tte.html#ssec-misc-conio) for details.)
 
-Tonc's support for text goes through `tte_` functions. In this case, `tte_init_se_default()` sets up background 0 for tile-mapped text. It also loads the default 8×8 font into charblock 0 (see fig 9.8b). After that, you can write to text with `tte_write`. The sequence `#{P:x,y}` is the formatting command that TTE uses to position the cursor. There are a number of these, some of which you'll also see in later chapters.
-
-
+Tonc's support for text goes through `tte_` functions. In this case, `tte_init_se_default()` sets up background 0 for tile-mapped text. It also loads the default 8×8 font into charblock 0 (see {@fig:hello}b). After that, you can write to text with `tte_write`. The sequence `#{P:x,y}` is the formatting command that TTE uses to position the cursor. There are a number of these, some of which you'll also see in later chapters.
 
 From this point on, I'll make liberal use of tonclib's text capabilities in examples for displaying values and the like. This will mostly happen without explanation, because that won't be part of the demo. Again, to see the internals, go to the [TTE chapter](tte.html).
 
@@ -1196,7 +1005,7 @@ Using the functions themselves is pretty simple, but they are spread out over mu
 
 Libraries are essentially clusters of object files. Instead of linking the objects into an executable directly, you <dfn>archive</dfn> them with arm-none-eabi-ar. The command is similar to the link step as well. Here is how you can create the library libfoo.a from objects foo.o, bar.o and baz.o.
 
-``` proglist
+```makefile
 # archive rule
 libfoo : foo.o bar.o baz.o
     arm-none-eabi-ar -crs libfoo.a foo.o bar.o baz.o
@@ -1207,7 +1016,7 @@ The three flags stand for **c**reate archive, **r**eplace member and create **s*
 
 To use the library, you have to link it to the executable. There are two linker flags of interest here: -L and -l. Upper- and lowercase ‘L’. The former, -L adds a library path. The lowercase version, -l, adds the actual library, but there is a twist here: only need the root-name of the library. For example, to link the library libfoo.a, use ‘-lfoo’. The prefix lib and extension .a are assumed by the linker.
 
-``` proglist
+```makefile
 # using libfoo (assume it's in ../lib)
 $(PROJ).elf : $(OBJS)
     $(LD) $^ $(LDFLAGS) -L../lib -lfoo -o $@
@@ -1227,7 +1036,7 @@ Better copy and fill routines: memcpy16/32 and memset16/32
 
 Now that I am using tonclib as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the traditional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
 
-``` proglist
+```c
 void memset16(void *dest, u16 hw, uint hwcount);
 void memcpy16(void *dest, const void *src, uint hwcount);
 
