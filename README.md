@@ -84,6 +84,12 @@ For example:
     <div class="note" markdown> ... </div>
     <div style="margin-left:1.2cm;" markdown> ... </div>
     ```
+    
+    It may help to apply this attribute to all notes.
+    
+    ```
+    sed -i -E 's,<div class="note">,<div class="note" markdown>,g' pagename.md
+    ```
 
 Once it's in good shape, you can delete the original .htm file.
 
