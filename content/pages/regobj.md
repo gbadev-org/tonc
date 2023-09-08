@@ -1,21 +1,25 @@
+Title: Introduction to Tonc
+Date: 2003-09-01
+Modified: 2023-09-08
+Authors: Cearn
+
 # 8. Regular sprites {#ch-}
 
--   [Sprite introduction](#sec-intro).
--   [Sprite image data and mapping mode](#sec-tiles).
--   [Sprite control: Object Attribute Memory](#sec-oam).
--   [Object attributes: OBJ_ATTR](#sec-oam-entry).
--   [Bitfield macros (OAM or otherwise)](#sec-macro).
--   [Demo time](#sec-obj-demo).
+[TOC]
 
 ## Sprite introduction {#sec-intro}
 
 <div class="cpt_fr" style="width:64px">
 
-![a metroid.](img/metr/std.png){#img-metr} **Fig 8.1**. Metroid. Rawr.
+<div class="cpt_fr" style="width:64px">
+<img src="img/metr/std.png" id="fig:metr" 
+  alt="a metroid.">
+<b>{*@fig:metr}</b>. Metroid. Rawr.
+</div>
 
 </div>
 
-According to Webster's, a sprite is “an imaginary being or spirit, as a fairy, elf, or goblin”. Right, glad that's cleared up. For games, though, when referring to a sprite one is usually talking about “a \[small\] animated object that can move freely from the background” (PERN). Primary examples are game characters, but status objects like scores and life bars are often sprites as well. Fig 8.1 on the right shows a sprite of everybody's favorite vampire jellyfish, the metroid. I will use this sprite in the demo at the end of this chapter.
+According to Webster's, a sprite is “an imaginary being or spirit, as a fairy, elf, or goblin”. Right, glad that's cleared up. For games, though, when referring to a sprite one is usually talking about “a \[small\] animated object that can move freely from the background” (PERN). Primary examples are game characters, but status objects like scores and life bars are often sprites as well. {*@fig:metr} on the right shows a sprite of everybody's favorite vampire jellyfish, the metroid. I will use this sprite in the demo at the end of this chapter.
 
 
 
@@ -60,51 +64,20 @@ It may seem that calculating those tile addresses can be annoying, and it would 
 Also, don't forget that the sprites have their own palette which starts at `0500:0200h` (right after the background palette). If you are certain you've loaded your tiles correctly but nothing shows up, it's possible you filled the wrong palette.
 
 <div class="lblock">
-
-**Table 8.1**: tile counting for sprites, always per 32 bytes. (You can use odd numbers for 8bpp tiles, but be sure you fill the VRAM accordingly.)
-
-memory 0601:
-
-0000
-
-0020
-
-0040
-
-0060
-
-0080
-
-0100
-
-...
-
-4bpp tile
-
-0
-
-1
-
-2
-
-3
-
-4
-
-5
-
- 
-
-8bpp tile
-
-0
-
-2
-
-4
-
- 
-
+<table id="tbl:obj-tids"
+  border=1 cellspacing=0 cellpadding=1>
+<caption align="bottom">
+  <b>{*@tbl:obj-tids}</b>: tile counting for sprites, 
+  always per 32 bytes. (You can use odd numbers for 8bpp tiles, but 
+  be sure you fill the VRAM accordingly.)
+</caption>
+<tr>
+  <th>memory 0601:<th>0000<th>0020 <th>0040<th>0060 <th>0080<th>0100 <th>...
+<tr>
+  <th>4bpp tile <td>0      <td>1  <td>2    <td>3  <td>4    <td>5 <td>&nbsp;
+<tr>
+  <th>8bpp tile <td colspan=2>0   <td colspan=2>2 <td colspan=2>4<td>&nbsp;
+</table>
 </div>
 
 <div class="note" markdown>
@@ -119,34 +92,38 @@ Only the higher sprite block is available for sprites in modes 3-5. Indexing sti
 
 ### The sprite mapping mode {#ssec-map}
 
-Sprites aren't limited to a single tile. In fact, most sprites are larger (see Table 8.4 for a list of the available sizes for GBA sprites). Larger sprites simply use multiple tiles, but this may present a problem. For backgrounds, you choose each tile explicitly with the tile-map. In the case of sprites, you have two options: 1D and 2D mapping. The default is 2D mapping, and you can switch to 1D mapping by setting `REG_DISPCNT`{6}.
+Sprites aren't limited to a single tile. In fact, most sprites are larger (see {*@tbl:obj-size} for a list of the available sizes for GBA sprites). Larger sprites simply use multiple tiles, but this may present a problem. For backgrounds, you choose each tile explicitly with the tile-map. In the case of sprites, you have two options: 1D and 2D mapping. The default is 2D mapping, and you can switch to 1D mapping by setting `REG_DISPCNT`{6}.
 
 How do these work? Consider the example sprite of fig 8.2a, showing the metroid of fig 8.1 divided into tiles. In 2D mapping, you're interpreting the sprite charblocks as one big bitmap of 256x256 pixels and the sprite a rectangle out of that bitmap (still divided into tiles, of course). In this case, each tile-row of a sprite is at a 32-tile offset. This is shown in fig8.2b. On the other hand, you can also consider the charblocks as one big array of tiles, and the tiles of every sprite are consecutive. This is shown in fig 8.2c. The numbers in fig 8.2a show the difference between 1D and 2D mapping. Assuming we start at tile 0, the red and cyan numbers follow 2d and 1d mapping, respectively.
 
 From a GBA-programming viewpoint, it is easier to use 1d mapping, as you don't have to worry about the offset of each tile-row when storing sprites. However, actually *creating* sprites is easier in 2d-mode. I mean, do you *really* want to edit a bitmap tile by tile? That's what I thought. Of course, it should be the exporting tool's job to convert your sprites from 2d to 1d mapping for you. You can do this with [Usenti](http://www.coranac.com/projects/#usenti){target="_blank"} too.
 
 <div class="lblock">
-
-<div class="cpt" style="width:200px">
-
-![a metroid divided into tiles](img/metr/tile_1d2d.png) **Fig 8.2a**: zoomed out version of Fig 8.1, divided into tiles; colored numbers indicate mapping mode: red for 2d, cyan for 1d.
-
-</div>
-
-<div class="cpt" style="width:297px">
-
-![2d mapping](img/metr/tile_2d.png) **Fig 8.2b**: how fig 8.2a should be stored in memory when using 2d mapping.
-
-</div>
-
-
-
-<div class="cpt" style="width:296px">
-
-![1d mapping](img/metr/tile_1d.png) **Fig 8.2c**: how fig 8.2a should be stored in memory when using 1d mapping.
-
-</div>
-
+<table id="fig:obj-map"
+  cellpadding=4 cellspacing=0>
+<tr valign="top">
+<td>
+  <div class="cpt" style="width:200px">
+  <img src="img/metr/tile_1d2d.png" alt="a metroid divided into tiles">
+  <b>{*@fig:obj-map}a</b>: zoomed out version of 
+  {*@fig:metr}, divided into tiles; colored numbers 
+    indicate mapping mode: red for 2d, cyan for 1d.
+  </div>
+<td>
+  <div class="cpt" style="width:297px">
+  <img src="img/metr/tile_2d.png" alt="2d mapping">
+  <b>{*@fig:obj-map}b</b>: how 
+    {@fig:obj-map}a should be stored in memory when 
+	using 2d mapping.
+  </div>
+  <br>
+  <div class="cpt" style="width:296px">
+  <img src="img/metr/tile_1d.png" alt="1d mapping">
+  <b>{*@fig:obj-map}c</b>: how 
+    {@fig:obj-map}a should be stored in memory when using 
+	1d mapping.
+  </div>
+</table>
 </div>
 
 <div class="note" markdown>
@@ -157,13 +134,13 @@ Object data conversion via CLI
 
 Some command-line interfaces can tile bitmaps for use with objects (and tilemaps). In some cases, they can also convert images with multiple sprite-frames to a set of object tiles in 1D object mapping mode. If foo.bmp is a 64x16 bitmap with 4 16x16 objects, here's how you can convert it to 8x8 4bpp tiles using gfx2gba and grit (flags for 1D mapping are given in brackets)
 
-``` proglist
+```sh
 # gfx2gba
 # 4x 16x16@4 objects (C array; u8 foo_Bitmap[], u16 master_Palette[]; foo.raw.c, master.pal.c)
     gfx2gba -fsrc -c16 -t8 [-T32] foo.bmp
 ```
 
-``` proglist
+```sh
 # grit
 # 4x 16x16@4 objects (C array; u32 fooTiles[], u16 fooPal[]; foo.c, foo.h)
     grit foo.bmp -gB4 [-Mw 2 -Mh 2]
@@ -189,7 +166,8 @@ Much unlike in the bitmap modes, you don't have to draw the sprites yourself: th
 
 So you don't have to draw the sprites yourself; however, you *do* need to tell the GBA how you want them. This is what the <dfn>Object Attribute Memory </dfn> –OAM for short– is for. This starts at address `0700:0000h` and is 1024 bytes long. You can find two types of structures in OAM: the <dfn>OBJ_ATTR</dfn> struct for regular sprite attributes, and the <dfn>OBJ_AFFINE</dfn> struct containing the transformation data. The definitions of these structures can be found below. Note that names may vary from site to site.
 
-``` {#cd-oam-structs .proglist}
+<div id="cd-oam-structs" markdown>
+```c
 typedef struct tagOBJ_ATTR
 {
     u16 attr0;
@@ -210,73 +188,26 @@ typedef struct OBJ_AFFINE
     s16 pd;
 } ALIGN4 OBJ_AFFINE;
 ```
+</div>
 
 There are a few interesting things about these structures. First, you see a lot of `fill`er fields. Second, if you would take 4 `OBJ_ATTR` structures and lay them over one `OBJ_AFFINE` structure, as done in table 2, you'd see that the fillers of one would exactly cover the data of the other, and vice versa. This is no coincidence: OAM is in fact a weave of `OBJ_ATTR`s and `OBJ_AFFINE`s. Why would Nintendo use a weave instead of simply having one section of attributes and one for transform data? That's a good question and deserves a good answer. When I have one, I'll tell you (I'm guessing it's a data-alignment thing). Also, note that the elements of the `OBJ_AFFINE` are *signed* shorts. I've gone through a world of hurt with the obj_aff code because I used `u16` instead of `s16`. With 1024 bytes at our disposal, we have room for 128 `OBJ_ATTR` structures and 32 `OBJ_AFFINE`s. The rest of this file will explain regular sprites that only use `OBJ_ATTR`. I want to give the [affine transformation matrix](affine.html) the full mathematical treatment it deserves and will save [affine sprites](affobj.html) for later.
 
 <div class="lblock">
-
-**Table 8.2**: memory interlace of OBJ_ATTR and OBJ_AFFINE structures.
-
-mem (u16)
-
-0
-
-3
-
-4
-
-7
-
-8
-
-b
-
-c
-
-f
-
-OBJ_ATTR
-
-0 1 2
-
- 
-
-0 1 2
-
- 
-
-0 1 2
-
- 
-
-0 1 2
-
- 
-
-OBJ_AFFINE
-
- 
-
-pa
-
- 
-
-pb
-
- 
-
-pc
-
- 
-
-pd
-
-</div>
-
-<div class="note" markdown>
-<div class="nhgood">
-Force alignment on OBJ_ATTRs
-
+<table id="tbl:obj-weave"
+  class="reg" border=1 frame=void cellpadding=4 cellspacing=0>
+<caption align= bottom>
+  <b>{*@tbl:obj-weave}</b>: 
+  memory interlace of OBJ_ATTR and 
+  OBJ_AFFINE structures.
+ </caption>
+<tr align="left"><th>mem (u16)<th>0<th>3<th>4<th>7<th>8<th>b<th>c<th>f
+<tr><th>OBJ_ATTR
+  <td>0 1 2<td>&nbsp;<td>0 1 2<td>&nbsp;
+  <td>0 1 2<td>&nbsp;<td>0 1 2<td>&nbsp;
+<tr><th>OBJ_AFFINE
+  <td>&nbsp;<td>pa<td>&nbsp;<td>pb
+  <td>&nbsp;<td>pc<td>&nbsp;<td>pd
+</table>
 </div>
 
 As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of OBJ_ATTR structs (and others), means that struct-copies like the one in `oam_update()` later on, will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs with ‘`ALIGN4`’, which is a macro for ‘`__attribute__((aligned(4)))`’. For more on this, see the section on [data alignment](bitmaps.html#ssec-data-align).
@@ -292,223 +223,146 @@ The basic control for every sprite is the `OBJ_ATTR` structure. It consists of t
 The first attribute controls a great deal, but the most important parts are for the *y* coordinate, and the shape of the sprite. Also important are whether or not the sprite is transformable (an affine sprite), and whether the tiles are considered to have a bitdepth of 4 (16 colors, 16 sub-palettes) or 8 (256 colors / 1 palette).
 
 <div class="reg">
+<table class="reg" id="tbl:oe-attr0"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  {*@tbl:oe-attr0}: <code>OBJ_ATTR.attr0</code>
+</caption>
+<tr class="bits">
+	<td>F E<td>D<td>C<td>B A<td>9 8 <td>7 6 5 4 3 2 1 0
+<tr class="bf">
+	<td class="rclr1">Sh
+	<td class="rclr2">CM
+	<td class="rclr5">Mos
+	<td class="rclr4">GM
+	<td class="rclr3">OM
+	<td class="rclr0">Y
+</table>
 
-`OBJ_ATTR.attr0`
-
-F E
-
-D
-
-C
-
-B A
-
-9 8
-
-7 6 5 4 3 2 1 0
-
-Sh
-
-CM
-
-Mos
-
-GM
-
-OM
-
-Y
-
-bits
-
-name
-
-define
-
-description
-
-0-7
-
-Y
-
-*ATTR0_Y#*
-
-**Y coordinate**. Marks the top of the sprite.
-
-8-9
-
-OM
-
-ATTR0_REG, ATTR0_AFF, ATTR0_HIDE, ATTR0_AFF_DBL. *ATTR0_MODE#*
-
-**(Affine) object mode**. Use to hide the sprite or govern affine mode.
-
--   **00**. Normal rendering.
--   **01**. Sprite is an affine sprite, using affine matrix specified by `attr1{9-D}`
--   **10**. Disables rendering (hides the sprite)
--   **11**. Affine sprite using double rendering area. See [affine sprites](affobj.html) for more.
-
-A-B
-
-GM
-
-ATTR0_BLEND, ATTR0_WIN. *ATTR0_GFX#*
-
-**Gfx mode**. Flags for special effects.
-
--   **00**. Normal rendering.
--   **01**. Enables alpha blending. Covered [here](gfx.html#sec-blend).
--   **10**. Object is part of the object window. The sprite itself isn't rendered, but serves as a mask for bgs and other sprites. (I think, haven't used it yet)
--   **11**. Forbidden.
-
-C
-
-Mos
-
-ATTR0_MOSAIC
-
-Enables mosaic effect. Covered [here](gfx.html#sec-mos).
-
-D
-
-CM
-
-ATTR0_4BPP, ATTR0_8BPP
-
-**Color mode**. 16 colors (4bpp) if cleared; 256 colors (8bpp) if set.
-
-E-F
-
-Sh
-
-ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. *ATTR0_SHAPE#*
-
-**Sprite shape**. This and the sprite's size (`attr1{E-F}`) determines the sprite's real size, see [table 8.4](#tbl-obj-size).
-
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-7<td class="rclr0">Y
+  <td><i>ATTR0_Y#</i>
+  <td><b>Y coordinate</b>. Marks the top of the sprite.
+<tr class="bg1">	
+  <td>8-9<td class="rclr3">OM
+  <td>ATTR0_REG, ATTR0_AFF, ATTR0_HIDE, ATTR0_AFF_DBL.
+    <i>ATTR0_MODE#</i>
+  <td><b>(Affine) object mode</b>. Use to hide the sprite or govern 
+    affine mode.
+    <ul>
+      <li><b>00</b>. Normal rendering.
+      <li><b>01</b>. Sprite is an affine sprite, using affine matrix
+        specified by <code>attr1{9-D}</code>
+      <li><b>10</b>. Disables rendering (hides the sprite)
+      <li><b>11</b>. Affine sprite using double rendering area. See 
+        <a href="affobj.html">affine sprites</a> for more.
+    </ul>   
+<tr class="bg0">	
+  <td>A-B<td class="rclr4">GM
+  <td>ATTR0_BLEND, ATTR0_WIN. <i>ATTR0_GFX#</i>
+  <td><b>Gfx mode</b>. Flags for special effects.
+    <ul>
+      <li><b>00</b>. Normal rendering.
+      <li><b>01</b>. Enables alpha blending. Covered 
+        <a href="gfx.html#sec-blend">here</a>.
+      <li><b>10</b>. Object is part of the object window. The sprite 
+        itself isn't rendered, but serves as a mask for bgs and other 
+        sprites. (I think, haven't used it yet)
+      <li><b>11</b>. Forbidden.
+    </ul>
+<tr class="bg1">	
+  <td>C<td class="rclr5">Mos
+  <td>ATTR0_MOSAIC
+  <td>Enables mosaic effect. Covered <a href="gfx.html#sec-mos">here</a>. 
+<tr class="bg0">	
+  <td>D<td class="rclr2">CM
+  <td>ATTR0_4BPP, ATTR0_8BPP
+  <td><b>Color mode</b>. 16 colors (4bpp) if cleared; 
+    256 colors (8bpp) if set.    
+<tr class="bg1">	
+  <td>E-F<td class="rclr1">Sh
+  <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i>
+  <td><b>Sprite shape</b>. This and the sprite's size 
+    (<code>attr1{E-F}</code>) determines the sprite's real size, see 
+    {@tbl:obj-size}.
+</tbody>
+</table>
 </div>
 
 Two extra notes on attribute 0. First, `attr0` contains the ***y*** coordinate; `attr1` contains the ***x*** coordinate. For some reason I keep messing these two up; if you find your sprite is moving left when it should be moving up, this may be why. Second, the affine and gfx modes aren't always named as such. In particular, `attr0{9}` is simply referred to as *the* double-size flag, even though it only works in that capacity if bit 8 is set too. If it isn't, then it hides the sprite. I think that it's actually taken out of the object rendering stage entirely leaving more time for the others, but I'm not 100% sure of that.
 
 <div class="lblock">
-
-**Table 8.4**: GBA sprite sizes
-
-shape\\size
-
-00
-
-01
-
-10
-
-11
-
-00
-
-8x8
-
-16x16
-
-32x32
-
-64x64
-
-01
-
-16x8
-
-32x8
-
-32x16
-
-64x32
-
-10
-
-8x16
-
-8x32
-
-16x32
-
-32x64
-
-</div>
+<table id="tbl:obj-size"
+  class="reg" border=1 cellpadding=2 cellspacing=0>
+<caption align="bottom">
+  <b>{*@tbl:obj-size}</b>: GBA sprite sizes
+</caption>
+<tr><td>shape\size <th>00    <th>01    <th>10    <th>11
+<tr><th>00<td>8x8  <td>16x16 <td>32x32 <td>64x64
+<tr><th>01<td>16x8 <td>32x8 <td>32x16 <td>64x32
+<tr><th>10<td>8x16 <td>8x32 <td>16x32 <td>32x64
+</table></div>
 
 ### Attribute 1 {#ssec-obj-attr1}
 
 The primary parts of this attribute are the *x* coordinate and the size of the sprite. The role of bits 8 to 14 depend on whether or not this is a affine sprite (determined by `attr0`{8}). If it is, these bits specify which of the 32 `OBJ_AFFINE`s should be used. If not, they hold flipping flags.
 
 <div class="reg">
+<table class="reg" id="tbl:oe-attr1"
+  border=1 frame=void cellPadding=4 cellSpacing=0>
+<caption class="reg">
+  {*@tbl:oe-attr1}: <code>OBJ_ATTR.attr1</code>
+</caption>
+<tr class="bits">
+	<td>F E<td>D<td>C<td>B A 9<td>8 7 6 5 4 3 2 1 0
+<tr class="bf">
+	<td class="rclr1">Sz
+	<td class="rclr2">VF
+	<td class="rclr2">HF
+	<td>-
+	<td class="rclr0">X
+<tr class="bf">
+    <td>-
+	<td colspan=3 class="rclr3">AID
+    <td>-
+</table>
 
-`OBJ_ATTR.attr1`
-
-F E
-
-D
-
-C
-
-B A 9
-
-8 7 6 5 4 3 2 1 0
-
-Sz
-
-VF
-
-HF
-
-\-
-
-X
-
-\-
-
-AID
-
-\-
-
-bits
-
-name
-
-define
-
-description
-
-0-8
-
-X
-
-*ATTR1_X#*
-
-**X coordinate**. Marks left of the sprite.
-
-9-D
-
-AID
-
-*ATTR1_AFF#*
-
-**Affine index**. Specifies the `OAM_AFF_ENTY` this sprite uses. Valid *only* if the affine flag (`attr0`{8}) is set.
-
-C-D
-
-HF, VF
-
-ATTR1_HFLIP, ATTR1_VFLIP. *ATTR1_FLIP#*
-
-**Horizontal/vertical flipping** flags. Used *only* if the affine flag (`attr0`) is clear; otherwise they're part of the affine index.
-
-E-F
-
-Sz
-
-*ATTR1_SIZE#*
-
-**Sprite size**. Kinda. Together with the shape bits (`attr0`{E-F}) these determine the sprite's real size, see [table 8.4](#tbl-obj-size).
-
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def" width="12%">
+<tr align="left"><th>bits<th>name<th>define<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-8<td class="rclr0">X
+  <td><i>ATTR1_X#</i>
+  <td><b>X coordinate</b>. Marks left of the sprite.
+<tr class="bg1">	
+  <td>9-D<td class="rclr3">AID
+  <td><i>ATTR1_AFF#</i>
+  <td><b>Affine index</b>. Specifies the <code>OAM_AFF_ENTY</code> this 
+    sprite uses. Valid <i>only</i> if the affine flag 
+    (<code>attr0</code>{8}) is set.
+<tr class="bg0">	
+  <td>C-D<td class="rclr2">HF, VF
+  <td>ATTR1_HFLIP, ATTR1_VFLIP. <i>ATTR1_FLIP#</i>
+  <td><b>Horizontal/vertical flipping</b> flags. Used <i>only</i> if 
+    the affine flag (<code>attr0</code>) is clear; otherwise they're 
+    part of the affine index.
+<tr class="bg1">	
+  <td>E-F<td class="rclr1">Sz
+  <td><i>ATTR1_SIZE#</i>
+  <td><b>Sprite size</b>. Kinda. Together with the shape bits
+    (<code>attr0</code>{E-F}) these determine the sprite's real size, 
+    see {@tbl:obj-size}.
+</tbody>
+</table>
 </div>
 
 I'll say it here too: `attr0` contains *y*, `attr1` contains *x*. Note that bits 12 and 13 have a double role as either flipping flags or affine index. And if you are wondering if you can still flip affine sprites, the answer is yes: simply use negative scales in the matrix.
@@ -518,53 +372,44 @@ I'll say it here too: `attr0` contains *y*, `attr1` contains *x*. Note that bits
 This attribute tells the GBA which tiles to display and its background priority. If it's a 4bpp sprite, this is also the place to say what sub-palette should be used.
 
 <div class="reg">
+<table class="reg" id="tbl:oe-attr2"
+  border=1 frame=void cellpadding=4 cellspacing=0>
+<caption class="reg">
+  {*@tbl:oe-attr2}: <code>OBJ_ATTR.attr2</code>
+</caption>
+<tr class="bits">
+	<td>F E D C<td>B A<td>9 8 7 6 5 4 3 2 1 0
+<tr class="bf">
+	<td class="rclr1">PB
+	<td class="rclr2">Pr
+	<td class="rclr0">TID
+</table>
 
-`OBJ_ATTR.attr2`
-
-F E D C
-
-B A
-
-9 8 7 6 5 4 3 2 1 0
-
-PB
-
-Pr
-
-TID
-
-bits
-
-name
-
- 
-
-description
-
-0-9
-
-TID
-
-*ATTR2_ID#*
-
-Base **tile-index** of sprite. Note that in bitmap modes this must be 512 or higher.
-
-A-B
-
-Pr
-
-*ATTR2_PRIO#*
-
-**Priority**. Higher priorities are drawn first (and therefore can be covered by later sprites and backgrounds). Sprites cover backgrounds of the same priority, and for sprites of the same priority, the higher `OBJ_ATTR`s are drawn first.
-
-C-F
-
-PB
-
-*ATTR2_PALBANK#*
-
-**Palette-bank** to use when in 16-color mode. Has no effect if the color mode flag (`attr0`{C}) is set.
-
+<table>
+  <col class="bits" width=40>
+  <col class="bf" width="8%">
+  <col class="def">
+<tr align="left"><th>bits<th>name<th>&nbsp;<th>description
+<tbody valign="top">
+<tr class="bg0">	
+  <td>0-9<td class="rclr0">TID
+  <td><i>ATTR2_ID#</i>
+  <td>Base <b>tile-index</b> of sprite. Note that in bitmap modes 
+    this must be 512 or higher.
+<tr class="bg1">	
+  <td>A-B<td class="rclr2">Pr
+  <td><i>ATTR2_PRIO#</i>
+  <td><b>Priority</b>. Higher priorities are drawn first (and therefore 
+    can be covered by later sprites and backgrounds). Sprites cover 
+    backgrounds of the same priority, and for sprites of the 
+    same priority, the higher <code>OBJ_ATTR</code>s are drawn first.
+<tr class="bg0">	
+  <td>C-F<td class="rclr1">PB
+  <td><i>ATTR2_PALBANK#</i>
+  <td><b>Palette-bank</b> to use when in 16-color mode. Has no effect if
+	the color mode flag (<code>attr0</code>{C}) is set.
+</tbody>
+</table>
 </div>
 
 ### Attribute 3 {#ssec-obj-attr3}
@@ -575,7 +420,7 @@ There is *no* attribute 3. Although the `OBJ_ATTR` struct does *have* a fourth h
 
 You *could* write all your sprite data directly to the OAM at `0700:0000h`, but that might not always be the best move. If it's done during VDraw there's the possibility of tearing. Even worse, you might change the sprite's tile-index in mid-render so that the top is in one animation frame and the bottom is in another. Not a pretty sight. Actually, this isn't something to worry about because you *can't* update OAM during VDraw; it's locked then. What's often done is creating a separate buffer of OAM entries (also known as the <dfn>object shadow</dfn>) that can be modified at any time, and then copy that to the real OAM during VBlank. Here's my take on this.
 
-``` proglist
+```c
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *const obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 ```
@@ -590,7 +435,7 @@ The hash means that for each of these, there will be three #defines with *foo* a
 
 For example, the one attached to the tile index, `ATTR2_ID#`. The tile index field has 10 bits and starts at bit-0. The corresponding defines therefore are:
 
-``` proglist
+```c
 // The 'ATTR2_ID#' from the attr2 list means these 3 #defines exist
 #define ATTR2_ID_MASK       0x03FF    
 #define ATTR2_ID_SHIFT           0    
@@ -603,7 +448,8 @@ Most GBA libraries out there have #defines like these, albeit with different nam
 
 I also have a second batch of macros you can use for setting and getting specific fields, which use the mask and shift names explained above. I'll admit the macros look horrible, but I assure you they make sense and can come in handy.
 
-``` {#cd-bitfield .proglist}
+<div id="cd-bitfield" markdown>
+```c
 // bit field set and get routines
 #define BF_PREP(x, name)         ( ((x)<<name##_SHIFT)& name##_MASK  )
 #define BF_GET(x, name)          ( ((x) & name##_MASK)>> name##_SHIFT )
@@ -613,10 +459,11 @@ I also have a second batch of macros you can use for setting and getting specifi
 #define BF_GET2(y, name)         ( (y) & name##_MASK )
 #define BF_SET2(y, x, name)      (y = ((y)&~name##_MASK) | BF_PREP2(x, name) )
 ```
+</div>
 
 Well, I did warn you. The \``name`' argument here is the *foo* from before. The preprocessor concatenation operator is use to create the full mask and shift names. Again using the tile-index as an example, these macros expand to the following:
 
-``` proglist
+```c
 // Create bitfield:
 attr2 |= BF_PREP(id, ATTR0_SHAPE);
 // becomes:
@@ -637,7 +484,7 @@ attr2= (attr&~ATTR2_ID_MASK) | ((id<<ATTR2_ID_SHIFT) & ATTR2_ID_MASK);
 
 The macros with a ‘2’ in their names work in a similar way, but do not apply shifts. These can be useful when you have already shifted #defines like `ATTR0_WIDE`, which can't use the other ones.
 
-``` proglist
+```c
 // Insert pre-shifted bitfield:
 // BF_SET2(attr0, ATTR0_WIDE, ATTR0_SHAPE);
 attr0= (attr0&~ATTR0_SHAPE_MASK) | (id & ATTR0_SHAPE_MASK);
@@ -649,7 +496,8 @@ Note that none of these three have anything GBA specific in them; they can be us
 
 Finally, what I call my build macros. These piece together the various bit-flags into a single number in an orderly fashion, similar to HAM's tool macros. I haven't used them that often yet, and I'm not forcing you to, but on occasion they are useful to have around especially near initialization time.
 
-``` {#cd-oe-build .proglist}
+<div id="cd-oe-build" markdown>
+```c
 // Attribute 0
 #define ATTR0_BUILD(y, shape, bpp, mode, mos, bld, win)             \
 (                                                                   \
@@ -669,6 +517,7 @@ Attribute 2
 #define ATTR2_BUILD(id, pbank, prio)                 \
 ( ((id)&0x3FF) | (((pbank)&15)<<12) | (((prio)&3)<<10) )
 ```
+</div>
 
 Instead of doing ORring the bitflags together yourself, you can use these and perhaps save some typing. The order of arguments maybe annoying to remember for some, and the amount of safety checking may be a bit excessive (gee, ya think?!?), but if the numbers you give them are constants the operations are done at compile time so that's okay, and sometimes they really can be helpful. Or not <span class="kbd">:P</span>. Like I said, I'm not forcing you to use them; if you think they're wretched pieces of code (and I admit they are) and don't want to taint your program with them, that's fine.
 
@@ -692,13 +541,13 @@ Make it glow. Well, makes it palette-swap, actually. Handy for damage-flashing.
 
 Start
 
-Toggles between 1D and 2D mapping modes. Fig 8.2b and fig 8.2c should explain what happens. Since the sprite is in 1D mode, there's really not much to see when you switch to 2D mapping, but I had a few buttons to spare, so I thought why not.
+Toggles between 1D and 2D mapping modes. {*@fig:obj-map}b and {@fig:obj-map}c should explain what happens. Since the sprite is in 1D mode, there's really not much to see when you switch to 2D mapping, but I had a few buttons to spare, so I thought why not.
 
 L,R
 
 Decreases or increase the starting tile, respectively. Again, I had a few keys to spare.
 
-``` proglist
+```c
 // Excerpt from toolbox.h
 
 void oam_init(OBJ_ATTR *obj, uint count);
@@ -734,7 +583,7 @@ INLINE void obj_unhide(OBJ_ATTR *obj, u16 mode)
 {   BF_SET2(obj->attr0, mode, ATTR0_MODE);          }
 ```
 
-``` proglist
+```c
 // toolbox.c
 
 void oam_init(OBJ_ATTR *obj, uint count)
@@ -781,9 +630,8 @@ The two functions in toolbox.c need some more clarification as well I guess. In 
 
 The other point concerns something of a very specific bug in the optimizer of the current compiler (DKP r19b). I expect this to be fixed in a later addition and the basic version here *should* work, but just in case it isn't, set the #if expression to 0 if you see OAM get corrupted. If you must know, the problem seems to be struct-copying of OBJ_ATTRs in a for-loop. Yes, it's that specific. Even though struct-copying is legal and fast if they're word aligned, it seems GCC gets confused with 8-byte blocks in loops and uses `memcpy()` for each struct anyway, something that wouldn't work on OAM. Oh well.
 
-
-
-``` {#cd-obj-demo .proglist}
+<div id="cd-obj-demo" markdown>
+```c
 #include <string.h>
 #include "toolbox.h"
 #include "metr.h"
@@ -860,6 +708,7 @@ int main()
     return 0;
 }
 ```
+</div>
 
 ### Setting up sprites {#ssec-demo-init}
 
@@ -933,13 +782,13 @@ If you're making a sprite positioning function or use someone else's **make sure
 
 This is bad
 
-``` proglist
+```c
 obj->attr0= (obj->attr0 &~ 0x00FF) | (y);
 ```
 
 This is good:
 
-``` proglist
+```c
 obj->attr0= (obj->attr0 &~ 0x00FF) | (y & 0x00FF);
 ```
 
