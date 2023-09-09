@@ -116,7 +116,7 @@ Essential tilemap steps
 
 -   Load the graphics: tiles into charblocks and colors in the background palette.
 -   Load a map into one or more screenblocks.
--   Switch to the right mode in REG_DISPCNT and activate a background.
+-   Switch to the right mode in `REG_DISPCNT` and activate a background.
 -   Initialize that background's control register to use the right CBB, SBB and bitdepth.
 </div>
 
@@ -167,13 +167,13 @@ Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, wi
 </table>
 </div>
 
-The description of `REG_BGxCNT` can be found in {@tbl:reg-bgxcnt}. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right `#define`s.
+The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right `#define`s.
 
 <div class="reg">
-<table class="reg" id="tbl:reg-bgxcnt"
+<table class="reg" id="tbl-reg-bgxcnt"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  {*@tbl:reg-bgxcnt}: `REG_BGxCNT` @ <code>0400:0008</code> + 2<i>x</i>
+  REG_BGxCNT @ <code>0400:0008</code> + 2<i>x</i>
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td> C B A 9 8
@@ -197,36 +197,36 @@ The description of `REG_BGxCNT` can be found in {@tbl:reg-bgxcnt}. Most of it is
 <tbody valign="top">
 <tr class="bg0">	
   <td>0-1<td class="rclr4">Pr
-  <td><code>BG_PRIO#</code>
+  <td><i>BG_PRIO#</i>
   <td><b>Priority</b>. Determines drawing order of backgrounds.
 <tr class="bg1">	
   <td>2-3<td class="rclr0">CBB
-  <td><code>BG_CBB#</code>
+  <td><i>BG_CBB#</i>
   <td><b>Character Base Block</b>. Sets the charblock that serves as 
     the base for character/tile indexing. Values: 0-3.
 <tr class="bg0">	
   <td> 6 <td class="rclr5">Mos
-  <td><code>BG_MOSAIC</code>
+  <td>BG_MOSAIC
   <td><b>Mosaic</b> flag. Enables mosaic effect.
 <tr class="bg1">	
   <td> 7 <td class="rclr3">CM
-  <td><code>BG_4BPP</code>, <code>BG_8BPP</code>
+  <td>BG_4BPP, BG_8BPP
   <td><b>Color Mode</b>. 16 colors (4bpp) if cleared; 
     256 colors (8bpp) if set. 
 <tr class="bg0">	
   <td>8-C<td class="rclr1">SBB
-  <td><code>BG_SBB#</code>
+  <td><i>BG_SBB#</i>
   <td><b>Screen Base Block</b>. Sets the screenblock that serves as 
     the base for screen-entry/map indexing. Values: 0-31.
 <tr class="bg1">	
   <td> D <td class="rclr6">Wr
-  <td><code>BG_WRAP</code>
+  <td>BG_WRAP
   <td><b>Affine Wrapping</b> flag. If set, affine background wrap 
     around at their edges. Has no effect on regular backgrounds as 
     they wrap around by default.
 <tr class="bg0">	
   <td>E-F<td class="rclr2">Sz
-  <td><code>BG_SIZE#</code>, <i class="mini">see below</i>
+  <td><i>BG_SIZE#</i>, <i class="mini">see below</i>
   <td><b>Background Size</b>. Regular and affine backgrounds have 
       different sizes available to them. The sizes, in tiles and in 
       pixels, can be found in {@tbl:bg-size}.
@@ -356,13 +356,13 @@ In theory, it is also useful create a sort of background API, with a struct with
 
 The screenblocks form a matrix of screen entries that describe the full image on the screen. In the example of {@fig:map}, the tilemap entries just contained the tile index. The GBA screen entries bahave a little differently.
 
-For regular tilemaps, each screen entry is 16-bits long. Besides the tile index, it contains flipping flags and a palette bank index for 4bpp / 16-color tiles. The exact layout can be found in {@tbl:se}. The affine screen entries are only 8 bits wide and just contain an 8-bit tile index.
+For regular tilemaps, each screen entry is 16-bits long. Besides the tile index, it contains flipping flags and a palette bank index for 4bpp / 16-color tiles. The exact layout can be found in "Screen entry format" below. The affine screen entries are only 8 bits wide and just contain an 8-bit tile index.
 
 <div class="reg">
-<table class="reg" id="tbl:se"
+<table class="reg" id="tbl-se"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  {*@tbl:se}: Screen entry format for regular backgrounds
+  Screen entry format for regular backgrounds
 </caption>
 <tr class="bits">
 	<td>F E D C<td>B<td>A<td>9 8 7 6 5 4 3 2 1 0
@@ -381,15 +381,15 @@ For regular tilemaps, each screen entry is 16-bits long. Besides the tile index,
 <tbody valign="top">
 <tr class="bg0">	
   <td>0-9<td class="rclr0">TID
-  <td><code>SE_ID#</code>
+  <td><i>SE_ID#</i>
   <td><b>Tile-index</b> of the SE.
 <tr class="bg1">	
   <td>A-B<td class="rclr2">HF, VF
-  <td><code>SE_HFLIP</code>, <code>SE_VFLIP</code>. <code>SE_FLIP#</code>
+  <td>SE_HFLIP, SE_VFLIP. <i>SE_FLIP#</i>
   <td><b>Horizontal/vertical flipping</b> flags. 
 <tr class="bg0">	
   <td>C-F<td class="rclr1">PB
-  <td><code>SE_PALBANK#</code>
+  <td><i>SE_PALBANK#</i>
   <td><b>Palette bank</b> to use when in 16-color mode. Has no effect 
     for 256-color bgs (<code>REG_BGxCNT{6}</code> is set).
 </tbody>
