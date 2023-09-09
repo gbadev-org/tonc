@@ -1,6 +1,6 @@
 Title: 9. Regular tiled backgrounds
 Date: 2003-09-01
-Modified: 2023-09-08
+Modified: 2023-09-09
 Authors: Cearn
 
 # 9. Regular tiled backgrounds {#ch-}
@@ -284,10 +284,24 @@ And now the third part, which may be the most important, namely what the values 
 
 So, if you increase the scrolling values, you move the screen to the right, which corresponds to the map moving *left* on the screen. In mathematical terms, if you have map position **p** and screen position **q**, then the following is true:
 
-(9.1)
-
-- **q + dx** = **p**
-- **q** = **p − dx**
+<table id="eq-bgr-dx">
+<tr>
+  <td class="eqnrcell">(9.1)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td><b>q + dx</b>
+	<td>=
+	<td><b>p</b>
+  <tr>
+    <td><b>q</b>
+	<td>= 
+	<td><b>p &minus; dx</b>
+  </table>
+</table>
 
 <div class="note" markdown>
 <div class="nhcare">
