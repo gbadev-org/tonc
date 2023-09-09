@@ -13,7 +13,7 @@ The Nintendo GameBoy Advance (GBA) is a portable games console. As if you didn't
 
 The original GameBoy which took the world by storm in 1989. Not bad for a monochrome handheld console, eh? Later the GameBoy Color was released which finally put some color on the aging machine, but it was still very much a simple GameBoy. The true successor was the GBA, released in 2002. The GBA is backward compatible with the GameBoy, so you can play all the old GB games as well.
 
-In terms of capabilities the GBA is a lot like the Super NES (SNES): 15bit color, multiple background layers and hardware rotation and scaling. And shoulder buttons, of course. A cynic might look at the enormous amount of SNES ports and say that the GBA *is* a SNES, only portable. This is true, but you can hardly call that a bad thing.
+In terms of capabilities the GBA is a lot like the Super NES (SNES): 15-bit color, multiple background layers and hardware rotation and scaling. And shoulder buttons, of course. A cynic might look at the enormous amount of SNES ports and say that the GBA *is* a SNES, only portable. This is true, but you can hardly call that a bad thing.
 
 <div class="cblock">
   <table>
@@ -43,7 +43,7 @@ In terms of capabilities the GBA is a lot like the Super NES (SNES): 15bit color
 Below is a list of the specifications and capabilities of the GBA. This not a full list, but these are the most important things you need to know.
 
 - Video
-    - 240x160 pixel, 15bit color LCD screen. The original GBA screen was not backlit, but the SP's and Micro's are.
+    - 240x160 pixel, 15-bit color LCD screen. The original GBA screen was not backlit, but the SP's and Micro's are.
     - 3 [bitmap modes](bitmaps.html) and 3 [tilemap modes](regbg.html) and [sprites](regobj.html).
     - 4 individual tilemap layers (backgrounds) and 128 sprites (objects).
     - [Affine transformations](affine.html) (rotate/scale/shear) on 2 backgrounds and 32 objects.
@@ -65,7 +65,7 @@ To get anything done, you use <dfn>memory-mapped IO</dfn>. Specific areas of mem
 
 ### CPU {#ssec-cpu}
 
-As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2^24^ cycles/second). It is a 32bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
+As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2^24^ cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16-bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
 
 For more information on the CPU, go to [www.arm.com](http://www.arm.com){target="_blank"} or to the [assembly chapter](asm.html)
 
@@ -91,7 +91,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>System ROM</th>
         <td><code>0000:0000</code></td>
         <td><code>0000:03FF</code></td>
-        <td>16kb</td>
+        <td>16 KB</td>
         <td>32 bit</td>
         <td>Bios memory. You can execute it, but not read it (i.o.w, touch, don't look)</td>
       </tr>
@@ -99,31 +99,31 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>EWRAM</th>
         <td><code>0200:0000h</code></td>
         <td><code>0203:FFFFh</code></td>
-        <td>256kb</td>
+        <td>256 KB</td>
         <td>16 bit</td>
-        <td>External work RAM. Is available for your code and data. If you're using a multiboot cable, this is where the downloaded code goes and execution starts (normally execution starts at ROM). Due to the 16bit port, you want this section's code to be THUMB code.</td>
+        <td>External work RAM. Is available for your code and data. If you're using a multiboot cable, this is where the downloaded code goes and execution starts (normally execution starts at ROM). Due to the 16-bit port, you want this section's code to be THUMB code.</td>
       </tr>
       <tr>
         <th>IWRAM</th>
         <td><code>0300:0000h</code></td>
         <td><code>0300:7FFFh</code></td>
-        <td>32kb</td>
+        <td>32 KB</td>
         <td>32 bit</td>
-        <td>This is also available for code and data. The 32-bit bus and the fact it's embedded in the CPU make this the fastest memory section. The 32bit bus means that ARM instructions can be loded at once, so put your ARM code here.</td>
+        <td>This is also available for code and data. The 32-bit bus and the fact it's embedded in the CPU make this the fastest memory section. The 32-bit bus means that ARM instructions can be loded at once, so put your ARM code here.</td>
       </tr>
       <tr>
         <th>IO RAM</th>
         <td><code>0400:0000h</code></td>
         <td><code>0400:03FFh</code></td>
-        <td>1kb</td>
-        <td>16 bit</td>
+        <td>1 KB</td>
+        <td>32 bit</td>
         <td>Memory-mapped IO registers. These have nothing to do with the CPU registers you use in assembly so the name can be a bit confusing. Don't blame me for that. This section is where you control graphics, sound, buttons and other features.</td>
       </tr>
       <tr>
         <th>PAL RAM</th>
         <td><code>0500:0000h</code></td>
         <td><code>0500:03FFh</code></td>
-        <td>1kb</td>
+        <td>1 KB</td>
         <td>16 bit</td>
         <td>Memory for two palettes contaning 256 entries of 15-bit colors each. The first is for backgrounds, the second for sprites.</td>
       </tr>
@@ -131,7 +131,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>VRAM</th>
         <td><code>0600:0000h</code></td>
         <td><code>0601:7FFFh</code></td>
-        <td>96kb</td>
+        <td>96 KB</td>
         <td>16 bit</td>
         <td>Video RAM. This is where the data used for backgrounds and sprites are stored. The interpretation of this data depends on a number of things, including video mode and background and sprite settings.</td>
       </tr>
@@ -139,7 +139,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>OAM</th>
         <td><code>0700:0000h</code></td>
         <td><code>0700:03FFh</code></td>
-        <td>1kb</td>
+        <td>1 KB</td>
         <td>32 bit</td>
         <td>Object Attribute Memory. This is where you control the sprites.</td>
       </tr>
@@ -149,7 +149,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td>var</td>
         <td>var</td>
         <td>16 bit</td>
-        <td>Game Pak ROM. This is where the game is located and execution starts, except when you're running from a multiboot cable. This size is variable, but the limit is 32 MB. It's a 16bit bus, so THUMB code is preferable over ARM code here.</td>
+        <td>Game Pak ROM. This is where the game is located and execution starts, except when you're running from a multiboot cable. This size is variable, but the limit is 32 MB. It's a 16-bit bus, so THUMB code is preferable over ARM code here.</td>
       </tr>
       <tr>
         <th>Cart RAM</th>
@@ -157,7 +157,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td>var</td>
         <td>var</td>
         <td>8 bit</td>
-        <td>This is where saved data is stored. Cart RAM can be in the form of SRAM, Flash ROM or EEPROM. Programatically they all do the same thing: store data. The total size is variable, but 64kb is a good indication.</td>
+        <td>This is where saved data is stored. Cart RAM can be in the form of SRAM, Flash ROM or EEPROM. Programatically they all do the same thing: store data. The total size is variable, but 64 KB is a good indication.</td>
       </tr>
     </tbody>
   </table>
