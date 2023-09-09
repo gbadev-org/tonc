@@ -1,6 +1,6 @@
-Title: Introduction to Tonc
+Title: 8. Regular sprites
 Date: 2003-09-01
-Modified: 2023-09-08
+Modified: 2023-09-09
 Authors: Cearn
 
 # 8. Regular sprites {#ch-}
@@ -78,7 +78,7 @@ Only the higher sprite block is available for sprites in modes 3-5. Indexing sti
 
 ### The sprite mapping mode {#ssec-map}
 
-Sprites aren't limited to a single tile. In fact, most sprites are larger (see {*@tbl:obj-size} for a list of the available sizes for GBA sprites). Larger sprites simply use multiple tiles, but this may present a problem. For backgrounds, you choose each tile explicitly with the tile-map. In the case of sprites, you have two options: 1D and 2D mapping. The default is 2D mapping, and you can switch to 1D mapping by setting `REG_DISPCNT`{6}.
+Sprites aren't limited to a single tile. In fact, most sprites are larger (see {*@tbl:obj-size} for a list of the available sizes for GBA sprites). Larger sprites simply use multiple tiles, but this may present a problem. For backgrounds, you choose each tile explicitly with the tile-map. In the case of sprites, you have two options: 1D and 2D mapping. The default is 2D mapping, and you can switch to 1D mapping by setting `REG_DISPCNT{6}`.
 
 How do these work? Consider the example sprite of {@fig:obj-map}a, showing the metroid of {@fig:metr} divided into tiles. In 2D mapping, you're interpreting the sprite charblocks as one big bitmap of 256×256 pixels and the sprite a rectangle out of that bitmap (still divided into tiles, of course). In this case, each tile-row of a sprite is at a 32-tile offset. This is shown in {@fig:obj-map}b. On the other hand, you can also consider the charblocks as one big array of tiles, and the tiles of every sprite are consecutive. This is shown in {@fig:obj-map}c. The numbers in {@fig:obj-map}a show the difference between 1D and 2D mapping. Assuming we start at tile 0, the red and cyan numbers follow 2D and 1D mapping, respectively.
 
@@ -192,8 +192,11 @@ There are a few interesting things about these structures. First, you see a lot 
 </table>
 </div>
 
+<div class="note">
+<div class="nhgood">
+Force alignment on OBJ_ATTRs
+</div>
 As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of `OBJ_ATTR` structs (and others), means that `struct` copies like the one in `oam_update()` later on, will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs with `ALIGN4`, which is a macro for `__attribute__((aligned(4)))`. For more on this, see the section on [data alignment](bitmaps.html#ssec-data-align).
-
 </div>
 
 ## Object attributes: OBJ_ATTR {#sec-oam-entry}
@@ -205,10 +208,10 @@ The basic control for every sprite is the `OBJ_ATTR` structure. It consists of t
 The first attribute controls a great deal, but the most important parts are for the *y* coordinate, and the shape of the sprite. Also important are whether or not the sprite is transformable (an affine sprite), and whether the tiles are considered to have a bit depth of 4 (16 colors, 16 sub-palettes) or 8 (256 colors / 1 palette).
 
 <div class="reg">
-<table class="reg" id="tbl:oe-attr0"
+<table class="reg" id="tbl-oe-attr0"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  {*@tbl:oe-attr0}: <code>OBJ_ATTR.attr0</code>
+  <code>OBJ_ATTR.attr0</code>
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td>C<td>B A<td>9 8 <td>7 6 5 4 3 2 1 0
@@ -233,8 +236,8 @@ The first attribute controls a great deal, but the most important parts are for 
   <td><b>Y coordinate</b>. Marks the top of the sprite.
 <tr class="bg1">	
   <td>8-9<td class="rclr3">OM
-  <td><code>ATTR0_REG</code>, <code>ATTR0_AFF</code>, <code>ATTR0_HIDE</code>, <code>ATTR0_AFF_DBL</code>.
-    <i><code>ATTR0_MODE#</code></i>
+  <td>ATTR0_REG, ATTR0_AFF, ATTR0_HIDE, ATTR0_AFF_DBL.
+    <i>ATTR0_MODE#</i>
   <td><b>(Affine) object mode</b>. Use to hide the sprite or govern 
     affine mode.
     <ul>
@@ -247,7 +250,7 @@ The first attribute controls a great deal, but the most important parts are for 
     </ul>   
 <tr class="bg0">	
   <td>A-B<td class="rclr4">GM
-  <td><code>ATTR0_BLEND</code>, <code>ATTR0_WIN</code>. <<code>ATTR0_GFX#</code>
+  <td>ATTR0_BLEND, ATTR0_WIN. <i>ATTR0_GFX#</i>
   <td><b>Gfx mode</b>. Flags for special effects.
     <ul>
       <li><b>00</b>. Normal rendering.
@@ -260,19 +263,19 @@ The first attribute controls a great deal, but the most important parts are for 
     </ul>
 <tr class="bg1">	
   <td>C<td class="rclr5">Mos
-  <td><code>ATTR0_MOSAIC</code>
+  <td>ATTR0_MOSAIC
   <td>Enables mosaic effect. Covered <a href="gfx.html#sec-mos">here</a>. 
 <tr class="bg0">	
   <td>D<td class="rclr2">CM
-  <td><code>ATTR0_4BPP</code>, <code>ATTR0_8BPP</code>
+  <td>ATTR0_4BPP, ATTR0_8BPP
   <td><b>Color mode</b>. 16 colors (4bpp) if cleared; 
-    256 colors (8bpp) if set.
+    256 colors (8bpp) if set.    
 <tr class="bg1">	
   <td>E-F<td class="rclr1">Sh
-  <td><code>ATTR0_SQUARE</code>, <code>ATTR0_WIDE</code>, <code>ATTR0_TALL</code>. <code>ATTR0_SHAPE#</code>
+  <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i>
   <td><b>Sprite shape</b>. This and the sprite's size 
     (<code>attr1{E-F}</code>) determines the sprite's real size, see 
-    {@tbl:obj-size}.
+    <a href="#tbl-obj-size">table 8.4</a>.
 </tbody>
 </table>
 </div>
@@ -293,13 +296,13 @@ Two extra notes on attribute 0. First, `attr0` contains the ***y*** coordinate; 
 
 ### Attribute 1 {#ssec-obj-attr1}
 
-The primary parts of this attribute are the *x* coordinate and the size of the sprite. The role of bits 9 to 13 depend on whether or not this is a affine sprite (determined by `attr0`{8}). If it is, these bits specify which of the 32 `OBJ_AFFINE`s should be used. If not, they hold flipping flags.
+The primary parts of this attribute are the *x* coordinate and the size of the sprite. The role of bits 9 to 13 depend on whether or not this is a affine sprite (determined by `attr0{8}`). If it is, these bits specify which of the 32 `OBJ_AFFINE`s should be used. If not, they hold flipping flags.
 
 <div class="reg">
-<table class="reg" id="tbl:oe-attr1"
+<table class="reg" id="tbl-oe-attr1"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  {*@tbl:oe-attr1}: <code>OBJ_ATTR.attr1</code>
+  <code>OBJ_ATTR.attr1</code>
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td>C<td>B A 9<td>8 7 6 5 4 3 2 1 0
@@ -323,23 +326,23 @@ The primary parts of this attribute are the *x* coordinate and the size of the s
 <tbody valign="top">
 <tr class="bg0">	
   <td>0-8<td class="rclr0">X
-  <td><code>ATTR1_X#</code>
+  <td><i>ATTR1_X#</i>
   <td><b>X coordinate</b>. Marks left of the sprite.
 <tr class="bg1">	
   <td>9-D<td class="rclr3">AID
-  <td><code>ATTR1_AFF#</code>
+  <td><i>ATTR1_AFF#</i>
   <td><b>Affine index</b>. Specifies the <code>OAM_AFF_ENTY</code> this 
     sprite uses. Valid <i>only</i> if the affine flag 
     (<code>attr0</code>{8}) is set.
 <tr class="bg0">	
   <td>C-D<td class="rclr2">HF, VF
-  <td><code>ATTR1_HFLIP</code>, <code>ATTR1_VFLIP</code>. <code>ATTR1_FLIP#</code>
+  <td>ATTR1_HFLIP, ATTR1_VFLIP. <i>ATTR1_FLIP#</i>
   <td><b>Horizontal/vertical flipping</b> flags. Used <i>only</i> if 
     the affine flag (<code>attr0</code>) is clear; otherwise they're 
     part of the affine index.
 <tr class="bg1">	
   <td>E-F<td class="rclr1">Sz
-  <td><code>ATTR1_SIZE#</code>
+  <td><i>ATTR1_SIZE#</i>
   <td><b>Sprite size</b>. Kinda. Together with the shape bits
     (<code>attr0</code>{E-F}) these determine the sprite's real size, 
     see {@tbl:obj-size}.
