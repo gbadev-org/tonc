@@ -290,7 +290,7 @@ It's just a call to `bit_tribool()` with using `key_hit()` instead of `__key_cur
 **{*@fig:key-demo}**: key_demo screenshot, with L and B held.
 </div>
 
-I have the `key_demo` demo illustrates how these key functions can be used. It shows a mode 4 picture of a GBA (a 240x160 8bit bitmap); the colors change according to the button presses. The normal state is grey; when you press the key, it turns red; when you release it, it goes yellow; and as long as it's held it's green. {*@fig:key-demo} shows this for the L and B buttons. Here's the code that does the real work:
+The *key_demo* demo illustrates how these key functions can be used. It shows a mode 4 picture of a GBA (a 240x160 8bit bitmap); the colors change according to the button presses. The normal state is grey; when you press the key, it turns red; when you release it, it goes yellow; and as long as it's held it's green. {*@fig:key-demo} shows this for the L and B buttons. Here's the code that does the real work:
 
 <div id="cd-key-demo" markdown>
 
