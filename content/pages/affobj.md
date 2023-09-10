@@ -1,10 +1,11 @@
+Title: 11. Affine sprites
+Date: 2003-09-01
+Modified: 2023-09-10
+Authors: Cearn
+
 # 11. Affine sprites {#ch-}
 
--   [Affine sprite introduction](#sec-intro).
--   [Affine sprite initialization](#sec-init).
--   [Graphical artifacts](#sec-artifact).
--   [A very (af)fine demo](#sec-demo).
--   [Off-center reference points and object combo's](#sec-combo).
+[TOC]
 
 ## Affine sprite introduction {#sec-intro}
 
@@ -18,7 +19,7 @@ In this chapter we'll see how to set-up object to use affine transformations. Th
 
 To turn a regular sprite into an affine sprite you need to do two things. First, set `OBJ_ATTR.attr0`{8} to indicate this is a affine sprite. Second, put a number between 0 and 31 into `OBJ_ATTR.attr1`{8-C}. This number indicates which of the 32 Object Affine Matrices (OBJ_AFFINE structures) should be used. In case you've forgot, the `OBJ_AFFINE` looks like this:
 
-``` proglist
+```c
 typedef struct OBJ_AFFINE
 {
     u16 fill0[3];
@@ -34,43 +35,42 @@ typedef struct OBJ_AFFINE
 
 The *signed* 16bit members `pa, pb, pc` and `pd` are 8.8 fixed point numbers that form the actual matrix, which I will refer to as **P**, in correspondence with the elements' names. For more information about this matrix, go to the [affine matrix](affine.html) section. Do so now if you haven't already, because I'm not going to repeat it here. If all you are after is a simple scale-then-rotate matrix, try this: for a zoom by s~x~ and s~y~ followed by a counter-clockwise rotation by α, the correct matrix is this:
 
- 
-
-**P** =
-
- 
-
-*p*~a~
-
- 
-
-*p*~b~
-
- 
-
-*p*~c~
-
- 
-
-*p*~d~
-
-=
-
- 
-
-cos(α) / *s*~x~
-
- 
-
-−sin(α) / *s*~x~
-
- 
-
-sin(α) / *s*~y~
-
- 
-
-cos(α) / *s*~y~
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell"> <b>P</b> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td><i>p</i><sub>a</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>b</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td><i>p</i><sub>c</sub>
+    <td>&nbsp;
+    <td><i>p</i><sub>d</sub>
+  </tbody>
+  </table>
+  <td class="eqcell"> =
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <tbody align="center">
+  <tr>
+    <td class="bdrLL" rowspan=2>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>x</sub>
+    <td>&nbsp;
+    <td>&minus;sin(&alpha;) / <i>s</i><sub>x</sub>
+    <td class="bdrRR" rowspan=2>&nbsp;
+  <tr>
+    <td>sin(&alpha;) / <i>s</i><sub>y</sub>
+    <td>&nbsp;
+    <td>cos(&alpha;) / <i>s</i><sub>y</sub>
+  </tbody>
+  </table>
+</table>
 
 Note that the origin of the transformation is *center* of the sprite, not the top-left corner. This is worth remembering if you want to align your sprite with other objects, which we'll do later.
 
@@ -92,13 +92,17 @@ Essential affine sprite steps
 
 The procedure that the GBA uses for drawing sprites is as follows: the sprite forms a rectangle on the screen defined by its size. To paint the screen pixels in that area (**q**) uses texture-pixel **p**, which is calculated via:
 
-(11.1)
-
-**p − p**~0~ = **P** · (**q − q**~0~),
+<table id="eq-aff-ofs">
+<tr>
+  <td class="eqnrcell">(11.1)
+  <td class="eqcell">
+    <b>p &minus; p</b><sub>0</sub> =
+	<b>P</b> · (<b>q &minus; q</b><sub>0</sub>),
+</table>
 
 where **p**~0~ and **q**~0~ are the centers of the sprite in texture and screen space, respectively. The code below is essentially what the hardware does; it scans the screen-rectangle between plus and minus the half-width and half-height (half-sizes because the center is the reference point), calculates the texture-pixel and plots that color.
 
-``` proglist
+```c
 // pseudocode for affine objects
 hwidth= width/2;   // half-width of object screen canvas
 hheight= hheight/2;   // half-height of object screen canvas
@@ -116,16 +120,14 @@ for(iy=-hheight; iy<hheight; iy++)
 
 This has two main consequences, the clipping artifact and a discretization artifact.
 
-
-
 <div class="cpt_fr" style="width:160px;">
-
-![defanged metroid](img/metr/aff_clipped.png){#img-metr-clip}  
-**Fig 11.1**: a partially defanged metroid, since the parts outside the blue square are clipped off.
-
+<img src="img/metr/aff_clipped.png" id="fig:metr-clip" 
+  alt="defanged metroid"><br>
+<b>{*@fig:metr-clip}</b>: a partially defanged metroid, 
+since the parts outside the blue square are clipped off.
 </div>
 
-The <dfn>clipping artifact</dfn> is caused by scanning only over the rectangle **on-screen**. But almost all transformations will cause the texture pixels to exceed that rectangle, and the pixels outside the rectangle will not be rendered. Fig 11.1 shows the screen rect (grey, blue border) and a rotated object (inside the red border). The parts that extend the blue borderlines will not be cut off.
+The <dfn>clipping artifact</dfn> is caused by scanning only over the rectangle **on-screen**. But almost all transformations will cause the texture pixels to exceed that rectangle, and the pixels outside the rectangle will not be rendered. {*@fig:metr-clip} shows the screen rect (grey, blue border) and a rotated object (inside the red border). The parts that extend the blue borderlines will not be cut off.
 
 As this is an obvious flaw, there is of course a way around it: set the sprite's affine mode to **double-sized affine** (`ATTR0_AFF_DBL`, `OBJ_ATTR.attr0`{8,9}). This will double the screen range of valid **q** coordinates, so you'd have + and − the width and height to play with instead of the half-sizes. This double (well quadruple, really) area means that you can safely rotate a sprite as the maximum distance from the center is ½√2 ≈ 0.707. Of course, you can still get the clipping artifact if you scale up beyond the doubled ranges. Also, note that the sprites' origin is shifted to the center of this rectangle, so that **q**~0~ is now one full sprite-size away from the top-left corner.
 
@@ -133,23 +135,33 @@ The double-size flag also has a second use. Or perhaps I should say misuse. If y
 
 
 
-The second artifact, if you can call it that, is a <dfn>discretization</dfn> artifact. This is a more subtle point than the clipping artifact and you might not even ever notice it. The problem here is that the transformation doesn't actually take place at the center of the object, but at the **center pixel**, rounded up. As an example, look at fig 11.2. Here we have a number-line from 0 to 8; and in between them 8 pixels from 0 to 7. The number at the center is 4, of course. The central pixel is 4 as well, however its location is actually halfway between numbers 4 and 5. This creates an unbalance between the number of pixels on the left and on the right.
+The second artifact, if you can call it that, is a <dfn>discretization</dfn> artifact. This is a more subtle point than the clipping artifact and you might not even ever notice it. The problem here is that the transformation doesn't actually take place at the center of the object, but at the **center pixel**, rounded up. As an example, look at {@fig:numline}. Here we have a number-line from 0 to 8; and in between them 8 pixels from 0 to 7. The number at the center is 4, of course. The central pixel is 4 as well, however its location is actually halfway between numbers 4 and 5. This creates an unbalance between the number of pixels on the left and on the right.
 
-The center pixel is the reference point of the transformation algorithm, which has indices (ix, iy) = (0, 0). Fill that into the equations and you'll see that this is invariant under the transformation, even though mathematically it should not. This has consequences for the offsets, which are calculated from the pixel, not the position. In fig 11.2, there are 4 pixels on the left, but only 3 on the right. A mirroring operation that would center on pixel 4 would effectively move the sprite one pixel to the right.
+The center pixel is the reference point of the transformation algorithm, which has indices (ix, iy) = (0, 0). Fill that into the equations and you'll see that this is invariant under the transformation, even though mathematically it should not. This has consequences for the offsets, which are calculated from the pixel, not the position. In {@fig:numline}, there are 4 pixels on the left, but only 3 on the right. A mirroring operation that would center on pixel 4 would effectively move the sprite one pixel to the right.
 
-Fig 11.3 shows how this affects rotations. It displays lines every grey gridlines every 8 pixels and a 16x16 sprite of a box. Note that at the start the right and left sides do not lie on the gridlines, because the sprite's width and height is 16, not 17. The other figures are rotations in increments of 90°, which gives nice round numbers in the matrix. When rotating, the center pixel (the red dot in the middle) stays in the same position, and the rest rotate around it, and this process will carry the edges out of the designated 16x16 box of the sprite (the dashed lines).
+{*@fig:aff-algor} shows how this affects rotations. It displays lines every grey gridlines every 8 pixels and a 16x16 sprite of a box. Note that at the start the right and left sides do not lie on the gridlines, because the sprite's width and height is 16, not 17. The other figures are rotations in increments of 90°, which gives nice round numbers in the matrix. When rotating, the center pixel (the red dot in the middle) stays in the same position, and the rest rotate around it, and this process will carry the edges out of the designated 16x16 box of the sprite (the dashed lines).
 
 <div class="cblock">
-
-+--------------------------------------------------------------------------+---------------------------------------------------------------------+
-| <div class="cpt_fr" style="width:288px;">                                | <div class="cpt_fr" style="width:320px;">                           |
-|                                                                          |                                                                     |
-| ![Numbers vs pixels](img/affine/numline.png){#img-numline width="288"}   | ![Rotations](img/affine/numalgor.png){#img-aff-algor width="320"}   |
-| **Fig 11.2**: pixels are between, not on, coordinates.                   | **Fig 11.3**: Rotations in 90° increments.                          |
-|                                                                          |                                                                     |
-| </div>                                                                   | </div>                                                              |
-+--------------------------------------------------------------------------+---------------------------------------------------------------------+
-
+<table>
+<tbody valign="top">
+<tr>
+  <td>
+  <div class="cpt_fr" style="width:288px;">
+  <img src="img/affine/numline.png" id="fig:numline" width="288"
+    alt="Numbers vs pixels"><br>
+  <b>{*@fig:numline}</b>: pixels are between, 
+    not on, coordinates.
+  </div></td>
+  <td>
+  <div class="cpt_fr" style="width:320px;">
+  <img src="img/affine/numalgor.png" id="fig:aff-algor" width="320"
+    alt="Rotations"><br>
+  <b>{*@fig:aff-algor}</b>: Rotations in 90&deg; 
+    increments.
+  </div></td>
+</tr>
+</tbody>
+</table>
 </div>
 
 <div class="note" markdown>
@@ -174,7 +186,7 @@ There's never any trouble with regular sprites, and hardly any for affine sprite
 
 As it happens, the GBA uses the third interpretation. In other words, it uses
 
-``` proglist
+```c
 // pseudo code
 if(oam.y + bbox_height > 256)
     oam.y -= 256;
@@ -225,26 +237,29 @@ Control button (see A, B and Start).
 The interesting point of seeing the transformations back to back is that you can actually see the difference between, for example, a scaling followed by a rotation (**A**=**S**·**R**), and a rotate-then-scale (**A**=**R**·**S**). Figs 11.4 and 11.5 show this difference for a 45° rotation and a 2× vertical scale. Also, note that the corners are cut off here: the clipping artifact at work – even though I've already set the double-size flag here.
 
 <div class="cblock">
-
+<table>
+<tr>
+<td>
 <div class="cpt_fr" style="width:240px;">
-
-![R\*S affine object.](img/demo/obj_aff_rs.png){#img-obj-aff-rs}  
-**Fig 11.4**: obj_aff, via **S**(1,2), then **R**(45°)
-
+<img src="img/demo/obj_aff_rs.png" id="fig:obj-aff-rs" 
+  alt="R*S affine object."><br>
+<b>{*@fig:obj-aff-rs}</b>: 
+  <tt>obj_aff</tt>, via <b>S</b>(1,2), then <b>R</b>(45&deg;)
 </div>
-
+<td>
 <div class="cpt_fr" style="width:240px;">
-
-![S\*R affine object.](img/demo/obj_aff_sr.png){#img-obj-aff-sr}  
-**Fig 11.5**: obj_aff, via **R**(45°), then **S**(1,2)
-
+<img src="img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
+  alt="S*R affine object."><br>
+<b>{*@fig:obj-aff-sr}</b>: 
+  <tt>obj_aff</tt>, via <b>R</b>(45&deg;), then <b>S</b>(1,2)
 </div>
-
+</table>
 </div>
 
 The full source code for the obj_aff demo is given below. It's quite long, mostly because of the amount of code necessary for managing the different affine states that can be applied. The functions that actually deal with affine sprites are `init_metr()`, `get_aff_new()` and part of the game loop in `objaff_test()`; the rest is essentially fluff required to making the whole thing work.
 
-``` {#cd-obj-aff .proglist}
+<div id="cd-obj-aff" markdown>
+```c
 // obj_aff.c
 
 #include <tonc.h>
@@ -441,6 +456,7 @@ int main()
     return 0;
 }
 ```
+</div>
 
 Making the metroid an affine sprite is all done inside `init_metr()`. As you've seen how bits are set a number of times by now, it should be understandable. That said, do note that I am filling the first OBJ_AFFINE (the one that the sprite uses) to the identity matrix **I**. If you keep this fully zeroed-out, you'll just end up with a 64x64-pixel rectangle of uniform color. Remember that **P** contains pixel offsets; if they're all zero, there is no offset and the origin's color is used for the whole thing. In essence, the sprite is scaled up to infinity.
 
@@ -450,15 +466,22 @@ To be frank though, calling `obj_aff_identity()` isn't necessary after a call to
 
 That's the set-up, now for how the demo does what it does. At any given time, you will have some transformation matrix, **P**. By pressing a button (or not), a small transformation of the current state will be performed, via matrix multiplication.
 
- 
-
-**P**~new~ = **P**~old~ · **D**^−1^,
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    <b>P</b><sub>new</sub> =
+    <b>P</b><sub>old</sub> · <b>D</b><sup>&minus;1</sup>,
+</table>
 
 where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**). Or a no-op (**I**). However, there is a little hitch here. This would work nice in theory, but in *practice*, it won't work well because the fixed point matrix multiplications will result in unacceptable round-off errors very very quickly. Fortunately, all these transformations have the convenient property that
 
- 
-
-**D**(a)·**D**(b) = **D**(c).
+<table>
+<tr>
+  <td class="fill">&nbsp;
+  <td class="eqcell">
+    <b>D</b>(a)·<b>D</b>(b) = <b>D</b>(c).
+</table>
 
 That is to say, multiple small transformations work as one big one. All you have to do is keep track of the current chosen transformation (the variable `aff_state`, in `get_aff_state()`), modify the state variable (`aff_value`), then calculate full transformation matrix (`get_aff_new()`) and apply that (with `obj_aff_postmul()`). When a different transformation type is chosen, the current matrix is saved, the state value is reset and the whole thing continues with that state until yet another is picked. The majority of the code is for keeping track of these changes; it's not pretty, but it gets the job done.
 
@@ -467,15 +490,15 @@ That is to say, multiple small transformations work as one big one. All you have
 ## Off-center reference points and object combos {#sec-combo}
 
 <div class="cpt_fr" style="width:240px;">
-
-![Rotation around off-center point](img/metr/rot_ofs.png){#img-rot-ofs}  
-**Fig 11.6**: rotation of object around an off-center point.
-
+<img src="img/metr/rot_ofs.png" id="fig:rot-ofs" 
+  alt="Rotation around off-center point"><br>
+<b>{*@fig:rot-ofs}</b>: rotation of object around an 
+  off-center point.
 </div>
 
 As mentioned earlier, affine sprites always use their centers as affine origins, but there are times when one might want to use something else to rotate around – to use another point as the reference point. Now, you can't actually do this, but you can make it *look* as if you can. To do this, I need to explain a few things about what I like to call anchoring. The <dfn>anchor</dfn> is the position that is supposed to remain ‘fixed’; the spot where the texture (in this case the object) is anchored to the screen.
 
-For anchoring, you actually need one set of coordinates for each coordinate-space you're using. In this case, that's two: the texture space and the screen space. Let's call these points **p**~0~ and **q**~0~, respectively. Where these actually point *from* is largely immaterial, but for convenience' sake let's use the screen and texture origins for this. These points are only the start. In total, there are *seven* vectors that we need to take into account for the full procedure, and they are all depicted in fig 11.6. Their meanings are explained in the table below.
+For anchoring, you actually need one set of coordinates for each coordinate-space you're using. In this case, that's two: the texture space and the screen space. Let's call these points **p**~0~ and **q**~0~, respectively. Where these actually point *from* is largely immaterial, but for convenience' sake let's use the screen and texture origins for this. These points are only the start. In total, there are *seven* vectors that we need to take into account for the full procedure, and they are all depicted in {@fig:rot-ofs}. Their meanings are explained in the table below.
 
 <div class="lblock">
 
@@ -491,29 +514,61 @@ For anchoring, you actually need one set of coordinates for each coordinate-spac
 
 Yes, it is a whole lot of vectors, but funnily enough, most are already known. The center points (**c**~p~ and **c**~q~) can be derived from the objects size and double-size status, the anchors are known in advance because those are the input values, and **r**~p~ and **r**~q~ fit the general equation for the affine transformation, eq 1, so this links the two spaces. All that's left now is to write down and solve the set of equations.
 
-+-----------------------------------+------------------------------------------------------+
-| (11.2)                            |   ----------------------------- --- ---------------- |
-|                                   |   **x** + **c**~q~ + **r**~q~   =   **q**~0~         |
-|                                   |   **c**~p~ + **r**~p~           =   **p**~0~         |
-|                                   |   **r**~p~                      =   **P**·**r**~q~   |
-|                                   |   ----------------------------- --- ---------------- |
-+-----------------------------------+------------------------------------------------------+
+<table id="eq-aff-ex-base">
+<tr>
+  <td class="eqnrcell">(11.2)</td>
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tr>
+    <td> <b>x</b> + <b>c</b><sub>q</sub> + <b>r</b><sub>q</sub> </td>
+    <td> = </td>
+    <td> <b>q</b><sub>0</sub> </td>
+  </tr>
+  <tr>
+    <td> <b>c</b><sub>p</sub> + <b>r</b><sub>p</sub> </td>
+    <td> = </td>
+    <td> <b>p</b><sub>0</sub> </td>
+  </tr>
+  <tr>
+    <td> <b>r</b><sub>p</sub> </td>
+    <td> = </td>
+    <td> <b>P</b>·<b>r</b><sub>q</sub> </td>
+  </tr>
+  </table>
+  </td>
+</tr>
+</table>
 
 Three equations with three unknowns, means it is solvable. I won't post the entire derivation because that's not all that difficult; what you see in eq 11.3 is the end result in the most usable form.
 
-(11.3)
-
-**x**
-
-=
-
-**q**~0~ − *m***s** − **P**^−1^· (**p**~0~ − ½**s**)
+<table id="eq-aff-ex">
+<tr>
+  <td class="eqnrcell">(11.3)
+  <td class="eqcell">
+  <table class="eqtbl" cellpadding=2 cellspacing=0>
+  <col align="right">
+  <col align="center">
+  <col align="left">
+  <tbody valign="middle">
+  <tr>
+    <td> <b>x</b>
+    <td>=
+    <td> <b>q</b><sub>0</sub> &minus; <i>m</i><b>s</b> &minus; 
+	  <b>P</b><sup>&minus;1</sup>·
+	  (<b>p</b><sub>0</sub> &minus; &frac12;<b>s</b>)
+  </tbody>
+  </table>
+</table>
 
 The right-hand side here has three separate vectors, two of which are part of the input, a scaling flag for the double-size mode, and the inverted affine matrix. Yes, I did say inverted. This is here because the translations to position the object correctly mostly take place in screen-space. The whole term using it is merely **r**~q~, the transformed difference between anchor and center in texture space, which you need for the final correction.
 
 Now, this matrix inversion means two things. First, that you will likely have to set-up *two* matrices: the affine matrix itself, and its inverse. For general matrices, this might take a while, especially when considering that if you want scaling, you will have to do a division somewhere. Secondly, because you only have 16bits for the matrix elements, the inverse won't be the *exact* inverse, meaning that aligning the objects exactly will be difficult, if not actually impossible. This is pretty much guaranteed by the hardware itself and I'll return to this point later on. For now, let's look at a function implementing eq 11.3 in the case of a 2-way scaling followed by a rotation.
 
-``` {#cd-oe-rs-ex .proglist}
+<div id="cd-oe-rs-ex" markdown>
+```c
 // === in tonc_types.h ===
 
 // This is the same struct that's used in BgAffineSet, 
@@ -577,6 +632,7 @@ void obj_rotscale_ex(OBJ_ATTR *obj, OBJ_AFFINE *oa, AFF_SRC_EX *asx)
     obj_set_pos(obj, dx, dy);
 }
 ```
+</div>
 
 The `AFF_SRC_EX` struct and `oam_sizes` arrays are supporting entities of the function that does the positioning, which is `obj_rotscale_ex()`. This creates the affine matrix (`pa-pd`), and carries out all the necessary steps for eq 11.3, namely create the inverse matrix **A** (`aa-ad`), calculate all the offsets and correcting for the sizes, and finally updating the OBJ_ATTR. Note that the fixed point accuracy varies a lot, so it is important to comment often on this
 
@@ -585,10 +641,9 @@ As I said, this is not a particularly fast function; it takes roughly a scanline
 ### Affine object combo demo {#ssec-combo-demo}
 
 <div class="cpt_fr" style="width:64px;">
-
-![](img/demo/oac_orb.png){#img-oac-orb width="64"}  
-**Fig 11.7**: object for oacombo.
-
+<img src="img/demo/oac_orb.png" id="fig:oac-orb"
+  width=64 alt=""><br>
+<b>{*@fig:oac-orb}</b>: object for <tt>oacombo</tt>.
 </div>
 
 The demo for this section, oacombo, will display three versions of essentially the same object, namely the circle of 11.7. The difference between them is in how they are constructed
@@ -599,7 +654,7 @@ The demo for this section, oacombo, will display three versions of essentially t
 
 The point of this demo will be to rotate them and position the components of the combined sprites (<dfn>object combos</dfn>) as if they were a single sprite. This requires off-center anchors and therefore ties in nicely with the subject of this section. To manage the combos, I make use of the following struct.
 
-``` proglist
+```c
 typedef struct OACOMBO
 {
     OBJ_ATTR *sub_obj; // obj pointer for sub-objects
@@ -618,7 +673,8 @@ The rotation will take place around the center of the circle, so that's an ancho
 
 Because the sub-objects share the same **P** matrix, it'd be a waste to recalculate it the whole time, so I'm using a modified version of it especially tailored to `OACOMBO` structs called `oac_rotscale()`. The code is basically the same though. The `oacs[]` array forms the three combos, which are initialized at definition because that makes things so much easier. The full circle is at (16,20), the semis at (80,20) and the one composed of quarter circles is at (48,60). The `obj_data[]` array contains the data for our seven objects, and is copied to `obj_buffer` in the initialization function. While it is generally true that magic numbers (such as using hex for OAM attributes) are evil, it is also true that they really aren't central to this story and to spend a lot of space on initializing all of them in the ‘proper’ fashion may actually do more harm than good … this time. I am still using #defines for the anchor and a reference point though, because they appear multiple times in the rest of the code.
 
-``` {#cd-oacombo .proglist}
+<div id="cd-oacombo" markdown>
+```
 // oacombo.c
 
 #include <stdio.h>
@@ -763,15 +819,16 @@ int main()
     return 0;
 }
 ```
-
-<div class="cpt_fr" style="width:272px;">
-
-![](img/demo/oacombo.png){#img-oacombo width="272"}  
-**Fig 11.8**: oacombo in action. Note the gaps.
-
 </div>
 
-Fig 11.8 on the right shows a screenshot of the demo. There are three main things to point out here. First, all three objects are indeed roughly the same shape, meaning that the function(s) work. But this was never really much in doubt anyway, since it just follows the math. The second point is that there appear to be gaps in the semi- and quarter-circle combos. If you play with the demo yourself for a while, you'll see these gaps appear and disappear seemingly at random. Meanwhile, the full-circle object looks fine throughout. Well mostly anyway.
+<div class="cpt_fr" style="width:272px;">
+<img src="img/demo/oacombo.png" id="fig:oacombo" width=272
+  alt=""><br>
+<b>{*@fig:oacombo}</b>: <tt>oacombo</tt> in action. 
+Note the gaps.
+</div>
+
+{*@fig:oacombo} on the right shows a screenshot of the demo. There are three main things to point out here. First, all three objects are indeed roughly the same shape, meaning that the function(s) work. But this was never really much in doubt anyway, since it just follows the math. The second point is that there appear to be gaps in the semi- and quarter-circle combos. If you play with the demo yourself for a while, you'll see these gaps appear and disappear seemingly at random. Meanwhile, the full-circle object looks fine throughout. Well mostly anyway.
 
 The cause of this is related to the third point. Compare the pixel clusters of all three circles, in particular the smaller circles within each of them. Note that even though they use the **exact** same **P** matrix, their formations are different! The reason for this is that while we may have positioned the sub-objects to make them form a bigger object, the pixel-mapping for each of them *still* starts at their centers. This means that the cumulative offsets that determine which source pixel is used for a given screen pixel will be different and hence you'll get a different picture, which is especially visible at the seams.
 
