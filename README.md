@@ -74,6 +74,10 @@ For example:
 
 *   Tables and Figures should be replaced with the raw HTML from the `-old.htm` file.
 
+*   Equations are coded in MathML, which displays in all browsers since 2023 according to [Can I use](https://caniuse.com/mathml).
+    It's recommended to write equations in LaTeX first, using a live preview tool such as [Online LaTeX Equation Editor](https://latexeditor.lagrida.com/).
+    Right-click the preview and choose Copy to Clipboard > MathML Code.
+
 *   Code blocks should have the correct language set on them (`c`, `asm`, `sh`, `makefile`)
 
 *   Use backticks (`` ` ``) around code keywords and italics (`*`) around file names in the text.
@@ -111,6 +115,7 @@ For autonumbering and cross-referencing of figures, tables and equations, we use
 * Use `{@fig:foobar}` to avoid clashing with surrounding syntax.
 
 * The figure/table/equation prefix is defined by the page title.
+
 
 For example, on the page *'ii. Introduction to Tonc'*, the following Markdown:
 
