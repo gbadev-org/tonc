@@ -33,7 +33,7 @@ typedef struct OBJ_AFFINE
 } ALIGN4 OBJ_AFFINE;
 ```
 
-The *signed* 16-bit members `pa, pb, pc` and `pd` are 8.8 fixed point numbers that form the actual matrix, which I will refer to as **P**, in correspondence with the elements' names. For more information about this matrix, go to the [affine matrix](affine.html) section. Do so now if you haven't already, because I'm not going to repeat it here. If all you are after is a simple scale-then-rotate matrix, try this: for a zoom by s~x~ and s~y~ followed by a counter-clockwise rotation by α, the correct matrix is this:
+The *signed* 16-bit members `pa`, `pb`, `pc` and `pd` are 8.8 fixed point numbers that form the actual matrix, which I will refer to as **P**, in correspondence with the elements' names. For more information about this matrix, go to the [affine matrix](affine.html) section. Do so now if you haven't already, because I'm not going to repeat it here. If all you are after is a simple scale-then-rotate matrix, try this: for a zoom by s<sub>x</sub> and s<sub>y</sub> followed by a counter-clockwise rotation by α, the correct matrix is this:
 <!--
 \vb{P} =
 \begin{bmatrix}
@@ -245,7 +245,7 @@ The procedure that the GBA uses for drawing sprites is as follows: the sprite fo
 </math>
 </table>
 
-where **p**~0~ and **q**~0~ are the centers of the sprite in texture and screen space, respectively. The code below is essentially what the hardware does; it scans the screen-rectangle between plus and minus the half-width and half-height (half-sizes because the center is the reference point), calculates the texture-pixel and plots that color.
+where **p**<sub>0</sub> and **q**<sub>0</sub> are the centers of the sprite in texture and screen space, respectively. The code below is essentially what the hardware does; it scans the screen-rectangle between plus and minus the half-width and half-height (half-sizes because the center is the reference point), calculates the texture-pixel and plots that color.
 
 ```c
 // pseudocode for affine objects
@@ -274,7 +274,7 @@ since the parts outside the blue square are clipped off.
 
 The <dfn>clipping artifact</dfn> is caused by scanning only over the rectangle **on-screen**. But almost all transformations will cause the texture pixels to exceed that rectangle, and the pixels outside the rectangle will not be rendered. {*@fig:metr-clip} shows the screen rect (grey, blue border) and a rotated object (inside the red border). The parts that extend the blue borderlines will not be cut off.
 
-As this is an obvious flaw, there is of course a way around it: set the sprite's affine mode to **double-sized affine** (`ATTR0_AFF_DBL`, `OBJ_ATTR.attr0{8,9}`). This will double the screen range of valid **q** coordinates, so you'd have + and − the width and height to play with instead of the half-sizes. This double (well quadruple, really) area means that you can safely rotate a sprite as the maximum distance from the center is ½√2 ≈ 0.707. Of course, you can still get the clipping artifact if you scale up beyond the doubled ranges. Also, note that the sprites' origin is shifted to the center of this rectangle, so that **q**~0~ is now one full sprite-size away from the top-left corner.
+As this is an obvious flaw, there is of course a way around it: set the sprite's affine mode to **double-sized affine** (`ATTR0_AFF_DBL`, `OBJ_ATTR.attr0{8,9}`). This will double the screen range of valid **q** coordinates, so you'd have + and − the width and height to play with instead of the half-sizes. This double (well quadruple, really) area means that you can safely rotate a sprite as the maximum distance from the center is ½√2 ≈ 0.707. Of course, you can still get the clipping artifact if you scale up beyond the doubled ranges. Also, note that the sprites' origin is shifted to the center of this rectangle, so that **q**<sub>0</sub> is now one full sprite-size away from the top-left corner.
 
 The double-size flag also has a second use. Or perhaps I should say misuse. If you set it for a regular sprite, it will be hidden. This is an alternative way to hide unused sprites.
 
@@ -677,7 +677,7 @@ That is to say, multiple small transformations work as one big one. All you have
 
 As mentioned earlier, affine sprites always use their centers as affine origins, but there are times when one might want to use something else to rotate around – to use another point as the reference point. Now, you can't actually do this, but you can make it *look* as if you can. To do this, I need to explain a few things about what I like to call anchoring. The <dfn>anchor</dfn> is the position that is supposed to remain ‘fixed’; the spot where the texture (in this case the object) is anchored to the screen.
 
-For anchoring, you actually need one set of coordinates for each coordinate-space you're using. In this case, that's two: the texture space and the screen space. Let's call these points **p**~0~ and **q**~0~, respectively. Where these actually point *from* is largely immaterial, but for convenience' sake let's use the screen and texture origins for this. These points are only the start. In total, there are *seven* vectors that we need to take into account for the full procedure, and they are all depicted in {@fig:rot-ofs}. Their meanings are explained in the table below.
+For anchoring, you actually need one set of coordinates for each coordinate-space you're using. In this case, that's two: the texture space and the screen space. Let's call these points **p**<sub>0</sub> and **q**<sub>0</sub>, respectively. Where these actually point *from* is largely immaterial, but for convenience' sake let's use the screen and texture origins for this. These points are only the start. In total, there are *seven* vectors that we need to take into account for the full procedure, and they are all depicted in {@fig:rot-ofs}. Their meanings are explained in the table below.
 
 <div class="lblock">
 
@@ -710,7 +710,7 @@ For anchoring, you actually need one set of coordinates for each coordinate-spac
 </table>
 </div>
 
-Yes, it is a whole lot of vectors, but funnily enough, most are already known. The center points (**c**~p~ and **c**~q~) can be derived from the objects size and double-size status, the anchors are known in advance because those are the input values, and **r**~p~ and **r**~q~ fit the general equation for the affine transformation, {@eq:aff-ex-base}, so this links the two spaces. All that's left now is to write down and solve the set of equations.
+Yes, it is a whole lot of vectors, but funnily enough, most are already known. The center points (**c**<sub>p</sub> and **c**<sub>q</sub>) can be derived from the objects size and double-size status, the anchors are known in advance because those are the input values, and **r**<sub>p</sub> and **r**<sub>q</sub> fit the general equation for the affine transformation, {@eq:aff-ex-base}, so this links the two spaces. All that's left now is to write down and solve the set of equations.
 <!--
 \begin{matrix}
 \vb{x} + \vb{c}_{q} + \vb{r}_{q} & = & \vb{q}_{0} \\
@@ -991,11 +991,11 @@ The rotation will take place around the center of the circle, so that's an ancho
 Because the sub-objects share the same **P** matrix, it'd be a waste to recalculate it the whole time, so I'm using a modified version of it especially tailored to `OACOMBO` structs called `oac_rotscale()`. The code is basically the same though. The `oacs[]` array forms the three combos, which are initialized at definition because that makes things so much easier. The full circle is at (16,20), the semis at (80,20) and the one composed of quarter circles is at (48,60). The `obj_data[]` array contains the data for our seven objects, and is copied to `obj_buffer` in the initialization function. While it is generally true that magic numbers (such as using hex for OAM attributes) are evil, it is also true that they really aren't central to this story and to spend a lot of space on initializing all of them in the ‘proper’ fashion may actually do more harm than good … this time. I am still using `#define`s for the anchor and a reference point though, because they appear multiple times in the rest of the code.
 
 <div id="cd-oacombo" markdown>
-```
+```c
 // oacombo.c
 
 #include <stdio.h>
-#include <ton.h>
+#include <tonc.h>
 
 
 #include "oac_gfx.h"
