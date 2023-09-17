@@ -35,7 +35,7 @@ typedef struct OBJ_AFFINE
 
 The *signed* 16-bit members `pa, pb, pc` and `pd` are 8.8 fixed point numbers that form the actual matrix, which I will refer to as **P**, in correspondence with the elements' names. For more information about this matrix, go to the [affine matrix](affine.html) section. Do so now if you haven't already, because I'm not going to repeat it here. If all you are after is a simple scale-then-rotate matrix, try this: for a zoom by s~x~ and s~y~ followed by a counter-clockwise rotation by α, the correct matrix is this:
 <!--
-\textbf{P} =
+\vb{P} =
 \begin{bmatrix}
 p_{a} & p_{b} \\
 p_{c} & p_{d}
@@ -45,14 +45,13 @@ p_{c} & p_{d}
 -\sin(\alpha)/s_{y} & \cos(\alpha)/s_{y}
 \end{bmatrix}
 -->
-
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
     <mrow data-mjx-texclass="ORD">
       <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
         <mtr>
           <mtd>
-            <mtext mathvariant="bold">P</mtext>
+            <mi mathvariant="bold">P</mi>
             <mo>=</mo>
             <mrow data-mjx-texclass="INNER">
               <mo data-mjx-texclass="OPEN">[</mo>
@@ -207,7 +206,7 @@ Essential affine sprite steps
 The procedure that the GBA uses for drawing sprites is as follows: the sprite forms a rectangle on the screen defined by its size. To paint the screen pixels in that area (**q**) uses texture-pixel **p**, which is calculated via:
 
 <!--
-\textbf{p} - \textbf{p}_{0} = \textbf{P} \cdot (\textbf{q} - \textbf{q}_0)
+\vb{p} - \vb{p}_{0} = \vb{P} \cdot (\vb{q} - \vb{q}_0)
 -->
 <table id="eq:aff-ofs">
 <tr>
@@ -219,22 +218,22 @@ The procedure that the GBA uses for drawing sprites is as follows: the sprite fo
       <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
         <mtr>
           <mtd>
-            <mtext mathvariant="bold">p</mtext>
+            <mi mathvariant="bold">p</mi>
             <mo>&#x2212;</mo>
             <msub>
-              <mtext mathvariant="bold">p</mtext>
+              <mi mathvariant="bold">p</mi>
               <mrow data-mjx-texclass="ORD">
                 <mn>0</mn>
               </mrow>
             </msub>
             <mo>=</mo>
-            <mtext mathvariant="bold">P</mtext>
+            <mi mathvariant="bold">P</mi>
             <mo>&#x22C5;</mo>
             <mo stretchy="false">(</mo>
-            <mtext mathvariant="bold">q</mtext>
+            <mi mathvariant="bold">q</mi>
             <mo>&#x2212;</mo>
             <msub>
-              <mtext mathvariant="bold">q</mtext>
+              <mi mathvariant="bold">q</mi>
               <mn>0</mn>
             </msub>
             <mo stretchy="false">)</mo>
@@ -592,7 +591,7 @@ To be frank though, calling `obj_aff_identity()` isn't necessary after a call to
 That's the set-up, now for how the demo does what it does. At any given time, you will have some transformation matrix, **P**. By pressing a button (or not), a small transformation of the current state will be performed, via matrix multiplication.
 
 <!--
-\textbf{P}_{new} = \textbf{P}_{old} \cdot \textbf{D}^{-1}
+\vb{P}_\text{new} = \vb{P}_{old} \cdot \vb{D}^{-1}
 -->
 <table>
 <tr>
@@ -605,25 +604,17 @@ That's the set-up, now for how the demo does what it does. At any given time, yo
         <mtr>
           <mtd>
             <msub>
-              <mtext mathvariant="bold">P</mtext>
-              <mrow data-mjx-texclass="ORD">
-                <mi>n</mi>
-                <mi>e</mi>
-                <mi>w</mi>
-              </mrow>
+              <mi mathvariant="bold">P</mi>
+              <mtext>new</mtext>
             </msub>
             <mo>=</mo>
             <msub>
-              <mtext mathvariant="bold">P</mtext>
-              <mrow data-mjx-texclass="ORD">
-                <mi>o</mi>
-                <mi>l</mi>
-                <mi>d</mi>
-              </mrow>
+              <mi mathvariant="bold">P</mi>
+              <mtext>old</mtext>
             </msub>
             <mo>&#x22C5;</mo>
             <msup>
-              <mtext mathvariant="bold">D</mtext>
+              <mi mathvariant="bold">D</mi>
               <mrow data-mjx-texclass="ORD">
                 <mo>&#x2212;</mo>
                 <mn>1</mn>
@@ -639,7 +630,7 @@ That's the set-up, now for how the demo does what it does. At any given time, yo
 
 where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**). Or a no-op (**I**). However, there is a little hitch here. This would work nice in theory, but in *practice*, it won't work well because the fixed point matrix multiplications will result in unacceptable round-off errors very very quickly. Fortunately, all these transformations have the convenient property that
 <!--
-\textbf{D}(a)\cdot\textbf{D}(b) = \textbf{D}(c)
+\vb{D}(a)\cdot\vb{D}(b) = \vb{D}(c)
 -->
 <table>
 <tr>
@@ -651,17 +642,17 @@ where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**)
       <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
         <mtr>
           <mtd>
-            <mtext mathvariant="bold">D</mtext>
+            <mi mathvariant="bold">D</mi>
             <mo stretchy="false">(</mo>
             <mi>a</mi>
             <mo stretchy="false">)</mo>
             <mo>&#x22C5;</mo>
-            <mtext mathvariant="bold">D</mtext>
+            <mi mathvariant="bold">D</mi>
             <mo stretchy="false">(</mo>
             <mi>b</mi>
             <mo stretchy="false">)</mo>
             <mo>=</mo>
-            <mtext mathvariant="bold">D</mtext>
+            <mi mathvariant="bold">D</mi>
             <mo stretchy="false">(</mo>
             <mi>c</mi>
             <mo stretchy="false">)</mo>
@@ -722,9 +713,9 @@ For anchoring, you actually need one set of coordinates for each coordinate-spac
 Yes, it is a whole lot of vectors, but funnily enough, most are already known. The center points (**c**~p~ and **c**~q~) can be derived from the objects size and double-size status, the anchors are known in advance because those are the input values, and **r**~p~ and **r**~q~ fit the general equation for the affine transformation, {@eq:aff-ex-base}, so this links the two spaces. All that's left now is to write down and solve the set of equations.
 <!--
 \begin{matrix}
-\textbf{x} + \textbf{c}_{q} + \textbf{r}_{q} & = & \textbf{q}_{0} \\
-\textbf{c}_{p} + \textbf{r}_{p} & = & \textbf{p}_{0} \\
-\textbf{r}_{p} & = & \textbf{P} \cdot\ \textbf{r}_{q} \\
+\vb{x} + \vb{c}_{q} + \vb{r}_{q} & = & \vb{q}_{0} \\
+\vb{c}_{p} + \vb{r}_{p} & = & \vb{p}_{0} \\
+\vb{r}_{p} & = & \vb{P} \cdot\ \vb{r}_{q} \\
 \end{matrix}
 -->
 <table id="eq:aff-ex-base">
@@ -740,17 +731,17 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
             <mtable columnspacing="1em" rowspacing="4pt">
               <mtr>
                 <mtd>
-                  <mtext mathvariant="bold">x</mtext>
+                  <mi mathvariant="bold">x</mi>
                   <mo>+</mo>
                   <msub>
-                    <mtext mathvariant="bold">c</mtext>
+                    <mi mathvariant="bold">c</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>q</mi>
                     </mrow>
                   </msub>
                   <mo>+</mo>
                   <msub>
-                    <mtext mathvariant="bold">r</mtext>
+                    <mi mathvariant="bold">r</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>q</mi>
                     </mrow>
@@ -761,7 +752,7 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
                 </mtd>
                 <mtd>
                   <msub>
-                    <mtext mathvariant="bold">q</mtext>
+                    <mi mathvariant="bold">q</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mn>0</mn>
                     </mrow>
@@ -771,14 +762,14 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
               <mtr>
                 <mtd>
                   <msub>
-                    <mtext mathvariant="bold">c</mtext>
+                    <mi mathvariant="bold">c</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>p</mi>
                     </mrow>
                   </msub>
                   <mo>+</mo>
                   <msub>
-                    <mtext mathvariant="bold">r</mtext>
+                    <mi mathvariant="bold">r</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>p</mi>
                     </mrow>
@@ -789,7 +780,7 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
                 </mtd>
                 <mtd>
                   <msub>
-                    <mtext mathvariant="bold">p</mtext>
+                    <mi mathvariant="bold">p</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mn>0</mn>
                     </mrow>
@@ -799,7 +790,7 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
               <mtr>
                 <mtd>
                   <msub>
-                    <mtext mathvariant="bold">r</mtext>
+                    <mi mathvariant="bold">r</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>p</mi>
                     </mrow>
@@ -809,11 +800,11 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
                   <mo>=</mo>
                 </mtd>
                 <mtd>
-                  <mtext mathvariant="bold">P</mtext>
+                  <mi mathvariant="bold">P</mi>
                   <mo>&#x22C5;</mo>
                   <mtext>&#xA0;</mtext>
                   <msub>
-                    <mtext mathvariant="bold">r</mtext>
+                    <mi mathvariant="bold">r</mi>
                     <mrow data-mjx-texclass="ORD">
                       <mi>q</mi>
                     </mrow>
@@ -833,7 +824,7 @@ Yes, it is a whole lot of vectors, but funnily enough, most are already known. T
 
 Three equations with three unknowns, means it is solvable. I won't post the entire derivation because that's not all that difficult; what you see in {@eq:aff-ex} is the end result in the most usable form.
 <!--
-\textbf{x} = \textbf{q}_{0} - m\textbf{s} - \textbf{P}^{-1} \cdot (\textbf{p}_{0} - \tfrac{1}{2} s)
+\vb{x} = \vb{q}_{0} - m\vb{s} - \vb{P}^{-1} \cdot (\vb{p}_{0} - \tfrac{1}{2} s)
 -->
 <table id="eq:aff-ex">
 <tr>
@@ -845,20 +836,20 @@ Three equations with three unknowns, means it is solvable. I won't post the enti
       <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
         <mtr>
           <mtd>
-            <mtext mathvariant="bold">x</mtext>
+            <mi mathvariant="bold">x</mi>
             <mo>=</mo>
             <msub>
-              <mtext mathvariant="bold">q</mtext>
+              <mi mathvariant="bold">q</mi>
               <mrow data-mjx-texclass="ORD">
                 <mn>0</mn>
               </mrow>
             </msub>
             <mo>&#x2212;</mo>
             <mi>m</mi>
-            <mtext mathvariant="bold">s</mtext>
+            <mi mathvariant="bold">s</mi>
             <mo>&#x2212;</mo>
             <msup>
-              <mtext mathvariant="bold">P</mtext>
+              <mi mathvariant="bold">P</mi>
               <mrow data-mjx-texclass="ORD">
                 <mo>&#x2212;</mo>
                 <mn>1</mn>
@@ -867,7 +858,7 @@ Three equations with three unknowns, means it is solvable. I won't post the enti
             <mo>&#x22C5;</mo>
             <mo stretchy="false">(</mo>
             <msub>
-              <mtext mathvariant="bold">p</mtext>
+              <mi mathvariant="bold">p</mi>
               <mrow data-mjx-texclass="ORD">
                 <mn>0</mn>
               </mrow>
