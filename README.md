@@ -4,17 +4,17 @@ This is a community-maintained version of Tonc, the GBA programming tutorial ori
 
 ## Setup
 
-You need Python 3. Dependencies can be installed via `pip` or your package manager.
+You need Python 3. This example will set up a virtual environment and install dependencies inside it.
 
 ```sh
 # clone the repo
 git clone git@github.com:gbadev-org/tonc.git
 cd tonc
 
-# install dependencies
-# (if your operating system distributor provides Python, follow the
-# PEP 668 instructions to set up a venv first)
-pip install pelican markdown
+python -m venv env
+source env/bin/activate
+
+pip install -r requirements.txt
 
 # run the development server
 make devserver
