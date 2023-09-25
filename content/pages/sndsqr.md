@@ -9,11 +9,12 @@ Authors: Cearn
 
 ## Introduction to GBA sound {#sec-intro}
 
-Apart from graphics and interaction, there is one other sense important to games: audio. While graphics may set the scene, sound sets the mood, which can be even more important that the graphics. Try playing Resident Evil with, say, Weird Al Yankovic playing: it simply doesn't work, the atmosphere is lost.
+Apart from graphics and interaction, there is one other sense important to games: audio. While graphics may set the scene, sound sets the mood, which can be even more important that the graphics. Try playing *Resident Evil* with, say, "Weird Al" Yankovic playing: it simply doesn't work, the atmosphere is lost.
 
-The GBA has six sound channels. The first four are roughly the same as the original GameBoy had: two square wave generators (channels 1 and 2), a sample player (channel 3) and a noise generator (channel 4). Those are also referred to as the DMG channels. New are two Direct Sound channels A and B (not to be confused with Microsoft's Direct Sound, the DirectX component). These are 8bit digital channels.
+The GBA has six sound channels. The first four are roughly the same as the original Game Boy had: two square wave generators (channels 1 and 2), a sample player (channel 3) and a noise generator (channel 4). Those are also referred to as the DMG channels after the Game Boy's code name "Dot Matrix Game." New are two Direct Sound channels A and B (not to be confused with Microsoft's DirectSound, the DirectX component). These are 8-bit digital pulse code modulation (PCM) channels.
 
-I should point out that I really know very little about sound programming, mostly because I'm not able to actually put together a piece of music (it's kinda hard to do that when you already have music playing). If you want to really learn about sound programming, you should look at [Belogic.com](http://www.belogic.com){target="_blank"}, where almost everybody got their information from, and [deku.gbadev.org](http://deku.gbadev.org){target="_blank"}, which shows you how to build a sound mixer. Both of these sites are excellent.
+I should point out that I really know very little about sound programming, mostly because I'm not able to actually put together a piece of music (it's kinda hard to do that when you already have music playing). If you want to really learn about sound programming, you should look at [Belogic.com](http://www.belogic.com){target="_blank"}, where almost everybody got their information from, and [deku.gbadev.org](https://deku.gbadev.org/program/sound1.html){target="_blank"}, which shows you how to build a sound mixer. Both of these sites are excellent.
+<!-- as of 2023-09, belogic.com uses a self-signed certificate -->
 
 I may not know much about sound creation/programming, but at its core sound is a wave in matter; waves are mathematical critters, and I *do* know a thing or two about math, and that's kind of what I'll do here for the square wave generators.
 
@@ -21,16 +22,16 @@ I may not know much about sound creation/programming, but at its core sound is a
 
 Consider if you will, a massive sea of particles, all connected to their neighbours with little springs. Now give one of them a little push. In the direction of the push, the spring compresses and relaxes, pushing the original particle back to its normal position and passing on the push to the neighbour; this compresses the next spring and relays the push to *its* neighbour, and so on and so on.
 
-This is a prime example of wave behaviour. Giving a precise definition of a wave that covers all cases is tricky, but in essence, a <dfn>wave </dfn> is a <dfn>transferred disturbance</dfn>. There are many kinds of waves; two major classes are <dfn>longitudinal</dfn> waves, which oscillate in the direction of travel, and <dfn>transverse</dfn> waves, which are perpendicular to it. Some waves are periodic (repeating patterns over time or space), some aren't. Some travel, some don't.
+This is a prime example of wave behaviour. Giving a precise definition of a wave that covers all cases is tricky, but in essence, a <dfn>wave</dfn> is a <dfn>transferred disturbance</dfn>. There are many kinds of waves; two major classes are <dfn>longitudinal</dfn> waves, which oscillate in the direction of travel, and <dfn>transverse</dfn> waves, which are perpendicular to it. Some waves are periodic (repeating patterns over time or space), some aren't. Some travel, some don't.
 
 ### Waves {#ssec-harmonic}
 
-The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*) that's a solution to eq 18.1. The name of the variable doesn't really matter, but usually it's either spatial (*x*, *y*, *z*) or temporal (*t*), or all of these at the same time. The general solution can be found in eq 18.2. Or perhaps I should say solution**s**, as there are many ways of writing them down. They're all equivalent though, and you can go from one to the other with some trickery that does not concern us at this moment.
+The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*) that's a solution to {@eq:wave}. The name of the variable doesn't really matter, but usually it's either spatial (*x*, *y*, *z*) or temporal (*t*), or all of these at the same time. The general solution can be found in {@eq:wave-sols}. Or perhaps I should say solution**s**, as there are many ways of writing them down. They're all equivalent though, and you can go from one to the other with some trickery that does not concern us at this moment.
 
-<table id="eq-wave">
+<table id="eq:wave">
 <tbody valign="middle">
 <tr>
-  <td class="eqnrcell">(18.1)
+  <td class="eqnrcell">({!@eq:wave})
   <td class="eqcell">
   <table cellpadding=0 cellspacing=0>
   <tr>
@@ -45,9 +46,9 @@ The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*)
 
 General solution(s):
 
-<table id="eq-wave-sols">
+<table id="eq:wave-sols">
 <tr>
-  <td class="eqnrcell">(18.2)
+  <td class="eqnrcell">({!@eq:wave-sols})
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <col align="right">
@@ -73,23 +74,23 @@ General solution(s):
 **{*@fig:wave}**: a harmonic wave
 </div>
 
-A full wave can be described by three things. First, there's the <dfn>amplitude</dfn> *A*, which gives half-distance between the minimum and maximum. Second, the <dfn>wavelength</dfn> λ, which is the length after which the wave repeats itself (this is tied to wave-number *k*= 2π/λ). Then there's <dfn>phase constant</dfn> φ~0~, which defines the stating point. If the wave is in time, instead of a wavelength you have <dfn>period</dfn> *T*, <dfn>frequency</dfn> *f*=1/*T* (and angular frequency ω= 2π*f*= 2π/*T*). You can see what each of these parameters is in {@fig:wave}.
+A full wave can be described by three things. First, there's the <dfn>amplitude</dfn> *A*, which gives half-distance between the minimum and maximum. Second, the <dfn>wavelength</dfn> λ, which is the length after which the wave repeats itself (this is tied to wave-number *k*= 2π/λ). Then there's <dfn>phase constant</dfn> φ<sub>0</sub>, which defines the stating point. If the wave is in time, instead of a wavelength you have <dfn>period</dfn> *T*, <dfn>frequency</dfn> *f*=1/*T* (and angular frequency ω= 2π*f*= 2π/*T*). You can see what each of these parameters is in {@fig:wave}.
 
-One of the interesting things about the wave equation is that it is a linear operation on ψ. What that means is that any combination of solutions is also a solution; this is the <dfn>superposition principle</dfn>. For example, if you have two waves ψ~1~ and ψ~2~, then Ψ = *a*ψ~1~ + *b*ψ~2~ is also a wave. This may sound like a trivial thing but I assure you it's not. The fact that non-linear equations (and they exist too) tend to make scientists cringe a little should tell you something about the value of linear equations.
+One of the interesting things about the wave equation is that it is a linear operation on ψ. What that means is that any combination of solutions is also a solution; this is the <dfn>superposition principle</dfn>. For example, if you have two waves ψ<sub>1</sub> and ψ<sub>2</sub>, then Ψ = *a*ψ<sub>1</sub> + *b*ψ<sub>2</sub> is also a wave. This may sound like a trivial thing but I assure you it's not. The fact that non-linear equations (and they exist too) tend to make scientists cringe a little should tell you something about the value of linear equations.
 
 ### Sound waves {#ssec-wave-sound}
 
-Sound is also a wave. In fact, it is a longitudinal pressure wave in matter and pretty much works as the system of particles on springs mentioned earlier with whole sets of molecules moving back and forth. In principle, it has both spatial and temporal structure and you can things can get hideously complex if you want to deal with everything. But I'll keep it easy and only consider two parts: amplitude *A* and period and frequency *T* and *f*. As you probably know, the tone of a sound is related to the frequency. Human hearing has a range between 20 Hz and 20 kHz, and the higher the frequency (i.e., the more compressed the wave), the higher the tone. Most sounds are actually a conglomeration of different waves, with different amplitudes and frequencies – the superposition principle at work. The funny thing about this is that if you added all those components up to one single function and plot it, it wouldn't look like a sine wave at all anymore. What's even funnier is that you can also reverse the process and take a function –*any* function– and break it up into a superposition of sine and cosine waves, and so see what kind of frequencies your sound has. This is called Fourier Transformation, and we'll get to that in a minute.
+Sound is also a wave. In fact, it is a longitudinal pressure wave in matter and pretty much works as the system of particles on springs mentioned earlier with whole sets of molecules moving back and forth. In principle, it has both spatial and temporal structure, and things can get hideously complex if you want to deal with everything. But I'll keep it easy and only consider two parts: amplitude *A* and period and frequency *T* and *f*. As you probably know, the tone of a sound is related to the frequency. Human hearing has a range between 20 Hz and 20 kHz, and the higher the frequency (that is, the more compressed the wave), the higher the tone. Most sounds are actually a conglomeration of different waves, with different amplitudes and frequencies – the superposition principle at work. The funny thing about this is that if you added all those components up to one single function and plot it, it wouldn't look like a sine wave at all anymore. What's even funnier is that you can also reverse the process and take a function –*any* function– and break it up into a superposition of sine and cosine waves, and so see what kind of frequencies your sound has. This is called Fourier Transformation, and we'll get to that in a minute.
 
 ### Musical scale {#ssec-notes}
 
-While the full range between 20 Hz and 20 kHz is audible, only a discrete set of frequencies are used for music, which brings us to the notion of the <dfn>musical scale</dfn>. Central to these are <dfn>octaves</dfn>, representing a frequency doubling. Each octave is divided into a number of different notes; 12 in Western systems, ranging from A to G, although octave numbering starts at C for some reason. Octave 0 starts at the <dfn>central C</dfn>, which has a frequency of about 262 Hz (see also {{@tbl:oct0}}. And yes, I know there are only 7 letters between A and G, the other notes are flats and sharps that lie between these notes. The ‘12’ refers to the number of half-notes in an octave. The musical scale is **logarithmic**; each half-note being 2^1/12^ apart. Well, almost anyway: for some reason, some notes don't *quite* fit in exactly.
+While the full range between 20 Hz and 20 kHz is audible, only a discrete set of frequencies are used for music, which brings us to the notion of the <dfn>musical scale</dfn>. Central to these are <dfn>octaves</dfn>, representing a frequency doubling. Each octave is divided into a number of different notes; 12 in Western systems, ranging from A to G, although octave numbering starts at C for some reason. Octave 0 starts at the <dfn>central C</dfn>, which has a frequency of about 262 Hz (see also {@tbl:oct0}. And yes, I know there are only 7 letters between A and G, the other notes are flats and sharps that lie between these notes. The ‘12’ refers to the number of half-notes in an octave. The musical scale is **logarithmic**; each half-note being 2<sup>1/12</sup> apart. Well, almost anyway: for some reason, some notes don't *quite* fit in exactly.
 
 <div class="cblock">
 <table id="tbl:oct0"
   border=1 cellpadding=2 cellspacing=0>
 <caption align="bottom">
-  <b>{{*@tbl:oct0}}</b>: notes &amp; frequencies of 
+  <b>{*@tbl:oct0}</b>: notes &amp; frequencies of 
   octave 0
 </caption>
 <tbody align="center">
@@ -114,11 +115,11 @@ While the full range between 20 Hz and 20 kHz is audible, only a discrete set of
 
 ### Fourier transforms and the square wave {#ssec-fourier}
 
-Fourier transformations are a way of going describing a function in the time domain as a distribution of frequencies called a <dfn>spectrum</dfn>. They're also one of the many ways that professors can scare the bejebus out of young, natural-science students. Don't worry, I'm sure you'll get through this section unscathed <span class="kbd">\>:)</span>. For well- to reasonably-behaved functions, you can rewrite them as series of *very* well-behaved functions such as polynomials, exponentials and also waves. For example, as a Fourier series, a function may look like eq 18.3.
+Fourier transformations are a way of going describing a function in the time domain as a distribution of frequencies called a <dfn>spectrum</dfn>. They're also one of the many ways that professors can scare the bejebus out of young, natural-science students. Don't worry, I'm sure you'll get through this section unscathed <span class="kbd">\>:)</span>. For well- to reasonably-behaved functions, you can rewrite them as series of *very* well-behaved functions such as polynomials, exponentials and also waves. For example, as a Fourier series, a function may look like {@eq:fser}.
 
-<table id="eq-fser">
+<table id="eq:fser">
 <tr>
-  <td class="eqnrcell">(18.3)
+  <td class="eqnrcell">({!@eq:fser})
   <td class="eqcell">f(<i>t</i>) = &frac12;A<sub>0</sub> + 
     <big>&Sigma;</big><sub>n&gt;0</sub>
     <i>A</i><sub>m</sub>cos(m&omega;<i>t</i>) + 
@@ -126,11 +127,11 @@ Fourier transformations are a way of going describing a function in the time dom
     <i>B</i><sub>m</sub>sin(m&omega;<i>t</i>)
 </table>
 
-Of course, the whole thing relies on being able to find the coefficients *A*~m~ and *B*~m~. While it is fairly straightforward to derive the equations for them, I'll leave that as an exercise for the reader and just present the results in the form of eq 18.4. I should mention that there are actually a few ways of defining Fourier transforms. For example, there are versions that don't integrate over \[0,*T*\], but over \[−½*T*, ½*T*\]; or use the complex exponential instead of sines and cosines, but in the end they're all doing the same thing.
+Of course, the whole thing relies on being able to find the coefficients *A*<sub>m</sub> and *B*<sub>m</sub>. While it is fairly straightforward to derive the equations for them, I'll leave that as an exercise for the reader and just present the results in the form of {@eq:ftrans}. I should mention that there are actually a few ways of defining Fourier transforms. For example, there are versions that don't integrate over \[0,*T*\], but over \[−½*T*, ½*T*\]; or use the complex exponential instead of sines and cosines, but in the end they're all doing the same thing.
 
-<table id="eq-ftrans">
+<table id="eq:ftrans">
 <tr>
-  <td class="eqnrcell">(18.4)
+  <td class="eqnrcell">({!@eq:ftrans})
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <tbody valign="middle">
@@ -160,15 +161,14 @@ Of course, the whole thing relies on being able to find the coefficients *A*~m~ 
 
 <div class="cpt_fr" style="width:212px;" markdown>
 <img src="img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
-**{{*@fig:sqrwave}}**: a square wave
-
+**{*@fig:sqrwave}**: a square wave
 </div>
 
-As an example, let's take a look at a square wave see {{@fig:sqrwave}}. A square wave is on (1) for a certain time (parameter *h*), then off (0) for the rest of the cycle.It's still a periodic wave, so it doesn't really matter where we place the thing along the *t*-axis. I centered it on the peak for convenience: doing so makes it a symmetrical wave which has the nice properly of removing *all* the anti-symmetrical sine waves. *A*~0~=*h*/*T* because it's the average of the function and the rest of the *A*~m~'s follow from eq 18.4.
+As an example, let's take a look at the square wave shown in {@fig:sqrwave}. A square wave is on (1) for a certain time (parameter *h*), then off (0) for the rest of the cycle. It's still a periodic wave, so it doesn't really matter where we place the thing along the *t*-axis. I centered it on the peak for convenience: doing so makes it a symmetrical wave which has the nice properly of removing *all* the anti-symmetrical sine waves. *A*<sub>0</sub>=*h*/*T* because it's the average of the function and the rest of the *A*<sub>m</sub>'s follow from {@eq:ftrans}.
 
-<table id="eq-fsqr">
+<table id="eq:fsqr">
 <tr>
-  <td class="eqnrcell">(18.5)
+  <td class="eqnrcell">({!@eq:fsqr})
   <td class="eqcell">
     <i>A</i><sub>m</sub> = 
   <td class="eqcell">
@@ -198,21 +198,21 @@ As an example, let's take a look at a square wave see {{@fig:sqrwave}}. A square
   </table>
 </table>
 
-*A*~m~ is a <dfn>sinc</dfn> function: sin(*x*)/*x*. For high *m* it approaches zero (as it should, since higher terms should be relatively less important), but also interesting is that of the higher terms some will also *vanish* because of the sine. This will happen whenever *m* is a multiple of *T/h*.
+*A*<sub>m</sub> is a <dfn>sinc</dfn> function: sin(*x*)/*x*. For high *m* it approaches zero (as it should, since higher terms should be relatively less important), but also interesting is that of the higher terms some will also *vanish* because of the sine. This will happen whenever *m* is a multiple of *T/h*.
 
 ## GBA sound {#sec-gbasnd}
 
 ### Sound registers {#ssec-snd-regs}
 
-For graphics, you only had to deal with one register to get a result; for sound, you have to cover a lot of registers before you get *anything*. The DMG channels each have 2 or 3 registers – some with similar functionality, some not. Apart from that, there are four overall control registers.
+For graphics, you only had to deal with two registers (`REG_DISPCNT` and `REG_BGxCNT`) to get a result; for sound, you have to cover a lot of registers before you get *anything*. The DMG channels each have 2 or 3 registers – some with similar functionality, some not. Apart from that, there are four overall control registers.
 
-The register nomenclature seems particularly vexed when it comes to sound. There are basically two sets of names that you can find: one consisting of `REG_SOUNDxCNT` followed by `_L`, `_H` and `_X` in a rather haphazard manner; the other one uses a `REG_SGxy` and `REG_SGCNTy` structure (*x*=1, 2, 3 or 4 and *y*=0 or 1). I think the former is the newer version, which is funny because the older is more consistent. Oh well. In any case, I find neither of them very descriptive and keep forgetting which of the L/H/X or 0/1 versions does what, so I use a *third* set of names based on the ones found in [tepples'](http://www.pineight.com){target="_blank"} pin8gba.h, which IMHO makes more sense than the other two.
+The register nomenclature seems particularly vexed when it comes to sound. There are basically two sets of names that you can find: one consisting of `REG_SOUNDxCNT` followed by `_L`, `_H` and `_X` in a rather haphazard manner; the other one uses a `REG_SGxy` and `REG_SGCNTy` structure (*x*=1, 2, 3 or 4 and *y*=0 or 1). I think the former is the newer version, which is funny because the older is more consistent. Oh well. In any case, I find neither of them very descriptive and keep forgetting which of the L/H/X or 0/1 versions does what, so I use a *third* set of names based on the ones found in [tepples'](https://pineight.com/gba/){target="_blank"} pin8gba.h, which IMHO makes more sense than the other two.
 
 <div class="cblock">
 <table id="tbl:snd-names"
   border=1 cellpadding=2 cellspacing=0>
 <caption align="bottom">
-  <b>{{*@tbl:snd-names}}</b>: Sound register nomenclature.
+  <b>{*@tbl:snd-names}</b>: Sound register nomenclature.
 </caption>
 <tr align="center">
   <th> offset	<th> function 
@@ -221,29 +221,29 @@ The register nomenclature seems particularly vexed when it comes to sound. There
   <th> 60h	<td> channel 1 (sqr) sweep
   <td rowspan=2> REG_SG10	<td> SOUND1CNT_L	<td> REG_SND1SWEEP	
 <tr>
-  <th> 62h	<td> channel 1 (sqr) len, duty, env	
+  <th> 62h	<td> channel 1 (sqr) len, duty, env
   <!-- -->		<td> SOUND1CNT_H	<td> REG_SND1CNT
 <tr>
-  <th> 64h	<td> channel 1 (sqr) freq, on	
+  <th> 64h	<td> channel 1 (sqr) freq, on
   <td> REG_SG11	<td> SOUND1CNT_X	<td> REG_SND1FREQ
 <tr>
   <th> 68h		<td> channel 2 (sqr) len, duty, env
-  <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT	
+  <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT
 <tr>
   <th> 6Ch		<td> channel 2 (sqr) freq, on
-  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND1FREQ	
+  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND1FREQ
 <tr>
   <th> 70h		<td> channel 3 (wave) mode
-  <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL	
+  <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL
 <tr>
   <th> 72h		<td> channel 3 (wave) len, vol
-  <!-- -->		<td> SOUND3CNT_H	<td> REG_SND3CNT	
+  <!-- -->		<td> SOUND3CNT_H	<td> REG_SND3CNT
 <tr>
   <th> 74h		<td> channel 3 (wave) freq, on
-  <td> REG_SG31	<td> SOUND3CNT_X	<td> REG_SND3FREQ	
+  <td> REG_SG31	<td> SOUND3CNT_X	<td> REG_SND3FREQ
 <tr>
   <th> 78h		<td> channel 4 (noise) len, vol, env
-  <td> REG_SG40	<td> SOUND4CNT_L	<td> REG_SND4CNT	
+  <td> REG_SG40	<td> SOUND4CNT_L	<td> REG_SND4CNT
 <tr>
   <th> 7Ch		<td> channel 4 (noise) freq, on
   <td> REG_SG41	<td> SOUND4CNT_H	<td> REG_SND4FREQ	
@@ -255,10 +255,10 @@ The register nomenclature seems particularly vexed when it comes to sound. There
   <!-- -->		<td> SOUNDCNT_H	<td> REG_SNDDSCNT
 <tr>
   <th> 84h	<td> sound status	
-  <td> REG_SGCNT1	<td> SOUNDCNT_X	<td> REG_SNDSTAT		
+  <td> REG_SGCNT1	<td> SOUNDCNT_X	<td> REG_SNDSTAT
 <tr>
   <th> 88h	<td> bias control
-  <td> REG_SGBIAS	<td> SOUNDBIAS	<td> REG_SNDBIAS		
+  <td> REG_SGBIAS	<td> SOUNDBIAS	<td> REG_SNDBIAS
 </table>
 </div>
 
@@ -408,7 +408,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 </table>
 </div>
 
-Don't know too much about `REG_SNDDSCNT`, apart from that it governs DirectSound, but also has some DMG sound bits for some reason. `REG_SNDSTAT` shows the status of the DMG channels *and* enables all sound. If you want to have any sound at all, you need to set bit 7 there.
+Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, but also has some DMG sound bits for some reason. `REG_SNDSTAT` shows the status of the DMG channels *and* enables all sound. If you want to have any sound at all, you need to set bit 7 there.
 
 <div class="reg">
 <table class="reg" 
@@ -463,13 +463,13 @@ Emulators may allow access to sound registers even if sound is disabled (`REG_SN
 
 ### GBA Square wave generators {#ssec-snd-sqr}
 
-The GBA has two square sound generators, channels 1 and 2. The only difference between them is channel 1's <dfn>frequency sweep</dfn>, which can make the frequency rise or drop exponentially as it's played. That's all done with `REG_SND1SWEEP`. `REG_SNDxCNT` controls the wave's length, envelope and duty cycle. Length should be obvious. The <dfn>envelope</dfn> is basically the amplitude as function of time: you can make it fade in (<dfn>attack</dfn>), remain at the same level (<dfn>sustain</dfn>) and fade out again (<dfn>decay</dfn>). The envelope has 16 volume levels and you can control the starting volume, direction of the envelope and the time till the next change. The <dfn>duty</dfn> refers to the ratio of the ‘on’ time and the period, in other words *D* = *h/T*.
+The GBA has two square sound generators, channels 1 and 2. The only difference between them is channel 1's <dfn>frequency sweep</dfn>, which can make the frequency rise or drop exponentially as it's played. That's all done with `REG_SND1SWEEP`. `REG_SNDxCNT` controls the wave's length, envelope and duty cycle. Length should be obvious. The <dfn>envelope</dfn> is basically the amplitude as function of time: you can make it fade in (<dfn>attack</dfn>), remain at the same level (<dfn>sustain</dfn>) and fade out again (<dfn>decay</dfn>). The envelope has 16 volume levels and you can control the starting volume, direction of the envelope and the time till the next change. Volumes are linear: 12 produces twice the amplitude of 6. The <dfn>duty</dfn> refers to the ratio of the ‘on’ time and the period, in other words *D* = *h/T*.
 
-Of course, you can control the frequency as well, namely with `REG_SNDxFREQ`. However, it isn't the frequency that you enter in this field. It's not exactly the period either; it's something I'll refer to as the <dfn>rate</dfn> *R*. The three quantities are related, but different in subtle ways and chaos ensues when they're confused – and they often *are* in documentation, so be careful. The relation between frequency *f* and rate *R* is described by eq 18.6; if the rate goes up, so does the frequency. Since *R* ∈ \[0, 2047\], the range of frequencies is \[64 Hz, 131 kHz\]. While this spans ten octaves, the highest ones aren't of much use because the frequency steps become too large (the denominator in eq 18.6 approaches 0).
+Of course, you can control the frequency as well, namely with `REG_SNDxFREQ`. However, it isn't the frequency that you enter in this field. It's not exactly the period either; it's something I'll refer to as the <dfn>rate</dfn> *R*. The three quantities are related, but different in subtle ways and chaos ensues when they're confused – and they often *are* in documentation, so be careful. The relation between frequency *f* and rate *R* is described by {@eq:fvsr}; if the rate goes up, so does the frequency. Since *R* ∈ \[0, 2047\], the range of frequencies is \[64 Hz, 131 kHz\]. While this spans ten octaves, the highest ones aren't of much use because the frequency steps become too large (the denominator in eq {@eq:fvsr} approaches 0).
 
-<table id="eq-fvsr">
+<table id="eq:fvsr">
 <tr>
-  <td class="eqnrcell">(18.6a)
+  <td class="eqnrcell">({!@eq:fvsr}a)
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <tbody align="center" valign="middle">
@@ -481,7 +481,7 @@ Of course, you can control the frequency as well, namely with `REG_SNDxFREQ`. Ho
   </tbody>
   </table>
 <tr>
-  <td class="eqnrcell">(18.6b)
+  <td class="eqnrcell">({!@eq:fvsr}b)
   <td class="eqcell">
     <i>R</i>(<i>f</i>) &nbsp;=&nbsp; 2048 
     &minus; 2<sup>17</sup> <big>/</big> <i>f</i>
@@ -489,7 +489,7 @@ Of course, you can control the frequency as well, namely with `REG_SNDxFREQ`. Ho
 
 ### Square sound registers {#ssec-snd-sqrreg}
 
-Both square-wave generators have registers `REG_SNDxCNT` for evelope/length/duty control and `REG_SNDxFREQ` for frequency control. Sound 1 also has sweep control in the form of `REG_SND1SWEEP`.Look in {{@tbl:snd-names}} for the traditional names; note that in traditional nomenclature the suffixes for control and frequency are *different* for channels 1 and 2, even though they have exactly the same function.
+Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/duty control and `REG_SNDxFREQ` for frequency control. Sound 1 also has sweep control in the form of `REG_SND1SWEEP`. Look in {@tbl:snd-names} for the traditional names; note that in traditional nomenclature the suffixes for control and frequency are *different* for channels 1 and 2, even though they have exactly the same function.
 
 <div class="reg">
 <table class="reg" id="tbl-reg-snd1cnt"
@@ -558,7 +558,7 @@ Both square-wave generators have registers `REG_SNDxCNT` for evelope/length/duty
 
 <div class="cpt_fr" style="width:312px;" markdown>
 <img src="img/sqrfour.png" alt="Fourier transform of square wave" id="fig:sqrf"><br>
-<b>{{*@fig:sqrf}}</b>: Square wave spectrum. 
+<b>{*@fig:sqrf}</b>: Square wave spectrum. 
   (integer <i>m</i> only)
 </div>
 
@@ -581,7 +581,7 @@ Both square-wave generators have registers `REG_SNDxCNT` for evelope/length/duty
   </table>
 </table>
 
-Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {{@fig:sqrf}}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
+Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {@fig:sqrf}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
 
 <div class="reg">
 <table class="reg" id="tbl-reg-snd1freq"
@@ -591,7 +591,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   REG_SND1FREQ (SOUND1CNT_X / SG11) @ <code>0400:0062h</code></span>
   <br> and <br>
 <span class="nobr">
-  REG_SND2FREQ (SOUND2CNT_H / SG21) @ <code>0400:006Ch</code></span>  
+  REG_SND2FREQ (SOUND2CNT_H / SG21) @ <code>0400:006Ch</code></span>
 </caption>
 <tr class="bits">
   <td class="wof">F<td>E<td>D C B
@@ -692,18 +692,18 @@ That's what belogic gives and if you know what the terms are you'll be fine. Con
 
 Second, the *n* in the exponent is *not* the current sweep index that runs up to the number of sweep shifts. It is in fact simply the **sweep shift number**, and the sweeps continue until the rate reaches 0 or the maximum of 2047.
 
-The formulas you may see do say that, but it's easy to misread them. I did. Eq 18.7 holds a number of correct relations. *R* is the rate, *n* is the sweep shift (18.7c explains why it's called a *shift* (singular, not plural)), and *j* is the current sweep index. You can view them in a number of ways, but they all boil down to exponential functions, that's what ‘d*y*(*x*) = *a·y*(*x*)d*x*’ means, after all. For example, if *n*=1, then you get 1½^j^ and ½^j^ behaviour for increasing and decreasing sweeps, respectively; with *n*=2 it's 1¼^j^ and ¾^j^, etc. The higher the shift, the slower the sweep.
+The formulas you may see do say that, but it's easy to misread them. I did. {*@eq:sweep} holds a number of correct relations. *R* is the rate, *n* is the sweep shift ({!@eq:sweep}c explains why it's called a *shift* (singular, not plural)), and *j* is the current sweep index. You can view them in a number of ways, but they all boil down to exponential functions, that's what ‘d*y*(*x*) = *a·y*(*x*)d*x*’ means, after all. For example, if *n*=1, then you get 1½<sup>j</sup> and ½<sup>j</sup> behaviour for increasing and decreasing sweeps, respectively; with *n*=2 it's 1¼<sup>j</sup> and ¾<sup>j</sup>, etc. The higher the shift, the slower the sweep.
 
-<table id="eq-sweep">
+<table id="eq:sweep">
 <tr>
-  <td class="eqnrcell">(18.7a)
+  <td class="eqnrcell">({!@eq:sweep}a)
   <td class="eqcell">
     &Delta;<i>R</i> &nbsp;=&nbsp; 2<sup>&minus;n</sup>&middot;<i>R</i>
 </table>
 
 <table>
 <tr>
-  <td class="eqnrcell">(18.7b)
+  <td class="eqnrcell">({!@eq:sweep}b)
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <col align="right">
@@ -729,16 +729,16 @@ The formulas you may see do say that, but it's easy to misread them. I did. Eq 1
 
 <table>
 <tr>
-  <td class="eqnrcell">(18.7c)
+  <td class="eqnrcell">({!@eq:sweep}c)
   <td class="eqcell">
     <code>R += R&gt;&gt;n;</code>
 </table>
 
 ### Playing notes {#ssec-snd-notes}
 
-Even though the rates are equal, some may be considered more equal than others. I've already given a table with the frequencies for the standard notes ({{@tbl:oct0}} of octave 0. You can of course convert those to rates via eq 18.6b and use them as such. However, it might pay to figure out how to play the notes of *all* octaves.
+Even though the rates are equal, some may be considered more equal than others. I've already given a table with the frequencies for the standard notes ({@tbl:oct0} of octave 0. You can of course convert those to rates via {@eq:fvsr}b and use them as such. However, it might pay to figure out how to play the notes of *all* octaves.
 
-To do this, we'll use some facts I mentioned in section 18.2.3. about the make-up of the musical scale. While I *could* make use of the logarithmic relation between successive notes (Δ*f*=2^1/12^·*f*), I'll restrict myself to the fact that notes between octaves differ by a factor of two. We'll also need the rate-frequency relation (obviously). That's the basic information you need, I'll explain more once we get through all the math. Yes, it's more math, but it'll be the last of this page, I promise.
+To do this, we'll use some facts I mentioned in section 18.2.3. about the make-up of the musical scale. While I *could* make use of the logarithmic relation between successive notes (Δ*f*=2<sup>1/12</sup>·*f*), I'll restrict myself to the fact that notes between octaves differ by a factor of two. We'll also need the rate-frequency relation (obviously). That's the basic information you need, I'll explain more once we get through all the math. Yes, it's more math, but it'll be the last of this page, I promise.
 
 The equations we'll start with are the general frequency equation and the rate-frequency relation. In these we have rate *R*, frequency *f* and octave *c*. We also have a base octave *C* and frequency *F* in that base octave.
 
@@ -764,9 +764,9 @@ The equations we'll start with are the general frequency equation and the rate-f
 
 And now for the magic. And you *are* expected to understand this.
 
-<table id="eq-noterate">
+<table id="eq:noterate">
 <tr>
-  <td class="eqnrcell">(18.8)
+  <td class="eqnrcell">({!@eq:noterate})
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <col align="right">
@@ -802,7 +802,7 @@ And now for the magic. And you *are* expected to understand this.
   </table>
 </table>
 
-Right, and now for *why* this thing's useful. Remember that the GBA has no hardware division or floating-point support, so we're left with integers and (if possible) shifts. That's why the last term in the last step of eq 18.8 was separated. The term with *F* gives a rate offset for the base octave, which we need to divide (read: shift) by the octave offset term for the different octaves. Remember that integer division truncates, so we need a big numerator for the most accuracy. This can be done with a large *C* and by adding an extra term *m*. Baseically, this makes it an *m*f fixed point division. The workable octave range is −2 to 5, so we take *C*=5. The value for *m* is *almost* arbitrary, but needs to be higher than two because of the minimum octave is −2, and a shift can never be negative. *m*=4 will suffice.
+Right, and now for *why* this thing's useful. Remember that the GBA has no hardware division or floating-point support, so we're left with integers and (if possible) shifts. That's why the last term in the last step of {@eq:noterate} was separated. The term with *F* gives a rate offset for the base octave, which we need to divide (read: shift) by the octave offset term for the different octaves. Remember that integer division truncates, so we need a big numerator for the most accuracy. This can be done with a large *C* and by adding an extra term *m*. Basically, this makes it an *m*f fixed point division. The workable octave range is −2 to 5, so we take *C*=5. The value for *m* is *almost* arbitrary, but needs to be higher than two because of the minimum octave is −2, and a shift can never be negative. *m*=4 will suffice.
 
 Note that there is *still* a division in there. Fortunately, there are only twelve values available for *F*, so might just as well store the whole term in a look-up table. The final result is listing 18.1 below.
 
@@ -817,7 +817,7 @@ typedef enum
     NOTE_GIS, NOTE_A,   NOTE_BES, NOTE_B
 } eSndNoteId;
 
-// Rates for traditional notes in octave +5
+// Rates for equal temperament notes in octave +5
 const u32 __snd_rates[12]=
 {
     8013, 7566, 7144, 6742, // C , C#, D , D#
@@ -1002,6 +1002,6 @@ void sos()
 
 There are two arrays here, `notes` and `lens`, and a loop over all elements. We take a byte from `notes` and use the nybbles for octave and note information, play the note, then wait a while –the length is indicated by the `lens` array– before the next note is played. Basically, we're playing music. Hey, if the likes of *Schnappi* and *Crazy Frog* can make it into the top 10, I think I'm allowed to call *this* music too, alright? Alright.
 
-The point I'm trying to make is that it's very well possible to play a tune with just the tone generators, technically you don't need digitized music and all that stuff to play something. Of course, it'll sound better if you do, but if you just need a little jingle the tone generators may be all you need. Just define some notes (the nybble format for octaves and notes will do) and some lengths and you have the basics already. You could even use more than one channel for different effects.
+The point I'm trying to make is that it's very well possible to play a tune with just the tone generators. Technically you don't need digitized music and all that stuff to play something. Of course, it'll sound better if you do, but if you just need a little jingle the tone generators may be all you need. Twelve years of Game Boy games using only tone generators prove this. Just define some notes (the nybble format for octaves and notes will do) and some lengths and you have the basics already. You could even use more than one channel for different effects.
 
-If you understood that, then get this: the note+length+channel idea is pretty much what tracked music (mod, it, xm, etc) does, only they use a more sophisticated wave than a square wave. But the principle is the same. Getting it to work takes a little more effort, but that's what Deku's [sound mix tutorial](http://deku.gbadev.org){target="_blank"} is for.
+If you understood that, then get this: the note+length+channel idea is pretty much what tracked music (mod, it, xm, etc) does, only they use a more sophisticated wave than a square wave. But the principle is the same. Getting it to work takes a little more effort, but that's what Deku's [sound mix tutorial](https://deku.gbadev.org/program/sound1.html){target="_blank"} is for.
