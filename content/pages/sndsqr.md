@@ -28,45 +28,177 @@ This is a prime example of wave behaviour. Giving a precise definition of a wave
 
 The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*) that's a solution to {@eq:wave}. The name of the variable doesn't really matter, but usually it's either spatial (*x*, *y*, *z*) or temporal (*t*), or all of these at the same time. The general solution can be found in {@eq:wave-sols}. Or perhaps I should say solution**s**, as there are many ways of writing them down. They're all equivalent though, and you can go from one to the other with some trickery that does not concern us at this moment.
 
+<!--
+\dv[2]{x}\psi(x) + k^2\psi(x) = 0
+-->
 <table id="eq:wave">
 <tbody valign="middle">
 <tr>
   <td class="eqnrcell">({!@eq:wave})
   <td class="eqcell">
-  <table cellpadding=0 cellspacing=0>
-  <tr>
-    <td class="bdrB"> d&sup2; 
-  <tr>
-    <td>dx&sup2;
-  </table>
-  <td class="eqcell">
-    &psi;(<i>x</i>) + k&sup2; &psi;(<i>x</i>) = 0
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mfrac>
+              <msup>
+                <mrow data-mjx-texclass="ORD">
+                  <mi mathvariant="normal">d</mi>
+                </mrow>
+                <mrow data-mjx-texclass="ORD">
+                  <mn>2</mn>
+                </mrow>
+              </msup>
+              <mrow>
+                <mrow data-mjx-texclass="ORD">
+                  <mi mathvariant="normal">d</mi>
+                </mrow>
+                <msup>
+                  <mi>x</mi>
+                  <mrow data-mjx-texclass="ORD">
+                    <mn>2</mn>
+                  </mrow>
+                </msup>
+              </mrow>
+            </mfrac>
+            <mi>&#x3C8;</mi>
+            <mo stretchy="false">(</mo>
+            <mi>x</mi>
+            <mo stretchy="false">)</mo>
+            <mo>+</mo>
+            <msup>
+              <mi>k</mi>
+              <mn>2</mn>
+            </msup>
+            <mi>&#x3C8;</mi>
+            <mo stretchy="false">(</mo>
+            <mi>x</mi>
+            <mo stretchy="false">)</mo>
+            <mo>=</mo>
+            <mn>0</mn>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </tbody>
 </table>
 
 General solution(s):
 
+<!--
+\begin{matrix}
+\psi(x) & = & A \cdot cos(kx) + B \cdot sin(kx) \\
+ & = & C \cdot e^{ikx} + D \cdot e^{-ikx} \\
+ & = & E \cdot sin(kx + \varphi_0)
+\end{matrix}
+-->
+
 <table id="eq:wave-sols">
 <tr>
   <td class="eqnrcell">({!@eq:wave-sols})
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <col align="right">
-  <col align="center">
-  <col align="left">
-  <tr>
-    <td>&psi;(<i>x</i>)
-    <td>=
-    <td> A&middot;cos(k<i>x</i>) + B&middot;sin(k<i>x</i>) 
-  <tr>
-    <td>&nbsp;
-    <td>=
-    <td> C&middot;e<sup>i k<i>x</i></sup> + D&middot;e<sup>-i k<i>x</i></sup>
-  <tr>
-    <td>&nbsp;
-    <td>=
-    <td> E&middot;sin(k<i>x</i> + &phi;<sub>0</sub>)
-  </table>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mtable columnspacing="1em" rowspacing="4pt">
+              <mtr>
+                <mtd>
+                  <mi>&#x3C8;</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>x</mi>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mi>A</mi>
+                  <mo>&#x22C5;</mo>
+                  <mi>c</mi>
+                  <mi>o</mi>
+                  <mi>s</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>k</mi>
+                  <mi>x</mi>
+                  <mo stretchy="false">)</mo>
+                  <mo>+</mo>
+                  <mi>B</mi>
+                  <mo>&#x22C5;</mo>
+                  <mi>s</mi>
+                  <mi>i</mi>
+                  <mi>n</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>k</mi>
+                  <mi>x</mi>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mi>C</mi>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mi>e</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>i</mi>
+                      <mi>k</mi>
+                      <mi>x</mi>
+                    </mrow>
+                  </msup>
+                  <mo>+</mo>
+                  <mi>D</mi>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mi>e</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mo>&#x2212;</mo>
+                      <mi>i</mi>
+                      <mi>k</mi>
+                      <mi>x</mi>
+                    </mrow>
+                  </msup>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mi>E</mi>
+                  <mo>&#x22C5;</mo>
+                  <mi>s</mi>
+                  <mi>i</mi>
+                  <mi>n</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>k</mi>
+                  <mi>x</mi>
+                  <mo>+</mo>
+                  <msub>
+                    <mi>&#x3C6;</mi>
+                    <mn>0</mn>
+                  </msub>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+              </mtr>
+            </mtable>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 <div class="cpt_fr" style="width:212px;" markdown>
@@ -117,44 +249,200 @@ While the full range between 20 Hz and 20 kHz is audible, only a discrete set of
 
 Fourier transformations are a way of going describing a function in the time domain as a distribution of frequencies called a <dfn>spectrum</dfn>. They're also one of the many ways that professors can scare the bejebus out of young, natural-science students. Don't worry, I'm sure you'll get through this section unscathed <span class="kbd">\>:)</span>. For well- to reasonably-behaved functions, you can rewrite them as series of *very* well-behaved functions such as polynomials, exponentials and also waves. For example, as a Fourier series, a function may look like {@eq:fser}.
 
+<!--
+f(x) = \frac{1}{2}A_0 + \sum_{n>0}A_m\cos(m{\omega}t) + \sum_{n>0}B_m\sin(m{\omega}t)
+-->
 <table id="eq:fser">
 <tr>
   <td class="eqnrcell">({!@eq:fser})
-  <td class="eqcell">f(<i>t</i>) = &frac12;A<sub>0</sub> + 
-    <big>&Sigma;</big><sub>n&gt;0</sub>
-    <i>A</i><sub>m</sub>cos(m&omega;<i>t</i>) + 
-    <big>&Sigma;</big><sub>n&gt;0</sub>
-    <i>B</i><sub>m</sub>sin(m&omega;<i>t</i>)
+  <td class="eqcell">
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mi>f</mi>
+            <mo stretchy="false">(</mo>
+            <mi>x</mi>
+            <mo stretchy="false">)</mo>
+            <mo>=</mo>
+            <mfrac>
+              <mn>1</mn>
+              <mn>2</mn>
+            </mfrac>
+            <msub>
+              <mi>A</mi>
+              <mn>0</mn>
+            </msub>
+            <mo>+</mo>
+            <munder>
+              <mo data-mjx-texclass="OP">&#x2211;</mo>
+              <mrow data-mjx-texclass="ORD">
+                <mi>n</mi>
+                <mo>&gt;</mo>
+                <mn>0</mn>
+              </mrow>
+            </munder>
+            <msub>
+              <mi>A</mi>
+              <mi>m</mi>
+            </msub>
+            <mi>cos</mi>
+            <mo data-mjx-texclass="NONE">&#x2061;</mo>
+            <mrow>
+              <mo data-mjx-texclass="OPEN">(</mo>
+              <mi>m</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mi>&#x3C9;</mi>
+              </mrow>
+              <mi>t</mi>
+              <mo data-mjx-texclass="CLOSE">)</mo>
+            </mrow>
+            <mo>+</mo>
+            <munder>
+              <mo data-mjx-texclass="OP">&#x2211;</mo>
+              <mrow data-mjx-texclass="ORD">
+                <mi>n</mi>
+                <mo>&gt;</mo>
+                <mn>0</mn>
+              </mrow>
+            </munder>
+            <msub>
+              <mi>B</mi>
+              <mi>m</mi>
+            </msub>
+            <mi>sin</mi>
+            <mo data-mjx-texclass="NONE">&#x2061;</mo>
+            <mrow>
+              <mo data-mjx-texclass="OPEN">(</mo>
+              <mi>m</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mi>&#x3C9;</mi>
+              </mrow>
+              <mi>t</mi>
+              <mo data-mjx-texclass="CLOSE">)</mo>
+            </mrow>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 Of course, the whole thing relies on being able to find the coefficients *A*<sub>m</sub> and *B*<sub>m</sub>. While it is fairly straightforward to derive the equations for them, I'll leave that as an exercise for the reader and just present the results in the form of {@eq:ftrans}. I should mention that there are actually a few ways of defining Fourier transforms. For example, there are versions that don't integrate over \[0,*T*\], but over \[−½*T*, ½*T*\]; or use the complex exponential instead of sines and cosines, but in the end they're all doing the same thing.
 
+<!--
+\begin{matrix}
+A_m & = & \frac{2}{T}\int_{0}^{T} f(t)\cos(m{\omega}t) dt \\
+B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
+\end{matrix}
+-->
 <table id="eq:ftrans">
 <tr>
   <td class="eqnrcell">({!@eq:ftrans})
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <tbody valign="middle">
-  <tr>
-    <td><i>A</i><sub>m</sub>
-    <td> =
-    <td>
-      <table cellpadding=2 cellspacing=0>
-      <tr><td class="bdrB"> 2
-      <tr><td> T
-      </table>
-    <td><big>&int;</big><sub>0,T</sub> 
-      f(<i>t</i>) cos(m&omega;<i>t</i>) dt
-  <tr>
-    <td><i>B</i><sub>m</sub>
-    <td> =
-    <td>
-      <table cellpadding=2 cellspacing=0>
-      <tr><td class="bdrB"> 2
-      <tr><td> T
-      </table>
-    <td><big>&int;</big><sub>0,T</sub> 
-      f(<i>t</i>) sin(m&omega;<i>t</i>) dt
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mtable columnspacing="1em" rowspacing="4pt">
+              <mtr>
+                <mtd>
+                  <msub>
+                    <mi>A</mi>
+                    <mi>m</mi>
+                  </msub>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mfrac>
+                    <mn>2</mn>
+                    <mi>T</mi>
+                  </mfrac>
+                  <msubsup>
+                    <mo data-mjx-texclass="OP">&#x222B;</mo>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>0</mn>
+                    </mrow>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>T</mi>
+                    </mrow>
+                  </msubsup>
+                  <mi>f</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>t</mi>
+                  <mo stretchy="false">)</mo>
+                  <mi>cos</mi>
+                  <mo data-mjx-texclass="NONE">&#x2061;</mo>
+                  <mrow>
+                    <mo data-mjx-texclass="OPEN">(</mo>
+                    <mi>m</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>&#x3C9;</mi>
+                    </mrow>
+                    <mi>t</mi>
+                    <mo data-mjx-texclass="CLOSE">)</mo>
+                  </mrow>
+                  <mi>d</mi>
+                  <mi>t</mi>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd>
+                  <msub>
+                    <mi>B</mi>
+                    <mi>m</mi>
+                  </msub>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mfrac>
+                    <mn>2</mn>
+                    <mi>T</mi>
+                  </mfrac>
+                  <msubsup>
+                    <mo data-mjx-texclass="OP">&#x222B;</mo>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>0</mn>
+                    </mrow>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>T</mi>
+                    </mrow>
+                  </msubsup>
+                  <mi>f</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>t</mi>
+                  <mo stretchy="false">)</mo>
+                  <mi>sin</mi>
+                  <mo data-mjx-texclass="NONE">&#x2061;</mo>
+                  <mrow>
+                    <mo data-mjx-texclass="OPEN">(</mo>
+                    <mi>m</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>&#x3C9;</mi>
+                    </mrow>
+                    <mi>t</mi>
+                    <mo data-mjx-texclass="CLOSE">)</mo>
+                  </mrow>
+                  <mi>d</mi>
+                  <mi>t</mi>
+                </mtd>
+              </mtr>
+            </mtable>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
   </tbody>
   </table>
 </table>
@@ -166,34 +454,96 @@ Of course, the whole thing relies on being able to find the coefficients *A*<sub
 
 As an example, let's take a look at the square wave shown in {@fig:sqrwave}. A square wave is on (1) for a certain time (parameter *h*), then off (0) for the rest of the cycle. It's still a periodic wave, so it doesn't really matter where we place the thing along the *t*-axis. I centered it on the peak for convenience: doing so makes it a symmetrical wave which has the nice properly of removing *all* the anti-symmetrical sine waves. *A*<sub>0</sub>=*h*/*T* because it's the average of the function and the rest of the *A*<sub>m</sub>'s follow from {@eq:ftrans}.
 
+<!--
+A_m = \frac{2}{\pi} \cdot \frac{\sin({\pi}mh/T)}{m} = \frac{2T}{h} \cdot \frac{\sin({\pi}h/T \cdot m)}{{\pi}h/T \cdot m}
+-->
 <table id="eq:fsqr">
 <tr>
   <td class="eqnrcell">({!@eq:fsqr})
   <td class="eqcell">
-    <i>A</i><sub>m</sub> = 
-  <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <tbody align="center">
-  <tr>
-    <td class="bdrB">2
-    <td rowspan=2>&middot;
-    <td class="bdrB">sin(&pi;m <i>h/T</i>)
-  <tr>
-    <td>&pi;
-    <td>m
-  </tbody>
-  </table>
-  <td> &nbsp;=&nbsp;
-  <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <tbody align="center">
-  <tr>
-    <td class="bdrB">2<i>T</i>
-    <td rowspan=2>&middot;
-    <td class="bdrB">sin(&pi;<i>h/T</i> m)
-  <tr>
-    <td><i>h</i>
-    <td>&pi;<i>h/T</i> m
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <msub>
+              <mi>A</mi>
+              <mi>m</mi>
+            </msub>
+            <mo>=</mo>
+            <mfrac>
+              <mn>2</mn>
+              <mi>&#x3C0;</mi>
+            </mfrac>
+            <mo>&#x22C5;</mo>
+            <mfrac>
+              <mrow>
+                <mi>sin</mi>
+                <mo data-mjx-texclass="NONE">&#x2061;</mo>
+                <mrow>
+                  <mo data-mjx-texclass="OPEN">(</mo>
+                  <mrow data-mjx-texclass="ORD">
+                    <mi>&#x3C0;</mi>
+                  </mrow>
+                  <mi>m</mi>
+                  <mi>h</mi>
+                  <mrow data-mjx-texclass="ORD">
+                    <mo>/</mo>
+                  </mrow>
+                  <mi>T</mi>
+                  <mo data-mjx-texclass="CLOSE">)</mo>
+                </mrow>
+              </mrow>
+              <mi>m</mi>
+            </mfrac>
+            <mo>=</mo>
+            <mfrac>
+              <mrow>
+                <mn>2</mn>
+                <mi>T</mi>
+              </mrow>
+              <mi>h</mi>
+            </mfrac>
+            <mo>&#x22C5;</mo>
+            <mfrac>
+              <mrow>
+                <mi>sin</mi>
+                <mo data-mjx-texclass="NONE">&#x2061;</mo>
+                <mrow>
+                  <mo data-mjx-texclass="OPEN">(</mo>
+                  <mrow data-mjx-texclass="ORD">
+                    <mi>&#x3C0;</mi>
+                  </mrow>
+                  <mi>h</mi>
+                  <mrow data-mjx-texclass="ORD">
+                    <mo>/</mo>
+                  </mrow>
+                  <mi>T</mi>
+                  <mo>&#x22C5;</mo>
+                  <mi>m</mi>
+                  <mo data-mjx-texclass="CLOSE">)</mo>
+                </mrow>
+              </mrow>
+              <mrow>
+                <mrow data-mjx-texclass="ORD">
+                  <mi>&#x3C0;</mi>
+                </mrow>
+                <mi>h</mi>
+                <mrow data-mjx-texclass="ORD">
+                  <mo>/</mo>
+                </mrow>
+                <mi>T</mi>
+                <mo>&#x22C5;</mo>
+                <mi>m</mi>
+              </mrow>
+            </mfrac>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
   </tbody>
   </table>
 </table>
@@ -467,24 +817,75 @@ The GBA has two square sound generators, channels 1 and 2. The only difference b
 
 Of course, you can control the frequency as well, namely with `REG_SNDxFREQ`. However, it isn't the frequency that you enter in this field. It's not exactly the period either; it's something I'll refer to as the <dfn>rate</dfn> *R*. The three quantities are related, but different in subtle ways and chaos ensues when they're confused – and they often *are* in documentation, so be careful. The relation between frequency *f* and rate *R* is described by {@eq:fvsr}; if the rate goes up, so does the frequency. Since *R* ∈ \[0, 2047\], the range of frequencies is \[64 Hz, 131 kHz\]. While this spans ten octaves, the highest ones aren't of much use because the frequency steps become too large (the denominator in eq {@eq:fvsr} approaches 0).
 
+<!--
+f(R) = \frac{2^{17}}{2048-R}
+R(f) = 2048 - \frac{2^{17}}{f}
+-->
+
 <table id="eq:fvsr">
 <tr>
   <td class="eqnrcell">({!@eq:fvsr}a)
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <tbody align="center" valign="middle">
-  <tr>
-    <td rowspan=2> <i>f</i>(<i>R</i>) &nbsp;=&nbsp;
-    <td class="bdrB"> 2<sup>17</sup>
-  <tr>
-    <td> 2048 &minus; <i>R</i>
-  </tbody>
-  </table>
-<tr>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mi>f</mi>
+            <mo stretchy="false">(</mo>
+            <mi>R</mi>
+            <mo stretchy="false">)</mo>
+            <mo>=</mo>
+            <mfrac>
+              <msup>
+                <mn>2</mn>
+                <mrow data-mjx-texclass="ORD">
+                  <mn>17</mn>
+                </mrow>
+              </msup>
+              <mrow>
+                <mn>2048</mn>
+                <mo>&#x2212;</mo>
+                <mi>R</mi>
+              </mrow>
+            </mfrac>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math><tr>
   <td class="eqnrcell">({!@eq:fvsr}b)
   <td class="eqcell">
-    <i>R</i>(<i>f</i>) &nbsp;=&nbsp; 2048 
-    &minus; 2<sup>17</sup> <big>/</big> <i>f</i>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mi>R</mi>
+            <mo stretchy="false">(</mo>
+            <mi>f</mi>
+            <mo stretchy="false">)</mo>
+            <mo>=</mo>
+            <mn>2048</mn>
+            <mo>&#x2212;</mo>
+            <mfrac>
+              <msup>
+                <mn>2</mn>
+                <mrow data-mjx-texclass="ORD">
+                  <mn>17</mn>
+                </mrow>
+              </msup>
+              <mi>f</mi>
+            </mfrac>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 ### Square sound registers {#ssec-snd-sqrreg}
@@ -562,23 +963,50 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
   (integer <i>m</i> only)
 </div>
 
+<!--
+A_m = \frac{2}{\pi} \cdot \frac{sin({\pi}Dm)}{m}
+-->
 <table>
 <tr>
   <td class="fill">&nbsp;
   <td class="eqcell">
-    <i>A</i><sub>m</sub> = 
-  <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <tbody align="center">
-  <tr>
-    <td class="bdrB">2
-    <td rowspan=2>&middot;
-    <td class="bdrB">sin(&pi;<i>D</i> m)
-  <tr>
-    <td>&pi;
-    <td>m
-  </tbody>
-  </table>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <msub>
+              <mi>A</mi>
+              <mi>m</mi>
+            </msub>
+            <mo>=</mo>
+            <mfrac>
+              <mn>2</mn>
+              <mi>&#x3C0;</mi>
+            </mfrac>
+            <mo>&#x22C5;</mo>
+            <mfrac>
+              <mrow>
+                <mi>s</mi>
+                <mi>i</mi>
+                <mi>n</mi>
+                <mo stretchy="false">(</mo>
+                <mrow data-mjx-texclass="ORD">
+                  <mi>&#x3C0;</mi>
+                </mrow>
+                <mi>D</mi>
+                <mi>m</mi>
+                <mo stretchy="false">)</mo>
+              </mrow>
+              <mi>m</mi>
+            </mfrac>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {@fig:sqrf}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
@@ -680,12 +1108,38 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
 
 I'm reasonably confident that the *exact* workings of shifts are explained without due care in most documents, so here are a few more things about it. Sure enough, the sweep *does* make the pitch go up or down which is controlled by bit 3, and the step-time *does* change the pitch after that time, but exactly what the sweep-shift does is ambiguous at best. The information is in there, but only if you know what to look for. The usual formula given is something like:
 
+<!--
+T = T \pm T\cdot2^{-n}
+-->
 <table>
 <tr>
   <td class="fill">
   <td class="eqcell">
-    <i>T</i> &nbsp;=&nbsp; <i>T</i> &plusmn; 
-    <i>T</i>&middot;2<sup>&minus;n</sup>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mi>T</mi>
+            <mo>=</mo>
+            <mi>T</mi>
+            <mo>&#xB1;</mo>
+            <mi>T</mi>
+            <mo>&#x22C5;</mo>
+            <msup>
+              <mn>2</mn>
+              <mrow data-mjx-texclass="ORD">
+                <mo>&#x2212;</mo>
+                <mi>n</mi>
+              </mrow>
+            </msup>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 That's what belogic gives and if you know what the terms are you'll be fine. Contrary to what you may read, the sweep does *not* apply to the frequency (*f*). It does *not* apply to the period (*T*, see above). It applies to the **rate** (*R*). If you look in emulators, you can actually *see* the rate-value change.
@@ -694,112 +1148,472 @@ Second, the *n* in the exponent is *not* the current sweep index that runs up to
 
 The formulas you may see do say that, but it's easy to misread them. I did. {*@eq:sweep} holds a number of correct relations. *R* is the rate, *n* is the sweep shift ({!@eq:sweep}c explains why it's called a *shift* (singular, not plural)), and *j* is the current sweep index. You can view them in a number of ways, but they all boil down to exponential functions, that's what ‘d*y*(*x*) = *a·y*(*x*)d*x*’ means, after all. For example, if *n*=1, then you get 1½<sup>j</sup> and ½<sup>j</sup> behaviour for increasing and decreasing sweeps, respectively; with *n*=2 it's 1¼<sup>j</sup> and ¾<sup>j</sup>, etc. The higher the shift, the slower the sweep.
 
+<!--
+{\Delta}R = 2^{-n} \cdot R
+-->
 <table id="eq:sweep">
 <tr>
   <td class="eqnrcell">({!@eq:sweep}a)
   <td class="eqcell">
-    &Delta;<i>R</i> &nbsp;=&nbsp; 2<sup>&minus;n</sup>&middot;<i>R</i>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mrow data-mjx-texclass="ORD">
+              <mi mathvariant="normal">&#x394;</mi>
+            </mrow>
+            <mi>R</mi>
+            <mo>=</mo>
+            <msup>
+              <mn>2</mn>
+              <mrow data-mjx-texclass="ORD">
+                <mo>&#x2212;</mo>
+                <mi>n</mi>
+              </mrow>
+            </msup>
+            <mo>&#x22C5;</mo>
+            <mi>R</mi>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
+<!--
+\begin{matrix}
+R_j & = & R_{j-1} \pm R_{j-1} \cdot 2^{-n} \\
+    & = & R_{j-1} \cdot (1 \pm 2^{-n}) \\
+    & = & R_0 \cdot (1 \pm 2^{-n})^j
+\end{matrix}
+-->
 <table>
 <tr>
   <td class="eqnrcell">({!@eq:sweep}b)
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <col align="right">
-  <col align="center">
-  <col align="left">
-  <tr>
-    <td><i>R</i><sub>j</sub> 
-    <td>&nbsp;=&nbsp;
-    <td><i>R</i><sub>j&minus;1</sub> &plusmn; 
-      <i>R</i><sub>j&minus;1</sub>&middot;2<sup>-n</sup>
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td><i>R</i><sub>j&minus;1</sub><big>(</big>1 &plusmn; 
-      2<sup>&minus;n</sup><big>)</big>
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td><i>R</i><sub>0</sub>
-      <big>(</big>1 &plusmn; 2<sup>&minus;n</sup><big>)<sup>j</sup></big>
-  </table>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mtable columnspacing="1em" rowspacing="4pt">
+              <mtr>
+                <mtd>
+                  <msub>
+                    <mi>R</mi>
+                    <mi>j</mi>
+                  </msub>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msub>
+                    <mi>R</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>j</mi>
+                      <mo>&#x2212;</mo>
+                      <mn>1</mn>
+                    </mrow>
+                  </msub>
+                  <mo>&#xB1;</mo>
+                  <msub>
+                    <mi>R</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>j</mi>
+                      <mo>&#x2212;</mo>
+                      <mn>1</mn>
+                    </mrow>
+                  </msub>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mo>&#x2212;</mo>
+                      <mi>n</mi>
+                    </mrow>
+                  </msup>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msub>
+                    <mi>R</mi>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>j</mi>
+                      <mo>&#x2212;</mo>
+                      <mn>1</mn>
+                    </mrow>
+                  </msub>
+                  <mo>&#x22C5;</mo>
+                  <mo stretchy="false">(</mo>
+                  <mn>1</mn>
+                  <mo>&#xB1;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mo>&#x2212;</mo>
+                      <mi>n</mi>
+                    </mrow>
+                  </msup>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msub>
+                    <mi>R</mi>
+                    <mn>0</mn>
+                  </msub>
+                  <mo>&#x22C5;</mo>
+                  <mo stretchy="false">(</mo>
+                  <mn>1</mn>
+                  <mo>&#xB1;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mo>&#x2212;</mo>
+                      <mi>n</mi>
+                    </mrow>
+                  </msup>
+                  <msup>
+                    <mo stretchy="false">)</mo>
+                    <mi>j</mi>
+                  </msup>
+                </mtd>
+              </mtr>
+            </mtable>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 <table>
 <tr>
   <td class="eqnrcell">({!@eq:sweep}c)
   <td class="eqcell">
-    <code>R += R&gt;&gt;n;</code>
+    <code>R += R &gt;&gt; n;</code>
 </table>
 
 ### Playing notes {#ssec-snd-notes}
 
-Even though the rates are equal, some may be considered more equal than others. I've already given a table with the frequencies for the standard notes ({@tbl:oct0} of octave 0. You can of course convert those to rates via {@eq:fvsr}b and use them as such. However, it might pay to figure out how to play the notes of *all* octaves.
+Even though the rates are equal, some may be considered more equal than others. I've already given a table with the frequencies for the standard notes ({@tbl:oct0}) of octave 0. You can of course convert those to rates via {@eq:fvsr}b and use them as such. However, it might pay to figure out how to play the notes of *all* octaves.
 
 To do this, we'll use some facts I mentioned in section 18.2.3. about the make-up of the musical scale. While I *could* make use of the logarithmic relation between successive notes (Δ*f*=2<sup>1/12</sup>·*f*), I'll restrict myself to the fact that notes between octaves differ by a factor of two. We'll also need the rate-frequency relation (obviously). That's the basic information you need, I'll explain more once we get through all the math. Yes, it's more math, but it'll be the last of this page, I promise.
 
 The equations we'll start with are the general frequency equation and the rate-frequency relation. In these we have rate *R*, frequency *f* and octave *c*. We also have a base octave *C* and frequency *F* in that base octave.
 
+<!--
+\begin{matrix}
+f(F, c) & = & F \cdot 2^{c - C} \\
+R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)}
+\end{matrix}
+-->
 <table>
 <tr>
   <td class="fill">&nbsp;
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <col align="right">
-  <col align="center">
-  <col align="left">
-  <tr>
-    <td><i>f</i>(<i>F</i>, <i>c</i>)
-    <td>&nbsp;=&nbsp;
-    <td><i>F</i>&middot;2<sup>c&minus;C</sup>
-  <tr>
-    <td><i>R</i>(<i>F</i>, <i>c</i>)
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/</big> 
-      <i>f</i>(<i>F</i>, <i>c</i>)
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mtable columnspacing="1em" rowspacing="4pt">
+              <mtr>
+                <mtd>
+                  <mi>f</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>F</mi>
+                  <mo>,</mo>
+                  <mi>c</mi>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <mi>F</mi>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mi>c</mi>
+                      <mo>&#x2212;</mo>
+                      <mi>C</mi>
+                    </mrow>
+                  </msup>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd>
+                  <mi>R</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>F</mi>
+                  <mo>,</mo>
+                  <mi>c</mi>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <msup>
+                      <mn>2</mn>
+                      <mrow data-mjx-texclass="ORD">
+                        <mn>17</mn>
+                      </mrow>
+                    </msup>
+                    <mrow>
+                      <mi>f</mi>
+                      <mo stretchy="false">(</mo>
+                      <mi>F</mi>
+                      <mo>,</mo>
+                      <mi>c</mi>
+                      <mo stretchy="false">)</mo>
+                    </mrow>
+                  </mfrac>
+                </mtd>
+              </mtr>
+            </mtable>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
   </table>
 </table>
 
 And now for the magic. And you *are* expected to understand this.
 
+<!--
+\begin{matrix}
+R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)} \\
+        & = & 2^{11} - \frac{2^{17}}{F \cdot 2^{c - C}} \\
+        & = & 2^{11} - \frac{2^{17 + C - c}}{F} \\
+        & = & 2^{11} - \frac{1}{F} \cdot 2^{17 + C + m - (c + m)}  \\
+        & = & 2^{11} - \frac{2^{17 + C + m}}{F} \cdot 2^{ - (c + m)}
+\end{matrix}
+-->
 <table id="eq:noterate">
 <tr>
   <td class="eqnrcell">({!@eq:noterate})
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <col align="right">
-  <col align="center">
-  <col align="left">
-  <tr>
-    <td><i>R</i>(<i>F</i>, <i>c</i>)
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/</big> 
-      <i>f</i>(<i>F</i>, <i>c</i>)
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus; 2<sup>17</sup> <big>/ 
-      (</big><i>F</i>&middot;2<sup>c&minus;C</sup><big>)</big>
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus; 
-      2<sup>17+C&minus;c</sup> <big>/</big> 
-      <i>F</i>
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus; 1<big>/</big><i>F</i> &middot;   
-      2<sup>17+C+m&minus;(<i>c</i>+m)</sup> 
-  <tr>
-    <td>&nbsp;
-    <td>&nbsp;=&nbsp;
-    <td>2<sup>11</sup> &minus;   
-      <big>{</big> 2<sup>17+C+m</sup><big>/</big><i>F</i> <big>}</big>
-      &middot; 2<sup>&minus;(<i>c</i>+m)</sup> 
-  </table>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mstyle displaystyle="true" scriptlevel="0">
+    <mrow data-mjx-texclass="ORD">
+      <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+        <mtr>
+          <mtd>
+            <mtable columnspacing="1em" rowspacing="4pt">
+              <mtr>
+                <mtd>
+                  <mi>R</mi>
+                  <mo stretchy="false">(</mo>
+                  <mi>F</mi>
+                  <mo>,</mo>
+                  <mi>c</mi>
+                  <mo stretchy="false">)</mo>
+                </mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <msup>
+                      <mn>2</mn>
+                      <mrow data-mjx-texclass="ORD">
+                        <mn>17</mn>
+                      </mrow>
+                    </msup>
+                    <mrow>
+                      <mi>f</mi>
+                      <mo stretchy="false">(</mo>
+                      <mi>F</mi>
+                      <mo>,</mo>
+                      <mi>c</mi>
+                      <mo stretchy="false">)</mo>
+                    </mrow>
+                  </mfrac>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <msup>
+                      <mn>2</mn>
+                      <mrow data-mjx-texclass="ORD">
+                        <mn>17</mn>
+                      </mrow>
+                    </msup>
+                    <mrow>
+                      <mi>F</mi>
+                      <mo>&#x22C5;</mo>
+                      <msup>
+                        <mn>2</mn>
+                        <mrow data-mjx-texclass="ORD">
+                          <mi>c</mi>
+                          <mo>&#x2212;</mo>
+                          <mi>C</mi>
+                        </mrow>
+                      </msup>
+                    </mrow>
+                  </mfrac>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <msup>
+                      <mn>2</mn>
+                      <mrow data-mjx-texclass="ORD">
+                        <mn>17</mn>
+                        <mo>+</mo>
+                        <mi>C</mi>
+                        <mo>&#x2212;</mo>
+                        <mi>c</mi>
+                      </mrow>
+                    </msup>
+                    <mi>F</mi>
+                  </mfrac>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <mn>1</mn>
+                    <mi>F</mi>
+                  </mfrac>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>17</mn>
+                      <mo>+</mo>
+                      <mi>C</mi>
+                      <mo>+</mo>
+                      <mi>m</mi>
+                      <mo>&#x2212;</mo>
+                      <mo stretchy="false">(</mo>
+                      <mi>c</mi>
+                      <mo>+</mo>
+                      <mi>m</mi>
+                      <mo stretchy="false">)</mo>
+                    </mrow>
+                  </msup>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd></mtd>
+                <mtd>
+                  <mo>=</mo>
+                </mtd>
+                <mtd>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mn>11</mn>
+                    </mrow>
+                  </msup>
+                  <mo>&#x2212;</mo>
+                  <mfrac>
+                    <msup>
+                      <mn>2</mn>
+                      <mrow data-mjx-texclass="ORD">
+                        <mn>17</mn>
+                        <mo>+</mo>
+                        <mi>C</mi>
+                        <mo>+</mo>
+                        <mi>m</mi>
+                      </mrow>
+                    </msup>
+                    <mi>F</mi>
+                  </mfrac>
+                  <mo>&#x22C5;</mo>
+                  <msup>
+                    <mn>2</mn>
+                    <mrow data-mjx-texclass="ORD">
+                      <mo>&#x2212;</mo>
+                      <mo stretchy="false">(</mo>
+                      <mi>c</mi>
+                      <mo>+</mo>
+                      <mi>m</mi>
+                      <mo stretchy="false">)</mo>
+                    </mrow>
+                  </msup>
+                </mtd>
+              </mtr>
+            </mtable>
+          </mtd>
+        </mtr>
+      </mtable>
+    </mrow>
+  </mstyle>
+</math>
 </table>
 
 Right, and now for *why* this thing's useful. Remember that the GBA has no hardware division or floating-point support, so we're left with integers and (if possible) shifts. That's why the last term in the last step of {@eq:noterate} was separated. The term with *F* gives a rate offset for the base octave, which we need to divide (read: shift) by the octave offset term for the different octaves. Remember that integer division truncates, so we need a big numerator for the most accuracy. This can be done with a large *C* and by adding an extra term *m*. Basically, this makes it an *m*f fixed point division. The workable octave range is −2 to 5, so we take *C*=5. The value for *m* is *almost* arbitrary, but needs to be higher than two because of the minimum octave is −2, and a shift can never be negative. *m*=4 will suffice.
