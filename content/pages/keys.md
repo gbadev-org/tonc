@@ -5,7 +5,7 @@ Author: Cearn
 
 # 6. The GBA buttons (a.k.a. keys) {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Introduction {#sec-intro}
 
@@ -220,7 +220,7 @@ INLINE u32 key_released(u32 key)
 
 ### Key tribool states {#ssec-adv-tri}
 
-This is a little technique taken from the [PA_Lib wiki](http://www.palib.info/wiki/doku.php?id=day4){target="_blank"}. It isn't so much about keys per se, but a shorthand in how you can use the functions, and you will have to make up for yourself whether what's discussed in this subsection is right for you.
+This is a little technique taken from the [PA_Lib wiki](http://www.palib.info/wiki/doku.php?id=day4). It isn't so much about keys per se, but a shorthand in how you can use the functions, and you will have to make up for yourself whether what's discussed in this subsection is right for you.
 
 Imagine you have a game/demo/whatever in which you can move stuff around. To make a character move left and right, for example, you might do use something like this.
 

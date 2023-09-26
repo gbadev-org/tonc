@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 1. GBA Hardware {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Meet the GBA {#sec-intro}
 
@@ -67,11 +67,11 @@ To get anything done, you use <dfn>memory-mapped IO</dfn>. Specific areas of mem
 
 As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2^24^ cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16-bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
 
-For more information on the CPU, go to [www.arm.com](http://www.arm.com){target="_blank"} or to the [assembly chapter](asm.html)
+For more information on the CPU, go to [www.arm.com](http://www.arm.com) or to the [assembly chapter](asm.html)
 
 ## Memory Sections {#sec-memory}
 
-This section lists the various memory areas. It's basically a summary of the [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} section on memory.
+This section lists the various memory areas. It's basically a summary of the [GBATek](http://nocash.emubase.de/gbatek.htm) section on memory.
 
 <div class="cblock">
   <table border=1 cellspacing=0 cellpadding=2>
@@ -163,4 +163,4 @@ This section lists the various memory areas. It's basically a summary of the [GB
   </table>
 </div>
 
-The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The areas you will deal with them most are IO, PAL, VRAM and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like the [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm){target="_blank"} are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.
+The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The areas you will deal with them most are IO, PAL, VRAM and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like the [GBATek](http://nocash.emubase.de/gbatek.htm) and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.

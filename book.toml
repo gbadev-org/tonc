@@ -1,0 +1,19 @@
+[book]
+title = "Tonc - GBA Programming in rot13"
+src = "content"
+language = "en"
+
+[build]
+build-dir = "output"
+create-missing = false
+
+[preprocessor.toc]
+command = "cargo run -p mdbook-toc --locked --release --"
+# Doesn't seem to work because of how markdown parses this as an unresolved shorthand link.
+# Default marker is <!-- toc -->
+# marker = "[TOC]"
+renderer = ["html"]
+max-level = 2
+
+[preprocessor.external-links]
+command = "cargo run -p mdbook-external-links --locked --release --"

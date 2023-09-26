@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 7. Sprite and background overview
 
-[TOC]
+<!-- toc -->
 
 ## Sprites and backgrounds introduction {#sec-intro}
 
@@ -187,7 +187,7 @@ Sprites and backgrounds have separate palettes. The background palette goes firs
 
 In 8-bit color mode, the pixel value in the tiles is palette-index for that pixel. In 4-bit color mode, the pixel value contains the lower nybble of the palette index; the high nybble is the <dfn>palbank</dfn> index, which can be found in either the sprite's attributes, or the upper nybble of the tiles. If the pixel-value is 0, then that pixel won't be rendered (i.e., will be transparent).
 
-Because of 16-color mode and the transparency issue, it is *essential* that your bitmap editor leaves the palette intact. I know from personal experience that MS-Paint and the Visual C bitmap editor don't, so you might want to use something else. Favorites among other GBA developers are [Graphics Gale](http://www.tempest-j.com/gale/e/){target="_blank"} and [GIMP](http://www.gimp.org){target="_blank"}. Of course, since I have my [my own bitmap editor](http://www.coranac.com/projects/#usenti){target="_blank"}, I prefer to use that.
+Because of 16-color mode and the transparency issue, it is *essential* that your bitmap editor leaves the palette intact. I know from personal experience that MS-Paint and the Visual C bitmap editor don't, so you might want to use something else. Favorites among other GBA developers are [Graphics Gale](http://www.tempest-j.com/gale/e/) and [GIMP](http://www.gimp.org). Of course, since I have my [my own bitmap editor](http://www.coranac.com/projects/#usenti), I prefer to use that.
 
 ## Summary {#sec-summary}
 
@@ -237,7 +237,7 @@ This is a short list of various attributes of sprites and backgrounds. It's alri
 
 ## What's in a name? {#sec-name}
 
-Well, since you are a programmer you should know the answer: plenty. If you disagree, visit the [How To Write Unmaintanable Code](http://mindprod.com/jgloss/unmain.html){target="_blank"} website and look at a number of their entries. My naming scheme is a bit different from that of the GBA community. I don't do this just because I feel like being contrary. I find some of the conventional names are incomplete, misleading and ambiguous. I feel little need, at least at present, to follow tradition simply because everyone else does. But you still need to know the traditional names, simply because everyone else does. So here's a list of differences in names.
+Well, since you are a programmer you should know the answer: plenty. If you disagree, visit the [How To Write Unmaintanable Code](http://mindprod.com/jgloss/unmain.html) website and look at a number of their entries. My naming scheme is a bit different from that of the GBA community. I don't do this just because I feel like being contrary. I find some of the conventional names are incomplete, misleading and ambiguous. I feel little need, at least at present, to follow tradition simply because everyone else does. But you still need to know the traditional names, simply because everyone else does. So here's a list of differences in names.
 
 <div class="cblock">
 <table id="tbl:name" 

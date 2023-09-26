@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 11. Affine sprites {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Affine sprite introduction {#sec-intro}
 

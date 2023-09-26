@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 9. Regular tiled backgrounds {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Tilemap introduction {#sec-intro}
 
@@ -557,7 +557,7 @@ There are four demos in this chapter. The first one is *brin_demo*, which is ver
 
 As I've been using a 512×256 part of Brinstar throughout this chapter, I thought I might as well use it for a demo.
 
-There are a few map editors out there that you can use. Two good ones are Nessie's [MapEd](https://nessie.gbadev.org){target="_blank"} or [Mappy](https://www.tilemap.co.uk/mappy.php){target="_blank"}, both of which have a number of interesting features. I have my own map editor, [mirach](https://www.coranac.com/projects/#mirach){target="_blank"}, but it's just a very basic thing. Some tutorials may point you to GBAMapEditor. Do *not* use this editor as it's pretty buggy, leaving out half of the tilemaps sometimes. Tilemaps can be troublesome enough for beginners without having to worry about whether the map data is faulty.
+There are a few map editors out there that you can use. Two good ones are Nessie's [MapEd](https://nessie.gbadev.org) or [Mappy](https://www.tilemap.co.uk/mappy.php), both of which have a number of interesting features. I have my own map editor, [mirach](https://www.coranac.com/projects/#mirach), but it's just a very basic thing. Some tutorials may point you to GBAMapEditor. Do *not* use this editor as it's pretty buggy, leaving out half of the tilemaps sometimes. Tilemaps can be troublesome enough for beginners without having to worry about whether the map data is faulty.
 
 In this cause, however, I haven't used any editor at all. Some of the graphics converters can convert to a tileset+tilemap – it's not the standard method, but for small maps it may well be easier. In this case I've used Usenti to do it, but grit and gfx2gba work just as well. Note that because the map here is 64×32 tiles, which requires splitting into screenblocks. In Usenti this is called the ‘sbb’ layout, in grit it's ‘-mLs’ and for gfx2gba you'd use ‘-mm 32’ … I think. In any case, after a conversion you'd have a palette, a tileset and a tilemap.
 
@@ -934,7 +934,7 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 
 ### Bonus demo: the 'text' in text bg and introducing tonclib {#ssec-demo-hello}
 
-Woo, bonus demo! This example will serve a number of purposes. The first is to introduce tonclib, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)){target="_blank"} that can be shared among projects.
+Woo, bonus demo! This example will serve a number of purposes. The first is to introduce tonclib, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)) that can be shared among projects.
 
 The second reason is to show how you can output text, which is obviously an important ability to have. Tonclib has an extensive list of options for text rendering – too much to explain here – but its interface is pretty easy. For details, visit the [Tonc Text Engine chapter](tte.html).
 
@@ -999,7 +999,7 @@ libfoo : foo.o bar.o baz.o
 # shorthand rule: $(AR) rcs $@ $^
 ```
 
-The three flags stand for **c**reate archive, **r**eplace member and create **s**ymbol table, respectively. For more on these and other archiving flags, I will refer you to the manual, which is part of the [binutils](https://sourceware.org/binutils/){target="_blank"} toolset. The flags are followed by the library name, which is followed by all the objects (the ‘members’ you want to archive).
+The three flags stand for **c**reate archive, **r**eplace member and create **s**ymbol table, respectively. For more on these and other archiving flags, I will refer you to the manual, which is part of the [binutils](https://sourceware.org/binutils/) toolset. The flags are followed by the library name, which is followed by all the objects (the ‘members’ you want to archive).
 
 To use the library, you have to link it to the executable. There are two linker flags of interest here: `-L` and `-l`. Upper- and lowercase ‘L’. The former, `-L` adds a library path. The lowercase version, `-l`, adds the actual library, but there is a twist here: only need the root-name of the library. For example, to link the library *libfoo.a*, use `-lfoo`. The prefix *lib* and extension *.a* are assumed by the linker.
 
@@ -1011,7 +1011,7 @@ $(PROJ).elf : $(OBJS)
 
 Of course, these archives can get pretty big if you dump a lot of stuff in there. You might wonder if all of it is linked when you add a library to your project. The answer is no, it is not. The linker is smart enough to use only the files which functions you're actually referencing. In the case of this demo, for example, I'm using various text functions, but none of the [affine](affine.html) functions or tables, so those are excluded. Note that the exclusion goes by *file*, not by *function*. If you only have one file in the library (or `#include`d everything, which amounts to the same thing), everything will be linked.
 
-I intend to use tonclib in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of tonclib can be found in the *tonclib* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/tonclib/){target="_blank"}.
+I intend to use tonclib in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of tonclib can be found in the *tonclib* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/tonclib/).
 
 <div class="note" markdown>
 <div class="nhgood" markdown>

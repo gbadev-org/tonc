@@ -1,0 +1,8 @@
+*           text=auto
+Cargo.lock  -diff
+*.css       text
+*.htm       text
+*.html      text
+*.md        text
+*.jpg       binary
+*.png       binary

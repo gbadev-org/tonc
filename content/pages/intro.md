@@ -5,7 +5,7 @@ Authors: Cearn
 
 # ii. Introduction to Tonc
 
-[TOC]
+<!-- toc -->
 
 ## Organisation {#sec-org}
 
@@ -30,9 +30,9 @@ Aside from the introduction and appendices, the text is divided into 3 parts. Fi
 
   
 
-Individual html: [tonc-text.zip](http://www.coranac.com/files/tonc-text.zip){target="_blank"} (663 kb)  
-Compiled html (CHM, v1.4 version): [tonc.chm](http://www.coranac.com/files/tonc.chm){target="_blank"} (1.2 MB).  
-PDF: [tonc.pdf](http://www.coranac.com/files/tonc.pdf){target="_blank"} (3.1 MB)
+Individual html: [tonc-text.zip](http://www.coranac.com/files/tonc-text.zip) (663 kb)  
+Compiled html (CHM, v1.4 version): [tonc.chm](http://www.coranac.com/files/tonc.chm) (1.2 MB).  
+PDF: [tonc.pdf](http://www.coranac.com/files/tonc.pdf) (3.1 MB)
 
 ### Tonc code {#ssec-org-code}
 
@@ -44,19 +44,19 @@ Pretty much all of the general functions used in tonc can be found in `tonclib`.
 
   
 
-Download [tonc-code.zip](http://www.coranac.com/files/tonc-code.zip){target="_blank"} (198 kb).
+Download [tonc-code.zip](http://www.coranac.com/files/tonc-code.zip) (198 kb).
 
 ### Tonc binaries {#ssec-org-bin}
 
-The **`bin`** directory contains the binaries of the demos. Each of them has been tested on a number of emulators, and on hardware using a homemade Xboo communication cable (see [www.devkitpro.org](http://www.devkitpro.org){target="_blank"} for instructions on how to make one). In most instances they behave exactly the same. The readme `tonc_bins.txt` indicates when and where hardware and emulators disagree.
+The **`bin`** directory contains the binaries of the demos. Each of them has been tested on a number of emulators, and on hardware using a homemade Xboo communication cable (see [www.devkitpro.org](http://www.devkitpro.org) for instructions on how to make one). In most instances they behave exactly the same. The readme `tonc_bins.txt` indicates when and where hardware and emulators disagree.
 
   
 
-Download [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip){target="_blank"} (167 kb).
+Download [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip) (167 kb).
 
 ### Statement of Purpose {#ssec-org-sop}
 
-I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You often see things in a different light when you write things down and learn from that experience. Secondly, there is a lot of *very bad* information in other tutorials out there (the only exceptions I know of are the [new PERN](http://www.drunkencoders.com/index.php?system_id=2&page=Tutorials){target="_blank"} and [Deku's sound tutorial](http://deku.gbadev.org){target="_blank"}*\[b0rked\]*). Yes, I am aware of how that sounds, but unfortunately it happens to be true. A number of examples:
+I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You often see things in a different light when you write things down and learn from that experience. Secondly, there is a lot of *very bad* information in other tutorials out there (the only exceptions I know of are the [new PERN](http://www.drunkencoders.com/index.php?system_id=2&page=Tutorials) and [Deku's sound tutorial](http://deku.gbadev.org)*\[b0rked\]*). Yes, I am aware of how that sounds, but unfortunately it happens to be true. A number of examples:
 
 -   Only very basic information given, sometimes even [incorrect info](affine.html).
 -   Strong focus on bitmap modes, which are hardly ever used for serious GBA programming.
@@ -195,13 +195,13 @@ The text and code have been created and found to work under the following condit
 
 -   **Programming language**. The language we'll be using is **C** with a dash of assembly (but *not* C++). I am working under the assumption that you are familiar with this language. If not, go learn it first because I'm not going to show you; this is not a C course. I do have some links to C tutorials in the [references](refs.html#ssec-tut).
 
--   **Compiler**. Obviously, you need a compiler that can turn C code into a GBA binary. I'm using the completely **free** [devkitARM](http://www.devkitpro.org){target="_blank"} (dkARM) toolchain, which is based on the [GNU compiler collection (GCC)](http://www.gnu.org){target="_blank"}. Setup instructions and samples can be found on the site, and in my [setup](setup.html) section, of course. dkARM has become the standard over the past year or so; if you are still using the older DevKit Advance, you might think about switching. I can't say how difficult it would be to get [HAM](http://www.ngine.de){target="_blank"}*b0rked* to accept my code/makefiles, but it shouldn't be too hard. If you use the official Arm ADS, sorry but you're on your own there.
+-   **Compiler**. Obviously, you need a compiler that can turn C code into a GBA binary. I'm using the completely **free** [devkitARM](http://www.devkitpro.org) (dkARM) toolchain, which is based on the [GNU compiler collection (GCC)](http://www.gnu.org). Setup instructions and samples can be found on the site, and in my [setup](setup.html) section, of course. dkARM has become the standard over the past year or so; if you are still using the older DevKit Advance, you might think about switching. I can't say how difficult it would be to get [HAM](http://www.ngine.de)*b0rked* to accept my code/makefiles, but it shouldn't be too hard. If you use the official Arm ADS, sorry but you're on your own there.
 
     To write and manage my code I use Visual C++ 6.0, but I am not using its native make tool (`NMAKE`), because it's not very portable and seems to be pretty weak as well. Instead, I use `GNU make`, which usually comes with any of the devkits.
 
--   **Binaries**. You'll also need something that can run the binaries. On the emu side, I use either [VisualBoy Advance](http://vba.ngemu.com){target="_blank"} (VBA) v1.7 or higher, and [no$gba](http://nocash.emubase.de/gba.htm){target="_blank"}, freeware edition. But as nice as these emulators are, you *must* be able to test on a real GBA too if you're serious about this stuff. Get yourself a flash card or, if you're on a budget, you can always build a multiboot cable like Xboo yourself. If you shop around you should be able to get the components for about $5.
+-   **Binaries**. You'll also need something that can run the binaries. On the emu side, I use either [VisualBoy Advance](http://vba.ngemu.com) (VBA) v1.7 or higher, and [no$gba](http://nocash.emubase.de/gba.htm), freeware edition. But as nice as these emulators are, you *must* be able to test on a real GBA too if you're serious about this stuff. Get yourself a flash card or, if you're on a budget, you can always build a multiboot cable like Xboo yourself. If you shop around you should be able to get the components for about $5.
 
--   **OS**. I use the Windows operation system (Win 98 and WinXP) and when referring to commands or programs I'm more or less assuming you are too. The GBA and devkits couldn't care less. However, a Linux user, for example, would have little use for a Visual C project and wouldn't be able to use [Usenti](http://www.coranac.com/projects/#usenti){target="_blank"} (my bitmap editor) or [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} (my Excel LUT builder).
+-   **OS**. I use the Windows operation system (Win 98 and WinXP) and when referring to commands or programs I'm more or less assuming you are too. The GBA and devkits couldn't care less. However, a Linux user, for example, would have little use for a Visual C project and wouldn't be able to use [Usenti](http://www.coranac.com/projects/#usenti) (my bitmap editor) or [excellut](http://www.coranac.com/projects/#excellut) (my Excel LUT builder).
 
 -   **Browser**. I've tested these pages with MSIE 6 and 7, Firefox, and sometimes Opera too. With one or two exceptions, (\<nobr\>), everything is valid HTML 4.01 and CSS 2. However, IE isn't a compliant browser so there are one or two minor glitches. Firefox on the other hand is *too* compliant and pretty much ignores column-based layout in tables (CSS and HTML standards conflict on this issue). But again, these situations aren't too significant. In case you want a print-out, it'll come out as if the browser window was roughly 640 pixels wide. Personally, I prefer setting the font to ‘smaller’; I feel that I lose the perspective in the ‘normal’ font-size. Note that the entire text is roughly 300 pages long, so consider shrinking the pages and don't forget to fill the tray when you're done.
 

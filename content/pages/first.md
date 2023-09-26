@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 3. My first GBA demo
 
-[TOC]
+<!-- toc -->
 
 ## Finally, your first GBA program {#sec-first}
 
