@@ -570,7 +570,7 @@ Knowing what the **P**-matrix is used for is one thing, knowing how to use them 
 
 Affine transformations are part of mathematics and, generally speaking, math numbers will be real numbers. That is to say, floating point numbers. However, if you were to use floating points for the **P** elements, you'd be in for two rude surprises.
 
-The first one is that the matrix elements are not floats, but integers. The reason behind this is that <ack>the GBA has no floating point unit!</ack> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
+The first one is that the matrix elements are not floats, but integers. The reason behind this is that <span class="ack">the GBA has no floating point unit!</span> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
 
 This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](http://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
 
@@ -588,7 +588,7 @@ but this:
     pb= pc= 0;
 ```
 
-In a fixed point system with *Q* fractional bits, ‘1’ (‘one’) is represented by 2^Q^ or 1\<\<*Q*, because simply that's how fractions work.
+In a fixed point system with *Q* fractional bits, ‘1’ (‘one’) is represented by <math><msup><mn>2</mn><mi>Q</mi></msup></math> or 1<<*Q*, because simply that's how fractions work.
 
 Now, fixed point numbers are still just integers, but there are different types of integers, and it is important to use the right ones. 8.8f are 16bit variables, so the logical choice there is `short`. However, this should be a *signed* short: `s16`, not `u16`. Sometimes is doesn't matter, but if you want to do any arithmetic with them they'd better be signed. Remember that internally the CPU works in words, which are 32bit, and the 16bit variable will be converted to that. You really want, say, a 16bit "−1" (`0xFFFF`) to turn into a 32bit "−1" (`0xFFFFFFFF`), and not "65535" (`0x0000FFFF`), which is what happens if you use unsigned shorts. Also, when doing fixed point math, it is recommended to use signed ints (the 32bit kind) for them, anything else will slow you down and you might get overflow problems as well.
 
@@ -644,47 +644,47 @@ Tonclib contains a number of functions for manipulating the affine parameters of
     </thead>
     <tbody>
         <tr>
-            <td>void foo_copy(FOO_AFFINE *dst, const FOO_AFFINE *src, uint count);</td>
+            <td>void <i>foo</i>_copy(FOO_AFFINE *dst, const FOO_AFFINE *src, uint count);</td>
             <td>Copy affine parameters</td>
         </tr>
         <tr>
-            <td>void foo_identity(FOO_AFFINE *oaff);</td>
+            <td>void <i>foo</i>_identity(FOO_AFFINE *oaff);</td>
             <td><math><mi>P</mi><mo>=</mo><mi>I</mi></td>
         </tr>
         <tr>
-            <td>void foo_postmul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
+            <td>void <i>foo</i>_postmul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
             <td>Post-multiply: <math><mi>D</mi><mo>=</mo><mi>D</mi><mo>&middot;</mo><mi>S</mi></math></td>
         </tr>
         <tr>
-            <td>void foo_premul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
+            <td>void <i>foo</i>_premul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
             <td>Pre-multiply: <math><mi>D</mi><mo>=</mo><mi>S</mi><mo>&middot;</mo><mi>D</mi></math></td>
         </tr>
         <tr>
-            <td>void foo_rotate(FOO_AFFINE *aff, u16 alpha);</td>
+            <td>void <i>foo</i>_rotate(FOO_AFFINE *aff, u16 alpha);</td>
             <td>Rotate counter-clockwise by α·π/8000h.</td>
         </tr>
         <tr>
-            <td>void foo_rotscale(FOO_AFFINE *aff, FIXED sx, FIXED sy, u16 alpha);</td>
+            <td>void <i>foo</i>_rotscale(FOO_AFFINE *aff, FIXED sx, FIXED sy, u16 alpha);</td>
             <td>Scale by <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac></math> and <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>y</mi></msub></mfrac></math>, then rotate counter-clockwise by α·π/8000h.</td>
         </tr>
         <tr>
-            <td>void foo_rotscale2(FOO_AFFINE *aff, const AFF_SRC *as);</td>
-            <td>As foo_rotscale(), but input stored in an AFF_SRC struct.</td>
+            <td>void <i>foo</i>_rotscale2(FOO_AFFINE *aff, const AFF_SRC *as);</td>
+            <td>As <code><i>foo</i>_rotscale()</code>, but input stored in an <code>AFF_SRC</code> struct.</td>
         </tr>
         <tr>
-            <td>void foo_scale(FOO_AFFINE *aff, FIXED sx, FIXED sy);</td>
+            <td>void <i>foo</i>_scale(FOO_AFFINE *aff, FIXED sx, FIXED sy);</td>
             <td>Scale by <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac></math> and <math><mfrac><mn>1</mn><msub><mi>s</mi><mi>y</mi></msub></mfrac></math></td>
         </tr>
         <tr>
-            <td>void foo_set(FOO_AFFINE *aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);</td>
+            <td>void <i>foo</i>_set(FOO_AFFINE *aff, FIXED pa, FIXED pb, FIXED pc, FIXED pd);</td>
             <td>Set P's elements</td>
         </tr>
         <tr>
-            <td>void foo_shearx(FOO_AFFINE *aff, FIXED hx);</td>
+            <td>void <i>foo</i>_shearx(FOO_AFFINE *aff, FIXED hx);</td>
             <td>Shear top-side right by <math><msub><mi>h</mi><mi>x</mi></msub></math></td>
         </tr>
         <tr>
-            <td>void foo_sheary(FOO_AFFINE *aff, FIXED hy);</td>
+            <td>void <i>foo</i>_sheary(FOO_AFFINE *aff, FIXED hy);</td>
             <td>Shear left-side down by <math><msub><mi>h</mi><mi>y</mi></msub></math></td>
         </tr>
     </tbody>
