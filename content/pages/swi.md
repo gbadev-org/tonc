@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 17. BIOS Calls
 
-[TOC]
+<!-- toc -->
 
 <br>  
 
@@ -21,7 +21,7 @@ Using software interrupts isn't too hard if it weren't for one thing: the `swi` 
 
 Calling the BIOS functions can be done via the ‘<code>swi <i>n</i></code>’ instruction, where *n* is the BIOS call you want to use. Mind you, the exact numbers you need to use depends on whether your code is in ARM or THUMB state. In THUMB the argument is simply the *n* itself, but in ARM you need to use *n*<<16. Just like normal functions, the BIOS calls can have input and output. The first four registers (r0-r3) are used for this purpose; though the exact purpose and the number of registers differ for each call.
 
-Here's a list containing the names of each BIOS call. I am not going to say what each of them does since other sites have done that already and it seems pointless to copy their stuff verbatim. For full descriptions go to [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"}, for example. I will give a description of a few of them so you can get a taste of how they work.
+Here's a list containing the names of each BIOS call. I am not going to say what each of them does since other sites have done that already and it seems pointless to copy their stuff verbatim. For full descriptions go to [GBATek](http://nocash.emubase.de/gbatek.htm), for example. I will give a description of a few of them so you can get a taste of how they work.
 
 ### Full list {#ssec-funs-list}
 
@@ -273,7 +273,7 @@ Found that quote long ago in one of those Kids on Science lists, and I'm always 
 
 So how does that explain the input/output? Well, it doesn't do it directly, but it points to how you should be looking at the situation. Consider you're the compiler and you have to convert some bloke's C code into machine code (or assembly, which is almost the same thing) that a CPU can actually use. You come across the line “`q= Div(x,y);`”. What does `Div()` do? Well, if there's no symbol in the C-file for that name (and there isn't, as it's in *tonc_bios.s*), you wouldn't know. Technically, you don't even know *what* it is. But `Div` knows, and that's the important thing. At least, that's *almost* how it works. The compiler should still need to know what sort of critter `Div` is to avoid confusion: A variable? A macro? A function? That's what the declarations are for. And the declaration above says that `Div` is a function that expects two signed integers and returns one too. As far as the compiler's concerned, it ends there.
 <br>  
-Of course, that still doesn't explain how the compiler knows what do to. Well, it simply follows the *ARM Architecture Procedure Call Standard*, <dfn>AAPCS</dfn> for short. This states how functions should pass arguments to each other. This PDF document can be found [here](http://www.arm.com/miscPDFs/8031.pdf){target="_blank"} and if you're contemplating assembly is a very worthwhile download.
+Of course, that still doesn't explain how the compiler knows what do to. Well, it simply follows the *ARM Architecture Procedure Call Standard*, <dfn>AAPCS</dfn> for short. This states how functions should pass arguments to each other. This PDF document can be found [here](http://www.arm.com/miscPDFs/8031.pdf) and if you're contemplating assembly is a very worthwhile download.
 
 For now, here's what you need to know. The first four arguments are placed in the first four registers `r0-r3`, every one after that is placed on the stack. The output value is placed in `r0`. As long as you take the argument list of the BIOS call as the list in the declaration, it should work fine. Note that the declaration also takes care of any casting that needs to be done. It is important that you realize just what the declaration means here: *it* determines how the function is called, not the actual *definition* assembly function. Or even C function. Things can go very wrong if you mess up the declaration.
 
@@ -289,11 +289,11 @@ int Div(int num, int denom)
 {   asm("swi 0x06");   }
 ```
 
-This does exactly the same thing as the assembly version of `Div`. However, you need to be careful with inline assembly because you can't see the code around it and might accidentally <dfn>clobber</dfn> some registers that you shouldn't be messing with, thus ruining the rest of the code. For the full rules on inline assembly, see the [GCC manual](http://www.gnu.org/manual/manual.html){target="_blank"}. You can also find a short faq on inline assembly use at [devrs.com](http://www.devrs.com/gba/){target="_blank"}. The ‘proper’ syntax of inline assembly isn't the friendliest in the world, mind you, and there are other problems as well. Consider the C function given above. Since it doesn't really do anything itself, the optimiser may be tempted to throw it away. This will happen with `-O3` unless you take appropriate precautions. Also, the compiler will complain that the function doesn't return anything, even though it should. It has a point, of course, considering that part is taken care of inside the assembly block. There are probably a few other problems that I'm not aware of at present; in the end it's easier to use the full-assembly versions so you know what's happening.
+This does exactly the same thing as the assembly version of `Div`. However, you need to be careful with inline assembly because you can't see the code around it and might accidentally <dfn>clobber</dfn> some registers that you shouldn't be messing with, thus ruining the rest of the code. For the full rules on inline assembly, see the [GCC manual](http://www.gnu.org/manual/manual.html). You can also find a short faq on inline assembly use at [devrs.com](http://www.devrs.com/gba/). The ‘proper’ syntax of inline assembly isn't the friendliest in the world, mind you, and there are other problems as well. Consider the C function given above. Since it doesn't really do anything itself, the optimiser may be tempted to throw it away. This will happen with `-O3` unless you take appropriate precautions. Also, the compiler will complain that the function doesn't return anything, even though it should. It has a point, of course, considering that part is taken care of inside the assembly block. There are probably a few other problems that I'm not aware of at present; in the end it's easier to use the full-assembly versions so you know what's happening.
 
 ### The <kbd>swi_call</kbd> macro {#ssec-use-swi-call}
 
-On the other hand, there are also BIOS calls that use no arguments, which can be run via a mere macro. The `swi_call(x)` macro will run the BIOS call *x*, and can be found in *swi.h*, and in Wintermute's [libgba](http://www.devkitpro.org){target="_blank"}, which is where I got it from. It's a little more refined than the `Div` function given above. First, it uses the `volatile` keyword, which should keep your optimizer from deleting the function (just like we did for all the registers). Secondly, it uses a <dfn>clobber list</dfn> (after the triple colons). This will tell the compiler which registers are used by the inline assembly. Thirdly, it will take care of the THUMB/ARM switch automatically. If you use the `-mthumb` compiler option, the compiler will define `__thumb__` for us, which we will now use to get the right swi-number. Clever, eh?
+On the other hand, there are also BIOS calls that use no arguments, which can be run via a mere macro. The `swi_call(x)` macro will run the BIOS call *x*, and can be found in *swi.h*, and in Wintermute's [libgba](http://www.devkitpro.org), which is where I got it from. It's a little more refined than the `Div` function given above. First, it uses the `volatile` keyword, which should keep your optimizer from deleting the function (just like we did for all the registers). Secondly, it uses a <dfn>clobber list</dfn> (after the triple colons). This will tell the compiler which registers are used by the inline assembly. Thirdly, it will take care of the THUMB/ARM switch automatically. If you use the `-mthumb` compiler option, the compiler will define `__thumb__` for us, which we will now use to get the right swi-number. Clever, eh?
 
 ```c
 #ifndef(__thumb__)
@@ -320,7 +320,7 @@ ASM_CMT("Hi, I'm here!");
 
 <div class="cpt_fr" style="width:240px;" markdown>
 
-![math graphs](img/demo/swi_demo.png){#fig:swi-demo}  
+<img alt="math graphs" src="../img/demo/swi_demo.png" id="fig:swi-demo">
 **{*@fig:swi-demo}**: div, sqrt, arctan2, sin and cos graphs, courtesy of BIOS.
 
 </div>
@@ -463,7 +463,7 @@ Until now, all demos used the function `vid_vsync` to synchronize the action to 
 
 <div class="cpt_fr" style="width:240px;" markdown>
 
-![swi_vsync](img/demo/swi_vsync.png){#fig:swi-vsync}  
+<img alt="swi_vsync" src="../img/demo/swi_vsync.png" id="fig:swi-vsync">
 **{*@fig:swi-vsync}**: `swi_vsync` demo.
 
 </div>

@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 14. Direct Memory Access
 
-[TOC]
+<!-- toc -->
 
 ## DMA … que? {#sec-intro}
 
@@ -254,7 +254,7 @@ DMA is fast, there's no question about that. It can be up to [ten times as fast]
 
 <div class="cpt_fr" style="width:240px;" markdown>
 
-![dma_demo shot](img/demo/dma_demo.png){#fig:dma-demo}  
+<img alt="dma_demo short" src="../img/demo/dma_demo.png" id="fig:dma-demo">
 **{*@fig:dma-demo}**: palette for `dma_demo`.
 
 </div>
@@ -267,7 +267,7 @@ This is easier said than done, of course. The first step in the design is how to
 #define DMA_HDMA    (DMA_ENABLE | DMA_REPEAT | DMA_AT_HBLANK | DMA_DST_RELOAD)
 ```
 
-As for the circle, we need a routine that can calculate the left and right edges of a circle. There are a couple of algorithms around that can draw circles, for example [Bresenham's](http://www.gamedev.net/reference/articles/article767.asp){target="_blank"} version. We'll use a modified version of it because we only need to store the left and right points instead of drawing a pixel there. Why left-right and not top-bottom? Because the array is scanline-based, so that indicates the *y*-values already.
+As for the circle, we need a routine that can calculate the left and right edges of a circle. There are a couple of algorithms around that can draw circles, for example [Bresenham's](http://www.gamedev.net/reference/articles/article767.asp) version. We'll use a modified version of it because we only need to store the left and right points instead of drawing a pixel there. Why left-right and not top-bottom? Because the array is scanline-based, so that indicates the *y*-values already.
 
 It doesn't really matter what you use actually, as long as you can find the edges. Once you have, all you need to do is setup the DMA in the VBlank and you're done.
 <br>  

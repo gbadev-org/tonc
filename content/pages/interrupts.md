@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 16. Interrupts
 
-[TOC]
+<!-- toc -->
 
 ## Introduction {#sec-intro}
 
@@ -132,7 +132,7 @@ Usually, these two result in the same thing, but if multiple interrupts come in 
 
 ### The interrupt process {#ssec-isr-proc}
 
-The complete interrupt process is kind of tricky and part of it is completely beyond your control. What follows now is a list of things that you, the programmer, need to know. For the full story, see [GBATek : irq control](http://nocash.emubase.de/gbatek.htm#interruptcontrol){target="_blank"}.
+The complete interrupt process is kind of tricky and part of it is completely beyond your control. What follows now is a list of things that you, the programmer, need to know. For the full story, see [GBATek : irq control](http://nocash.emubase.de/gbatek.htm#interruptcontrol).
 
 1.  Interrupt occurs. Some black magic deep within the deepest dungeons of BIOS happens and the CPU is switched to IRQ mode and ARM state. A number of registers (`r0-r3, r12, lr`) are pushed onto the stack.
 2.  BIOS loads the address located at `0300:7FFC` and branches to that address.
@@ -465,7 +465,7 @@ Nested irqs are nasty
 
 Making a nested interrupt routine work is not a pleasant exercise when you only partially know what you're doing. For example, that different CPU modes used different stacks took me a while to figure out, and it took me quite a while to realize that the reason my nested isrs didn't work was because there are different link registers too.
 
-The `isr_master_nest` is largely based on libgba's interrupt dispatcher, but also borrows information from GBATek and A. Bilyk and DekuTree's analysis of the whole thing as described in [forum:4063](http://forum.gbadev.org/viewtopic.php?t=4063){target="_blank"}. Also invaluable was the home-use debugger version of no$gba, hurray for breakpoints.
+The `isr_master_nest` is largely based on libgba's interrupt dispatcher, but also borrows information from GBATek and A. Bilyk and DekuTree's analysis of the whole thing as described in [forum:4063](http://forum.gbadev.org/viewtopic.php?t=4063). Also invaluable was the home-use debugger version of no$gba, hurray for breakpoints.
 
 If you want to develop your own interrupt routine, these sources will help you immensely and will keep the loss of sanity down to somewhat acceptable levels.
 
@@ -641,7 +641,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 <tbody align="center"><tr>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="img/demo/irq_demo_hbl.png"
+  <img src="../img/demo/irq_demo_hbl.png"
     alt="Gradient hbl&gt;vct"><br>
   <b>{*@fig:irq-demo}a</b>: Gradient; nested 
   <code>vct_wait_nested</code>.
@@ -649,7 +649,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 </td>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="img/demo/irq_demo_vct.png"
+  <img src="../img/demo/irq_demo_vct.png"
     alt="Gradient vct&gt;hbl"><br>
   <b>{*@fig:irq-demo}b</b>: Gradient; non-nested 
   <code>vct_wait</code>.
@@ -657,7 +657,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 </td>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="img/demo/irq_demo_c.png"
+  <img src="../img/demo/irq_demo_c.png"
     alt="Gradient hbl in C"><br>
   <b>{*@fig:irq-demo}c</b>: Gradient; HBlank in 
   master ISR in C.
