@@ -13,9 +13,12 @@ As you probably know, the GBA is capable of applying geometric transformations l
 
 There are two ways of interpreting these numbers. The first is to think of each of them as individual offsets to the sprite and background data. This is how the reference documents like [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} and [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm){target="_blank"} describe them. The other way is to see them as the elements of a 2x2 matrix which I will refer to as **P**. This is how pretty much all tutorials describe them. These tutorials also give the following matrix for rotation and scaling:
 
-**{*@eq:incorrect_transform_matrix}**:
-<math id="eq:incorrect_transform_matrix">
-    <mi>P</mi>
+<math id="eq:incorrect_transform_matrix" class="block">
+    <mo>(</mo>
+    <mi>{!@eq:incorrect_transform_matrix}</mi>
+    <mo>)</mo>
+    <mspace width="30px" />
+    <mi>𝗣</mi>
     <mo>=</mo>
     <mrow>
         <mo>[</mo>
@@ -48,15 +51,17 @@ There are two ways of interpreting these numbers. The first is to think of each 
     </mrow>
 </math>
 
-Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <rem>wrong one</rem>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of <math><msub><mi>s</mi><mi>x</mi></msub></math> = 1.5, <math><msub><mi>s</mi><mi>y</mi></msub></math> = 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale_good}, but what you'd actually get is {@fig:rotatescale_bad}. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
+Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <span class="rem">wrong one</span>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of <math><msub><mi>s</mi><mi>x</mi></msub></math> = 1.5, <math><msub><mi>s</mi><mi>y</mi></msub></math> = 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale}a, but what you'd actually get is {@fig:rotatescale}b. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
 
+<div style="display: flex; margin: 20px" markdown>
 <div class="cpt" style="width:160px;" markdown>
-![](img/affine/metr_rs_good.png){#fig:rotatescale_good}
-**{*@fig:rotatescale_good}**: when you say ‘rotate and scale’, you probably expect this…
+![](img/affine/metr_rs_good.png){#fig:rotatescale}
+**{*@fig:rotatescale}a**: when you say ‘rotate and scale’, you probably expect this…
 </div>
 <div class="cpt" style="width:160px" markdown>
-![](img/affine/metr_rs_bad.png){#fig:rotatescale_bad}
-**{*@fig:rotatescale_bad}**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
+![](img/affine/metr_rs_bad.png){#fig:rotatescale}
+**{*@fig:rotatescale}b**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
+</div>
 </div>
 
 Unfortunately, there is a lot of incorrect or misleading information on the transformation matrix around; the matrix of eq 10.1 is just one aspect of it. This actually starts with the moniker “Rot/Scale”, which does not fit with what actually occurs, continues with the fact that the terms used are never properly defined and that most people often just copy-paste from others without even considering checking whether the information is correct or not. The irony is that the principle reference document, GBATek, gives the correct descriptions of each of the elements, but somehow it got lost in the translation to matrix form in the tutorials.
@@ -77,7 +82,7 @@ It's true. Pretty much every document I've seen that deals with this subject is 
 
 ### General 2D texture mapping
 
-What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:rotscale_good}, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
+What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:rotatescale}a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
 
 **q** = **A · p**.
 

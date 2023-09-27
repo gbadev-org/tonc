@@ -529,3 +529,7 @@ pre .il { color: #57b5d4 } /* Literal.Number.Integer.Long */
   visibility: visible;
 }
 
+math.block {
+  display: block;
+  margin: 15px 0;
+}
