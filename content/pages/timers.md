@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 15. Timers
 
-[TOC]
+<!-- toc -->
 
 ## Timing is everything {#sec-intro}
 
@@ -138,7 +138,7 @@ In today's demo, I'm going to show how to make a simple digital clock with the t
 
 <div class="cpt_fr" style="width:240px;" markdown>
 
-![Clock demo](img/demo/tmr_demo.png){#fig:tmr-demo}
+<img alt="Clock demo" src="../img/demo/tmr_demo.png" id="fig:tmr-demo">
 **{*@fig:tmr-demo}**: `tmr_demo`.
 
 </div>
