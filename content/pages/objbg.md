@@ -109,31 +109,23 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 </table>
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Tiled graphics considerations
-
 </div>
 
 Remember and understand the following points:
 
 1.  The data of each tile are stored sequentially, with the next row of 8 pixels immediately following the previous row. VRAM is basically a big bitmap 8 pixels wide. Graphics converters should be able to convert bigger bitmaps into this format.
 2.  As always, watch your bitdepth.
-
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Tip for graphics converters
-
 </div>
 
 If you want to make your own conversion tools, here's a little tip that'll help you with tiles. Work in stages; do *not* go directly from a normal, linear bitmap to writing the data-file. Create a tiling function that takes a bitmap and arranges the tiles into a bitmap 1 tile wide and *H* tiles high. This can then be exported normally. If you allow for a variable tile-width (not hard-coding the 8-pixel width), you can use it for other purposes as well. For example, to create 16x16 sprites, first arrange with width=16, then with width=8.
-
 </div>
 
 ### Tile blocks (aka charblocks) {#ssec-img-cbb}
@@ -144,16 +136,12 @@ As said, there are 6 tile-blocks, that is 4 for backgrounds (0-3) and 2 for spri
 
 It'd be nice if tile-indexing followed the same scheme for backgrounds and sprites, but it doesn't. For sprites, numbering always follows s-tiles (20h offsets) even for d-tiles, but backgrounds stick to their indicated tile-size: 20h offsets in 4bpp mode, 40h offsets for 8bpp mode.
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 Bg vs sprite tile indexing
-
 </div>
 
 Sprites always have 32 bytes between tile indices, bg tile-indexing uses 32 or 64 byte offsets, depending on their set bitdepth.
-
 </div>
 
 Now, both regular backgrounds and sprites have 10 bits for tile indices. That means 1024 allowed indices. Since each charblock contains 512 s-tiles, you can access not only the base block, but also the one after that. And if your background is using d-tiles, you can actually access a total of four blocks! Now, since tiled backgrounds can start counting at any of the four background charblocks, you might be tempted to try to use the sprite charblocks (blocks 4 and 5) as well. On the emulators I've tested, this does indeed work. On a real GBA, however, it does not. This is one of the reasons why you *need* to test on real hardware. For more on this subject see the [background tile subtleties](regbg.html#ssec-map-subtle) and the [`cbb_demo`](regbg.html#sec-demo).

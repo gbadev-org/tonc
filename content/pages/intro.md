@@ -220,9 +220,7 @@ And, of course:
 
 OK that's it. Have fun.
 
-<div style="margin-left:1.2cm;" markdown>
-
-\- Jasper Vijn (cearn at coranac dot com)  
+<div style="margin-left:1.2cm;">
+- Jasper Vijn (cearn at coranac dot com)  
 (Mar 24, 2013)
-
 </div>

@@ -116,18 +116,14 @@ The first line inverts the color of the first entry of the palette memory. The s
 
 If you simply add this function to an existing program, nothing would change. How come? Well, though you have an isr now, you still need to tell the GBA where to find it. For that, we will need to take a closer look at the interrupt process as a whole.
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 On acknowledging interrupts correctly
-
 </div>
 
 To acknowledge that an interrupt has been dealt with, you have to **set** the bit of that interrupt in `REG_IF`, and *only* that bit. That means that ‘<code>REG_IF <b>=</b> IRQ_<i>x</i></code>’ is usually the correct course of action, and not ‘<code>REG_IF <b>|=</b> IRQ_<i>x</i></code>’. The |= version acknowledges all interrupts that have been raised, even if you haven't dealt with them yet.
 
 Usually, these two result in the same thing, but if multiple interrupts come in at the same time things will go bad. Just pay attention to what you're doing.
-
 </div>
 
 ### The interrupt process {#ssec-isr-proc}
@@ -163,16 +159,12 @@ Now, this will probably work, but as usual there's more to the story.
 -   `hbl_pal_invert()` doesn't check whether it has been activated by an HBlank interrupt. Now, in this case it doesn't really matter because it's the only one enabled, but when you use different types of interrupts, sorting them out is essential. That's why we'll create an [interrupt switchboard](#sec-switch) in the next section.
 -   Lastly, when you use [BIOS calls](swi.html) that require interrupts, you also need to acknowledge them in `REG_IFBIOS` (== `0300:7FF8`). The use is the same as `REG_IF`.
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 On section mirroring
-
 </div>
 
 GBA's memory sections are mirrored ever so many bytes. For example IWRAM (`0300:0000`) is mirrored every 8000h bytes, so that `0300:7FFC` is also `03FF:FFFC`, or `0400:0000`−4. While this is faster, I'm not quite sure if this should be taken advantage of. no$gba v2.2b marks it as an error, even though this was apparently a small oversight and fixed in v2.2c. Nevertheless, consider yourself warned.
-
 </div>
 
 ## Creating an interrupt switchboard {#sec-switch}
@@ -455,12 +447,9 @@ isr_master:
     bx      lr
 ```
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 Nested irqs are nasty
-
 </div>
 
 Making a nested interrupt routine work is not a pleasant exercise when you only partially know what you're doing. For example, that different CPU modes used different stacks took me a while to figure out, and it took me quite a while to realize that the reason my nested isrs didn't work was because there are different link registers too.
@@ -468,21 +457,16 @@ Making a nested interrupt routine work is not a pleasant exercise when you only 
 The `isr_master_nest` is largely based on libgba's interrupt dispatcher, but also borrows information from GBATek and A. Bilyk and DekuTree's analysis of the whole thing as described in [forum:4063](http://forum.gbadev.org/viewtopic.php?t=4063). Also invaluable was the home-use debugger version of no$gba, hurray for breakpoints.
 
 If you want to develop your own interrupt routine, these sources will help you immensely and will keep the loss of sanity down to somewhat acceptable levels.
-
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nh">
-
 Deprecation notice
-
 </div>
 
 I used to have a different master service routine that took care of nesting and prioritizing interrupts automatically. Because it was deemed too complicated, it has been replaced with this one.
 
 Nested interrupts are still possible, but you have to indicate interruptability inside the isr yourself now.
-
 </div>
 
 ## Nested interrupt demo {#sec-demo}
@@ -733,14 +717,10 @@ void hbl_grad_direct()
 }
 ```
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Flags for ARM+IWRAM compilation
-
 </div>
-
 Replace the ‘-mthumb’ in your compilation flags by ‘-marm -mlong-calls’. For example:
 
 ```makefile
@@ -753,5 +733,4 @@ ICFLAGS := $(CBASE) -mthumb-interwork -marm -mlong-calls
 ```
 
 For more details, look at the makefile for this project.
-
 </div>

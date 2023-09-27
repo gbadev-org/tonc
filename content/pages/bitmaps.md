@@ -341,7 +341,7 @@ void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 
 This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in tonclib.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 VRAM vs. byte writes
 </div>
@@ -351,7 +351,7 @@ You cannot write individual bytes into VRAM (or the palette or OAM for that matt
 Please don't skip this note, and make yourself aware of the full ramifications of this. Errors due to pointer-type mismatches are very easy to make, and [you may be writing to VRAM as bytes more often than you think](#ssec-data-memcpy).
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Generic vs. specific rendering routines
 </div>
@@ -371,7 +371,7 @@ Page flipping can alleviate some of these items, but that's not available in mod
 
 So basically, use the bitmap modes for testing and/or static images, but not much else unless you know the tilemodes can't do what you want.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhbad">
 Bitmap modes are not for gaming
 </div>
@@ -397,7 +397,7 @@ While the procedure works great, there are some snares. For the first, consider 
 
 The second problem concerns a little nasty in the age-old method of animation. The canonical animation does this. Frame1: draw object. Frame2: erase old object, draw object in new state. This doesn't work for page flipping since Frame2 is written on an entirely different bitmap than Frame1, so trying to erase Frame1's old object doesn't. What you need to erase is the object from 2 frames ago. Again, easy solution, but you have be aware of the problem. (Of course, erasing the entire frame each time would work too, but who's got the time?)
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Pageflipping, not double buffering
 </div>
@@ -411,7 +411,8 @@ What the GBA does is page flipping, so refer to it as such.
 
 The second page of the GBA is located at location `0600:A000h`. If you look at the size required for mode 3, you'll see why it doesn't have page-flipping capabilities: there's no room for a second page. To set the GBA to display the second page, set [`REG_DISPCNT`](video.html#tbl-reg-dispcnt){4}. My page flipping function looks a little like this:
 
-<div id="cd-vid-flip" markdown>
+<div id="cd-vid-flip">
+
 ```c
 u16 *vid_flip()
 {
@@ -437,7 +438,8 @@ Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `
 
 Lastly, you can pause and unpause the demo by holding the Start Button.
 
-<div id="cd-pageflip" markdown>
+<div id="cd-pageflip">
+
 ```c
 #include <string.h>
 
@@ -506,7 +508,7 @@ This section is a little boring (ok, very boring) but it needs to be said. While
 
 The first two subsections are about how to get graphics into your game, something that you'll really need to know. After that I'll discuss a few nasty and highly technical things that may or may not cause problems later on. These are optional and you can skip to the [data-loading/interpreting demo](#ssec-data-demo) at any time. That said, I urge you to read them anyway because they may save you a lot of debugging time.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Relax, it's only 1s and 0s
 </div>
@@ -520,8 +522,9 @@ This may be a good point to say a few words on data. Strictly speaking, *everyth
 
 All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C arrays and using `#include` on them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be `#include`d and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](https://pineight.com/gba/#gbfs) by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C arrays because they are the easiest to use.
 
-<div class="note" markdown>
-<div class="nh" markdown>
+<div class="note">
+<div class="nh">
+
 Ahem. Actually, we *do* have files
 </div>
 
@@ -543,8 +546,8 @@ Note that what I said about arrays is true for *all* arrays, not just data array
 #define IWRAM_CODE __attribute__((section(".iwram"), long_call))
 ```
 
-<div class="note" markdown>
-<div class="nhgood" markdown>
+<div class="note">
+<div class="nhgood">
 Const is good
 </div>
 

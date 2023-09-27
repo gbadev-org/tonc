@@ -19,7 +19,7 @@ According to Webster's, a sprite is “an imaginary being or spirit, as a fairy,
 
 Sprites are a little trickier to use than a bitmap background, but not by much. You just have to pay a little more attention to what you're doing. For starters, the graphics have to be grouped into 8×8 tiles; make sure your graphics converter can do that. Aside from the obvious actions such as enabling sprites in the display control and loading up the graphics and palette, you also have to set-up the attributes of the sprites correctly in OAM. Miss any of these steps and you'll see nothing. These things and more will be covered in this chapter.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Essential Sprite Steps
 </div>
@@ -31,7 +31,7 @@ There are 3 things that you have to do right to get sprites to show up:
 -   Switch on objects in `REG_DISPCNT`, and set the mapping mode there too.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Sprites aren't objects
 </div>
@@ -68,7 +68,7 @@ Also, don't forget that the sprites have their own palette which starts at `0500
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Bitmap modes and Object VRAM
 </div>
@@ -112,7 +112,7 @@ From a GBA-programming viewpoint, it is easier to use 1D mapping, as you don't h
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nh">
 Object data conversion via CLI
 </div>
@@ -134,7 +134,7 @@ Some command-line interfaces can tile bitmaps for use with objects (and tilemaps
 Two notes on the 1D mapping flags here. First, gfx2gba can only meta-tile (-T) square objects; for something like 16×8 objects you'd need to do the 1D mapping yourself. Second, grit's meta-tiling flags (`-Mw` and `-Mh`) can be anything, and use tile units, not pixels.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nh">
 Size units: tiles vs pixels
 </div>
@@ -148,7 +148,8 @@ Much unlike in the bitmap modes, you don't have to draw the sprites yourself: th
 
 So you don't have to draw the sprites yourself; however, you *do* need to tell the GBA how you want them. This is what the <dfn>Object Attribute Memory </dfn> –OAM for short– is for. This starts at address `0700:0000h` and is 1024 bytes long. You can find two types of structures in OAM: the <dfn>OBJ_ATTR</dfn> struct for regular sprite attributes, and the <dfn>OBJ_AFFINE</dfn> struct containing the transformation data. The definitions of these structures can be found below. Note that names may vary from site to site.
 
-<div id="cd-oam-structs" markdown>
+<div id="cd-oam-structs">
+
 ```c
 typedef struct tagOBJ_ATTR
 {
@@ -431,7 +432,8 @@ Most GBA libraries out there have `#define`s like these, albeit with different n
 
 I also have a second batch of macros you can use for setting and getting specific fields, which use the mask and shift names explained above. I'll admit the macros look horrible, but I assure you they make sense and can come in handy.
 
-<div id="cd-bitfield" markdown>
+<div id="cd-bitfield">
+
 ```c
 // bit field set and get routines
 #define BF_PREP(x, name)         ( ((x)<<name##_SHIFT)& name##_MASK  )
@@ -477,7 +479,8 @@ Note that none of these three have anything GBA specific in them; they can be us
 
 Finally, what I call my build macros. These piece together the various bit-flags into a single number in an orderly fashion, similar to HAM's tool macros. I haven't used them that often yet, and I'm not forcing you to, but on occasion they are useful to have around especially near initialization time.
 
-<div id="cd-oe-build" markdown>
+<div id="cd-oe-build">
+
 ```c
 // Attribute 0
 #define ATTR0_BUILD(y, shape, bpp, mode, mos, bld, win)             \
@@ -602,7 +605,8 @@ The two functions in *toolbox.c* need some more clarification as well I guess. I
 
 The other point concerns something of a very specific bug in the optimizer of the current compiler (devkitARM r19b). I expect this to be fixed in a later addition and the basic version here *should* work, but just in case it isn't, set the `#if` expression to 0 if you see OAM get corrupted. If you must know, the problem seems to be `struct` copying of OBJ_ATTRs in a `for` loop. Yes, it's that specific. Even though `struct` copying is legal and fast if they're word aligned, it seems GCC gets confused with 8-byte blocks in loops and uses `memcpy()` for each struct anyway, something that wouldn't work on OAM. Oh well.
 
-<div id="cd-obj-demo" markdown>
+<div id="cd-obj-demo">
+
 ```c
 #include <string.h>
 #include "toolbox.h"
@@ -704,7 +708,7 @@ As I said, loading the sprites happens at **point (1)** in the code. If you paid
 
 I am also loading its palette into the sprite palette. That's *sprite* palette (<span class="kbd">0500:0200</span>), not background palette. Load it to the wrong place and you won't see anything.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Finding tile addresses
 </div>
@@ -712,7 +716,7 @@ Finding tile addresses
 Use `tile_mem` or a macro to find the addresses to copy your tiles too, it's much more readable and maintainable than calculating them manually. You should not have any hard-coded VRAM addresses in your code, ever.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhbad">
 OAMData
 </div>
@@ -736,7 +740,7 @@ Note that these coordinates mark the **top-left** of the sprite. Also, the numbe
 
 You might see code that clears the lower bits of the attributes and then directly ORRs in *x* and *y*. This is not a good idea, because negative values are actually represented by upper half of a datatype's range. −1 for example is all bits set (0xFFFFFFFF). Without masking off the higher bits, negative values would overwrite the rest of the attribute bits, which would be bad.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Mask your coordinates
 </div>

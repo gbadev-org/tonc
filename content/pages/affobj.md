@@ -189,7 +189,7 @@ p_{c} & p_{d}
 
 Note that the origin of the transformation is *center* of the sprite, not the top-left corner. This is worth remembering if you want to align your sprite with other objects, which we'll do later.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Essential affine sprite steps
 </div>
@@ -307,7 +307,7 @@ The center pixel is the reference point of the transformation algorithm, which h
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 The offsets measure distance from the center pixel, not center position.
 </div>
@@ -339,7 +339,7 @@ Note, by the way, that some older emulators (VBA and BoycottAdvance) both use in
 
 I have a really interesting demo for you this time called *obj_aff*. It features a normal (boxed) metroid, which can be scaled, rotated and scaled. Because these transformations are applied to the *current* state of the matrix, you can end up with every kind of affine matrix possible by concatenating the different matrices. The controls are as follows:
 
-<div class="lblock" markdown>
+<div class="lblock">
 
 - L and R Buttons  
   Rotates the sprite counterclockwise and clockwise, respectively.
@@ -384,7 +384,8 @@ The interesting point of seeing the transformations back to back is that you can
 
 The full source code for the *obj_aff* demo is given below. It's quite long, mostly because of the amount of code necessary for managing the different affine states that can be applied. The functions that actually deal with affine sprites are `init_metr()`, `get_aff_new()` and part of the game loop in `objaff_test()`; the rest is essentially fluff required to making the whole thing work.
 
-<div id="cd-obj-aff" markdown>
+<div id="cd-obj-aff">
+
 ```c
 // obj_aff.c
 
@@ -884,7 +885,8 @@ The right-hand side here has three separate vectors, two of which are part of th
 
 Now, this matrix inversion means two things. First, that you will likely have to set up *two* matrices: the affine matrix itself, and its inverse. For general matrices, this might take a while, especially when considering that if you want scaling, you will have to do a division somewhere. Secondly, because you only have 16 bits for the matrix elements, the inverse won't be the *exact* inverse, meaning that aligning the objects exactly will be difficult, if not actually impossible. This is pretty much guaranteed by the hardware itself and I'll return to this point later on. For now, let's look at a function implementing {@eq:aff-ex} in the case of a 2-way scaling followed by a rotation.
 
-<div id="cd-oe-rs-ex" markdown>
+<div id="cd-oe-rs-ex">
+
 ```c
 // === in tonc_types.h ===
 
@@ -990,7 +992,8 @@ The rotation will take place around the center of the circle, so that's an ancho
 
 Because the sub-objects share the same **P** matrix, it'd be a waste to recalculate it the whole time, so I'm using a modified version of it especially tailored to `OACOMBO` structs called `oac_rotscale()`. The code is basically the same though. The `oacs[]` array forms the three combos, which are initialized at definition because that makes things so much easier. The full circle is at (16,20), the semis at (80,20) and the one composed of quarter circles is at (48,60). The `obj_data[]` array contains the data for our seven objects, and is copied to `obj_buffer` in the initialization function. While it is generally true that magic numbers (such as using hex for OAM attributes) are evil, it is also true that they really aren't central to this story and to spend a lot of space on initializing all of them in the ‘proper’ fashion may actually do more harm than good … this time. I am still using `#define`s for the anchor and a reference point though, because they appear multiple times in the rest of the code.
 
-<div id="cd-oacombo" markdown>
+<div id="cd-oacombo">
+
 ```c
 // oacombo.c
 

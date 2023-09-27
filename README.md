@@ -76,19 +76,17 @@ For example:
 
 *   Use backticks (`` ` ``) around code keywords and italics (`*`) around file names in the text.
 
-*   Container tags need empty lines before and after them, otherwise the Markdown within won't be rendered properly. For example:
+*   Container tags need empty lines after them, otherwise the Markdown within won't be rendered properly. For example:
 
     ```html
     <div class="note">
 
     ...
-
     </div>
 
     <div style="margin-left:1.2cm;">
 
     ...
-
     </div>
     ```
 

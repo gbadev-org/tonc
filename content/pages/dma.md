@@ -252,11 +252,10 @@ DMA is fast, there's no question about that. It can be up to [ten times as fast]
 
 ## DMA demo : circular windows {#sec-demo}
 
-<div class="cpt_fr" style="width:240px;" markdown>
-
+<div class="cpt_fr" style="width:240px;">
 <img alt="dma_demo short" src="../img/demo/dma_demo.png" id="fig:dma-demo">
-**{*@fig:dma-demo}**: palette for `dma_demo`.
 
+**{*@fig:dma-demo}**: palette for `dma_demo`.
 </div>
 
 The demo for this chapter may seem a little complicated, but the effect is worth it. The basic use of DMA transfers is so easy that it's hardly worth having a demo of. Use of *triggered* DMA is another matter. In this case, we'll look at HBlank-triggered DMA, or HDMA for short. We'll use it to update the [window](gfx.html#sec-win) sized inside the HBlank to give a circular window effect.

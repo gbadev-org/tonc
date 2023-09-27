@@ -11,7 +11,7 @@ Authors: Cearn
 
 Now that you have your development environment ready, it's time to take a look at a simple GBA program. For this we will use the code from the C-file <tt>first.c</tt>. The plan at this point is not full understanding; the plan is to get something to compile and get something running. The code will be discussed in this chapter, but what it all means will be covered in later chapters.
 
-<div id="cd-first" markdown>
+<div id="cd-first">
 
 ```c
 // First demo. You are not expected to understand it 
@@ -93,11 +93,10 @@ clean :
 #EOF
 ```
 
-<div class="cpt_fr" style="width:240px;" markdown>
-
+<div class="cpt_fr" style="width:240px;">
 <img alt="picture of the first demo" src="../img/demo/first.png" id="fig:first">  
-**{*@fig:first}**: picture of the first demo
 
+**{*@fig:first}**: picture of the first demo
 </div>
 
 Build the project by opening <tt>first.pnproj</tt> and hitting Alt+1 or double-clicking `build.bat`. This will

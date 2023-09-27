@@ -201,8 +201,9 @@ General solution(s):
 </math>
 </table>
 
-<div class="cpt_fr" style="width:212px;" markdown>
+<div class="cpt_fr" style="width:212px;">
 <img src="../img/wave.png" id="fig:wave" alt="it's a sine wave">
+
 **{*@fig:wave}**: a harmonic wave
 </div>
 
@@ -447,8 +448,9 @@ B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
   </table>
 </table>
 
-<div class="cpt_fr" style="width:212px;" markdown>
+<div class="cpt_fr" style="width:212px;">
 <img src="../img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
+
 **{*@fig:sqrwave}**: a square wave
 </div>
 
@@ -803,7 +805,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Sound register access
 </div>
@@ -957,7 +959,7 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
 </table>
 </div>
 
-<div class="cpt_fr" style="width:312px;" markdown>
+<div class="cpt_fr" style="width:312px;">
 <img src="../img/sqrfour.png" alt="Fourier transform of square wave" id="fig:sqrf"><br>
 <b>{*@fig:sqrf}</b>: Square wave spectrum. 
   (integer <i>m</i> only)
@@ -1620,7 +1622,8 @@ Right, and now for *why* this thing's useful. Remember that the GBA has no hardw
 
 Note that there is *still* a division in there. Fortunately, there are only twelve values available for *F*, so might just as well store the whole term in a look-up table. The final result is listing 18.1 below.
 
-<div id="cd-snd-rate" markdown>
+<div id="cd-snd-rate">
+
 ```c
 // Listing 18.1: a sound-rate macro and friends
 
@@ -1658,7 +1661,8 @@ I think I've done about enough theory for today, don't you dear reader?
 
 I'll take that as a yes. The demo in question demonstrates the use of the various macros of this chapter, most notably `SND_RATE`. It also shows how you can play a little song – and I use the term lightly – with the square wave generator. I hope you can recognize which one.
 
-<div id="cd-snddemo1" markdown>
+<div id="cd-snddemo1">
+
 ```c
 #include <stdio.h>
 #include <tonc.h>
@@ -1779,7 +1783,7 @@ The bolded code in `main()` initializes the sound register; nothing fancy, but i
 
 I'll explain what `sos()` in a little while, first something about the controls of the demo. You can play notes with the D-pad and A (hmm, there's something familiar about that arrangement). The octave *c* you're working in can be changed with L and R; the background color changes with it. B plays `sos()` again.
 
-<div class="lblock" markdown>
+<div class="lblock">
 
 - A Button, Control Pad  
   Play a note

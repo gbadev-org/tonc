@@ -318,11 +318,10 @@ ASM_CMT("Hi, I'm here!");
 
 ## Demo graphs {#sec-demo}
 
-<div class="cpt_fr" style="width:240px;" markdown>
-
+<div class="cpt_fr" style="width:240px;">
 <img alt="math graphs" src="../img/demo/swi_demo.png" id="fig:swi-demo">
-**{*@fig:swi-demo}**: div, sqrt, arctan2, sin and cos graphs, courtesy of BIOS.
 
+**{*@fig:swi-demo}**: div, sqrt, arctan2, sin and cos graphs, courtesy of BIOS.
 </div>
 
 To illustrate the use of BIOS calls I am using Div, Sqrt, ArcTan and ObjAffineSet to create graphs if a hyperbole, square root, sine and cosine. I've scaled them in such a way so that they fit nicely on the 240x160 screen. The definitions are
@@ -461,11 +460,10 @@ int main()
 
 Until now, all demos used the function `vid_vsync` to synchronize the action to the VBlank (see the [graphics introduction](video.html#sec-vsync1)). What this did was to check `REG_VCOUNT` and stay in a while loop until the next VBlank came along. While it works, it's really a pretty poor way of doing things for two reasons. First, because of the potential problem when you are in a VBlank already, but that one had been covered. The second reason is more important: while you're in the while loop, you're wasting an awful lot of CPU cycles, all of which slurp battery power.
 
-<div class="cpt_fr" style="width:240px;" markdown>
-
+<div class="cpt_fr" style="width:240px;">
 <img alt="swi_vsync" src="../img/demo/swi_vsync.png" id="fig:swi-vsync">
-**{*@fig:swi-vsync}**: `swi_vsync` demo.
 
+**{*@fig:swi-vsync}**: `swi_vsync` demo.
 </div>
 
 There are a number of BIOS calls that can put the CPU into a low power mode, thus sparing the batteries. The main BIOS call for this is Halt (#2), but what we're currently interested in is VBlankIntrWait (#5). This will set things up to wait until the next VBlank interrupt. To use it, you have to have interrupts switched on, of course, in particular the VBlank interrupt. As usual, the VBlank isr will have to acknowledge the interrupt by writing to `REG_IF`. But it *also* has to write to its BIOS equivalent, `REG_IFBIOS`. This little bit of information is a little hard to find elsewhere (in part because few tutorials cover BIOS calls); for more info, see [GBATek, BIOS Halt Functions](http://nocash.emubase.de/gbatek.htm#bioshaltfunctions). Fortunately for us, the switchboard presented in the [interrupts](interrupts.html#sec-switch) section has this built in.
@@ -495,28 +493,20 @@ while(1)
 }
 ```
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Prefer VBlankIntrWait() over vid_vsync()
-
 </div>
 
 Waiting for the VBlank via `vid_vsync()` (or its functional equivalent) is not a good idea: it wastes too much battery power. The recommended procedure is using `VBlankIntrWait()` to halt the processor, to be woken again on the VBlank interrupt.
-
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 Acknowledging IntrWait routines
-
 </div>
 
 `VBlankIntrWait()` is only one of the BIOS's `IntrWait()` routines that can stop the CPU until an interrupt has been raised. However, it doesn't look at `REG_IF` but at `REG_IFBIOS` (0300:7FF8) for the acknowledgement of the interrupt. If your game locks up after trying `VBlankIntrWait()`, this may be why. Note that you may find the address under other names, as there isn't really an official one for it.
-
 </div>
 
 ## Final thoughts {#sec-concs}

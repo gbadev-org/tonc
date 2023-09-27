@@ -24,7 +24,7 @@
 - [Timers](./pages/timers.md)
 - [Hardware interrupts](./pages/interrupts.md)
 - [BIOS calls](./pages/swi.md)
-- [Beep! GBA sound introduction]()
+- [Beep! GBA sound introduction](./pages/sndsqr.md)
 
 # Advanced / Applications
 

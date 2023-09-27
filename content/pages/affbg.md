@@ -141,7 +141,8 @@ I usually use the affine parameters via BG_AFFINE struct instead of `REG_BGxPA`,
 
 The elements of the affine transformation matrix **P** works exactly like they do for affine sprites: 8.8 fixed point numbers that describe the transformation from screen to texture space. However for affine backgrounds they are stored consecutively (2 byte offset), whereas those of sprites are at an 8 byte offset. You can use the `bg_aff_foo` functions from *tonc_bg_affine.c* to set them to the transformation you want.
 
-<div id="cd-bga-types" markdown>
+<div id="cd-bga-types">
+
 ```c
 typedef struct tagBG_AFFINE
 {
@@ -163,8 +164,9 @@ const BG_AFFINE bg_aff_default= { 256, 0, 0, 256, 0, 0 };
 REG_BG_AFFINE[2] = bg_aff_default;
 ```
 
-<div class="note" markdown>
+<div class="note">
   <div class="nhcare">Regular vs affine tilemap scrolling</div>
+
   Affine tilemaps use **different** scrolling registers! Instead of REG_BG*x*HOFS and REG_BG*x*VOFS, they use REG_BG*x*X and REG_BG*x*Y. Also, these are 32bit fixed point numbers, not halfwords.
 </div>
 
@@ -395,7 +397,8 @@ The demo lets you control both **p**<sub>0</sub> and **q**<sub>0</sub>. And rota
   </table>
 </div>
 
-<div id="cd=sbb-aff" markdown>
+<div id="cd=sbb-aff">
+
 ```c
 #include <stdio.h>
 #include <tonc.h>

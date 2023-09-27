@@ -91,7 +91,8 @@ The <dfn>stretch</dfn> is across how many pixels the base-pixel is stretched. Th
 
 There is a demo called *mos_demo* that illustrates the use of mosaic for both objects and backgrounds.
 
-<div id="cd-mos-demo" markdown>
+<div id="cd-mos-demo">
+
 ```c
 // mos_demo.c
 //   bg 0, cbb  0, sbb 31, pb 0: text
@@ -408,7 +409,8 @@ Blending is a nice feature to have, but keep these points in mind.
 
 ### The obligatory demo {#ssec-bld-demo}
 
-<div id="cd-bld-demo" markdown>
+<div id="cd-bld-demo">
+
 ```c
 // bld_demo.c
 
@@ -755,7 +757,7 @@ There is little in the way of macros or bit-defines here because they're not rea
 
 There are still a few things you should know about windows. First of all, when you turn on windowing in `REG_DISPCNT`, nothing will show up. There are two reasons for this. Firstly, the boundary registers are all 0, so the whole screen is basically winOut. Secondly, and this is really important: a background or object will only show up in the windows in which it is enabled! This means that unless at least *some* bits have been set in `REG_WININ` or `REG_WINOUT` nothing will show. This presents you with an effective way of hiding stuff, as we'll see in the demo. There is a third thing that you must remember, namely that win0 takes precedence over win1, which in turn takes precedence over winOut. I'm not sure how winObj fits into this yet.
 
-<div class="note" markdown>
+<div class="note">
   <div class="nhgood">Windowing necessities</div>
   To make windowing work for you, you need to do the following things:
 
@@ -772,8 +774,9 @@ There's something really weird going on when either the top or bottom is outside
 -   Also, if you move the bottom from, 161 to 160, the window will also cover the whole length, but only for a frame or so.
 -   The points mentioned above assume *T*<*B*. If the top is bigger, then the effect is reversed.
 
-<div class="note" markdown>
+<div class="note">
   <div class="nhcare">Windowing weirdness not on emulators</div>
+
   This behaviour does *not* appear on the emulators I've tested on.
 
   VBA clips the windows, like common sense would lead you to believe. (Of course, common sense also tells you that the Sun orbits the Earth or that the stars are pinpricks on a large black canvas. Common sense is hardly common).
@@ -806,7 +809,8 @@ The controls are simple: use the D-pad to move the window around; START repositi
 
 What follows below is the majority of the demo's code. I have removed the functions that set up the backgrounds and sprite because there's nothing in them that you haven't seen before already. The earlier {@fig:win-dgrm}a is a screenshot of the demo in action.
 
-<div id="cd-win-demo" markdown>
+<div id="cd-win-demo">
+
 ```c
 // win_demo.c
 
@@ -917,7 +921,8 @@ One class of generators are <dfn>linear congruential generators</dfn>, which fol
 
 The following routine `qran()` is taken from my numerical methods book, [Numerical Recipes](http://www.amazon.com/gp/product/0521431085/103-4874440-3995059), pp 275, where it is labelled a quick and dirty generator, but an adequate one. Consisting of one addition and one multiply (*m*=2^32^, so done automatically), it is *very* fast. The actual number returned are the top 15 bits from *N*, because the upper bits are apparently more random than the lower, and also because 15 gives a \[0,32767\] range, which is something of an unofficial standard, AFAIK. Note that there is a second function, `sqran()` used to <dfn>seed</dfn> the generator. Since the process itself is still deterministic, you need a seed to ensure that you don't get the same sequence every time. Unless, that is, you actually *want* that to happen. This isn't such a strange idea if you think about it: you could use it to generate maps, for example. Instead of storing the whole map so that it looks the same every time you load it, you just store the seed and you're done. This is how the planetary terrains in [Star Control 2](http://sc2.sourceforge.net/) are made; I very much doubt it would have been possible to store bitmaps of all the 1000+ planets it had. This is why `sqran()` also returns the current *N*, so you can reset it later if necessary.
 
-<div id="cd-qran" markdown>
+<div id="cd-qran">
+
 ```c
 // from tonc_core.h/.c
 // A Quick (and dirty) random number generator and its seeder

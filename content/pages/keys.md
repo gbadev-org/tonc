@@ -57,8 +57,9 @@ Checking whether a key is pressed (down) or not would be obvious, if it weren't 
 
 In case your bit-operation knowledge is a bit hazy (get it cleared up. Fast!), this first inverts `REG_KEYINPUT` to a more intuitive (and useful) ‘bit is set when down’ setting and then masks it with the key(s) you want to check. Note that `key` can in fact be a combination of multiple keys and the result will be the combination of keys that are actually down.
 
-<div class="note" markdown>
+<div class="note">
   <div class="nhcare">Key states are inverted</div>
+
   The key bits are low-active, meaning that they are **cleared** when a button is pressed and **set** when they're not. This may be a little counter-intuitive, but that's the way it is.
 </div>
 
@@ -285,14 +286,15 @@ It's just a call to `bit_tribool()` with using `key_hit()` instead of `__key_cur
 
 ## A simple key demo {#sec-demo}
 
-<div class="cpt_fr" style="width:120px;" markdown>
+<div class="cpt_fr" style="width:120px;">
 <img alt="key_demo screenshot" src="../img/demo/gba_sm.png" id="fig:key-demo">
+
 **{*@fig:key-demo}**: key_demo screenshot, with L and B held.
 </div>
 
 The *key_demo* demo illustrates how these key functions can be used. It shows a mode 4 picture of a GBA (a 240x160 8bit bitmap); the colors change according to the button presses. The normal state is grey; when you press the key, it turns red; when you release it, it goes yellow; and as long as it's held it's green. {*@fig:key-demo} shows this for the L and B buttons. Here's the code that does the real work:
 
-<div id="cd-key-demo" markdown>
+<div id="cd-key-demo">
 
 ```c
 #include <string.h>
@@ -344,7 +346,6 @@ int main()
     return 0;
 }
 ```
-
 </div>
 
 `BTN_PAL_ID` is the starting index of the palette-part used for the buttons and `CLR_UP` is a shade of grey; the rest of the colors should be obvious. To make sure that you can actually see the changes in button colors I'm only polling the keys once every 8 frames. If I didn't do that, you'll hardly ever see a red or yellow button. (By the way, I don't actually change the buttons' colors, but only the palette color that that button's pixels use; palette animation is a Good Thing™).
