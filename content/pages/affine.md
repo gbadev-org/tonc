@@ -59,7 +59,7 @@ Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <s
 **{*@fig:rotatescale}a**: when you say ‘rotate and scale’, you probably expect this…
 </div>
 <div class="cpt" style="width:160px" markdown>
-![](img/affine/metr_rs_bad.png){#fig:rotatescale}
+![](img/affine/metr_rs_bad.png)
 **{*@fig:rotatescale}b**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
 </div>
 </div>
