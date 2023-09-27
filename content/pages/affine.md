@@ -137,9 +137,12 @@ Affine transformations include rotation and scaling, but *also* shearing. This i
 As I said, there are three basic 2d transformations, though you can always describe one of these in terms of the other two. The transformations are: rotation (**R**), scaling (**S**) and shear (**H**). {*@tbl:transformation_matrices_and_their_inverses} shows what each of the transformations does to the regular metroid sprite. The black axes are the normal base vectors (note that *y* points down!), the blue axes are the transformed base vectors and the cyan variables are the arguments of the transformation. Also given are the matrix and inverse matrix of each transformation. Why? You'll see.
 
   
-{*@eq:transformation_matrix_and_inverse}
-<math id="eq:transformation_matrix_and_inverse">
-    <mi>A</mi>
+<math id="eq:transformation_matrix_and_inverse" class="block">
+    <mo>(</mo>
+    <mi>{!@eq:transformation_matrix_and_inverse}</mi>
+    <mo>)</mo>
+    <mspace width="30px" />
+    <mi>𝗔</mi>
     <mo>=</mo>
     <mrow>
         <mo>[</mo>
@@ -157,7 +160,7 @@ As I said, there are three basic 2d transformations, though you can always descr
     </mrow>
     <mspace width="30px"/>
     <msup>
-        <mi>A</mi>
+        <mi>𝗔</mi>
         <mn>-1</mn>
     </msup>
     <mo>≡</mo>
@@ -183,7 +186,7 @@ As I said, there are three basic 2d transformations, though you can always descr
     </mrow>
 </math>
 
-{@tbl:transformation_matrices_and_their_inverses}: transformation matrices and their inverses.
+{*@tbl:transformation_matrices_and_their_inverses}: transformation matrices and their inverses.
 <table id="tbl:transformation_matrices_and_their_inverses">
     <thead>
         <tr>
@@ -203,7 +206,7 @@ As I said, there are three basic 2d transformations, though you can always descr
         <tr>
             <td>
                 <math>
-                    <mi>I</mi>
+                    <mi>𝗜</mi>
                     <mo>=</mo>
                     <mrow>
                         <mo>[</mo>
@@ -223,7 +226,7 @@ As I said, there are three basic 2d transformations, though you can always descr
             </td>
             <td>
                 <math>
-                    <mi>R</mi>
+                    <mi>𝗥</mi>
                     <mo>(</mo>
                     <mn>&theta;</mn>
                     <mo>)</mo>
@@ -246,7 +249,7 @@ As I said, there are three basic 2d transformations, though you can always descr
             </td>
             <td>
                 <math>
-                    <mi>S</mi>
+                    <mi>𝗦</mi>
                     <mo>(</mo>
                     <msub><mi>s</mi><mi>x</mi></msub>
                     <mo>,</mo>
@@ -271,7 +274,7 @@ As I said, there are three basic 2d transformations, though you can always descr
             </td>
             <td>
                 <math>
-                    <mi>H</mi>
+                    <mi>𝗛</mi>
                     <mo>(</mo>
                     <msub><mi>h</mi><mi>x</mi></msub>
                     <mo>,</mo>
@@ -298,28 +301,28 @@ As I said, there are three basic 2d transformations, though you can always descr
         <tr>
             <td>
                 <math>
-                    <msup><mi>I</mi><mn>-1</mn></msup>
+                    <msup><mi>𝗜</mi><mn>-1</mn></msup>
                     <mo>=</mo>
-                    <mi>I</mi>
+                    <mi>𝗜</mi>
                 </math>
             </td>
             <td>
                 <math>
-                    <msup><mi>R</mi><mn>-1</mn></msup><mo>(</mo><mn>&theta;</mn><mo>)</mo>
+                    <msup><mi>𝗥</mi><mn>-1</mn></msup><mo>(</mo><mn>&theta;</mn><mo>)</mo>
                     <mo>=</mo>
-                    <mi>R</mi><mo>(</mo><mn>-&theta;</mn><mo>)</mo>
+                    <mi>𝗥</mi><mo>(</mo><mn>-&theta;</mn><mo>)</mo>
                 </math>
             </td>
             <td>
                 <math>
-                    <msup><mi>S</mi><mn>-1</mn></msup>
+                    <msup><mi>𝗦</mi><mn>-1</mn></msup>
                     <mo>(</mo>
                     <msub><mi>s</mi><mi>x</mi></msub>
                     <mo>,</mo>
                     <msub><mi>s</mi><mi>y</mi></msub>
                     <mo>)</mo>
                     <mo>=</mo>
-                    <mi>S</mi>
+                    <mi>𝗦</mi>
                     <mo>(</mo>
                     <mfrac><mn>1</mn><msub><mi>s</mi><mi>x</mi></msub></mfrac>
                     <mo>,</mo>
@@ -329,7 +332,7 @@ As I said, there are three basic 2d transformations, though you can always descr
             </td>
             <td>
                 <math>
-                    <msup><mi>H</mi><mn>-1</mn></msup>
+                    <msup><mi>𝗛</mi><mn>-1</mn></msup>
                     <mo>(</mo>
                     <msub><mi>h</mi><mi>x</mi></msub>
                     <mo>,</mo>
@@ -338,7 +341,7 @@ As I said, there are three basic 2d transformations, though you can always descr
                     <mo>=</mo>
                     <mfrac>
                         <mrow>
-                            <mi>H</mi>
+                            <mi>𝗛</mi>
                             <mo>(</mo>
                             <mn>-</mn><msub><mi>h</mi><mi>x</mi></msub>
                             <mo>,</mo>
@@ -360,14 +363,16 @@ As I said, there are three basic 2d transformations, though you can always descr
 
 We can now use these definitions to find the correct matrix for enlargements by <math><msub><mi>s</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math>, followed by a **counter-clockwise** rotation by α (=−θ), by matrix multiplication.
 
-{@eq:inverse_transform}
-
-<math id="eq:inverse_transform">
-    <mi>A</mi>
+<math id="eq:inverse_transform" class="block">
+    <mo>(</mo>
+    <mi>{!@eq:inverse_transform}</mi>
+    <mo>)</mo>
+    <mspace width="30px" />
+    <mi>𝗔</mi>
     <mo>=</mo>
-    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+    <mi>𝗥</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
     <mo>&middot;</mo>
-    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+    <mi>𝗦</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
     <mo>=</mo>
     <mrow>
         <mo>[</mo>
