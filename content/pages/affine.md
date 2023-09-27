@@ -434,41 +434,62 @@ As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect
 
 ### Resolution
 
-I hope you spotted the crucial difference between the two points of view. **A** maps *from* texture space *to* screen space, while **B** does the exact opposite (i.e., **B = A**^-1^). I think you know which one you should give the GBA by now. That's right: **P = B**, not **A**. This one bit of information is the crucial piece of the affine matrix puzzle.
+I hope you spotted the crucial difference between the two points of view. **A** maps *from* texture space *to* screen space, while **B** does the exact opposite (i.e., <math><mi>𝗕</mi><mo>=</mo><msup><mi>𝗔</mi><mn>-1</mn></msup></math>). I think you know which one you should give the GBA by now. That's right: **P = B**, not **A**. This one bit of information is the crucial piece of the affine matrix puzzle.
 
 So now you can figure out **P**'s elements in two ways. You can stick to the human POV and invert the matrix at the end. That's why I gave you the inverses of the affine transformations as well. You could also try to see things in the GBA's way and get the right matrix directly. Tonc's main affine functions (`tonc_video.h`, `tonc_obj_affine.c` and `tonc_bg_affine.c`) do things the GBA way, setting **P** directly; but inverted functions are also available using an "`_inv`" affix. Mind you, these are a little slower. Except for when scaling is involved; then it's a *lot* slower.
 
 In case you're curious, the proper matrix for scale by (<math><msub><mi>s</mi><mi>x</mi></msub></math>, <math><msub><mi>s</mi><mi>y</mi></msub></math>) and counter-clockwise rotation by α is:
 
-<math>
-    <mi>A</mi>
+<math class="block">
+    <mi>𝗔</mi>
     <mo>=</mo>
-    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+    <mi>𝗥</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
     <mo>&middot;</mo>
-    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+    <mi>𝗦</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
 </math>
 
-<math>
-    <mi>P</mi>
-    <mo>=</mo>
-    <msup><mi>A</mi><mn>-1</mn></msup>
-    <mo>=</mo>
-    <mo>(</mo>
-    <mi>R</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
-    <mo>&middot;</mo>
-    <mi>S</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
-    <msup><mo>)</mo><mn>-1</mn></msup>
-    <mo>=</mo>
-    <msup><mi>S</mi><mn>-1</mn></msup><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
-    <mo>&middot;</mo>
-    <msup><mi>R</mi><mn>-1</mn></msup><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+<math class="block">
+    <mtable>
+        <mtr>
+            <mtd>
+                <mi>𝗣</mi>
+            </mtd>
+            <mtd columnalign="left">
+                <mo>=</mo>
+                <msup><mi>𝗔</mi><mn>-1</mn></msup>
+            </mtd>
+        </mtr>
+        <mtr>
+            <mtd />
+            <mtd columnalign="left">
+                <mo>=</mo>
+                <mo>(</mo>
+                <mi>𝗥</mi><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+                <mo>&middot;</mo>
+                <mi>𝗦</mi><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+                <msup><mo>)</mo><mn>-1</mn></msup>
+            </mtd>
+        </mtr>
+        <mtr>
+            <mtd />
+            <mtd columnalign="left">
+                <mo>=</mo>
+                <msup><mi>𝗦</mi><mn>-1</mn></msup><mo>(</mo><msub><mi>s</mi><mi>x</mi></msub><mo>,</mo><msub><mi>s</mi><mi>y</mi></msub><mo>)</mo>
+                <mo>&middot;</mo>
+                <msup><mi>𝗥</mi><mn>-1</mn></msup><mo>(</mo><mn>-&alpha;</mn><mo>)</mo>
+            </mtd>
+        </mtr>
+    </mtable>
 </math>
 
 Using the inverse matrices given earlier, we find
 
-{*@eq:correct_matrix}
-<math id="eq:correct_matrix">
-    <mi>P</mi>
+<math id="eq:correct_matrix" class="block">
+    <mo>(</mo>
+    <mi>{!@eq:correct_matrix}</mi>
+    <mo>)</mo>
+    <mspace width="30px" />
+    <mi>𝗣</mi>
     <mo>=</mo>
     <mrow>
         <mo>[</mo>
@@ -528,13 +549,13 @@ The affine matrix **P** maps from screen space *to* texture space, not the other
 
 In other words:  
 
-<math><msub><mi>p</mi><mi>a</mi></msub></math> : texture *x*-increment / pixel
+&nbsp;<math><msub><mi>p</mi><mi>a</mi></msub></math>: texture *x*-increment / pixel
 
-<math><msub><mi>p</mi><mi>b</mi></msub></math> : texture *x*-increment / scanline
+&nbsp;<math><msub><mi>p</mi><mi>b</mi></msub></math>: texture *x*-increment / scanline
 
-<math><msub><mi>p</mi><mi>c</mi></msub></math> : texture *y*-increment / pixel
+&nbsp;<math><msub><mi>p</mi><mi>c</mi></msub></math>: texture *y*-increment / pixel
 
-<math><msub><mi>p</mi><mi>d</mi></msub></math> : texture *y*-increment / scanline
+&nbsp;<math><msub><mi>p</mi><mi>d</mi></msub></math>: texture *y*-increment / scanline
 </div>
 
 ## Finishing up {#sec-finish}
