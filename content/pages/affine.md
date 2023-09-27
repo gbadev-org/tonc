@@ -122,7 +122,7 @@ So how do you find **A**? Well, that's actually not that hard. The matrix is for
 <span style="font-size: 3em; display: inline-flex; flex-direction: column; padding: 10px" markdown>**A** →</span>
 
 <div class="cpt" style="width:128px;" markdown>
-![ ... mapped](img/affine/metr_texmapA.png){#fig:metroid_texture}b
+![ ... mapped](img/affine/metr_texmapA.png)
 **{*@fig:metroid_texture}b**: a texture mapped
 </div>
 </div>
