@@ -39,14 +39,14 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
 <tr valign="top">
 <td>
   <div class="cpt" style="width:200px">
-  <img src="img/tile_gfx_render.png"
+  <img src="../img/tile_gfx_render.png"
     alt="Example of both sprites and background"
     width=192><br>
   <b>{*@fig:tile-gfx}a</b>: 2 sprites on a background.
   </div>
 <td rowspan=2>
   <div class="cpt" style="width:384px">
-  <img src="img/tile_gfx_map.png"
+  <img src="../img/tile_gfx_map.png"
     alt="Tile usage" width=384><br>
   <b>{*@fig:tile-gfx}c</b>: tile usage by bgs and 
     sprites. One tile per SE for 
@@ -56,7 +56,7 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
 <tr>
 <td>
   <div class="cpt" style="width:200px">
-  <img src="img/tile_gfx_tileset.png"
+  <img src="../img/tile_gfx_tileset.png"
     alt="The bg and sprite tiles"><br>
   <b>{*@fig:tile-gfx}b</b>: background (above) and
     sprite (below) tiles. 
@@ -84,14 +84,14 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 <tr valign="top">
 <td>
   <div class="cpt" style="width:192px">
-  <img src="img/tile_8as8.png" width=192 
+  <img src="../img/tile_8as8.png" width=192 
     alt="8 bpp tiles">
   <b>{*@fig:tile-as}a</b>: 8bpp tiles.
   </div>
 </td>
 <td>
   <div class="cpt" style="width:192px">
-  <img src="img/tile_as_bm.png" width=192 
+  <img src="../img/tile_as_bm.png" width=192 
     alt="8 bpp tiles as bitmap">
   <b>{*@fig:tile-as}b</b>: 8bpp tiles as bitmap.
   </div>
@@ -99,7 +99,7 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 <tr>
 <td colspan=2>
   <div class="cpt" style="width:384px">
-  <img src="img/tile_8as4.png" width=384
+  <img src="../img/tile_8as4.png" width=384
     alt="as before, but interpreted as 4 bpp">
   <b>{*@fig:tile-as}c</b>: the data of 
     {@fig:tile-as}a, interpreted as 4bpp data. 

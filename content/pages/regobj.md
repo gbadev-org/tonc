@@ -10,7 +10,7 @@ Authors: Cearn
 ## Sprite introduction {#sec-intro}
 
 <div class="cpt_fr" style="width:64px">
-<img src="img/metr/std.png" id="fig:metr" 
+<img src="../img/metr/std.png" id="fig:metr" 
   alt="a metroid.">
 <b>{*@fig:metr}</b>. Metroid. Rawr.
 </div>
@@ -90,21 +90,21 @@ From a GBA-programming viewpoint, it is easier to use 1D mapping, as you don't h
 <tr valign="top">
 <td>
   <div class="cpt" style="width:200px">
-  <img src="img/metr/tile_1d2d.png" alt="a metroid divided into tiles">
+  <img src="../img/metr/tile_1d2d.png" alt="a metroid divided into tiles">
   <b>{*@fig:obj-map}a</b>: zoomed out version of 
   {*@fig:metr}, divided into tiles; colored numbers 
     indicate mapping mode: red for 2D, cyan for 1D.
   </div>
 <td>
   <div class="cpt" style="width:297px">
-  <img src="img/metr/tile_2d.png" alt="2d mapping">
+  <img src="../img/metr/tile_2d.png" alt="2d mapping">
   <b>{*@fig:obj-map}b</b>: how 
     {@fig:obj-map}a should be stored in memory when 
 	using 2D mapping.
   </div>
   <br>
   <div class="cpt" style="width:296px">
-  <img src="img/metr/tile_1d.png" alt="1d mapping">
+  <img src="../img/metr/tile_1d.png" alt="1d mapping">
   <b>{*@fig:obj-map}c</b>: how 
     {@fig:obj-map}a should be stored in memory when using 
 	1D mapping.

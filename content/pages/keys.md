@@ -286,7 +286,7 @@ It's just a call to `bit_tribool()` with using `key_hit()` instead of `__key_cur
 ## A simple key demo {#sec-demo}
 
 <div class="cpt_fr" style="width:120px;" markdown>
-![key_demo screenshot](img/demo/gba_sm.png){#fig:key-demo}
+<img alt="key_demo screenshot" src="../img/demo/gba_sm.png" id="fig:key-demo">
 **{*@fig:key-demo}**: key_demo screenshot, with L and B held.
 </div>
 

@@ -15,7 +15,7 @@ The best description of mosaic is that it makes sprites or tiles look blocky. A 
 
 <div class="lblock">
   <div class="cpt" style="width:400px;">
-    <img id="fig:metr-mos" src="img/metr/mos.png" alt="a 1x4 mosaiced metroid">
+    <img id="fig:metr-mos" src="../img/metr/mos.png" alt="a 1x4 mosaiced metroid">
     <b>{*@fig:metr-mos}</b>: a 1×4 mosaiced metroid.
   </div>
 </div>
@@ -175,7 +175,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:240px;">
-  <img id="fig:mos-demo" src="img/demo/mos_demo.png">
+  <img id="fig:mos-demo" src="../img/demo/mos_demo.png">
   <b>{*@fig:mos-demo}</b>: <i>mos_demo</i>.
 </div>
 
@@ -532,7 +532,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:240px;">
-  <img id="fig:bld-demo" src="img/demo/bld_demo.png" alt="bld_demo">
+  <img id="fig:bld-demo" src="../img/demo/bld_demo.png" alt="bld_demo">
   <b>{*@fig:bld-demo}</b>: blend demo; mode=2, eva=0, evb=0, ey=10.
 </div>
 
@@ -582,13 +582,13 @@ A rectangular window is defined by its <dfn>left</dfn>, <dfn>right</dfn>, <dfn>t
       <tr>
         <td>
           <div class="cpt" style="width:240px;">
-            <img src="img/demo/win_demo.png" alt="Showing win0, win1, and win_out windows">
+            <img src="../img/demo/win_demo.png" alt="Showing win0, win1, and win_out windows">
             <b>{*@fig:win-dgrm}a</b>: showing win0, win1, and win_out windows.
           </div>
         </td>
         <td>
           <div class="cpt" style="width:180px;">
-            <img src="img/demo/win_demo_x.png" alt="diagram.">
+            <img src="../img/demo/win_demo_x.png" alt="diagram.">
             <b>{*@fig:win-dgrm}b</b>: win0 in red, win1 in green, winIn is win0 | win1 (blue edge), winOut in grey.
           </div>
         </td>

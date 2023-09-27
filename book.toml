@@ -17,3 +17,6 @@ max-level = 2
 
 [preprocessor.external-links]
 command = "cargo run -p mdbook-external-links --locked --release --"
+
+[preprocessor.xnos]
+command = "python3 -X utf8 ./mdbook-xnos/mdbook-xnos.py"

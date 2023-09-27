@@ -21,14 +21,14 @@ In terms of capabilities the GBA is a lot like the Super NES (SNES): 15-bit colo
       <tr>
         <td>
           <div class="cpt" style="width:288px;">
-            <img src="img/hardware/gba.jpg" id="fig:gba" alt="original GBA" width=288>
+            <img src="../img/hardware/gba.jpg" id="fig:gba" alt="original GBA" width=288>
             <br>
             <b>{*@fig:gba}</b>: original GBA.
           </div>
         </td>
         <td rowspan=2>
           <div class="cpt" style="width:256px;">
-            <img src="img/hardware/gba-sp.jpg" id="fig:gba-sp" alt="GBA-SP" width=256>
+            <img src="../img/hardware/gba-sp.jpg" id="fig:gba-sp" alt="GBA-SP" width=256>
             <br>
             <b>{*@fig:gba-sp}</b>: GBA-SP.
           </div>

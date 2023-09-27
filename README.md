@@ -4,7 +4,7 @@ This is a community-maintained version of Tonc, the GBA programming tutorial ori
 
 ## Setup
 
-You need Rust and mdbook.
+You need Python, Rust and mdBook.
 
 ```sh
 # clone the repo

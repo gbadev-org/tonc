@@ -25,7 +25,7 @@ Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#G
 <tr align="center">
   <td>
   <div class="cpt" style="width:192px;">
-  <img src="img/gba_draw.png" id="fig:gba-draw" alt=""><br>
+  <img src="../img/gba_draw.png" id="fig:gba-draw" alt=""><br>
   <b>{*@fig:gba-draw}</b>: vdraw, vblank and hblank periods.
   </div>
 

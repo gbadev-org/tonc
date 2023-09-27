@@ -356,7 +356,7 @@ And that's about it, really. No, wait there's one more issue: you have to be car
 ## *sbb_aff* demo {#sec-demo}
 
 <div class="cpt_fr" style="width:240px">
-  <img id="fig:sbb-aff" src="img/demo/sbb_aff.png" alt="sbb_aff demo">
+  <img id="fig:sbb-aff" src="../img/demo/sbb_aff.png" alt="sbb_aff demo">
   <b>{*@fig:sbb-aff}</b>: <i>sbb_aff</i> demo.
 </div>
 

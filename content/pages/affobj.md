@@ -266,7 +266,7 @@ for(iy=-hheight; iy<hheight; iy++)
 This has two main consequences, the clipping artifact and a discretization artifact.
 
 <div class="cpt_fr" style="width:160px;">
-<img src="img/metr/aff_clipped.png" id="fig:metr-clip" 
+<img src="../img/metr/aff_clipped.png" id="fig:metr-clip" 
   alt="defanged metroid"><br>
 <b>{*@fig:metr-clip}</b>: a partially defanged metroid, 
 since the parts outside the blue square are clipped off.
@@ -290,14 +290,14 @@ The center pixel is the reference point of the transformation algorithm, which h
 <tr>
   <td>
   <div class="cpt_fr" style="width:288px;">
-  <img src="img/affine/numline.png" id="fig:numline" width="288"
+  <img src="../img/affine/numline.png" id="fig:numline" width="288"
     alt="Numbers vs pixels"><br>
   <b>{*@fig:numline}</b>: pixels are between, 
     not on, coordinates.
   </div></td>
   <td>
   <div class="cpt_fr" style="width:320px;">
-  <img src="img/affine/numalgor.png" id="fig:aff-algor" width="320"
+  <img src="../img/affine/numalgor.png" id="fig:aff-algor" width="320"
     alt="Rotations"><br>
   <b>{*@fig:aff-algor}</b>: Rotations in 90&deg; 
     increments.
@@ -367,14 +367,14 @@ The interesting point of seeing the transformations back to back is that you can
 <tr>
 <td>
 <div class="cpt_fr" style="width:240px;">
-<img src="img/demo/obj_aff_rs.png" id="fig:obj-aff-rs" 
+<img src="../img/demo/obj_aff_rs.png" id="fig:obj-aff-rs" 
   alt="R*S affine object."><br>
 <b>{*@fig:obj-aff-rs}</b>: 
   <tt>obj_aff</tt>, via <b>S</b>(1,2), then <b>R</b>(45&deg;)
 </div>
 <td>
 <div class="cpt_fr" style="width:240px;">
-<img src="img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
+<img src="../img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
   alt="S*R affine object."><br>
 <b>{*@fig:obj-aff-sr}</b>: 
   <tt>obj_aff</tt>, via <b>R</b>(45&deg;), then <b>S</b>(1,2)
@@ -669,7 +669,7 @@ That is to say, multiple small transformations work as one big one. All you have
 ## Off-center reference points and object combos {#sec-combo}
 
 <div class="cpt_fr" style="width:240px;">
-<img src="img/metr/rot_ofs.png" id="fig:rot-ofs" 
+<img src="../img/metr/rot_ofs.png" id="fig:rot-ofs" 
   alt="Rotation around off-center point"><br>
 <b>{*@fig:rot-ofs}</b>: rotation of object around an 
   off-center point.
@@ -958,7 +958,7 @@ As I said, this is not a particularly fast function; it takes roughly a scanline
 ### Affine object combo demo {#ssec-combo-demo}
 
 <div class="cpt_fr" style="width:64px;">
-<img src="img/demo/oac_orb.png" id="fig:oac-orb"
+<img src="../img/demo/oac_orb.png" id="fig:oac-orb"
   width=64 alt=""><br>
 <b>{*@fig:oac-orb}</b>: object for <tt>oacombo</tt>.
 </div>
@@ -1139,7 +1139,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:272px;">
-<img src="img/demo/oacombo.png" id="fig:oacombo" width=272
+<img src="../img/demo/oacombo.png" id="fig:oacombo" width=272
   alt=""><br>
 <b>{*@fig:oacombo}</b>: <tt>oacombo</tt> in action. 
 Note the gaps.
