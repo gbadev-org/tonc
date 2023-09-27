@@ -17,11 +17,11 @@
 # GBA Extended
 
 - [The affine transformation matrix]()
-- [Affine sprites]()
-- [Affine tiled backgrounds]()
-- [Graphic effects]()
+- [Affine sprites](./pages/affobj.md)
+- [Affine tiled backgrounds](./pages/affbg.md)
+- [Graphic effects](./pages/gfx.md)
 - [Direct Memory Access]()
-- [Timers]()
+- [Timers](./pages/timers.md)
 - [Hardware interrupts]()
 - [BIOS calls]()
 - [Beep! GBA sound introduction]()
