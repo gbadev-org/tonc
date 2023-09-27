@@ -96,6 +96,13 @@ For example:
     sed -i 's/{target="_blank"}//g' pagename.md
     ```
 
+*  Image links with a `{#id}` attribute need to be converted to `<img>` tags:
+
+    (vim substitute command)
+    ```
+    %s$!\[\(.\{-}\)\](\(.\{-}\)){\s*#\(.\{-}\)\s*}\s*$<img alt="\1" src="\2" id="\3">$g
+    ```
+
 Once it's in good shape, you can delete the original .htm file.
 
 ### 3. Figures, tables, equations
