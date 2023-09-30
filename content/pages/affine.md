@@ -64,7 +64,7 @@ Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <s
 </div>
 </div>
 
-Unfortunately, there is a lot of incorrect or misleading information on the transformation matrix around; the matrix of eq 10.1 is just one aspect of it. This actually starts with the moniker “Rot/Scale”, which does not fit with what actually occurs, continues with the fact that the terms used are never properly defined and that most people often just copy-paste from others without even considering checking whether the information is correct or not. The irony is that the principle reference document, GBATek, gives the correct descriptions of each of the elements, but somehow it got lost in the translation to matrix form in the tutorials.
+Unfortunately, there is a lot of incorrect or misleading information on the transformation matrix around; the matrix of {@eq:incorrect_transform_matrix} is just one aspect of it. This actually starts with the moniker “Rot/Scale”, which does not fit with what actually occurs, continues with the fact that the terms used are never properly defined and that most people often just copy-paste from others without even considering checking whether the information is correct or not. The irony is that the principle reference document, GBATek, gives the correct descriptions of each of the elements, but somehow it got lost in the translation to matrix form in the tutorials.
 
 In this chapter, I'll provide the **correct** interpretation of the **P**-matrix; how the GBA uses it and how to construct one yourself. To do this, though, I'm going into full math-mode. If you don't know your way around vector and matrix calculations you may have some difficulties understanding the finer points of the text. There is an appendix on [linear algebra](matrix.html) for some pointers on this subject.
 
@@ -82,7 +82,7 @@ It's true. Pretty much every document I've seen that deals with this subject is 
 
 ### General 2D texture mapping
 
-What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:rotatescale}a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
+What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:metroid_texture}a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
 
 <math class="block">
     <mi>𝗾</mi>
@@ -94,7 +94,7 @@ What the GBA does to get sprites and tiled backgrounds on screen is very much li
 
 So how do you find **A**? Well, that's actually not that hard. The matrix is formed by lining up the transformed base vectors, which are **u** and **v** (this works in any number of dimensions, btw), so that gives us:
 
-<math id="eq:correct_transform_matrix" class="block">
+<math class="block">
     <mi>𝗔</mi>
     <mo>=</mo>
     <mrow>
@@ -130,7 +130,7 @@ A forward texture mapping via affine matrix **A**.
 
 ### Affine transformations
 
-The transformations you can do with a 2D matrix are called <dfn>[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see {@eq:transformation_matrix_and_inverse}).
+The transformations you can do with a 2D matrix are called <dfn>[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see {@fig:metroid_texture}b).
 
 Affine transformations include rotation and scaling, but *also* shearing. This is why I object to the name “Rot/Scale”: that term only refers to a special case, not the general transformation. It is akin to calling colors shades of red: yes, reds are colors too, but not all colors are reds, and to call them that would give a distorted view of the subject.
 
@@ -693,7 +693,7 @@ Tonclib contains a number of functions for manipulating the affine parameters of
 
 ### Sample rot/scale function
 
-My code for a object version of the scale-then-rotate function (à la {@eq:transformation_matrix}) is given below. Note that it is from the computer's point of view, so that `sx` and `sy` scale down. Also, the alpha `alpha` uses 10000h/circle (i.e., the unit of α is π/8000h = 0.096 mrad, or 180/8000h = 0.0055°) and the sine lut is in .12f format, which is why the shifts by 12 are required. The background version is identical, except in name and type. If this were C++, templates would have been mighty useful here.
+My code for a object version of the scale-then-rotate function (à la {@eq:correct_matrix}) is given below. Note that it is from the computer's point of view, so that `sx` and `sy` scale down. Also, the alpha `alpha` uses 10000h/circle (i.e., the unit of α is π/8000h = 0.096 mrad, or 180/8000h = 0.0055°) and the sine lut is in .12f format, which is why the shifts by 12 are required. The background version is identical, except in name and type. If this were C++, templates would have been mighty useful here.
 
 ```c
 void obj_aff_rotscale(OBJ_AFFINE *oaff, int sx, int sy, u16 alpha)
