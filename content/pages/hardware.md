@@ -65,7 +65,7 @@ To get anything done, you use <dfn>memory-mapped IO</dfn>. Specific areas of mem
 
 ### CPU {#ssec-cpu}
 
-As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2^24^ cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16-bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
+As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2<sup>24</sup> cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16-bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
 
 For more information on the CPU, go to [www.arm.com](http://www.arm.com){target="_blank"} or to the [assembly chapter](asm.html)
 

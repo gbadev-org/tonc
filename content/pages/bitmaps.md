@@ -409,7 +409,7 @@ What the GBA does is page flipping, so refer to it as such.
 
 ### GBA page flipping {#ssec-page-gba}
 
-The second page of the GBA is located at location `0600:A000h`. If you look at the size required for mode 3, you'll see why it doesn't have page-flipping capabilities: there's no room for a second page. To set the GBA to display the second page, set [`REG_DISPCNT`](video.html#tbl-reg-dispcnt){4}. My page flipping function looks a little like this:
+The second page of the GBA is located at location `0600:A000h`. If you look at the size required for mode 3, you'll see why it doesn't have page-flipping capabilities: there's no room for a second page. To set the GBA to display the second page, set [`REG_DISPCNT`](video.html#tbl-reg-dispcnt)\{4\}. My page flipping function looks a little like this:
 
 <div id="cd-vid-flip" markdown>
 ```c
@@ -882,7 +882,7 @@ for(ii=0; ii<fooSize/4; ii++)
 
 Both these routines copy `fooSize` bytes from `fooData` to VRAM. Only the second version is much faster because there are half as many loop iterations and also because the ARM CPU is just better at dealing with 32-bit chunks. The only danger here is that while `fooData` will be halfword aligned, it need *not* be word aligned, which is a requirement for the second version. For those readers that think casts like this and mis-alignment only happen to other people, think again: the faster copy routines (`memcpy()`, `CpuFastSet()`, and DMA too) cast to word pointers implicitly. Use them (and you should) and you run the risk of misalignment.
 
-There are many ways of ensuring proper alignment. The easiest way is to not mix converted data with the rest of your stuff. That is, don't #include data-files. This should suffice. Another method is to convert to `u32` arrays in the first place. In assembly files, you can control alignment by using the `.p2align *n*` directive, where *n* aligns to 2^n^ bytes. C itself doesn't allow manual alignment, but there is an extension for this in GCC: `__attribute__(( aligned(4) ))`. Add that to the definition and it'll be word aligned. This is often `#define`d as `ALIGN4` in some headers. Files in GBFS are also always correctly aligned.
+There are many ways of ensuring proper alignment. The easiest way is to not mix converted data with the rest of your stuff. That is, don't #include data-files. This should suffice. Another method is to convert to `u32` arrays in the first place. In assembly files, you can control alignment by using the `.p2align *n*` directive, where *n* aligns to 2<sup>n</sup> bytes. C itself doesn't allow manual alignment, but there is an extension for this in GCC: `__attribute__(( aligned(4) ))`. Add that to the definition and it'll be word aligned. This is often `#define`d as `ALIGN4` in some headers. Files in GBFS are also always correctly aligned.
 
 #### Struct alignment
 
