@@ -11,7 +11,7 @@ Authors: Cearn
 
 As you probably know, the GBA is capable of applying geometric transformations like rotating and/or scaling to sprites and backgrounds. To set them apart from the regular items, the transformable ones are generally referred to as Rot/Scale sprites and backgrounds. The transformations are described by four parameters, `pa`, `pb`, `pc` and `pd`. The locations and exact names differ for sprites and backgrounds but that doesn't matter for now.
 
-There are two ways of interpreting these numbers. The first is to think of each of them as individual offsets to the sprite and background data. This is how the reference documents like [GBATek](http://nocash.emubase.de/gbatek.htm){target="_blank"} and [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm){target="_blank"} describe them. The other way is to see them as the elements of a 2x2 matrix which I will refer to as **P**. This is how pretty much all tutorials describe them. These tutorials also give the following matrix for rotation and scaling:
+There are two ways of interpreting these numbers. The first is to think of each of them as individual offsets to the sprite and background data. This is how the reference documents like [GBATek](http://nocash.emubase.de/gbatek.htm) and [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) describe them. The other way is to see them as the elements of a 2x2 matrix which I will refer to as **P**. This is how pretty much all tutorials describe them. These tutorials also give the following matrix for rotation and scaling:
 
 <math id="eq:incorrect_transform_matrix" class="block">
     <mo>(</mo>
@@ -53,14 +53,20 @@ There are two ways of interpreting these numbers. The first is to think of each 
 
 Now, this is indeed a rotation and scale matrix. Unfortunately, it's also the <span class="rem">wrong one</span>! Or at least, it probably does not do what you'd expect. For example, consider the case with a scaling of <math><msub><mi>s</mi><mi>x</mi></msub></math> = 1.5, <math><msub><mi>s</mi><mi>y</mi></msub></math> = 1.0 and a rotation of α= 45. You'd probably expect something like {@fig:rotatescale}a, but what you'd actually get is {@fig:rotatescale}b. The sprite has rotated, but in the wrong direction, it has shrunk rather than expanded and there's an extra shear as well. Of course, you can always say that you meant for this to happen, but that's probably not quite true.
 
-<div style="display: flex; margin: 20px" markdown>
-<div class="cpt" style="width:160px;" markdown>
-![](img/affine/metr_rs_good.png){#fig:rotatescale}
+<div style="display: flex; margin: 20px">
+<div class="cpt" style="width:160px;">
+
+<img src="./img/affine/metr_rs_good.png" id="fig:rotatescale">  
+
 **{*@fig:rotatescale}a**: when you say ‘rotate and scale’, you probably expect this…
+
 </div>
-<div class="cpt" style="width:160px" markdown>
-![](img/affine/metr_rs_bad.png)
-**{*@fig:rotatescale}b**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
+&nbsp;
+<div class="cpt" style="width:160px">
+<img src="./img/affine/metr_rs_bad.png" id="fig:rotatescale">  
+
+
+**{*@fig:rotatescale}b**: but with **P** from {@eq:incorrect_transform_matrix}, this is what you get.
 </div>
 </div>
 
@@ -115,17 +121,23 @@ So how do you find **A**? Well, that's actually not that hard. The matrix is for
 
 <div style="display: flex; align-items: center" markdown>
 <div class="cpt" style="width:128px;" markdown>
-![A metroid texture...](img/affine/metr_tex.png){#fig:metroid_texture}a
+<img src="./img/affine/metr_tex.png" id="fig:metroid_texture">  
+
 **{*@fig:metroid_texture}a**: a texture.
 </div>
 
-<span style="font-size: 3em; display: inline-flex; flex-direction: column; padding: 10px" markdown>**A** →</span>
+<span style="font-size: 3em; display: inline-flex; flex-direction: column; padding: 10px">
+A <br>
+→
+</span>
 
 <div class="cpt" style="width:128px;" markdown>
-![ ... mapped](img/affine/metr_texmapA.png)
+<img src="./img/affine/metr_texmapA.png" id="fig:metroid_texture">  
+
 **{*@fig:metroid_texture}b**: a texture mapped
 </div>
 </div>
+
 A forward texture mapping via affine matrix **A**.
 
 ### Affine transformations
@@ -412,9 +424,12 @@ To set them apart from regular backgrounds and sprites, I suppose ‘Rotation’
 
 ## “Many of the truths we cling to depend greatly upon our own point of view.”
 
-<div class="cpt_fr" style="width:160px" markdown>
-![Human view](img/affine/metr_texmapA.png){#fig:human_pov}  
+<div class="cpt_fr" style="width:160px">
+
+<img src="./img/affine/metr_texmapA.png" id="fig:human_pov">  
+
 **{*@fig:human_pov}**: Mapping process as seen by humans. **u** and **v** are the columns of **A** (in screen space).
+
 </div>
 
 As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect_transform_matrix}, which I said was incorrect. So what gives? Well, if you enter this matrix into the `pa-pd` elements you do indeed get something different than what you'd expect. Only now I've proven what you were supposed to expect in the first place (namely a scaling by <math><msub><mi>s</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math>, followed by a counter-clockwise rotation by α). The *real* question is of course, why doesn't this work? To answer this I will present two different approaches to the 2D mapping process.
@@ -425,9 +440,12 @@ As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect
 
 ### Computer point of view
 
-<div class="cpt_fr" style="width:160px" markdown>
-![puter view](img/affine/metr_texmapB.png){#fig:comp_pov}  
+<div class="cpt_fr" style="width:160px">
+
+<img src="./img/affine/metr_texmapB.png" id="fig:comp_pov">  
+
 **{*@fig:comp_pov}**: Mapping process as seen by computers. **u** and **v** (in texture space) are the columns of **B** and are mapped to the principle axes in screen space.
+
 </div>
 
 “Hello, I am Cearn's GBA. I'm a lean, mean gaming machine that fits in your pocket, and I can push pixels like no one else. Except perhaps my owner's GeForce 4 Ti4200, the bloody show-off. Anyway, one of the things I do is texture mapping. And not just ordinary texture-mapping, I can do cool stuff like rotation and scaling as well. What I do is fill pixels, all I need to know is for you to tell me where I should get the pixel's color from. In other words, to fill screen pixel **q**, I need a matrix **B** that gives me the proper texel **p** via **p = B · q**. I'll happily use any matrix you give me; I have complete confidence in your ability to supply me with the matrix for the transformation you require.”
