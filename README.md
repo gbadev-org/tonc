@@ -4,24 +4,18 @@ This is a community-maintained version of Tonc, the GBA programming tutorial ori
 
 ## Setup
 
-You need Python 3. This example will set up a virtual environment and install dependencies inside it.
+You need Python, Rust and mdBook.
 
 ```sh
 # clone the repo
-git clone git@github.com:gbadev-org/tonc.git
+git clone --recurse-submodules git@github.com:gbadev-org/tonc.git
 cd tonc
 
-python -m venv env
-source env/bin/activate
-
-pip install -r requirements.txt
+cargo install mdbook
 
 # run the development server
-make devserver
+mdbook serve --open
 ```
-
-Then open http://127.0.0.1:8000/toc.html in your browser.
-
 
 ## Converting pages to markdown
 
@@ -41,7 +35,7 @@ mv intro.htm intro-old.htm
 pandoc --from=html --to=markdown-fenced_divs-bracketed_spans-escaped_line_breaks-smart --wrap=none -o intro.md intro-old.htm
 ```
 
-Then, add metadata and replace the table of contents with a `[TOC]` marker:
+Then, add metadata and replace the table of contents with a `<!-- toc -->` marker:
 
 ```md
 Title: Introduction to Tonc
@@ -51,7 +45,7 @@ Authors: Cearn
 
 # ii. Introduction to Tonc
 
-[TOC]
+<!-- toc -->
 ```
 
 ### 2. Cleanup
@@ -61,13 +55,13 @@ Next, go through the page and fix anything that's broken.
 For example:
 
 *   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
-    
+
     ```
     sed -i -E 's,<span class="dfn">([^<]+)</span>,<dfn>\1</dfn>,g' pagename.md
     ```
 
 *   Section numbers should be removed from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
-    
+
     ```
     sed -i -E 's,^(##+) [0-9]+\.[0-9.]+,\1,g' pagename.md
     ```
@@ -82,17 +76,31 @@ For example:
 
 *   Use backticks (`` ` ``) around code keywords and italics (`*`) around file names in the text.
 
-*   Container tags may need a `markdown` attribute adding to them, otherwise the Markdown within won't be rendered properly. For example:
-    
+*   Container tags need empty lines after them, otherwise the Markdown within won't be rendered properly. For example:
+
     ```html
-    <div class="note" markdown> ... </div>
-    <div style="margin-left:1.2cm;" markdown> ... </div>
+    <div class="note">
+
+    ...
+    </div>
+
+    <div style="margin-left:1.2cm;">
+
+    ...
+    </div>
     ```
-    
-    It may help to apply this attribute to all notes.
-    
+
+*   The `target` attribute should be removed from links:
+
     ```
-    sed -i -E 's,<div class="note">,<div class="note" markdown>,g' pagename.md
+    sed -i 's/{target="_blank"}//g' pagename.md
+    ```
+
+*  Image links with a `{#id}` attribute need to be converted to `<img>` tags:
+
+    (vim substitute command)
+    ```
+    %s$!\[\(.\{-}\)\](\(.\{-}\)){\s*#\(.\{-}\)\s*}\s*$<img alt="\1" src="\2" id="\3">$g
     ```
 
 Once it's in good shape, you can delete the original .htm file.
@@ -120,7 +128,7 @@ For autonumbering and cross-referencing of figures, tables and equations, we use
 For example, on the page *'ii. Introduction to Tonc'*, the following Markdown:
 
 ```html
-<img src="img/toncdirs.png" id="fig:toncdirs" alt="Tonc directory structure">  
+<img src="img/toncdirs.png" id="fig:toncdirs" alt="Tonc directory structure">
 **{*@fig:toncdirs}**: directories.
 ```
 

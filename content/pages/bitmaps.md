@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 5. The Bitmap modes (mode 3, 4, 5) {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Introduction {#sec-intro}
 
@@ -16,7 +16,7 @@ The chapter will close with a section on how to deal with data and computer memo
 ### Bitmap 101 {#ssec-intro-101}
 
 <div class="cpt_fr" style="width:96px">
-  <img src="img/bitmaps/link_lttp_sm.png" width=72 id="fig:link-sm" 
+  <img src="../img/bitmaps/link_lttp_sm.png" width=72 id="fig:link-sm" 
     alt="a 24x24 bitmap of Link."><br>
   <b>{*@fig:link-sm}</b>: Link (24x24 bitmap).
 </div>
@@ -31,7 +31,7 @@ A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), whe
 <table id="fig:link-big">
 <tr><td>
   <div class="cpt" style="width:310px">
-  <img src="img/bitmaps/link_lttp.png"
+  <img src="../img/bitmaps/link_lttp.png"
     alt="zoom out of {@fig:link-sm}">
     <b>{*@fig:link-big}a</b>: zoom out of 
     {@fig:link-sm}, with pixel offsets.
@@ -39,7 +39,7 @@ A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), whe
   </td>
   <td>
   <div class="cpt" style="width:348px">
-  <img src="img/bitmaps/link_lttp_mem.png"
+  <img src="../img/bitmaps/link_lttp_mem.png"
     alt="zoom out of {@fig:link-sm}, with pixel values.">
     <b>{*@fig:link-big}b</b>: zoom out of 
     {@fig:link-sm}, with pixel values. 
@@ -86,7 +86,7 @@ We've already seen how to plot pixels, now it's time for some lines and rectangl
 
 Diagonal lines are a little trickier, for a number of reasons. Diagonal lines have a slope that indicates how many horizontal steps you need to take before moving to the next scanline. That would only work if the absolute value were lower than one, otherwise you'd get gaps between pixels. For higher slopes, you need to increment vertically, and plot horizontally.
 
-Another point is how to make the routine fast enough to be of real use. Fortunately, these things have all been figured out in the past already, so we'll just use the results here. In this case, we'll use a [Bresenham Midpoint](https://en.wikipedia.org/wiki/Bresenham's_line_algorithm){target="_blank"} algorithm for the line drawing, modified to deal with horizontal and vertical lines separately. While I could explain what the routine does exactly, it is out of the scope of the chapter, really.
+Another point is how to make the routine fast enough to be of real use. Fortunately, these things have all been figured out in the past already, so we'll just use the results here. In this case, we'll use a [Bresenham Midpoint](https://en.wikipedia.org/wiki/Bresenham's_line_algorithm) algorithm for the line drawing, modified to deal with horizontal and vertical lines separately. While I could explain what the routine does exactly, it is out of the scope of the chapter, really.
 
 Two points I have ignored here are normalization and clipping. <dfn>Normalization</dfn> means making sure the routine runs in the right direction. For example, when implementing a line drawing routine that runs from `x1` to `x2` via an incrementing `for` loop, you'd best be sure that `x2` is actually higher than `x1` in the first place. <dfn>Clipping</dfn> means cutting the primitive down to fit inside the viewport. While this is a good thing to do, we will omit it because it can get really hairy to do it well.
 
@@ -250,7 +250,7 @@ void m3_fill(COLOR clr)
 ```
 
 <div class="cpt_fr" style="width:240px">
-  <img src="img/demo/m3_demo.png" id="fig:m3-demo" alt="mode3 screen">
+  <img src="../img/demo/m3_demo.png" id="fig:m3-demo" alt="mode3 screen">
   <b>{*@fig:m3-demo}</b>: drawing in mode 3.
 </div>
 
@@ -341,7 +341,7 @@ void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 
 This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in tonclib.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 VRAM vs. byte writes
 </div>
@@ -351,7 +351,7 @@ You cannot write individual bytes into VRAM (or the palette or OAM for that matt
 Please don't skip this note, and make yourself aware of the full ramifications of this. Errors due to pointer-type mismatches are very easy to make, and [you may be writing to VRAM as bytes more often than you think](#ssec-data-memcpy).
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Generic vs. specific rendering routines
 </div>
@@ -371,7 +371,7 @@ Page flipping can alleviate some of these items, but that's not available in mod
 
 So basically, use the bitmap modes for testing and/or static images, but not much else unless you know the tilemodes can't do what you want.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhbad">
 Bitmap modes are not for gaming
 </div>
@@ -382,7 +382,7 @@ Do not get too comfortable with bitmap modes. Though they're nice for gbadev int
 ## Page flipping {#sec-page}
 
 <div class="cpt_fr" style="width:216px;">
-  <img src="img/bitmaps/pageflip.png" id="fig:flip" 
+  <img src="../img/bitmaps/pageflip.png" id="fig:flip" 
     alt="Page flipping procedure"><br>
   <b>{*@fig:flip}</b>: Page flipping procedure. 
   No data is copied, only the &lsquo;display&rsquo; and 
@@ -397,7 +397,7 @@ While the procedure works great, there are some snares. For the first, consider 
 
 The second problem concerns a little nasty in the age-old method of animation. The canonical animation does this. Frame1: draw object. Frame2: erase old object, draw object in new state. This doesn't work for page flipping since Frame2 is written on an entirely different bitmap than Frame1, so trying to erase Frame1's old object doesn't. What you need to erase is the object from 2 frames ago. Again, easy solution, but you have be aware of the problem. (Of course, erasing the entire frame each time would work too, but who's got the time?)
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Pageflipping, not double buffering
 </div>
@@ -411,7 +411,8 @@ What the GBA does is page flipping, so refer to it as such.
 
 The second page of the GBA is located at location `0600:A000h`. If you look at the size required for mode 3, you'll see why it doesn't have page-flipping capabilities: there's no room for a second page. To set the GBA to display the second page, set [`REG_DISPCNT`](video.html#tbl-reg-dispcnt)\{4\}. My page flipping function looks a little like this:
 
-<div id="cd-vid-flip" markdown>
+<div id="cd-vid-flip">
+
 ```c
 u16 *vid_flip()
 {
@@ -437,7 +438,8 @@ Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `
 
 Lastly, you can pause and unpause the demo by holding the Start Button.
 
-<div id="cd-pageflip" markdown>
+<div id="cd-pageflip">
+
 ```c
 #include <string.h>
 
@@ -492,9 +494,9 @@ int main()
 <div class="lblock">
 <div class="cpt" style="width:352px" id="fig:flipdemo">
 <center>
-<img src="img/demo/flip_front.png" alt="Flip A">
+<img src="../img/demo/flip_front.png" alt="Flip A">
 &nbsp;&nbsp;
-<img src="img/demo/flip_back.png" alt="Flip B"><br>
+<img src="../img/demo/flip_back.png" alt="Flip B"><br>
 </center>
 <b>{*@fig:flipdemo}</b>: the page flipping demo switches 
 between these two blocks.
@@ -506,7 +508,7 @@ This section is a little boring (ok, very boring) but it needs to be said. While
 
 The first two subsections are about how to get graphics into your game, something that you'll really need to know. After that I'll discuss a few nasty and highly technical things that may or may not cause problems later on. These are optional and you can skip to the [data-loading/interpreting demo](#ssec-data-demo) at any time. That said, I urge you to read them anyway because they may save you a lot of debugging time.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Relax, it's only 1s and 0s
 </div>
@@ -518,14 +520,15 @@ When you get right down to it, everything on computers is merely a big mess of b
 
 This may be a good point to say a few words on data. Strictly speaking, *everything* is data, but in this case I'm referring to data that on PC games would be separate from the executable: graphics, music, maybe scripts and text-files and what not. This all works fine on a PC, but not so fine on the GBA because there *is no file system*. This means that you cannot use the standard file I/O routines (`fscanf()`, `fread()`, etc) to read the data, because there are no files to read them from.
 
-All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C arrays and using `#include` on them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be `#include`d and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](https://pineight.com/gba/#gbfs){target="_blank"} by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C arrays because they are the easiest to use.
+All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C arrays and using `#include` on them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be `#include`d and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](https://pineight.com/gba/#gbfs) by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C arrays because they are the easiest to use.
 
-<div class="note" markdown>
-<div class="nh" markdown>
+<div class="note">
+<div class="nh">
+
 Ahem. Actually, we *do* have files
 </div>
 
-There *were* no files in the past, but in July of 2006, [Chishm](https://web.archive.org/web/20120201074338/http://chishm.drunkencoders.com/){target="_blank"} gave us libfat, which is a FAT-like file system for GBA and Nintendo DS. It is distributed via devkitPro Updater as well, so chances are you have it already.
+There *were* no files in the past, but in July of 2006, [Chishm](https://web.archive.org/web/20120201074338/http://chishm.drunkencoders.com/) gave us libfat, which is a FAT-like file system for GBA and Nintendo DS. It is distributed via devkitPro Updater as well, so chances are you have it already.
 </div>
 
 #### Where do my arrays go?
@@ -543,8 +546,8 @@ Note that what I said about arrays is true for *all* arrays, not just data array
 #define IWRAM_CODE __attribute__((section(".iwram"), long_call))
 ```
 
-<div class="note" markdown>
-<div class="nhgood" markdown>
+<div class="note">
+<div class="nhgood">
 Const is good
 </div>
 
@@ -553,7 +556,7 @@ Data that you don't expect to change in your game should be defined as constant 
 
 #### Converted and const arrays in C++
 
-There are two little snags that you can trip on if you're using (converted) data arrays in C++. The first is that tools that generate the arrays will output C files, not C++ files. This is not a problem in itself because those files will be compiled just the same. What *is* a problem is that C++ uses something known as [Name mangling](https://en.wikipedia.org/wiki/Name_mangling){target="_blank"} to allow overloading and stuff like that. C doesn't and as a result, the name that the C++ file looks for isn't the same one as in the C file and you get undefined references. To fix this, use `extern "C"` in front or around the declarations of the stuff in the C files.
+There are two little snags that you can trip on if you're using (converted) data arrays in C++. The first is that tools that generate the arrays will output C files, not C++ files. This is not a problem in itself because those files will be compiled just the same. What *is* a problem is that C++ uses something known as [Name mangling](https://en.wikipedia.org/wiki/Name_mangling) to allow overloading and stuff like that. C doesn't and as a result, the name that the C++ file looks for isn't the same one as in the C file and you get undefined references. To fix this, use `extern "C"` in front or around the declarations of the stuff in the C files.
 
 ```c
 // This:
@@ -590,9 +593,9 @@ Most files will follow a certain format to tell it what it is, and how to use it
 
 There are many conversion tools, one might almost say too many. Some are one-trick ponies: a single file-type to a single graphics mode for example. Some are very powerful and can handle multiple file-types, multiple files, different conversion modes with lots of options on the side, and compression. It should be obvious which are of the most value.
 
-A good one is [gfx2gba](https://www.coranac.com/files/gba/gfx2gba.zip){target="_blank"}. This is a command-line tool so that it can be used in a makefile, but there is a GUI front-end for it as well. This tool has the Good Things I mentioned earlier, plus some map-exporting options and palette merging, but the input file must be 8-bit and I hear that while it does compress data, the array-size is still given as its uncompressed size for some unfortunate reason. This tool comes with the HAM installation, and is quite common, so definitely recommended. Unfortunately, there seems to be another tool with the same name. You'll want the v0.13 version by Markus, not the other one.
+A good one is [gfx2gba](https://www.coranac.com/files/gba/gfx2gba.zip). This is a command-line tool so that it can be used in a makefile, but there is a GUI front-end for it as well. This tool has the Good Things I mentioned earlier, plus some map-exporting options and palette merging, but the input file must be 8-bit and I hear that while it does compress data, the array-size is still given as its uncompressed size for some unfortunate reason. This tool comes with the HAM installation, and is quite common, so definitely recommended. Unfortunately, there seems to be another tool with the same name. You'll want the v0.13 version by Markus, not the other one.
 
-Personally, I use [Usenti](https://www.coranac.com/projects/#usenti){target="_blank"}, which is my own tool. This is a bitmap editor (paint program) with exporting options thrown in. It allows different file-types, different bitdepths, different output files, all modes, some map-exporting stuff, meta-tiling, compression and a few others. It may not be as powerful as big photo-editing tools as Photoshop, GIMP, Aseprite, and the like, but it gets the job done. If you're still drawing your graphics with Microsoft Paint, please stop that and use this one instead. The exporter is also available separately in the form of the open source project called [(win)grit](https://www.coranac.com/projects/#grit){target="_blank"}, which comes in a command-line interface (grit) and a GUI (wingrit). As of January 2007, it is also part of the devkitPro distribution.
+Personally, I use [Usenti](https://www.coranac.com/projects/#usenti), which is my own tool. This is a bitmap editor (paint program) with exporting options thrown in. It allows different file-types, different bitdepths, different output files, all modes, some map-exporting stuff, meta-tiling, compression and a few others. It may not be as powerful as big photo-editing tools as Photoshop, GIMP, Aseprite, and the like, but it gets the job done. If you're still drawing your graphics with Microsoft Paint, please stop that and use this one instead. The exporter is also available separately in the form of the open source project called [(win)grit](https://www.coranac.com/projects/#grit), which comes in a command-line interface (grit) and a GUI (wingrit). As of January 2007, it is also part of the devkitPro distribution.
 
 <div class="note">
 <div class="nh">
@@ -684,7 +687,7 @@ const unsigned int modesPal[8]=
 
 </div>
 
-Those 2700 lines represent a 77 kB bitmap. One *single* bitmap. In all likelihood, you'll need at least a couple of them to make anything worthwhile. Most games have lots of data in them, not only graphics but maps and sound and music as well. All this adds up to a huge amount of data, certainly too much for just EWRAM and maybe even for a full cart. That is why <dfn>compression</dfn> is also important. The [GBA BIOS](swi.html) has decompression routines for bit-packing, run-length encoding, LZ77 and Huffman. Converters sometimes have the appropriate compressors for these routines, which can drastically shrink the amount of memory used. Usenti and (win)grit support these compressors. So does gfx2gba, which even has some more. A tool that just does compression on binary files (but does it very well) is [GBACrusher](https://www.coranac.com/files/gba/GBACrusher.zip){target="_blank"}. I won't go into compression that much (or at all), but you can read up on the subject [here](https://web.archive.org/web/20180820012154/http://members.iinet.net.au/~freeaxs/gbacomp/){target="_blank"}.
+Those 2700 lines represent a 77 kB bitmap. One *single* bitmap. In all likelihood, you'll need at least a couple of them to make anything worthwhile. Most games have lots of data in them, not only graphics but maps and sound and music as well. All this adds up to a huge amount of data, certainly too much for just EWRAM and maybe even for a full cart. That is why <dfn>compression</dfn> is also important. The [GBA BIOS](swi.html) has decompression routines for bit-packing, run-length encoding, LZ77 and Huffman. Converters sometimes have the appropriate compressors for these routines, which can drastically shrink the amount of memory used. Usenti and (win)grit support these compressors. So does gfx2gba, which even has some more. A tool that just does compression on binary files (but does it very well) is [GBACrusher](https://www.coranac.com/files/gba/GBACrusher.zip). I won't go into compression that much (or at all), but you can read up on the subject [here](https://web.archive.org/web/20180820012154/http://members.iinet.net.au/~freeaxs/gbacomp/).
 
 <div class="note">
 <div class="nhgood">
@@ -697,28 +700,28 @@ It is vital that you understand what data is, how the different datatypes work. 
 ### `#include` code or data considered harmful {#ssec-data-hdr}
 
 <div class="cpt_fr" style="width:240px;">
-  <img src="img/bitmaps/bart_data.png" id="fig:bart-data" 
+  <img src="../img/bitmaps/bart_data.png" id="fig:bart-data" 
     alt="Lines"><br>
   <b>{*@fig:bart-data}</b>: even Bart knows &hellip;
 </div>
 
-Most non-trivial projects will have multiple files with code and data. The standard way of dealing with these is to compile these separately and then link the results to the final binary. This is the recommended strategy. However, most other tutorials and many of the example code you can find on the web do something else: a [unity build](https://en.wikipedia.org/wiki/Unity_build){target="_blank"}. They `#include` everything into the main source file and compile that. This is *not* a recommended practice and should be avoided.
+Most non-trivial projects will have multiple files with code and data. The standard way of dealing with these is to compile these separately and then link the results to the final binary. This is the recommended strategy. However, most other tutorials and many of the example code you can find on the web do something else: a [unity build](https://en.wikipedia.org/wiki/Unity_build). They `#include` everything into the main source file and compile that. This is *not* a recommended practice and should be avoided.
 
 ”But why not? It seems to work fine, and it's so easy!”
 
-Yes, it is easy; and it does seem to work. The main problem is that a unity build isn't [scalable](https://en.wikipedia.org/wiki/Scalability){target="_blank"}. For small projects (a handful of files) you probably won't notice, but as projects grow to hundreds and perhaps thousands of files, you will run into some very annoying problems. The main issue is what #include actually does. It copies the whole included file into the includer to form a single larger file. This leads to the following issues.
+Yes, it is easy; and it does seem to work. The main problem is that a unity build isn't [scalable](https://en.wikipedia.org/wiki/Scalability). For small projects (a handful of files) you probably won't notice, but as projects grow to hundreds and perhaps thousands of files, you will run into some very annoying problems. The main issue is what #include actually does. It copies the whole included file into the includer to form a single larger file. This leads to the following issues.
 
 -   **Massive files to compile**. So, `#include` creates one big file. If you have a lot of stuff, you'll have one *very* big file. This will cost large amounts of memory and slows down compilation. As the project grows, what starts as a compile time of a second can grow to several, then minutes and perhaps even hours.
 
     At some point, there was also the problem that the compiler couldn't handle files exceeding 4 MB, putting a limit on how much you could `#include` in a C file. I'm not sure if this is still an issue.
 
--   **Recompiling the world**. The main problem is that when you `#include` everything, you need to recompile everything as well. If you make one change *anywhere*, no matter how small, causes *everything* to be compiled. For small projects (say, a handful of files), a full rebuild would take a few seconds so it's not a problem. But larger projects can have hundreds or thousands of files, and the time is not measured in seconds, but in minutes or perhaps hours. Sure it's a good excuse to go [sword fighting](https://xkcd.com/303/){target="_blank"}, but terribly annoying if you want to do something productive.
+-   **Recompiling the world**. The main problem is that when you `#include` everything, you need to recompile everything as well. If you make one change *anywhere*, no matter how small, causes *everything* to be compiled. For small projects (say, a handful of files), a full rebuild would take a few seconds so it's not a problem. But larger projects can have hundreds or thousands of files, and the time is not measured in seconds, but in minutes or perhaps hours. Sure it's a good excuse to go [sword fighting](https://xkcd.com/303/), but terribly annoying if you want to do something productive.
 
 -   **Bloat**. Even if your own code and data are relatively small in number, you're probably using some code library for API functions. Normally, these are pre-compiled and only the functions used are linked into your binary. But if those worked by #include as well (in other words, if their creators had followed the practice I'm warning against), every function in that library would be included as well, including the ones you're not using. This increases the filesize, *and* increases the problems mentioned above.
 
 -   **Undeclared identifiers, multiple definitions and circular dependencies**. In a nutshell, C requires that you declare an identifier before it's referenced, and it can only be defined once. The first point means that the order of inclusions starts to matter: if, say, *fileB.c* needs something from *fileA.c*, the latter needs to be included before the former to get a compile. The second means that you could only `#include` a file once in the whole project: if *fileB.c* and *fileC.c* both need stuff from *fileA.c*, you can't `#include` it in them both because when they're `#include`d in *main.c*, *fileA.c* is effectively `#include`d twice and the compiler will balk.
 
-    These points can technically be overcome by being careful, such as using an [include guard](https://en.wikipedia.org/wiki/Include_guard){target="_blank"}. But, again, when projects grow, things can get increasingly more difficult to keep track of which comes before what and why. There is, however, one point at which it *will* go wrong, namely when there are circular dependencies: *fileB.c* needs *fileA.c* and vice versa. Each file would require the other to go first, which simply isn't possible because it'd cause multiple definitions.
+    These points can technically be overcome by being careful, such as using an [include guard](https://en.wikipedia.org/wiki/Include_guard). But, again, when projects grow, things can get increasingly more difficult to keep track of which comes before what and why. There is, however, one point at which it *will* go wrong, namely when there are circular dependencies: *fileB.c* needs *fileA.c* and vice versa. Each file would require the other to go first, which simply isn't possible because it'd cause multiple definitions.
 
 -   **Data alignment**. I'll get to what this means in a minute, but right now know that copy routines work better if the data is aligned to 32-bit boundaries (even for byte and halfword arrays). Some of them won't even work properly if this isn't the case. This is usually guaranteed if you compile separately, but if the arrays are #included and no steps have been taken to force alignment, you simply never know.
 
@@ -834,7 +837,7 @@ void foo(int x)
 }
 ```
 
-Now, a definition is also a declaration, but this does *not* work the other way. How can it, the declaration is supposed to be empty. The distinction is subtle, but it's the reason you might get multiple definition errors when linking the files together. Think of what would happen if you have the definition of function `foo()` in multiple files. Each file itself would know what `foo()` is because definitions are also declarations, so it would pass the compilation stage. So now you have multiple object files, each containing a symbol called `foo`. But then you try to link them into one file. The linker sees different versions of `foo`, and stops because it doesn't know which one you are actually trying to use. The moral here is that you can have as many declarations as you want, but there can be [only *one* definition](https://en.wikipedia.org/wiki/One_Definition_Rule){target="_blank"}.
+Now, a definition is also a declaration, but this does *not* work the other way. How can it, the declaration is supposed to be empty. The distinction is subtle, but it's the reason you might get multiple definition errors when linking the files together. Think of what would happen if you have the definition of function `foo()` in multiple files. Each file itself would know what `foo()` is because definitions are also declarations, so it would pass the compilation stage. So now you have multiple object files, each containing a symbol called `foo`. But then you try to link them into one file. The linker sees different versions of `foo`, and stops because it doesn't know which one you are actually trying to use. The moral here is that you can have as many declarations as you want, but there can be [only *one* definition](https://en.wikipedia.org/wiki/One_Definition_Rule).
 
 Another point I should raise is that the declaration defines how a symbol is to be dealt with, as it is the only point of reference if the definition is in another file. This means that, in theory, you could have a variable `var` defined as an `int`, but declared as a `short`, or even a function! While not exactly recommended, but it is an interesting item.
 
@@ -1006,7 +1009,7 @@ I've arranged the data of the bitmap in such a way that the name of the current 
 
 Now, sometimes this is not as easy as it sounds. The general procedure for graphics is to create it on the PC, then use an exporter tool to convert it to a raw binary format, then copy it to VRAM. If the exporter has been given the wrong options, or if it can't handle the image in the first place, you'll get garbage. This can happen with some of the older tools. In some cases, it's the bitmap editor that is the culprit. For paletted images, a lot depends on the exact layout of the palette, and therefore it is **vital** that you have a bitmap editor that allows total control over the palette, and leaves it intact when saving. Microsoft Paint and Pyxel Edit for example do neither. Even very expensive photo editing tools don't, so be careful.
 
-For this image, I used \<plug\>my own bitmap editor [Usenti](https://www.coranac.com/projects/#usenti){target="_blank"}\</plug\>, which not only has some nice palette control options, and tiling functions, but a built-in GBA graphics exporter as well. To make the background be the same color in all modes, the two bytes of the 16-bit background color of modes 3 and 5 had to serve as palette entries for mode 4, both using that 16-bit color again. In this case, the color is `0x080F`, sort of a brownish color. The bytes are 8 and 15, so that's the palette entries where the color goes too. Normally you don't have to worry about switching bitdepths mid-game, but knowing how to read data like this is a useful debugging skill.
+For this image, I used \<plug\>my own bitmap editor [Usenti](https://www.coranac.com/projects/#usenti)\</plug\>, which not only has some nice palette control options, and tiling functions, but a built-in GBA graphics exporter as well. To make the background be the same color in all modes, the two bytes of the 16-bit background color of modes 3 and 5 had to serve as palette entries for mode 4, both using that 16-bit color again. In this case, the color is `0x080F`, sort of a brownish color. The bytes are 8 and 15, so that's the palette entries where the color goes too. Normally you don't have to worry about switching bitdepths mid-game, but knowing how to read data like this is a useful debugging skill.
 
 ```c
 #include <string.h>
@@ -1048,18 +1051,18 @@ int main()
 <tr>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="img/demo/bm_modes_3.png" alt="mode3 screen">
+  <img src="../img/demo/bm_modes_3.png" alt="mode3 screen">
   <b>{*@fig:bm-modes}a</b>: <tt>bm_modes</tt> in mode 3.
   </div>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="img/demo/bm_modes_4.png" alt="mode4 screen">
+  <img src="../img/demo/bm_modes_4.png" alt="mode4 screen">
   <b>{*@fig:bm-modes}b</b>: <tt>bm_modes</tt> in mode 4.
   </div>
 <tr>
 <td>
   <div class="cpt" style="width:240px">
-<img src="img/demo/bm_modes_5.png" alt="mode5 screen">
+<img src="../img/demo/bm_modes_5.png" alt="mode5 screen">
   <b>{*@fig:bm-modes}c</b>: <tt>bm_modes</tt> in mode 5.
   </div>
 <td>&nbsp;

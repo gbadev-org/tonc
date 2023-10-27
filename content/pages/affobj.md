@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 11. Affine sprites {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Affine sprite introduction {#sec-intro}
 
@@ -189,7 +189,7 @@ p_{c} & p_{d}
 
 Note that the origin of the transformation is *center* of the sprite, not the top-left corner. This is worth remembering if you want to align your sprite with other objects, which we'll do later.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Essential affine sprite steps
 </div>
@@ -266,7 +266,7 @@ for(iy=-hheight; iy<hheight; iy++)
 This has two main consequences, the clipping artifact and a discretization artifact.
 
 <div class="cpt_fr" style="width:160px;">
-<img src="img/metr/aff_clipped.png" id="fig:metr-clip" 
+<img src="../img/metr/aff_clipped.png" id="fig:metr-clip" 
   alt="defanged metroid"><br>
 <b>{*@fig:metr-clip}</b>: a partially defanged metroid, 
 since the parts outside the blue square are clipped off.
@@ -290,14 +290,14 @@ The center pixel is the reference point of the transformation algorithm, which h
 <tr>
   <td>
   <div class="cpt_fr" style="width:288px;">
-  <img src="img/affine/numline.png" id="fig:numline" width="288"
+  <img src="../img/affine/numline.png" id="fig:numline" width="288"
     alt="Numbers vs pixels"><br>
   <b>{*@fig:numline}</b>: pixels are between, 
     not on, coordinates.
   </div></td>
   <td>
   <div class="cpt_fr" style="width:320px;">
-  <img src="img/affine/numalgor.png" id="fig:aff-algor" width="320"
+  <img src="../img/affine/numalgor.png" id="fig:aff-algor" width="320"
     alt="Rotations"><br>
   <b>{*@fig:aff-algor}</b>: Rotations in 90&deg; 
     increments.
@@ -307,7 +307,7 @@ The center pixel is the reference point of the transformation algorithm, which h
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 The offsets measure distance from the center pixel, not center position.
 </div>
@@ -339,7 +339,7 @@ Note, by the way, that some older emulators (VBA and BoycottAdvance) both use in
 
 I have a really interesting demo for you this time called *obj_aff*. It features a normal (boxed) metroid, which can be scaled, rotated and scaled. Because these transformations are applied to the *current* state of the matrix, you can end up with every kind of affine matrix possible by concatenating the different matrices. The controls are as follows:
 
-<div class="lblock" markdown>
+<div class="lblock">
 
 - L and R Buttons  
   Rotates the sprite counterclockwise and clockwise, respectively.
@@ -367,14 +367,14 @@ The interesting point of seeing the transformations back to back is that you can
 <tr>
 <td>
 <div class="cpt_fr" style="width:240px;">
-<img src="img/demo/obj_aff_rs.png" id="fig:obj-aff-rs" 
+<img src="../img/demo/obj_aff_rs.png" id="fig:obj-aff-rs" 
   alt="R*S affine object."><br>
 <b>{*@fig:obj-aff-rs}</b>: 
   <tt>obj_aff</tt>, via <b>S</b>(1,2), then <b>R</b>(45&deg;)
 </div>
 <td>
 <div class="cpt_fr" style="width:240px;">
-<img src="img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
+<img src="../img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
   alt="S*R affine object."><br>
 <b>{*@fig:obj-aff-sr}</b>: 
   <tt>obj_aff</tt>, via <b>R</b>(45&deg;), then <b>S</b>(1,2)
@@ -384,7 +384,8 @@ The interesting point of seeing the transformations back to back is that you can
 
 The full source code for the *obj_aff* demo is given below. It's quite long, mostly because of the amount of code necessary for managing the different affine states that can be applied. The functions that actually deal with affine sprites are `init_metr()`, `get_aff_new()` and part of the game loop in `objaff_test()`; the rest is essentially fluff required to making the whole thing work.
 
-<div id="cd-obj-aff" markdown>
+<div id="cd-obj-aff">
+
 ```c
 // obj_aff.c
 
@@ -669,7 +670,7 @@ That is to say, multiple small transformations work as one big one. All you have
 ## Off-center reference points and object combos {#sec-combo}
 
 <div class="cpt_fr" style="width:240px;">
-<img src="img/metr/rot_ofs.png" id="fig:rot-ofs" 
+<img src="../img/metr/rot_ofs.png" id="fig:rot-ofs" 
   alt="Rotation around off-center point"><br>
 <b>{*@fig:rot-ofs}</b>: rotation of object around an 
   off-center point.
@@ -884,7 +885,8 @@ The right-hand side here has three separate vectors, two of which are part of th
 
 Now, this matrix inversion means two things. First, that you will likely have to set up *two* matrices: the affine matrix itself, and its inverse. For general matrices, this might take a while, especially when considering that if you want scaling, you will have to do a division somewhere. Secondly, because you only have 16 bits for the matrix elements, the inverse won't be the *exact* inverse, meaning that aligning the objects exactly will be difficult, if not actually impossible. This is pretty much guaranteed by the hardware itself and I'll return to this point later on. For now, let's look at a function implementing {@eq:aff-ex} in the case of a 2-way scaling followed by a rotation.
 
-<div id="cd-oe-rs-ex" markdown>
+<div id="cd-oe-rs-ex">
+
 ```c
 // === in tonc_types.h ===
 
@@ -958,7 +960,7 @@ As I said, this is not a particularly fast function; it takes roughly a scanline
 ### Affine object combo demo {#ssec-combo-demo}
 
 <div class="cpt_fr" style="width:64px;">
-<img src="img/demo/oac_orb.png" id="fig:oac-orb"
+<img src="../img/demo/oac_orb.png" id="fig:oac-orb"
   width=64 alt=""><br>
 <b>{*@fig:oac-orb}</b>: object for <tt>oacombo</tt>.
 </div>
@@ -990,7 +992,8 @@ The rotation will take place around the center of the circle, so that's an ancho
 
 Because the sub-objects share the same **P** matrix, it'd be a waste to recalculate it the whole time, so I'm using a modified version of it especially tailored to `OACOMBO` structs called `oac_rotscale()`. The code is basically the same though. The `oacs[]` array forms the three combos, which are initialized at definition because that makes things so much easier. The full circle is at (16,20), the semis at (80,20) and the one composed of quarter circles is at (48,60). The `obj_data[]` array contains the data for our seven objects, and is copied to `obj_buffer` in the initialization function. While it is generally true that magic numbers (such as using hex for OAM attributes) are evil, it is also true that they really aren't central to this story and to spend a lot of space on initializing all of them in the ‘proper’ fashion may actually do more harm than good … this time. I am still using `#define`s for the anchor and a reference point though, because they appear multiple times in the rest of the code.
 
-<div id="cd-oacombo" markdown>
+<div id="cd-oacombo">
+
 ```c
 // oacombo.c
 
@@ -1139,7 +1142,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:272px;">
-<img src="img/demo/oacombo.png" id="fig:oacombo" width=272
+<img src="../img/demo/oacombo.png" id="fig:oacombo" width=272
   alt=""><br>
 <b>{*@fig:oacombo}</b>: <tt>oacombo</tt> in action. 
 Note the gaps.

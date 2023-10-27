@@ -1,0 +1,6 @@
+[submodule "mdbook-external-links"]
+	path = mdbook-external-links
+	url = https://github.com/jonahgoldwastaken/mdbook-external-links
+[submodule "mdbook-toc"]
+	path = mdbook-toc
+	url = https://github.com/badboy/mdbook-toc

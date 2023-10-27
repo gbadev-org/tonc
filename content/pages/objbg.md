@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 7. Sprite and background overview
 
-[TOC]
+<!-- toc -->
 
 ## Sprites and backgrounds introduction {#sec-intro}
 
@@ -39,14 +39,14 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
 <tr valign="top">
 <td>
   <div class="cpt" style="width:200px">
-  <img src="img/tile_gfx_render.png"
+  <img src="../img/tile_gfx_render.png"
     alt="Example of both sprites and background"
     width=192><br>
   <b>{*@fig:tile-gfx}a</b>: 2 sprites on a background.
   </div>
 <td rowspan=2>
   <div class="cpt" style="width:384px">
-  <img src="img/tile_gfx_map.png"
+  <img src="../img/tile_gfx_map.png"
     alt="Tile usage" width=384><br>
   <b>{*@fig:tile-gfx}c</b>: tile usage by bgs and 
     sprites. One tile per SE for 
@@ -56,7 +56,7 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
 <tr>
 <td>
   <div class="cpt" style="width:200px">
-  <img src="img/tile_gfx_tileset.png"
+  <img src="../img/tile_gfx_tileset.png"
     alt="The bg and sprite tiles"><br>
   <b>{*@fig:tile-gfx}b</b>: background (above) and
     sprite (below) tiles. 
@@ -84,14 +84,14 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 <tr valign="top">
 <td>
   <div class="cpt" style="width:192px">
-  <img src="img/tile_8as8.png" width=192 
+  <img src="../img/tile_8as8.png" width=192 
     alt="8 bpp tiles">
   <b>{*@fig:tile-as}a</b>: 8bpp tiles.
   </div>
 </td>
 <td>
   <div class="cpt" style="width:192px">
-  <img src="img/tile_as_bm.png" width=192 
+  <img src="../img/tile_as_bm.png" width=192 
     alt="8 bpp tiles as bitmap">
   <b>{*@fig:tile-as}b</b>: 8bpp tiles as bitmap.
   </div>
@@ -99,7 +99,7 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 <tr>
 <td colspan=2>
   <div class="cpt" style="width:384px">
-  <img src="img/tile_8as4.png" width=384
+  <img src="../img/tile_8as4.png" width=384
     alt="as before, but interpreted as 4 bpp">
   <b>{*@fig:tile-as}c</b>: the data of 
     {@fig:tile-as}a, interpreted as 4bpp data. 
@@ -109,31 +109,23 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
 </table>
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Tiled graphics considerations
-
 </div>
 
 Remember and understand the following points:
 
 1.  The data of each tile are stored sequentially, with the next row of 8 pixels immediately following the previous row. VRAM is basically a big bitmap 8 pixels wide. Graphics converters should be able to convert bigger bitmaps into this format.
 2.  As always, watch your bitdepth.
-
 </div>
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhgood">
-
 Tip for graphics converters
-
 </div>
 
 If you want to make your own conversion tools, here's a little tip that'll help you with tiles. Work in stages; do *not* go directly from a normal, linear bitmap to writing the data-file. Create a tiling function that takes a bitmap and arranges the tiles into a bitmap 1 tile wide and *H* tiles high. This can then be exported normally. If you allow for a variable tile-width (not hard-coding the 8-pixel width), you can use it for other purposes as well. For example, to create 16x16 sprites, first arrange with width=16, then with width=8.
-
 </div>
 
 ### Tile blocks (aka charblocks) {#ssec-img-cbb}
@@ -144,16 +136,12 @@ As said, there are 6 tile-blocks, that is 4 for backgrounds (0-3) and 2 for spri
 
 It'd be nice if tile-indexing followed the same scheme for backgrounds and sprites, but it doesn't. For sprites, numbering always follows s-tiles (20h offsets) even for d-tiles, but backgrounds stick to their indicated tile-size: 20h offsets in 4bpp mode, 40h offsets for 8bpp mode.
 
-<div class="note" markdown>
-
+<div class="note">
 <div class="nhcare">
-
 Bg vs sprite tile indexing
-
 </div>
 
 Sprites always have 32 bytes between tile indices, bg tile-indexing uses 32 or 64 byte offsets, depending on their set bitdepth.
-
 </div>
 
 Now, both regular backgrounds and sprites have 10 bits for tile indices. That means 1024 allowed indices. Since each charblock contains 512 s-tiles, you can access not only the base block, but also the one after that. And if your background is using d-tiles, you can actually access a total of four blocks! Now, since tiled backgrounds can start counting at any of the four background charblocks, you might be tempted to try to use the sprite charblocks (blocks 4 and 5) as well. On the emulators I've tested, this does indeed work. On a real GBA, however, it does not. This is one of the reasons why you *need* to test on real hardware. For more on this subject see the [background tile subtleties](regbg.html#ssec-map-subtle) and the [`cbb_demo`](regbg.html#sec-demo).
@@ -187,7 +175,7 @@ Sprites and backgrounds have separate palettes. The background palette goes firs
 
 In 8-bit color mode, the pixel value in the tiles is palette-index for that pixel. In 4-bit color mode, the pixel value contains the lower nybble of the palette index; the high nybble is the <dfn>palbank</dfn> index, which can be found in either the sprite's attributes, or the upper nybble of the tiles. If the pixel-value is 0, then that pixel won't be rendered (i.e., will be transparent).
 
-Because of 16-color mode and the transparency issue, it is *essential* that your bitmap editor leaves the palette intact. I know from personal experience that MS-Paint and the Visual C bitmap editor don't, so you might want to use something else. Favorites among other GBA developers are [Graphics Gale](http://www.tempest-j.com/gale/e/){target="_blank"} and [GIMP](http://www.gimp.org){target="_blank"}. Of course, since I have my [my own bitmap editor](http://www.coranac.com/projects/#usenti){target="_blank"}, I prefer to use that.
+Because of 16-color mode and the transparency issue, it is *essential* that your bitmap editor leaves the palette intact. I know from personal experience that MS-Paint and the Visual C bitmap editor don't, so you might want to use something else. Favorites among other GBA developers are [Graphics Gale](http://www.tempest-j.com/gale/e/) and [GIMP](http://www.gimp.org). Of course, since I have my [my own bitmap editor](http://www.coranac.com/projects/#usenti), I prefer to use that.
 
 ## Summary {#sec-summary}
 
@@ -237,7 +225,7 @@ This is a short list of various attributes of sprites and backgrounds. It's alri
 
 ## What's in a name? {#sec-name}
 
-Well, since you are a programmer you should know the answer: plenty. If you disagree, visit the [How To Write Unmaintanable Code](http://mindprod.com/jgloss/unmain.html){target="_blank"} website and look at a number of their entries. My naming scheme is a bit different from that of the GBA community. I don't do this just because I feel like being contrary. I find some of the conventional names are incomplete, misleading and ambiguous. I feel little need, at least at present, to follow tradition simply because everyone else does. But you still need to know the traditional names, simply because everyone else does. So here's a list of differences in names.
+Well, since you are a programmer you should know the answer: plenty. If you disagree, visit the [How To Write Unmaintanable Code](http://mindprod.com/jgloss/unmain.html) website and look at a number of their entries. My naming scheme is a bit different from that of the GBA community. I don't do this just because I feel like being contrary. I find some of the conventional names are incomplete, misleading and ambiguous. I feel little need, at least at present, to follow tradition simply because everyone else does. But you still need to know the traditional names, simply because everyone else does. So here's a list of differences in names.
 
 <div class="cblock">
 <table id="tbl:name" 

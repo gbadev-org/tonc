@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 9. Regular tiled backgrounds {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Tilemap introduction {#sec-intro}
 
@@ -23,7 +23,7 @@ Suppose both the tileset and map used 8-bit entries, the sizes are 16×(16×16) 
 <tr>
 <td colspan=2 align="center">
   <div class="cpt" style="width:512px">
-  <img src="img/bgs/brin3-full.png" alt="Brinstar map">
+  <img src="../img/bgs/brin3-full.png" alt="Brinstar map">
   <b>{*@fig:map}a</b>: image on screen.
   </div>
 <tr>
@@ -35,13 +35,13 @@ Suppose both the tileset and map used 8-bit entries, the sizes are 16×(16×16) 
 <tr>
 <td>
   <div class="cpt" style="width:48px">
-  <img src="img/bgs/brin3-meta-2x.png" height=264
+  <img src="../img/bgs/brin3-meta-2x.png" height=264
     alt="(meta)tileset for the map"><br>
   <b>{*@fig:map}b</b>: the tile set.
   </div>		
 <td>
   <div class="cpt" style="width:528px">
-  <img src="img/bgs/brin3-map-2x.png" width=528
+  <img src="../img/bgs/brin3-map-2x.png" width=528
 	alt="Superimposed tile-map"><br>
   <b>{*@fig:map}c</b>: the tile map (with the proper 
     tiles as a backdrop).
@@ -89,7 +89,7 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
 </table>
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Tiles vs ‘tiles’
 </div>
@@ -97,7 +97,7 @@ Tiles vs ‘tiles’
 Both the entries of the tilemap and the data in the tileset are often referred to as ‘tiles’, which can make conversation confusing. I reserve the term ‘tile’ for the graphics, and ‘screen(block) entry’ or ‘map entry’ for the map's contents.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Charblocks vs screenblocks
 </div>
@@ -109,7 +109,7 @@ Size was one of the benefits of using tilemaps, speed was another. The rendering
 
 As I said in the overview, there are three stages to setting up a tiled background: control, mapping and image-data. I've already covered most of the image-data in the [overview](objbg.html), as well as some of the control and mapping parts that are shared by sprites and backgrounds alike; this chapter covers only things specific to backgrounds in general and regular backgrounds in particular. I'm assuming you've read the overview.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhgood">
 Essential tilemap steps
 </div>
@@ -274,7 +274,7 @@ And now the third part, which may be the most important, namely what the values 
 
 <div class="lblock">
   <div class="cpt" style="width:520px;">
-    <img src="img/bgs/brin3-ofs-2x.png" id="fig:map-ofs" width=520
+    <img src="../img/bgs/brin3-ofs-2x.png" id="fig:map-ofs" width=520
       alt="map-ofs-a"><br>
     <b>{*@fig:map-ofs}</b>: 
 	Scrolling offset <b>dx</b> sets is the position of the screen 
@@ -326,7 +326,7 @@ So, if you increase the scrolling values, you move the screen to the right, whic
   </math>
 </table>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Direction of offset registers
 </div>
@@ -334,7 +334,7 @@ Direction of offset registers
 The offset registers REG_BGxHOFS and REG_BGxVOFS indicate which map location is mapped to the top-left of the screen, meaning positive offsets scroll the map left and up. Watch your minus signs.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Offset registers are write only
 </div>
@@ -474,7 +474,8 @@ Within each screenblock the equation works, but the bigger backgrounds don't sim
 
 This kind of nesting problem isn't as hard as it looks. We know how many tiles fit in a screenblock, so to get the SBB-coordinates, all we have to do divide the tile-coords by the SBB width and height: *sbx*=*tx*/32 and *sby*=*ty*/32. The SBB-number can then be found with the standard matrix→array formula. To find the in-SBB SE-number, we have to use *tx*%32 and *ty*%32 to find the in-SBB coordinates, and then again the conversion from 2D coords to a single element. This is to be offset by the SBB-number tiles the size of an SBB to find the final number. The final form would be:
 
-<div id="cd-se-index" markdown>
+<div id="cd-se-index">
+
 ```c
 //! Get the screen entry index for a tile-coord pair
 //  And yes, the div and mods will be converted by the compiler
@@ -490,8 +491,9 @@ The general formula is left as an exercise for the reader – one that is well w
 
 If all those operations make you queasy, there's also a faster version specifically for a 2×2 arrangement. It starts with calculating the number as if it's a 32×32t map. This will be incorrect for a 64t wide map, which we can correct for by adding 0x0400−0x20 (i.e., tiles/block − tiles per row). We need another full block correction is the size is 64×64t.
 
-<div id="cd-se-index-fast" markdown>
-```
+<div id="cd-se-index-fast">
+
+```c
 //! Get the screen entry index for a tile-coord pair.
 /*! This is the fast (and possibly unsafe) way.
 *   \param bgcnt    Control flags for this background (to find its size)
@@ -539,7 +541,7 @@ The answer is: yes. And <span class="ack">NO</span>!
 
 Emulators from the early 2000s allow you to do this. However, a real GBA doesn't. It does output *something*, though: the screen-entry will be used as tile-data itself, but in a manner that simply defies explanation. Trust me on this one, okay? Of the current tonc demos, this is one of the times that VBA gets it wrong.
 
-<div class="note" markdown>
+<div class="note">
 <div class="nh">
 Available tiles
 </div>
@@ -549,7 +551,7 @@ For both 4bpp and 8bpp regular bgs, you can access 1024 tiles. The only caveat h
 
 Another thing you may be wondering is if you can use a particular screenblock that is within a currently used charblock. For example, is it allowed to have a background use charblock 0 and screenblock 1. Again, yes you can do this. This can be useful since you're not likely to fill an entire charblock, so using its later screenblocks for your map data is a good idea. (A sign of True Hackerdom would be if you manage to use the same data for both tiles and SEs and still get a meaningful image (this last part is important). If you have done this, please let me know.)
 
-<div class="note" markdown>
+<div class="note">
 <div class="nh">
 Tilemap data conversion via CLI
 </div>
@@ -580,7 +582,7 @@ There are four demos in this chapter. The first one is *brin_demo*, which is ver
 
 As I've been using a 512×256 part of Brinstar throughout this chapter, I thought I might as well use it for a demo.
 
-There are a few map editors out there that you can use. Two good ones are Nessie's [MapEd](https://nessie.gbadev.org){target="_blank"} or [Mappy](https://www.tilemap.co.uk/mappy.php){target="_blank"}, both of which have a number of interesting features. I have my own map editor, [mirach](https://www.coranac.com/projects/#mirach){target="_blank"}, but it's just a very basic thing. Some tutorials may point you to GBAMapEditor. Do *not* use this editor as it's pretty buggy, leaving out half of the tilemaps sometimes. Tilemaps can be troublesome enough for beginners without having to worry about whether the map data is faulty.
+There are a few map editors out there that you can use. Two good ones are Nessie's [MapEd](https://nessie.gbadev.org) or [Mappy](https://www.tilemap.co.uk/mappy.php), both of which have a number of interesting features. I have my own map editor, [mirach](https://www.coranac.com/projects/#mirach), but it's just a very basic thing. Some tutorials may point you to GBAMapEditor. Do *not* use this editor as it's pretty buggy, leaving out half of the tilemaps sometimes. Tilemaps can be troublesome enough for beginners without having to worry about whether the map data is faulty.
 
 In this cause, however, I haven't used any editor at all. Some of the graphics converters can convert to a tileset+tilemap – it's not the standard method, but for small maps it may well be easier. In this case I've used Usenti to do it, but grit and gfx2gba work just as well. Note that because the map here is 64×32 tiles, which requires splitting into screenblocks. In Usenti this is called the ‘sbb’ layout, in grit it's ‘-mLs’ and for gfx2gba you'd use ‘-mm 32’ … I think. In any case, after a conversion you'd have a palette, a tileset and a tilemap.
 
@@ -589,11 +591,12 @@ In this cause, however, I haven't used any editor at all. Some of the graphics c
 <tr>
   <td valign="top" width=160>
     <div class="cpt">
-    <img src="img/demo/brin_demo_pal.png" 
+    <img src="../img/demo/brin_demo_pal.png" 
       alt=""><br>
     <b>{*@fig:brin}a</b>: <i>brin_demo</i> palette.
 	</div>
-  <td rowspan=2 markdown>
+  <td rowspan=2>
+
 ```c
 const unsigned short brinMap[2048]=
 {
@@ -617,7 +620,7 @@ const unsigned short brinMap[2048]=
 <tr>
   <td valign="bottom">
     <div class="cpt">
-    <img src="img/demo/brin_demo_tiles.png" alt=""><br>
+    <img src="../img/demo/brin_demo_tiles.png" alt=""><br>
     <b>{*@fig:brin}b</b>: <i>brin_demo</i> tileset.
     </div>
 </table>
@@ -636,7 +639,8 @@ If you do it correctly, you should have something showing on screen. If not, go 
 
 The full code of *brin_demo* is given below. The three calls to `memcpy()` load up the palette, tileset and tilemap. For some reason, probably related to where the NES and 8-bit Game Boy put screenblocks in video memory, it's become conventional to place the maps in the last screenblocks on GBA as well. In this case, that's 30 rather than 31 because we need two blocks for a 64×32t map. For the scrolling part, I'm using two variables to store and update the positions because the scrolling registers are write-only. I'm starting at (192, 64) here because that's what I used for the scrolling picture of {@fig:map-ofs} earlier.
 
-<div id="cd-brin-demo" markdown>
+<div id="cd-brin-demo">
+
 ```c
 #include <string.h>
 
@@ -682,14 +686,14 @@ int main()
 <tr>
   <td>
 	<div class="cpt" style="width:240px;">
-	  <img src="img/demo/brin_demo.png"
+	  <img src="../img/demo/brin_demo.png"
 		alt=""><br>
 	  <b>{*@fig:brin-demo}a</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(192, 64).
 	</div>
   <td>
 	<div class="cpt" style="width:240px;">
-	  <img src="img/demo/brin_demo0.png"
+	  <img src="../img/demo/brin_demo0.png"
 		alt=""><br>
 	  <b>{*@fig:brin-demo}b</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(0, 0).
@@ -703,7 +707,7 @@ This is not exactly required knowledge, but should make for an interesting read.
 
 <div class="lblock">
 	<div class="cpt" style="width:512px;">
-	  <img src="img/demo/brin_demo_bad.png" id="fig:brin-bad"
+	  <img src="../img/demo/brin_demo_bad.png" id="fig:brin-bad"
 		alt=""><br>
 	  <b>{*@fig:brin-bad}</b> <i>brin_demo</i> 
 	  without blocking out into SBB's first.
@@ -712,7 +716,8 @@ This is not exactly required knowledge, but should make for an interesting read.
 
 There are few simple and slow ways and one simple and fast way of copying a non sbb-prepared map to a multiple screenblocks. The slow way would be to perform a double loop to go row by row of each screenblock. The fast way is through struct-copies and pointer arithmetic, like this:
 
-<div id="lin2sbb-fast" markdown>
+<div id="lin2sbb-fast">
+
 ```c
 typedef struct { u32 data[8]; } BLOCK;
 
@@ -738,7 +743,8 @@ A `BLOCK` struct-copy takes care of half a row, so two takes care of a whole scr
 
 The second demo, *sbb_reg*, uses a 64×64t background to indicate how multiple screenblocks are used for bigger maps in more detail. While the *brin_demo* used a multi-sbb map as well, it wasn't easy to see what's what because the map was irregular; this demo uses a very simple tileset so you can clearly see the screenblock boundaries. It'll also show how you can use the `REG_BG_OFS` registers for scrolling rather than `REG_BGxHOFS` and `REG_BGxVOFS`.
 
-<div id="cd-demo-sbb" markdown>
+
+<div id="cd-demo-sbb">
 ```c
 #include "toolbox.h"
 #include "input.h"
@@ -833,7 +839,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:240px">
-<img src="img/demo/sbb_reg.png" id="fig:sbb-reg"
+<img src="../img/demo/sbb_reg.png" id="fig:sbb-reg"
   alt="sbb_reg"><br>
 <b>{*@fig:sbb-reg}</b>: <i>sbb_reg</i>. 
   Compare {@tbl:reg-layout}, 64×64t background. 
@@ -854,7 +860,8 @@ Finally, there's one more thing to discuss: the cross that appears centered on t
 
 The third demo, *cbb_demo*, covers some of the details of charblocks and the differences in 4bpp and 8bpp tiles. The backgrounds in question are BG 0 and BG 1. Both will be 32×32t backgrounds, but BG 0 will use 4bpp tiles and CBB 0 and BG 2 uses 8bpp tiles and CBB 2. The exact locations and contents of the screenblocks are not important; what is important is to load the tiles to the starts of all 6 charblocks and see what happens.
 
-<div id="cd-cbb-demo" markdown>
+<div id="cd-cbb-demo">
+
 ```c
 #include <toolbox.h>
 #include "cbb_ids.h"
@@ -943,13 +950,13 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 <tr valign="top">
 <td>
   <div class="cpt" style="width:240px">
-  <img src="img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
+  <img src="../img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
   <b>{*@fig:cbb-demo}a</b>: <i>cbb_demo</i> on 
   obsolete emulators (such as VBA and Boycott Adv).
   </div>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
+  <img src="../img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
   <b>{*@fig:cbb-demo}b</b>: <i>cbb_demo</i> on 
     hardware. Spot the differences!
   </div>
@@ -958,13 +965,14 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 
 ### Bonus demo: the 'text' in text bg and introducing tonclib {#ssec-demo-hello}
 
-Woo, bonus demo! This example will serve a number of purposes. The first is to introduce tonclib, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)){target="_blank"} that can be shared among projects.
+Woo, bonus demo! This example will serve a number of purposes. The first is to introduce tonclib, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)) that can be shared among projects.
 
 The second reason is to show how you can output text, which is obviously an important ability to have. Tonclib has an extensive list of options for text rendering – too much to explain here – but its interface is pretty easy. For details, visit the [Tonc Text Engine chapter](tte.html).
 
 Anyway, here's the example.
 
-<div id="cd-hello" markdown>
+<div id="cd-hello">
+
 ```c
 #include <stdio.h>
 #include <tonc.h>
@@ -992,12 +1000,12 @@ int main()
 <tr>
   <td>
     <div class="cpt" style="width:112px;">
-      <img src="img/demo/hello.png" alt=""><br>
+      <img src="../img/demo/hello.png" alt=""><br>
       <b>{*@fig:hello}a</b>: <i>hello</i> demo.
     </div>
   <td>
     <div class="cpt" style="width:256px;">
-      <img src="img/demo/hello_tiles.png" alt=""><br>
+      <img src="../img/demo/hello_tiles.png" alt=""><br>
       <b>{*@fig:hello}b</b>: tileset of the <i>hello</i> demo.
     </div>
 </tbody>
@@ -1023,7 +1031,7 @@ libfoo : foo.o bar.o baz.o
 # shorthand rule: $(AR) rcs $@ $^
 ```
 
-The three flags stand for **c**reate archive, **r**eplace member and create **s**ymbol table, respectively. For more on these and other archiving flags, I will refer you to the manual, which is part of the [binutils](https://sourceware.org/binutils/){target="_blank"} toolset. The flags are followed by the library name, which is followed by all the objects (the ‘members’ you want to archive).
+The three flags stand for **c**reate archive, **r**eplace member and create **s**ymbol table, respectively. For more on these and other archiving flags, I will refer you to the manual, which is part of the [binutils](https://sourceware.org/binutils/) toolset. The flags are followed by the library name, which is followed by all the objects (the ‘members’ you want to archive).
 
 To use the library, you have to link it to the executable. There are two linker flags of interest here: `-L` and `-l`. Upper- and lowercase ‘L’. The former, `-L` adds a library path. The lowercase version, `-l`, adds the actual library, but there is a twist here: only need the root-name of the library. For example, to link the library *libfoo.a*, use `-lfoo`. The prefix *lib* and extension *.a* are assumed by the linker.
 
@@ -1035,11 +1043,13 @@ $(PROJ).elf : $(OBJS)
 
 Of course, these archives can get pretty big if you dump a lot of stuff in there. You might wonder if all of it is linked when you add a library to your project. The answer is no, it is not. The linker is smart enough to use only the files which functions you're actually referencing. In the case of this demo, for example, I'm using various text functions, but none of the [affine](affine.html) functions or tables, so those are excluded. Note that the exclusion goes by *file*, not by *function*. If you only have one file in the library (or `#include`d everything, which amounts to the same thing), everything will be linked.
 
-I intend to use tonclib in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of tonclib can be found in the *tonclib* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/tonclib/){target="_blank"}.
+I intend to use tonclib in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of tonclib can be found in the *tonclib* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/tonclib/).
 
-<div class="note" markdown>
-<div class="nhgood" markdown>
-Better copy and fill routines: memcpy16/32 and memset16/32
+<div class="note">
+<div class="nhgood">
+
+Better copy and fill routines: `memcpy16`/`32` and `memset16`/`32`
+
 </div>
 
 Now that I am using tonclib as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
@@ -1055,7 +1065,7 @@ void memcpy32(void *dest, const void *src, uint wcount) IWRAM_CODE;
 These routines are optimized assembly so they are [fast](text.html#ssec-demo-se2). They are also safer than the [dma routines](dma.html#sec-func), and the [BIOS routine](swi.html) `CpuFastSet()`. Basically, I highly recommend them, and I will use them wherever I can.
 </div>
 
-<div class="note" markdown>
+<div class="note">
 <div class="nhcare">
 Linker options: object files before libraries
 </div>

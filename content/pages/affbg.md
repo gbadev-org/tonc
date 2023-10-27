@@ -5,7 +5,7 @@ Author: Cearn
 
 # 12. Affine backgrounds {#ch-}
 
-[TOC]
+<!-- toc -->
 
 ## Introduction {#sec-intro}
 
@@ -141,7 +141,8 @@ I usually use the affine parameters via BG_AFFINE struct instead of `REG_BGxPA`,
 
 The elements of the affine transformation matrix **P** works exactly like they do for affine sprites: 8.8 fixed point numbers that describe the transformation from screen to texture space. However for affine backgrounds they are stored consecutively (2 byte offset), whereas those of sprites are at an 8 byte offset. You can use the `bg_aff_foo` functions from *tonc_bg_affine.c* to set them to the transformation you want.
 
-<div id="cd-bga-types" markdown>
+<div id="cd-bga-types">
+
 ```c
 typedef struct tagBG_AFFINE
 {
@@ -163,8 +164,9 @@ const BG_AFFINE bg_aff_default= { 256, 0, 0, 256, 0, 0 };
 REG_BG_AFFINE[2] = bg_aff_default;
 ```
 
-<div class="note" markdown>
+<div class="note">
   <div class="nhcare">Regular vs affine tilemap scrolling</div>
+
   Affine tilemaps use **different** scrolling registers! Instead of REG_BG*x*HOFS and REG_BG*x*VOFS, they use REG_BG*x*X and REG_BG*x*Y. Also, these are 32bit fixed point numbers, not halfwords.
 </div>
 
@@ -325,7 +327,7 @@ This is very similar to the `obj_rotscale_ex()` function covered in the [off-cen
 
 ### Internal reference point registers {#ssec-bga-refpts}
 
-There's one more important thing left to mention about the displacement and transformation registers. Quoting directly from [GBA Tek](http://nocash.emubase.de/gbatek.htm#lcdiobgrotationscaling){target="_blank"} (except the bracketed parts):
+There's one more important thing left to mention about the displacement and transformation registers. Quoting directly from [GBA Tek](http://nocash.emubase.de/gbatek.htm#lcdiobgrotationscaling) (except the bracketed parts):
 
 > The above reference points \[the displacement registers\] are automatically copied to internal registers during each vblank, specifying the origin for the first scanline. The internal registers are then incremented by dmx \[`REG_BGxPB`\] and dmy \[`REG_BGxPD`\] after each scanline.
 > Caution: Writing to a reference point register by software outside of the Vblank period does immediately copy the new value to the corresponding internal register, that means: in the current frame, the new value specifies the origin of the *current* scanline (instead of the topmost scanline).
@@ -356,7 +358,7 @@ And that's about it, really. No, wait there's one more issue: you have to be car
 ## *sbb_aff* demo {#sec-demo}
 
 <div class="cpt_fr" style="width:240px">
-  <img id="fig:sbb-aff" src="img/demo/sbb_aff.png" alt="sbb_aff demo">
+  <img id="fig:sbb-aff" src="../img/demo/sbb_aff.png" alt="sbb_aff demo">
   <b>{*@fig:sbb-aff}</b>: <i>sbb_aff</i> demo.
 </div>
 
@@ -395,7 +397,8 @@ The demo lets you control both **p**<sub>0</sub> and **q**<sub>0</sub>. And rota
   </table>
 </div>
 
-<div id="cd=sbb-aff" markdown>
+<div id="cd=sbb-aff">
+
 ```c
 #include <stdio.h>
 #include <tonc.h>
