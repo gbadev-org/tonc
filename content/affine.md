@@ -5,7 +5,7 @@ Authors: Cearn
 
 # 10. The Affine Transformation Matrix (a.k.a. **P**)
 
-[TOC]
+<!-- toc -->
 
 ## About this page
 

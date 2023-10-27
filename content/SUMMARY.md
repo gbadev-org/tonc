@@ -1,30 +1,30 @@
 # Summary
 
-[Introduction to Tonc](./pages/intro.md)
+[Introduction](./intro.md)
 
 # GBA Basics
 
-- [GBA Hardware](./pages/hardware.md)
+- [GBA Hardware](./hardware.md)
 - [Setting up a development environment]()
-- [My First GBA Demo](./pages/first.md)
-- [Video Introduction](./pages/video.md)
-- [The bitmap modes](./pages/bitmaps.md)
-- [The GBA keypad](./pages/keys.md)
-- [Sprite and tiled background overview](./pages/objbg.md)
-- [Regular sprites](./pages/regobj.md)
-- [Regular tiled backgrounds](./pages/regbg.md)
+- [My First GBA Demo](./first.md)
+- [Video Introduction](./video.md)
+- [The bitmap modes](./bitmaps.md)
+- [The GBA keypad](./keys.md)
+- [Sprite and tiled background overview](./objbg.md)
+- [Regular sprites](./regobj.md)
+- [Regular tiled backgrounds](./regbg.md)
 
 # GBA Extended
 
-- [The affine transformation matrix]()
-- [Affine sprites](./pages/affobj.md)
-- [Affine tiled backgrounds](./pages/affbg.md)
-- [Graphic effects](./pages/gfx.md)
-- [Direct Memory Access](./pages/dma.md)
-- [Timers](./pages/timers.md)
-- [Hardware interrupts](./pages/interrupts.md)
-- [BIOS calls](./pages/swi.md)
-- [Beep! GBA sound introduction](./pages/sndsqr.md)
+- [The affine transformation matrix](./affine.md)
+- [Affine sprites](./affobj.md)
+- [Affine tiled backgrounds](./affbg.md)
+- [Graphic effects](./gfx.md)
+- [Direct Memory Access](./dma.md)
+- [Timers](./timers.md)
+- [Hardware interrupts](./interrupts.md)
+- [BIOS calls](./swi.md)
+- [Beep! GBA sound introduction](./sndsqr.md)
 
 # Advanced / Applications
 
