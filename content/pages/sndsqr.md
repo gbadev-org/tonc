@@ -810,7 +810,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
 Sound register access
 </div>
 
-Emulators may allow access to sound registers even if sound is disabled (`REG_SNDSTAT`{7} is clear), but hardware doesn't. Always enable sound before use.
+Emulators may allow access to sound registers even if sound is disabled (`REG_SNDSTAT`\{7\} is clear), but hardware doesn't. Always enable sound before use.
 </div>
 
 ### GBA Square wave generators {#ssec-snd-sqr}

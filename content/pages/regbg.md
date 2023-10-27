@@ -1,4 +1,4 @@
-Title: 9. Regular tiled backgrounds
+Title: Regular tiled backgrounds
 Date: 2003-09-01
 Modified: 2023-09-09
 Authors: Cearn
@@ -284,23 +284,46 @@ And now the third part, which may be the most important, namely what the values 
 
 So, if you increase the scrolling values, you move the screen to the right, which corresponds to the map moving *left* on the screen. In mathematical terms, if you have map position **p** and screen position **q**, then the following is true:
 
-<table id="eq-bgr-dx">
+<table id="eq:bgr-dx">
 <tr>
-  <td class="eqnrcell">(9.1)
+  <td class="eqnrcell">({!@eq:bgr-dx})
   <td class="eqcell">
-  <table class="eqtbl" cellpadding=2 cellspacing=0>
-  <col align="right">
-  <col align="center">
-  <col align="left">
-  <tr>
-    <td><b>q + dx</b>
-	<td>=
-	<td><b>p</b>
-  <tr>
-    <td><b>q</b>
-	<td>= 
-	<td><b>p &minus; dx</b>
-  </table>
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mstyle displaystyle="true" scriptlevel="0">
+      <mrow data-mjx-texclass="ORD">
+        <mtable rowspacing=".5em" columnspacing="1em" displaystyle="true">
+          <mtr>
+            <mtd>
+              <mi mathvariant="bold">q</mi>
+              <mo>+</mo>
+              <mi mathvariant="bold">d</mi>
+              <mi mathvariant="bold">x</mi>
+            </mtd>
+            <mtd>
+              <mo>=</mo>
+            </mtd>
+            <mtd>
+              <mi mathvariant="bold">p</mi>
+            </mtd>
+          </mtr>
+          <mtr>
+            <mtd>
+              <mi mathvariant="bold">q</mi>
+            </mtd>
+            <mtd>
+              <mo>=</mo>
+            </mtd>
+            <mtd>
+              <mi mathvariant="bold">p</mi>
+              <mo>&#x2212;</mo>
+              <mi mathvariant="bold">d</mi>
+              <mi mathvariant="bold">x</mi>
+            </mtd>
+          </mtr>
+        </mtable>
+      </mrow>
+    </mstyle>
+  </math>
 </table>
 
 <div class="note">
@@ -570,7 +593,7 @@ In this cause, however, I haven't used any editor at all. Some of the graphics c
     <div class="cpt">
     <img src="../img/demo/brin_demo_pal.png" 
       alt=""><br>
-    <b>{*@fig:brin}a</b>: <tt>brin_demo</tt> palette.
+    <b>{*@fig:brin}a</b>: <i>brin_demo</i> palette.
 	</div>
   <td rowspan=2>
 
@@ -598,7 +621,7 @@ const unsigned short brinMap[2048]=
   <td valign="bottom">
     <div class="cpt">
     <img src="../img/demo/brin_demo_tiles.png" alt=""><br>
-    <b>{*@fig:brin}b</b>: <tt>brin_demo</tt> tileset.
+    <b>{*@fig:brin}b</b>: <i>brin_demo</i> tileset.
     </div>
 </table>
 </div>
@@ -665,14 +688,14 @@ int main()
 	<div class="cpt" style="width:240px;">
 	  <img src="../img/demo/brin_demo.png"
 		alt=""><br>
-	  <b>{*@fig:brin-demo}a</b>: <tt>brin_demo</tt> 
+	  <b>{*@fig:brin-demo}a</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(192, 64).
 	</div>
   <td>
 	<div class="cpt" style="width:240px;">
 	  <img src="../img/demo/brin_demo0.png"
 		alt=""><br>
-	  <b>{*@fig:brin-demo}b</b>: <tt>brin_demo</tt> 
+	  <b>{*@fig:brin-demo}b</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(0, 0).
 	</div>
 </table>
@@ -686,7 +709,7 @@ This is not exactly required knowledge, but should make for an interesting read.
 	<div class="cpt" style="width:512px;">
 	  <img src="../img/demo/brin_demo_bad.png" id="fig:brin-bad"
 		alt=""><br>
-	  <b>{*@fig:brin-bad}</b> <tt>brin_demo</tt> 
+	  <b>{*@fig:brin-bad}</b> <i>brin_demo</i> 
 	  without blocking out into SBB's first.
 	</div>
 </div>
@@ -712,6 +735,7 @@ for(iy=0; iy<32; iy++)
    *dst1++= *src++;     *dst1++= *src++;
 }
 ```
+</div>
 
 A `BLOCK` struct-copy takes care of half a row, so two takes care of a whole screenblock row (yes, you could define `BLOCK` as a 16-word struct, but that wouldn't work out anymore. Trust me). At that point, the `src` pointer has arrived at the right half of the map, so we copy the next row into the right-hand side destination, `dst1`. When done with that, `src` points to the second row of the left side. Now do this for all 32 lines. Huzzah for struct-copies, and pointers!
 
@@ -719,8 +743,8 @@ A `BLOCK` struct-copy takes care of half a row, so two takes care of a whole scr
 
 The second demo, *sbb_reg*, uses a 64×64t background to indicate how multiple screenblocks are used for bigger maps in more detail. While the *brin_demo* used a multi-sbb map as well, it wasn't easy to see what's what because the map was irregular; this demo uses a very simple tileset so you can clearly see the screenblock boundaries. It'll also show how you can use the `REG_BG_OFS` registers for scrolling rather than `REG_BGxHOFS` and `REG_BGxVOFS`.
 
-<div id="cd-demo-sbb">
 
+<div id="cd-demo-sbb">
 ```c
 #include "toolbox.h"
 #include "input.h"
@@ -817,7 +841,7 @@ int main()
 <div class="cpt_fr" style="width:240px">
 <img src="../img/demo/sbb_reg.png" id="fig:sbb-reg"
   alt="sbb_reg"><br>
-<b>{*@fig:sbb-reg}</b>: <tt>sbb_reg</tt>. 
+<b>{*@fig:sbb-reg}</b>: <i>sbb_reg</i>. 
   Compare {@tbl:reg-layout}, 64×64t background. 
   Note the little cross in the top left corner.
 </div>
@@ -830,7 +854,7 @@ Loading the map itself (point (3)) happens through a double loop. The outer loop
 
 That was creating the map, now we turn to the main loop in `main()`. The keys (point (4)) let you scroll around the map. The RIGHT button is tied to a positive change in *x*, but the map itself actually scrolls to the *left*! When I say it like that it may seem counter-intuitive, but if you look at the demo you see that it actually makes sense. Think of it from a hypothetical player sprite point of view. As the sprite moves through the world, you need to update the background to keep the sprite from going off-screen. To do that, the background's movement should be the opposite of the sprite's movement. For example, if the sprite moves to the *right*, you have to move the background to the *left* to compensate.
 
-Finally, there's one more thing to discuss: the cross that appears centered on the map. To do this as you scroll along, I keep track of the screen-entry at the center of the screen via a number of variables and the `se_index()` function. Variables `tx` and `ty` are the tile coordinates of the center of the screen, found by shifting and masking the background pixel coordinates. Feeding these to `se_index()` gives me the screen-entry offset from the screen base block. If this is different than the previous offset, I repaint the former offset as a pane, and update the new offset to the cross. That way, the cross seems to move over the map; much like a sprite would. This was actually designed as a test for `se_index()`; if the function was flawed, the cross would just disappear at some point. But it doesn't. Yay me <span class="kbd">\^\_\^</span>
+Finally, there's one more thing to discuss: the cross that appears centered on the map. To do this as you scroll along, I keep track of the screen-entry at the center of the screen via a number of variables and the `se_index()` function. Variables `tx` and `ty` are the tile coordinates of the center of the screen, found by shifting and masking the background pixel coordinates. Feeding these to `se_index()` gives me the screen-entry offset from the screen base block. If this is different than the previous offset, I repaint the former offset as a pane, and update the new offset to the cross. That way, the cross seems to move over the map; much like a sprite would. This was actually designed as a test for `se_index()`; if the function was flawed, the cross would just disappear at some point. But it doesn't. Yay me <kbd>^_^</kbd>
 
 ### The charblock demo {#ssec-demo-cbb}
 
@@ -927,13 +951,13 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 <td>
   <div class="cpt" style="width:240px">
   <img src="../img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
-  <b>{*@fig:cbb-demo}a</b>: <tt>cbb_demo</tt> on 
+  <b>{*@fig:cbb-demo}a</b>: <i>cbb_demo</i> on 
   obsolete emulators (such as VBA and Boycott Adv).
   </div>
 <td>
   <div class="cpt" style="width:240px">
   <img src="../img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
-  <b>{*@fig:cbb-demo}b</b>: <tt>cbb_demo</tt> on 
+  <b>{*@fig:cbb-demo}b</b>: <i>cbb_demo</i> on 
     hardware. Spot the differences!
   </div>
 </table>
@@ -977,12 +1001,12 @@ int main()
   <td>
     <div class="cpt" style="width:112px;">
       <img src="../img/demo/hello.png" alt=""><br>
-      <b>{*@fig:hello}a</b>: <tt>hello</tt> demo.
+      <b>{*@fig:hello}a</b>: <i>hello</i> demo.
     </div>
   <td>
     <div class="cpt" style="width:256px;">
       <img src="../img/demo/hello_tiles.png" alt=""><br>
-      <b>{*@fig:hello}b</b>: tileset of the <tt>hello</tt> demo.
+      <b>{*@fig:hello}b</b>: tileset of the <i>hello</i> demo.
     </div>
 </tbody>
 </table>
@@ -1025,6 +1049,7 @@ I intend to use tonclib in a number of later demos. In particular, the memory ma
 <div class="nhgood">
 
 Better copy and fill routines: `memcpy16`/`32` and `memset16`/`32`
+
 </div>
 
 Now that I am using tonclib as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
