@@ -1,5 +1,6 @@
 # Summary
 
+[Foreword](./foreword.md)
 [Introduction](./intro.md)
 
 # GBA Basics
