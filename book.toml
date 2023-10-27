@@ -1,11 +1,17 @@
 [book]
 title = "Tonc - GBA Programming in rot13"
+description = "GBA Programming tutorial"
 src = "content"
 language = "en"
 
 [build]
 build-dir = "output"
 create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/gbadev-org/tonc"
+edit-url-template = "https://github.com/gbadev-org/tonc/edit/master/{path}"
+site-url = "/tonc/"
 
 [preprocessor.toc]
 command = "cargo run -p mdbook-toc --locked --release --"
