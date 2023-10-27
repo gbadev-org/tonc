@@ -436,7 +436,7 @@ As you must have noticed, {@eq:inverse_transform} is identical to {@eq:incorrect
 
 I hope you spotted the crucial difference between the two points of view. **A** maps *from* texture space *to* screen space, while **B** does the exact opposite (i.e., <math><mi>𝗕</mi><mo>=</mo><msup><mi>𝗔</mi><mn>-1</mn></msup></math>). I think you know which one you should give the GBA by now. That's right: **P = B**, not **A**. This one bit of information is the crucial piece of the affine matrix puzzle.
 
-So now you can figure out **P**'s elements in two ways. You can stick to the human POV and invert the matrix at the end. That's why I gave you the inverses of the affine transformations as well. You could also try to see things in the GBA's way and get the right matrix directly. Tonc's main affine functions (`tonc_video.h`, `tonc_obj_affine.c` and `tonc_bg_affine.c`) do things the GBA way, setting **P** directly; but inverted functions are also available using an "`_inv`" affix. Mind you, these are a little slower. Except for when scaling is involved; then it's a *lot* slower.
+So now you can figure out **P**'s elements in two ways. You can stick to the human POV and invert the matrix at the end. That's why I gave you the inverses of the affine transformations as well. You could also try to see things in the GBA's way and get the right matrix directly. Tonc's main affine functions (<i>tonc_video.h</i>, <i>tonc_obj_affine.c</i> and <i>tonc_bg_affine.c</i>) do things the GBA way, setting **P** directly; but inverted functions are also available using an "`_inv`" affix. Mind you, these are a little slower. Except for when scaling is involved; then it's a *lot* slower.
 
 In case you're curious, the proper matrix for scale by (<math><msub><mi>s</mi><mi>x</mi></msub></math>, <math><msub><mi>s</mi><mi>y</mi></msub></math>) and counter-clockwise rotation by α is:
 
@@ -610,7 +610,7 @@ So fixed point math is used because floating point math is just to slow for effi
 
 Rather than using the functions directly, we'll use a time-honored tradition to weasel our way out of using costly math functions: we're going to build a <dfn>look-up table</dfn> (LUT) containing the sine and cosine values. There are a number of ways to do this. If you want an easy strategy, you can just declare two arrays of 360 8.8f numbers and fill them at initialization of your program. However, this is a poor way of doing things, for reasons explained in the [section on LUTs](fixed.html#sec-lut) in the appendix.
 
-Tonclib has a single sine lut which can be used for both sine and cosine values. The lut is called `sin_lut`, a `const short` array of 512 4.12f entries (12 fractional bits), created by my [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} lut creator. In `tonc_math.h` you can find two inline functions that retrieve sine and cosine values:
+Tonclib has a single sine lut which can be used for both sine and cosine values. The lut is called `sin_lut`, a `const short` array of 512 4.12f entries (12 fractional bits), created by my [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} lut creator. In <i>tonc_math.h</i> you can find two inline functions that retrieve sine and cosine values:
 
 ```c
 //! Look-up a sine and cosine values
@@ -633,7 +633,7 @@ When flagging a background or object as affine, you *must* enter at least some v
 
 ## Tonc's affine functions
 
-Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in `tonc_obj_affine.c` for objects, `tonc_bg_affine.c` for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
+Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in <i>tonc_obj_affine.c</i> for objects, <i>tonc_bg_affine.c</i> for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
 <table class="cblock" id="tbl:affine_functions">
     <thead>
