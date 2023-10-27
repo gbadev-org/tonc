@@ -16,7 +16,7 @@ The chapter will close with a section on how to deal with data and computer memo
 ### Bitmap 101 {#ssec-intro-101}
 
 <div class="cpt_fr" style="width:96px">
-  <img src="../img/bitmaps/link_lttp_sm.png" width=72 id="fig:link-sm" 
+  <img src="./img/bitmaps/link_lttp_sm.png" width=72 id="fig:link-sm" 
     alt="a 24x24 bitmap of Link."><br>
   <b>{*@fig:link-sm}</b>: Link (24x24 bitmap).
 </div>
@@ -31,7 +31,7 @@ A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), whe
 <table id="fig:link-big">
 <tr><td>
   <div class="cpt" style="width:310px">
-  <img src="../img/bitmaps/link_lttp.png"
+  <img src="./img/bitmaps/link_lttp.png"
     alt="zoom out of {@fig:link-sm}">
     <b>{*@fig:link-big}a</b>: zoom out of 
     {@fig:link-sm}, with pixel offsets.
@@ -39,7 +39,7 @@ A bitmap is little more than a *w*×*h* matrix of colors (or color-indices), whe
   </td>
   <td>
   <div class="cpt" style="width:348px">
-  <img src="../img/bitmaps/link_lttp_mem.png"
+  <img src="./img/bitmaps/link_lttp_mem.png"
     alt="zoom out of {@fig:link-sm}, with pixel values.">
     <b>{*@fig:link-big}b</b>: zoom out of 
     {@fig:link-sm}, with pixel values. 
@@ -250,7 +250,7 @@ void m3_fill(COLOR clr)
 ```
 
 <div class="cpt_fr" style="width:240px">
-  <img src="../img/demo/m3_demo.png" id="fig:m3-demo" alt="mode3 screen">
+  <img src="./img/demo/m3_demo.png" id="fig:m3-demo" alt="mode3 screen">
   <b>{*@fig:m3-demo}</b>: drawing in mode 3.
 </div>
 
@@ -382,7 +382,7 @@ Do not get too comfortable with bitmap modes. Though they're nice for gbadev int
 ## Page flipping {#sec-page}
 
 <div class="cpt_fr" style="width:216px;">
-  <img src="../img/bitmaps/pageflip.png" id="fig:flip" 
+  <img src="./img/bitmaps/pageflip.png" id="fig:flip" 
     alt="Page flipping procedure"><br>
   <b>{*@fig:flip}</b>: Page flipping procedure. 
   No data is copied, only the &lsquo;display&rsquo; and 
@@ -494,9 +494,9 @@ int main()
 <div class="lblock">
 <div class="cpt" style="width:352px" id="fig:flipdemo">
 <center>
-<img src="../img/demo/flip_front.png" alt="Flip A">
+<img src="./img/demo/flip_front.png" alt="Flip A">
 &nbsp;&nbsp;
-<img src="../img/demo/flip_back.png" alt="Flip B"><br>
+<img src="./img/demo/flip_back.png" alt="Flip B"><br>
 </center>
 <b>{*@fig:flipdemo}</b>: the page flipping demo switches 
 between these two blocks.
@@ -700,7 +700,7 @@ It is vital that you understand what data is, how the different datatypes work. 
 ### `#include` code or data considered harmful {#ssec-data-hdr}
 
 <div class="cpt_fr" style="width:240px;">
-  <img src="../img/bitmaps/bart_data.png" id="fig:bart-data" 
+  <img src="./img/bitmaps/bart_data.png" id="fig:bart-data" 
     alt="Lines"><br>
   <b>{*@fig:bart-data}</b>: even Bart knows &hellip;
 </div>
@@ -1051,18 +1051,18 @@ int main()
 <tr>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="../img/demo/bm_modes_3.png" alt="mode3 screen">
+  <img src="./img/demo/bm_modes_3.png" alt="mode3 screen">
   <b>{*@fig:bm-modes}a</b>: <tt>bm_modes</tt> in mode 3.
   </div>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="../img/demo/bm_modes_4.png" alt="mode4 screen">
+  <img src="./img/demo/bm_modes_4.png" alt="mode4 screen">
   <b>{*@fig:bm-modes}b</b>: <tt>bm_modes</tt> in mode 4.
   </div>
 <tr>
 <td>
   <div class="cpt" style="width:240px">
-<img src="../img/demo/bm_modes_5.png" alt="mode5 screen">
+<img src="./img/demo/bm_modes_5.png" alt="mode5 screen">
   <b>{*@fig:bm-modes}c</b>: <tt>bm_modes</tt> in mode 5.
   </div>
 <td>&nbsp;

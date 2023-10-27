@@ -319,7 +319,7 @@ ASM_CMT("Hi, I'm here!");
 ## Demo graphs {#sec-demo}
 
 <div class="cpt_fr" style="width:240px;">
-<img alt="math graphs" src="../img/demo/swi_demo.png" id="fig:swi-demo">
+<img alt="math graphs" src="./img/demo/swi_demo.png" id="fig:swi-demo">
 
 **{*@fig:swi-demo}**: div, sqrt, arctan2, sin and cos graphs, courtesy of BIOS.
 </div>
@@ -461,7 +461,7 @@ int main()
 Until now, all demos used the function `vid_vsync` to synchronize the action to the VBlank (see the [graphics introduction](video.html#sec-vsync1)). What this did was to check `REG_VCOUNT` and stay in a while loop until the next VBlank came along. While it works, it's really a pretty poor way of doing things for two reasons. First, because of the potential problem when you are in a VBlank already, but that one had been covered. The second reason is more important: while you're in the while loop, you're wasting an awful lot of CPU cycles, all of which slurp battery power.
 
 <div class="cpt_fr" style="width:240px;">
-<img alt="swi_vsync" src="../img/demo/swi_vsync.png" id="fig:swi-vsync">
+<img alt="swi_vsync" src="./img/demo/swi_vsync.png" id="fig:swi-vsync">
 
 **{*@fig:swi-vsync}**: `swi_vsync` demo.
 </div>

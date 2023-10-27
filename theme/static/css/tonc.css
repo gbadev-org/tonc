@@ -3,7 +3,7 @@
 
 body
 {
-	background: url(../img/main/tonc_bg.png) #D0F0F0; 
+	background: url(./img/main/tonc_bg.png) #D0F0F0; 
 	color: #000000;
 	max-width: 800px;
 	margin: 0 auto;
@@ -67,10 +67,10 @@ dt.spec	{ color:blue; }
 
 /* since MSIE screws up list padding, have to set margins AND padding */
 ul, ol	{ margin: 0.4em 0.5em; padding: 0 1.5em 0; }
-li.fix  { list-style-image:url(../img/main/bul_excl.png); }
-li.new	{ list-style-image:url(../img/main/bul_new.png);  }
-li.swap	{ list-style-image:url(../img/main/bul_swap.png); }
-li.upgr	{ list-style-image:url(../img/main/bul_upgr.png); }
+li.fix  { list-style-image:url(./img/main/bul_excl.png); }
+li.new	{ list-style-image:url(./img/main/bul_new.png);  }
+li.swap	{ list-style-image:url(./img/main/bul_swap.png); }
+li.upgr	{ list-style-image:url(./img/main/bul_upgr.png); }
 
 /* === divisions === */
 .sm		{ margin-top: 0; margin-bottom: 0; }

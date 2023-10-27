@@ -94,7 +94,7 @@ clean :
 ```
 
 <div class="cpt_fr" style="width:240px;">
-<img alt="picture of the first demo" src="../img/demo/first.png" id="fig:first">  
+<img alt="picture of the first demo" src="./img/demo/first.png" id="fig:first">  
 
 **{*@fig:first}**: picture of the first demo
 </div>
@@ -674,17 +674,17 @@ But, like always, there's no such thing as a free lunch. What happens in a multi
 <tr>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="../img/hardware/efa.jpg" id="fig:efa" alt="" width=192><br>
+  <img src="./img/hardware/efa.jpg" id="fig:efa" alt="" width=192><br>
   <b>{*@fig:efa}</b>: efa flash card.
 </div>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="../img/hardware/sc.jpg" id="fig:sc" alt="" width=192><br>
+  <img src="./img/hardware/sc.jpg" id="fig:sc" alt="" width=192><br>
   <b>{*@fig:sc}</b>: SuperCard, compact flash version.
 </div>
 <td>
 <div class="cpt" style="width:224px;">
-  <img src="../img/hardware/xboo.jpg" id="fig:xboo" alt="" width=224><br>
+  <img src="./img/hardware/xboo.jpg" id="fig:xboo" alt="" width=224><br>
   <b>{*@fig:xboo}</b>: xboo multiboot cable.
 </div>
 </tbody>

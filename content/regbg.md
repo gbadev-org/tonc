@@ -23,7 +23,7 @@ Suppose both the tileset and map used 8-bit entries, the sizes are 16×(16×16) 
 <tr>
 <td colspan=2 align="center">
   <div class="cpt" style="width:512px">
-  <img src="../img/bgs/brin3-full.png" alt="Brinstar map">
+  <img src="./img/bgs/brin3-full.png" alt="Brinstar map">
   <b>{*@fig:map}a</b>: image on screen.
   </div>
 <tr>
@@ -35,13 +35,13 @@ Suppose both the tileset and map used 8-bit entries, the sizes are 16×(16×16) 
 <tr>
 <td>
   <div class="cpt" style="width:48px">
-  <img src="../img/bgs/brin3-meta-2x.png" height=264
+  <img src="./img/bgs/brin3-meta-2x.png" height=264
     alt="(meta)tileset for the map"><br>
   <b>{*@fig:map}b</b>: the tile set.
   </div>		
 <td>
   <div class="cpt" style="width:528px">
-  <img src="../img/bgs/brin3-map-2x.png" width=528
+  <img src="./img/bgs/brin3-map-2x.png" width=528
 	alt="Superimposed tile-map"><br>
   <b>{*@fig:map}c</b>: the tile map (with the proper 
     tiles as a backdrop).
@@ -274,7 +274,7 @@ And now the third part, which may be the most important, namely what the values 
 
 <div class="lblock">
   <div class="cpt" style="width:520px;">
-    <img src="../img/bgs/brin3-ofs-2x.png" id="fig:map-ofs" width=520
+    <img src="./img/bgs/brin3-ofs-2x.png" id="fig:map-ofs" width=520
       alt="map-ofs-a"><br>
     <b>{*@fig:map-ofs}</b>: 
 	Scrolling offset <b>dx</b> sets is the position of the screen 
@@ -591,7 +591,7 @@ In this cause, however, I haven't used any editor at all. Some of the graphics c
 <tr>
   <td valign="top" width=160>
     <div class="cpt">
-    <img src="../img/demo/brin_demo_pal.png" 
+    <img src="./img/demo/brin_demo_pal.png" 
       alt=""><br>
     <b>{*@fig:brin}a</b>: <i>brin_demo</i> palette.
 	</div>
@@ -620,7 +620,7 @@ const unsigned short brinMap[2048]=
 <tr>
   <td valign="bottom">
     <div class="cpt">
-    <img src="../img/demo/brin_demo_tiles.png" alt=""><br>
+    <img src="./img/demo/brin_demo_tiles.png" alt=""><br>
     <b>{*@fig:brin}b</b>: <i>brin_demo</i> tileset.
     </div>
 </table>
@@ -686,14 +686,14 @@ int main()
 <tr>
   <td>
 	<div class="cpt" style="width:240px;">
-	  <img src="../img/demo/brin_demo.png"
+	  <img src="./img/demo/brin_demo.png"
 		alt=""><br>
 	  <b>{*@fig:brin-demo}a</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(192, 64).
 	</div>
   <td>
 	<div class="cpt" style="width:240px;">
-	  <img src="../img/demo/brin_demo0.png"
+	  <img src="./img/demo/brin_demo0.png"
 		alt=""><br>
 	  <b>{*@fig:brin-demo}b</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(0, 0).
@@ -707,7 +707,7 @@ This is not exactly required knowledge, but should make for an interesting read.
 
 <div class="lblock">
 	<div class="cpt" style="width:512px;">
-	  <img src="../img/demo/brin_demo_bad.png" id="fig:brin-bad"
+	  <img src="./img/demo/brin_demo_bad.png" id="fig:brin-bad"
 		alt=""><br>
 	  <b>{*@fig:brin-bad}</b> <i>brin_demo</i> 
 	  without blocking out into SBB's first.
@@ -839,7 +839,7 @@ int main()
 </div>
 
 <div class="cpt_fr" style="width:240px">
-<img src="../img/demo/sbb_reg.png" id="fig:sbb-reg"
+<img src="./img/demo/sbb_reg.png" id="fig:sbb-reg"
   alt="sbb_reg"><br>
 <b>{*@fig:sbb-reg}</b>: <i>sbb_reg</i>. 
   Compare {@tbl:reg-layout}, 64×64t background. 
@@ -950,13 +950,13 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 <tr valign="top">
 <td>
   <div class="cpt" style="width:240px">
-  <img src="../img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
+  <img src="./img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
   <b>{*@fig:cbb-demo}a</b>: <i>cbb_demo</i> on 
   obsolete emulators (such as VBA and Boycott Adv).
   </div>
 <td>
   <div class="cpt" style="width:240px">
-  <img src="../img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
+  <img src="./img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
   <b>{*@fig:cbb-demo}b</b>: <i>cbb_demo</i> on 
     hardware. Spot the differences!
   </div>
@@ -1000,12 +1000,12 @@ int main()
 <tr>
   <td>
     <div class="cpt" style="width:112px;">
-      <img src="../img/demo/hello.png" alt=""><br>
+      <img src="./img/demo/hello.png" alt=""><br>
       <b>{*@fig:hello}a</b>: <i>hello</i> demo.
     </div>
   <td>
     <div class="cpt" style="width:256px;">
-      <img src="../img/demo/hello_tiles.png" alt=""><br>
+      <img src="./img/demo/hello_tiles.png" alt=""><br>
       <b>{*@fig:hello}b</b>: tileset of the <i>hello</i> demo.
     </div>
 </tbody>

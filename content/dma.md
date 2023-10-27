@@ -253,7 +253,7 @@ DMA is fast, there's no question about that. It can be up to [ten times as fast]
 ## DMA demo : circular windows {#sec-demo}
 
 <div class="cpt_fr" style="width:240px;">
-<img alt="dma_demo short" src="../img/demo/dma_demo.png" id="fig:dma-demo">
+<img alt="dma_demo short" src="./img/demo/dma_demo.png" id="fig:dma-demo">
 
 **{*@fig:dma-demo}**: palette for `dma_demo`.
 </div>

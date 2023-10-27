@@ -625,7 +625,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 <tbody align="center"><tr>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="../img/demo/irq_demo_hbl.png"
+  <img src="./img/demo/irq_demo_hbl.png"
     alt="Gradient hbl&gt;vct"><br>
   <b>{*@fig:irq-demo}a</b>: Gradient; nested 
   <code>vct_wait_nested</code>.
@@ -633,7 +633,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 </td>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="../img/demo/irq_demo_vct.png"
+  <img src="./img/demo/irq_demo_vct.png"
     alt="Gradient vct&gt;hbl"><br>
   <b>{*@fig:irq-demo}b</b>: Gradient; non-nested 
   <code>vct_wait</code>.
@@ -641,7 +641,7 @@ You can switch between master service routines with `irq_set_master()`, as is do
 </td>
 <td>
 <div class="cpt" style="width:192px;">
-  <img src="../img/demo/irq_demo_c.png"
+  <img src="./img/demo/irq_demo_c.png"
     alt="Gradient hbl in C"><br>
   <b>{*@fig:irq-demo}c</b>: Gradient; HBlank in 
   master ISR in C.

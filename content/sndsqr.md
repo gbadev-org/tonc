@@ -202,7 +202,7 @@ General solution(s):
 </table>
 
 <div class="cpt_fr" style="width:212px;">
-<img src="../img/wave.png" id="fig:wave" alt="it's a sine wave">
+<img src="./img/wave.png" id="fig:wave" alt="it's a sine wave">
 
 **{*@fig:wave}**: a harmonic wave
 </div>
@@ -449,7 +449,7 @@ B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
 </table>
 
 <div class="cpt_fr" style="width:212px;">
-<img src="../img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
+<img src="./img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
 
 **{*@fig:sqrwave}**: a square wave
 </div>
@@ -960,7 +960,7 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
 </div>
 
 <div class="cpt_fr" style="width:312px;">
-<img src="../img/sqrfour.png" alt="Fourier transform of square wave" id="fig:sqrf"><br>
+<img src="./img/sqrfour.png" alt="Fourier transform of square wave" id="fig:sqrf"><br>
 <b>{*@fig:sqrf}</b>: Square wave spectrum. 
   (integer <i>m</i> only)
 </div>
