@@ -9,17 +9,12 @@ Authors: Cearn
 
 <!-- toc -->
 
-<div class="note">
 
-<div class="nh">
 
-Deprecation notice
+> **Deprecation notice**
+>
+> This chapter has been superceded by [TTE](tte.html). Information from this chapter can still be useful, but for serious work, TTE should be preferred.
 
-</div>
-
-This chapter has been superceded by [TTE](tte.html). Information from this chapter can still be useful, but for serious work, TTE should be preferred.
-
-</div>
 
 ## Introduction {#sec-intro}
 
