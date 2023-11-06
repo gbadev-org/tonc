@@ -29,7 +29,7 @@
 
 # Advanced / Applications
 
-- [Text systems]()
+- [Text systems](./text.md)
 - [Mode 7]()
 - [More Mode7 tricks]()
 - [Tonc's Text Engine]()
