@@ -57,7 +57,7 @@ Download [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip) (167 kb).
 
 ### Statement of Purpose {#ssec-org-sop}
 
-I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You often see things in a different light when you write things down and learn from that experience. Secondly, there is a lot of *very bad* information in other tutorials out there (the only exceptions I know of are the [new PERN](http://www.drunkencoders.com/index.php?system_id=2&page=Tutorials) and [Deku's sound tutorial](http://deku.gbadev.org)*\[b0rked\]*). Yes, I am aware of how that sounds, but unfortunately it happens to be true. A number of examples:
+I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You often see things in a different light when you write things down and learn from that experience. Secondly, there is a lot of *very bad* information in other tutorials out there (the only exceptions I know of are the [new PERN](http://www.drunkencoders.com/index.php?system_id=2&page=Tutorials) and [Deku's sound tutorial](https://stuij.github.io/deku-sound-tutorial/). Yes, I am aware of how that sounds, but unfortunately it happens to be true. A number of examples:
 
 -   Only very basic information given, sometimes even [incorrect info](affine.html).
 -   Strong focus on bitmap modes, which are hardly ever used for serious GBA programming.
