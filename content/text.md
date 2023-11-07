@@ -181,7 +181,7 @@ For bitpacking, you also have to deal with endianness at the bit level. The font
 In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed from 8x8 pixels into 2 words. All 64 pixels are numbered 0 to 63. These correspond to the bit-numbers. Each eight successive bits form a byte: 0-7 make up byte 0, 8-15 form byte 1, etc. Note how the bits seem to mirror horizontally, because we generally write numbers big-endian. So try to forget about that and think of bits in memory to walk through from 0 to 63. You can also view the bits as words, bits 0-31 for word 0 and 32-63 for word 1.
 
 <style>
-  #fig\:img-fontpack {
+  #fig\:img-fontpack, #tbl\:bupshade {
 
     & table {
       width: 100%;
@@ -1131,10 +1131,10 @@ for(ii=0; ii<96*8; ii++)
 
 These six statements set up the three fonts, complete with shading and opacity. The first one sets up the standard font, in charblock 0, screenblock 31, pal-bank 1 and using `0x0E` for the bit-unpacking offset, so that the text color is at `0x1F`. We've seen the same thing with the object text.
 
-<div class="cpt_fr" style="width:200px;">
+<div class="cpt_fr" style="width:400px; margin: 0px auto;">
 <center>
 <table id="tbl:bupshade"
-    cellpadding=2 cellspacing=0 bgcolor=#E0E0E0>
+    cellpadding=2 cellspacing=0 bgcolor=#E0E0E0 style="table-layout: fixed; width: 100%;">
 <caption align="bottom">
   <b>@tbl:bupshade</b>: 
   bit-unpacking with with base <code>0xEE</code>.
