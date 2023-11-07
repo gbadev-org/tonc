@@ -26,7 +26,7 @@ You can use `pandoc` to get you started:
 ### 1. Initial conversion
 
 ```sh
-cd content/pages
+cd content
 
 # rename to avoid conflicts in page generation
 mv intro.htm intro-old.htm
