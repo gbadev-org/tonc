@@ -30,7 +30,7 @@
 # Advanced / Applications
 
 - [Text systems](./text.md)
-- [Mode 7]()
+- [Mode 7](./mode7.md)
 - [More Mode7 tricks]()
 - [Tonc's Text Engine]()
 - [Whirlwind tour of ARM assembly]()
