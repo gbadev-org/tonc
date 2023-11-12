@@ -241,7 +241,7 @@ Note that in these examples the sum of the weights is 1, so that the final color
 Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ_ATTR.attr0`\{a\}. There are three registers that control blending, which unfortunately go by many different names. The ones I use are `REG_BLDCNT`, `REG_BLDALPHA` and `REG_BLDY`. Other names are `REG_BLDMOD`, `REG_COLEV` and `REG_COLEY`, and sometimes the ‘E’ in the last two is removed. Be warned. Anyway, the first says how and on which layers the blend should be performed, the last two contain the weights. Oh, since the GBA doesn't do floating point, the weights are [fixed-point](fixed.html) numbers in 1.4 format. Still limited by 0 and 1, of course, so there are 17 blend levels.
 
 <div class="reg">
-  <table class="reg" id="tbl:reg-bldcnt" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="reg reg-huge" id="tbl:reg-bldcnt" border=1 frame=void cellpadding=4 cellspacing=0>
     <caption class="reg">REG_BLDCNT (REG_BLDMOD) @ <code>0400:0050h</code></caption>
     <tr class="bits">
       <td>F E</td>
@@ -336,7 +336,6 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
       <td class="rclr0">eva</td>
     </tr>
   </table>
-  <br>
   <table>
     <col class="bits" width=40>
     <col class="bf" width="8%">
@@ -376,7 +375,6 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
       <td class="rclr2">ey</td>
     </tr>
   </table>
-  <br>
   <table>
     <col class="bits" width=40>
     <col class="bf" width="8%">
@@ -672,7 +670,7 @@ So you have one byte for each value. That's bytes as in *unsigned* chars. The co
 The possible content for the windows are backgrounds 0-3 and objects. No suprise there, right? In total, we have regions: win0, win1, winOut and winObj. `REG_WININ` (`0400:0048h`) controls win0 and win1, `REG_WINOUT` (`0400:004ah`) takes care of winOut and winObj. There's one bit for each content-type, plus one for blending, which you will need if you intend to use blending on the contents of that particular window.
 
 <div class="reg">
-  <table class="reg" id="tbl:reg-winio" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="reg reg-huge" id="tbl:reg-winio" border=1 frame=void cellpadding=4 cellspacing=0>
     <tr class="bits">
       <th>register</th>
       <td>F E</td>

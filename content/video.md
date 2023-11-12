@@ -82,9 +82,7 @@ Finally, we have sprites. Sprites are small (8x8 to 64x64 pixels) graphical obje
 <div class="note">
 
 <div class="nhgood">
-
 Prefer tile modes over bitmap modes
-
 </div>
 
 In almost all types of games, the tile modes will be more suitable. Most other tutorials focus on bitmap modes, but that's only because they are easier on beginners, not because of their practical value for games. The vast majority of commercial games use tile modes; that should tell you something.
@@ -247,7 +245,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
 </div><br>
 
 <div class="reg">
-<table class="reg" id="tbl:reg-vcount"
+<table class="reg" id="tbl:reg-vcount" width="320"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
   REG_VCOUNT @ <code>0400:0006h</code> (read-only)
@@ -283,7 +281,7 @@ void vid_vsync()
 {    while(REG_VCOUNT < 160);   }
 ```
 
-Unfortunately, there are a few problems with this code. First of all, if you're simply doing an empty `while` loop to wait for 160, the compiler may try to get smart, notice that the loop doesn't change `REG_VCOUNT` and put its value in a register for easy reference. Since there is a good chance that that value will be below 160 at some point, you have a nice little infinite loop on your hand. To prevent this, use the keyword `volatile`{.keyw} (see `regs.h`). Second, in small demos simply waiting for the VBlank isn't enough; you may still be in that VBlank when you call `vid_sync()` again, which will be blazed through immediately. That does not sync to 60 fps. To do this, you first have to wait until the *next* VDraw. This makes our `vid_sync` look a little like this:
+Unfortunately, there are a few problems with this code. First of all, if you're simply doing an empty `while` loop to wait for 160, the compiler may try to get smart, notice that the loop doesn't change `REG_VCOUNT` and put its value in a register for easy reference. Since there is a good chance that that value will be below 160 at some point, you have a nice little infinite loop on your hand. To prevent this, use the keyword `volatile` (see `regs.h`). Second, in small demos simply waiting for the VBlank isn't enough; you may still be in that VBlank when you call `vid_sync()` again, which will be blazed through immediately. That does not sync to 60 fps. To do this, you first have to wait until the *next* VDraw. This makes our `vid_sync` look a little like this:
 
 ```c
 #define REG_VCOUNT *(vu16*)0x04000006
@@ -295,6 +293,6 @@ void vid_vsync()
 }
 ```
 
-This will always wait until the start of the next VBlank occurs. And `REG_VCOUNT` is now `volatile`{.keyw} (the “`vu16`” is `typedef`ed as a <u>v</u>olatile <u>u</u>nsigned (<u>16</u>bit) short. I'll be using a lot of this kind of shorthand, so get used to it). That's one way to do it. Another is checking the last bit in the display status register, `REG_DISPSTAT`\{0\}.
+This will always wait until the start of the next VBlank occurs. And `REG_VCOUNT` is now `volatile` (the “`vu16`” is `typedef`ed as a <u>v</u>olatile <u>u</u>nsigned (<u>16</u>bit) short. I'll be using a lot of this kind of shorthand, so get used to it). That's one way to do it. Another is checking the last bit in the display status register, `REG_DISPSTAT`\{0\}.
 <br>  
 So we're done here, right? Errm ... no, not exactly. While it's true that you now have an easy way to vsync, it's also a very poor one. While you're in the while loop, you're still burning CPU cycles. Which, of course, costs battery power. And since you're doing absolutely nothing inside that while-loop, you're not just using it, you're actually wasting battery power. Moreover, since you will probably make only small games at first, you'll be wasting a *LOT* of battery power. The recommended way to vsync is putting the CPU in low-power mode when you're done and then use interrupts to bring it back to life again. You can read about the procedure [here](swi.html#sec-vsync2), but since you have to know how to use [interrupts](interrupts.html) and [BIOS calls](swi.html), you might want to wait a while.

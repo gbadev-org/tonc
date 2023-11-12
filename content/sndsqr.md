@@ -895,7 +895,7 @@ R(f) = 2048 - \frac{2^{17}}{f}
 Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/duty control and `REG_SNDxFREQ` for frequency control. Sound 1 also has sweep control in the form of `REG_SND1SWEEP`. Look in {@tbl:snd-names} for the traditional names; note that in traditional nomenclature the suffixes for control and frequency are *different* for channels 1 and 2, even though they have exactly the same function.
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1cnt"
+<table class="reg" id="tbl-reg-snd1cnt" width=420
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
 <span class="nobr">
@@ -1014,7 +1014,7 @@ A_m = \frac{2}{\pi} \cdot \frac{sin({\pi}Dm)}{m}
 Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {@fig:sqrf}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1freq"
+<table class="reg" id="tbl-reg-snd1freq" width=420
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
 <span class="nobr">
@@ -1068,7 +1068,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
 </div><br>
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1sweep"
+<table class="reg" id="tbl-reg-snd1sweep" width=420
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
   REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ <code>0400:0060h</code>
