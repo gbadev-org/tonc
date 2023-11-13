@@ -194,9 +194,11 @@ There are a few interesting things about these structures. First, you see a lot 
 </div>
 
 <div class="note">
+
 <div class="nhgood">
 Force alignment on OBJ_ATTRs
 </div>
+
 As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of `OBJ_ATTR` structs (and others), means that `struct` copies like the one in `oam_update()` later on, will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs with `ALIGN4`, which is a macro for `__attribute__((aligned(4)))`. For more on this, see the section on [data alignment](bitmaps.html#ssec-data-align).
 </div>
 
@@ -358,10 +360,10 @@ I'll say it here too: `attr0` contains *y*, `attr1` contains *x*. Note that bits
 This attribute tells the GBA which tiles to display and its background priority. If it's a 4bpp sprite, this is also the place to say what sub-palette should be used.
 
 <div class="reg">
-<table class="reg" id="tbl:oe-attr2"
+<table class="reg" id="tbl-oe-attr2"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  {*@tbl:oe-attr2}: <code>OBJ_ATTR.attr2</code>
+  <code>OBJ_ATTR.attr2</code>
 </caption>
 <tr class="bits">
 	<td>F E D C<td>B A<td>9 8 7 6 5 4 3 2 1 0
@@ -379,19 +381,19 @@ This attribute tells the GBA which tiles to display and its background priority.
 <tbody valign="top">
 <tr class="bg0">	
   <td>0-9<td class="rclr0">TID
-  <td><code>ATTR2_ID#</code>
+  <td>ATTR2_ID#
   <td>Base <b>tile index</b> of sprite. Note that in bitmap modes,
     this must be 512 or higher.
 <tr class="bg1">	
   <td>A-B<td class="rclr2">Pr
-  <td><code>ATTR2_PRIO#</code>
+  <td>ATTR2_PRIO#
   <td><b>Priority</b>. Higher priorities are drawn first (and therefore 
     can be covered by later sprites and backgrounds). Sprites cover 
     backgrounds of the same priority, and for sprites of the 
     same priority, the higher <code>OBJ_ATTR</code>s are drawn first.
 <tr class="bg0">	
   <td>C-F<td class="rclr1">PB
-  <td><code>ATTR2_PALBANK#</code>
+  <td>ATTR2_PALBANK#
   <td><b>Palette bank</b> to use when in 16-color mode. Has no effect if
 	the color mode flag (<code>attr0</code>{C}) is set.
 </tbody>
@@ -497,7 +499,7 @@ Finally, what I call my build macros. These piece together the various bit-flags
 #define ATTR1_BUILD_A(x, size, aff_id)               \
 ( ((x)&511) | (((aff_id)&31)<<9) | (((size)&3)<<14) )
 
-Attribute 2
+// Attribute 2
 #define ATTR2_BUILD(id, pbank, prio)                 \
 ( ((id)&0x3FF) | (((pbank)&15)<<12) | (((prio)&3)<<10) )
 ```

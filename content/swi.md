@@ -189,7 +189,6 @@ The source address points to an array of `AFF_SRC` structs (also known as `ObjAf
   </mstyle>
 </math>
 
-<br>  
 By now you should know what this does: it scales horizontally by 1/*s*<sub>x</sub>, vertically by 1/*s*<sub>y</sub> followed by a counter-clockwise rotation by *α*. `ObjAffineSet()` does almost exactly what `obj_aff_rotscale()` and `bg_aff_rotscale()` do, except that `ObjAffineSet()` can also set multiple matrices at once.
 
 The source data is kept in `ObjAffineSource` (i.e., `AFF_SRC`) structs. Now, as the routine sets affine matrices, you might think that the destinations are either `OBJ_AFFINE` or `ObjAffineDest` structs. However, you'd be wrong. Well, partially anyway. The problem is that the destination always points to a *p*<sub>a</sub>-element, which is not necessarily the first element in struct. You *will* make the mistake of simply supplying an `OBJ_AFFINE` pointer when you try to use it to fill those. Don't say I didn't warn you.
@@ -228,7 +227,7 @@ typedef struct OBJ_AFFINE
 
 You might think this whole discussion was rather pointless since you can't access the registers and the `swi` instruction unless you use assembly, which will be pretty tough, right? Well, no, yes and no. The necessary assembly steps for BIOS calls are actually rather simple, and are given below.
 
-```asm
+```armasm
 @ In tonc_bios.s
 
 @ at top of your file

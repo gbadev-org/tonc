@@ -361,7 +361,7 @@ Note: I said register**s**, plural! Each CPU mode has its own stack and link reg
 <br>  
 So, assembly it is then. The function below is the assembly equivalent of `irs_master_c()`. It is almost a line by line translation, although I am making use of a few features of the instruction set the compiler wont't or can't. I don't expect you to really understand everything written here, but with some imagination you should be able to follow most of it. Teaching assembly is *way* beyond the scope of this chapter, but worth the effort in my view. Tonc's [assembly chapter](asm.html) should give you the necessary information to understand most of it and shows where to go to learn more.
 
-```asm
+```armasm
     .file   "tonc_isr_master.s"
     .extern __isr_table;
 

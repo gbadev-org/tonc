@@ -37,7 +37,7 @@ Every kind of transfer routine needs 3 things: a source, a destination and the a
 The use of the source and destination registers should be obvious. The control register needs some explaining. Although the `REG_DMAxCNT` registers themselves are 32bits, they are often split into two separate registers: one for the count, and one for the actual control bits.
 
 <div class="reg">
-<table class="reg" id="tbl:reg-dmaxcnt"
+<table class="reg reg-huge" id="tbl:reg-dmaxcnt"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
   REG_DMAxCNT @ <code>0400:00B8</code>+12<i>x</i>

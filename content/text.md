@@ -1,9 +1,7 @@
----
 Title: Text Systems
 Date: 2005-05-19
 Modified: 2013-03-14
 Authors: Cearn
----
 
 # 19. Text systems {#ch-}
 
@@ -222,7 +220,7 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
 </style>
 
 <div class="cblock">
-<div class="cpt" style="width:750px;">
+<div style="width:750px;">
 <table id="fig:img-fontpack"
   border=0 cellpadding=4 cellspacing=0 style="table-layout:fixed; width:100%; page-break-inside: avoid;">
   <tbody align="center">
@@ -238,7 +236,7 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
     <td>
     <img src="img/font_pack.png" alt="pixels" style="width: 160px;">
     <td> <!-- bits -->
-    <table class="reg" cellpadding=1 cellspacing=0>
+    <table cellpadding=1 cellspacing=0>
       <tr>
         <td class="bdrLL">&nbsp;
         <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
@@ -1131,54 +1129,54 @@ for(ii=0; ii<96*8; ii++)
 
 These six statements set up the three fonts, complete with shading and opacity. The first one sets up the standard font, in charblock 0, screenblock 31, pal-bank 1 and using `0x0E` for the bit-unpacking offset, so that the text color is at `0x1F`. We've seen the same thing with the object text.
 
-<div class="cpt_fr" style="width:400px; margin: 0px auto;">
+<div class="cpt_fr" style="width:340px; margin: 0px auto;">
 <center>
 <table id="tbl:bupshade"
     cellpadding=2 cellspacing=0 bgcolor=#E0E0E0 style="table-layout: fixed; width: 100%;">
 <caption align="bottom">
-  <b>@tbl:bupshade</b>: 
+  <b>*@tbl:bupshade</b>: 
   bit-unpacking with with base <code>0xEE</code>.
 </caption>
 <tbody align="center">
   <tr>
-    <td class="bdrLL" rowspan=9>&nbsp;
+    <td rowspan=9>&nbsp;
     <th>bit 
-    <th class="bdrL">val
-    <td class="bdrRR" rowspan=9>&nbsp;
-    <td class="bdrLL">&nbsp;
+    <th>val
+    <td rowspan=9>&nbsp;
+    <td>&nbsp;
     <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
-    <td class="bdrRR">&nbsp;
+    <td>&nbsp;
   <tr>
-    <th>0	<td class="bdrL"> 0
-    <td class="bdrLL" rowspan=8>&nbsp;
+    <th>0	<td> 0
+    <td rowspan=8>&nbsp;
     <td> . <td> . <td> . <td> . <td> . <td> . <td> . <td> 0
-    <td class="bdrRR" rowspan=8>&nbsp;
+    <td rowspan=8>&nbsp;
   <tr>
-    <th> 1	<td class="bdrL"> 1
+    <th> 1	<td> 1
     <td> . <td> . <td> . <td> . <td> . <td> E <td> F <td> .
   <tr>
-    <th> 2	<td class="bdrL"> 1
+    <th> 2	<td> 1
     <td> . <td> . <td> . <td> . <td> E <td> F <td> . <td> .
   <tr>
-    <th> 3	<td class="bdrL"> 1
+    <th> 3	<td> 1
     <td> . <td> . <td> . <td> E <td> F <td> . <td> . <td> .
   <tr>
-    <th> 4	<td class="bdrL"> 0
+    <th> 4	<td> 0
     <td> . <td> . <td> . <td> 0 <td> . <td> . <td> . <td> .
   <tr>
-    <th> 5	<td class="bdrL"> 0
+    <th> 5	<td> 0
     <td> . <td> . <td> 0 <td> . <td> . <td> . <td> . <td> .
   <tr>
-    <th> 6	<td class="bdrL"> 1
+    <th> 6	<td> 1
     <td> E <td> F <td> . <td> . <td> . <td> . <td> . <td> .
   <tr>
-    <th> 7	<td class="bdrL"> 0
+    <th> 7	<td> 0
     <td> 0 <td> . <td> . <td> . <td> . <td> . <td> . <td> .
 <tr>
   <td colspan=4> OR: 
-    <td class="bdrLL">&nbsp;
+    <td>&nbsp;
     <th> E <th> F <th> 0 <th> E <th> F <th> F <th> F <th> 0
-    <td class="bdrRR">&nbsp;
+    <td>&nbsp;
 </tbody>
 </table>
 </center>
@@ -1391,17 +1389,20 @@ INLINE u32 profile_stop()
 </table>
 </div>
 
-@fig:img-txt-se2 shows the timing results, as run in VisualBoy Advance and no\$gba. Note that they are not quite the same. So you do what you should always do when two opinions differ: get a third one. In this case, I'll use the only one that really matters, namely hardware. You can see a comparison of the three in @tbl:txt-se2, which will tell you that no\$gba is very accurate in its timing, but VBA not so much. I guess you can still use it to get an estimate or relative timings, but true accuracy will not be found there. For that you need hardware or no\$gba.
+*@fig:img-txt-se2 shows the timing results, as run in VisualBoy Advance and no\$gba. Note that they are not quite the same. So you do what you should always do when two opinions differ: get a third one. In this case, I'll use the only one that really matters, namely hardware. You can see a comparison of the three in @tbl:txt-se2, which will tell you that no\$gba is very accurate in its timing, but VBA not so much. I guess you can still use it to get an estimate or relative timings, but true accuracy will not be found there. For that you need hardware or no\$gba.
 
 About the numbers themselves. The spread is about a factor 9, which is quite a lot. None of the techniques shown here are particularly hard to understand, and data copying is something that you could spend a lot of time doing, so might as well take advantage of the faster ones from the get go.
 
 Most of the tutorial code and probably a lot of demo code you can find out there uses the u16-array method of copying; presumably because byte-copies are unavailable for certain sections. But as you can see, **u16 copies are more than twice as slow as u32 copies**! Granted, it is not the slowest method of copying data, but not by much (using u16 loop variables –also a common occurence– would be slower by about 20%; try it and you'll see). The GBA is a 32-bit machine. It _likes_ 32-bit data, and its instruction sets are better at dealing with 32-bit chunks. Let go of the u16 fetish you may have picked up elsewhere. Use word-sized data if you can, the others only if you have to. That said, do watch your [data alignment](bitmaps.html#ssec-data-align)! u8 or u16 arrays aren't always word-aligned, which will cause trouble with casting.
 
-<!-- This should be styled as NOTE --> 
-> **GCC and waitstates vs timing results**
->
-> Giving exact timing results is tricky due to a number of factors. First, on the hardware side there are different memory sections with different wait states that complicate things unless you sit down, read the assembly and add up the cycle-counts of the instructions. This is a horrible job, trust me. The second problem is that GCC hasn't reached the theoretical optimum for this code yet, so the results tend to vary with new releases. What you see above is a good indication, but your mileage may vary.
+<div class="note">
+<div class="nhcare">
+GCC and waitstates vs timing results
+</div>
+ 
+Giving exact timing results is tricky due to a number of factors. First, on the hardware side there are different memory sections with different wait states that complicate things unless you sit down, read the assembly and add up the cycle-counts of the instructions. This is a horrible job, trust me. The second problem is that GCC hasn't reached the theoretical optimum for this code yet, so the results tend to vary with new releases. What you see above is a good indication, but your mileage may vary.
 
+</div>
 
 There are a number of fast ways of copying large chunks of data. Faster than writing your own simple loop that is. Common ones are the standard `memcpy()`, which is available for any platform, and two methods that are GBA specific: the `CpuFastSet()` BIOS call (or my own version `memcpy32()` and DMA. The first two _require_ word-alignment; DMA merely works better with it. The performance of `memcpy()` is actually not too shabby, and the fact that it's available everywhere means that it's a good place to start. The others are faster, but come at a cost: `memcpy32()` is hand written assembly; `CpuFastSet()` requires a word-count divisible by 8, and DMA locks up the CPU, which can interfere with interrupts. You would do well to remember these things when you find you need a little more speed.
 

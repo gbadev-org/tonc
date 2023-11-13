@@ -683,6 +683,10 @@ For anchoring, you actually need one set of coordinates for each coordinate-spac
 <div class="lblock">
 
 <table border=0 cellpadding=1 cellspacing=0>
+<colgroup>
+    <col span="1" style="width: 14%;">
+    <col span="1" style="width: 86%;">
+</colgroup>
 <tbody valign="top">
 <tr align="left"> <th width=48>point</th>		<th>description</th> </tr>
 <tr>

@@ -66,11 +66,11 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
   <b>{*@tbl:cbb-sbb}</b>:
   charblock and screenblock overlap.
 </caption>
-<colgroup span=1 style="background-color:#D0D0D0;"></colgroup>
-<colgroup span=3 style="background-color:#B0B0B0;"></colgroup>
-<colgroup span=3 style="background-color:#D0D0D0;"></colgroup>
-<colgroup span=3 style="background-color:#B0B0B0;"></colgroup>
-<colgroup span=3 style="background-color:#D0D0D0;"></colgroup>
+<colgroup span=1 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
+<colgroup span=3 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
+<colgroup span=3 style="background-color:none;"></colgroup>
 
 <tbody align="left"><tr>
   <th>Memory
@@ -234,10 +234,8 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
 </table>
 </div>
 
-<div class="cblock">
-<table width="100%" id="tbl:bg-size">
-<tr align="center">
-<td>
+<div class="cblock" id="tbl:bg-size">
+<div style="display: inline-block">
   <table id="tbl-reg-size" border=1 cellpadding=2  cellspacing=0>
   <caption align="bottom">
     <b>{*@tbl:bg-size}a</b>: regular bg sizes
@@ -251,7 +249,8 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
     <tr><td> 11   <td><code>BG_REG_64x64</code> <td> 64×64 <td> 512×512 
   </tbody>
   </table>
-<td>
+</div>
+<div style="display: inline-block">
   <table id="tbl-aff-size" border=1 cellpadding=2 cellspacing=0>
   <caption align="bottom">
     <b>{*@tbl:bg-size}b</b>: affine bg sizes
@@ -265,8 +264,8 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
     <tr><td> 11   <td><code>BG_AFF_128x128</code><td>128×128 <td>1024×1024
   </tbody>
   </table>
-</table>
-</div><br>
+</div>
+</div>
 
 Each background has two 16-bit scrolling registers to offset the rendering (`REG_BGxHOFS` and `REG_BGxVOFS`). There are a number of interesting points about these. First, because regular backgrounds wrap around, the values are essentially modulo *mapsize*. This is not really relevant at the moment, but you can use this to your benefit once you get to more advanced tilemaps. Second, these registers are **write-only**! This is a little annoying, as it means that you can't update the position by simply doing `REG_BG0HOFS++` and the like.
 
@@ -745,6 +744,7 @@ The second demo, *sbb_reg*, uses a 64×64t background to indicate how multiple s
 
 
 <div id="cd-demo-sbb">
+
 ```c
 #include "toolbox.h"
 #include "input.h"
@@ -1048,7 +1048,7 @@ I intend to use tonclib in a number of later demos. In particular, the memory ma
 <div class="note">
 <div class="nhgood">
 
-Better copy and fill routines: `memcpy16`/`32` and `memset16`/`32`
+Better copy and fill routines: memcpy16/32 and memset16/32
 
 </div>
 
