@@ -237,12 +237,16 @@ kbd {
 
 /* Style sheet for TONC */
 
+dfn {
+  font-style: italic;
+  font-weight: bold;
+}
+
 div.note {
-	width: 94%;
-	margin: 0.7em auto;
-	/* padding: 6px 12px 1px 16px; */
+  width: 94%;
+  margin: 0.7em auto;
   padding: 4px 10px;
-	page-break-inside: avoid;
+  page-break-inside: avoid;
   background-color: var(--table-alternate-bg);
 }
 div.note p, div.note ul {
@@ -251,17 +255,19 @@ div.note p, div.note ul {
 div.note ul {
   padding-left: 20px;
 }
+div.note p + p {
+  margin-top: 12px;
+}
 
 div.nh, div.nhgood, div.nhbad, div.nhcare {
   font-weight: bold;
   margin-top: 5px;
-  /* margin-bottom: -0.5em; */
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   border-bottom: 1px solid var(--quote-border);
 }
 
 /* TODO: can we use colours from the syntax highlighting style instead? */
-
+/*       (or just tweak them a bit per-theme) */
 div.nhbad, span.rem, .ack {
   color: #ec1256;
 }
@@ -272,23 +278,21 @@ div.nhcare {
   color: #e88f42;
 }
 
-div.endtag	{ text-align:right; font-size: 70%;	}
-
 /* --- picture+caption frames --- */
 div.cpt, div.cpt_fl, div.cpt_fr {
-	margin: .5em;		padding: 4px;
-	border: 1px var(--table-border-color) solid;
+  margin: .5em;  padding: 4px;
+  border: 1px var(--table-border-color) solid;
   background-color: var(--table-alternate-bg);
-	font-size: 80%; 
-	page-break-inside: avoid;
+  font-size: 80%; 
+  page-break-inside: avoid;
 }
 
-div.cpt_fl	{ float:left;	}
-div.cpt_fr	{ float:right; }
+div.cpt_fl { float:left; }
+div.cpt_fr { float:right; }
 
 /* Margins inside tables work differently. */
 td div.cpt, td div.dpt_fl, td div.cpt_fr {
-	margin: 0;
+  margin: 0;
 }
 
 .cpt p, .cpt_fl p, .cpt_fr p {
@@ -298,19 +302,19 @@ td div.cpt, td div.dpt_fl, td div.cpt_fr {
 /* --- table block styles --- */
 /* yes, table and caption forms are required */
 
-div.reg			{	margin: 8px auto;	text-align:center;	width: 94%;	}
-div.reg table	{	margin: 1px auto; margin-bottom: 12px;	text-align:left;	}
-div.reg caption	{	margin: 0px auto;	text-align:left;	}
+div.reg         { margin: 8px auto; text-align: center; width: 94%; }
+div.reg table   { margin: 1px auto; margin-bottom: 12px; text-align: left; }
+div.reg caption { margin: 0px auto; text-align: left; }
 
-div.cblock			{	margin: 6px auto;	text-align:center;	}
-div.cblock div		{	margin: 2px auto;	text-align:left;	}
-div.cblock table	{	margin: 2px auto;	text-align:left;	}
-div.cblock caption	{	margin: 0px auto;	text-align:left;	}
+div.cblock         { margin: 6px auto; text-align: center; }
+div.cblock div     { margin: 2px auto; text-align: left; }
+div.cblock table   { margin: 2px auto; text-align: left; }
+div.cblock caption { margin: 0px auto; text-align: left; }
 
-/* div.lblock			{	margin: 6px 3em;	}
-div.lblock table	{	margin: 2px 0;		} */
+/* div.lblock   { margin: 6px 3em; }
+div.lblock table { margin: 2px 0;  } */
 
-div.cblock div.cpt	{ margin: 0.5em auto; }
+div.cblock div.cpt { margin: 0.5em auto; }
 
 /* Fix oversight in the mdBook styles? */
 table, table th {
@@ -328,28 +332,28 @@ table.reg-huge th, table.reg-huge td {
 
 /* === Table styles === */
 
-td.fill, th.fill	{ width: 16px; }
+td.fill, th.fill { width: 16px; }
 
 /* --- reg table --- */
 table.reg {
-	font: 90% var(--mono-font);
-	page-break-inside: avoid;
+  font: 90% var(--mono-font);
+  page-break-inside: avoid;
 }
-caption.reg			{ caption-side:top; }
+caption.reg   { caption-side:top; }
 
 caption[align="bottom"], div.cblock caption[align="bottom"] {
   margin-top: 6px;
 }
 
-tr.bits, tr.bf, col.bits, col.bf, col.def { text-align:center; }
-col.bits, col.bf, col.def {	vertical-align:top; 	}
-tr.bits, col.bits		{	font: 90% var(--mono-font);	}
-tr.bf, col.bf			{	font-weight:bold;			}
-col.def					{	font: 90% var(--mono-font);	}
+tr.bits, tr.bf, col.bits, col.bf, col.def { text-align: center; }
+col.bits, col.bf, col.def { vertical-align: top; }
+tr.bits, col.bits { font: 90% var(--mono-font); }
+tr.bf, col.bf { font-weight: bold; }
+col.def { font: 90% var(--mono-font); }
 
 /* read only, write only */
-.rof	{ text-decoration:overline;  color: #f22;  }
-.wof	{ text-decoration:underline; color: #44f; }
+.rof { text-decoration: overline;  color: #f22; }
+.wof { text-decoration: underline; color: #44f; }
 
 /* reg colors */
 .rclr0 { color: #ef0d4b; }
@@ -360,8 +364,8 @@ col.def					{	font: 90% var(--mono-font);	}
 .rclr5 { color: #d09a4c; }
 .rclr6 { color: #e7849b; }
 .rclr7 { color: #dce24b; }
-.rclr8	{ color:teal;		}
-.rclr9	{ color:gray;		}
+.rclr8 { color:teal; }
+.rclr9 { color:gray; }
 
 font[color="blue"] { color: #43a8e6; }
 font[color="green"] { color: #45e774; }

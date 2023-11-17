@@ -4,7 +4,7 @@
 
 ## Finally, your first GBA program {#sec-first}
 
-Now that you have your development environment ready, it's time to take a look at a simple GBA program. For this we will use the code from the C-file <tt>first.c</tt>. The plan at this point is not full understanding; the plan is to get something to compile and get something running. The code will be discussed in this chapter, but what it all means will be covered in later chapters.
+Now that you have your development environment ready, it's time to take a look at a simple GBA program. For this we will use the code from the C-file *first.c*. The plan at this point is not full understanding; the plan is to get something to compile and get something running. The code will be discussed in this chapter, but what it all means will be covered in later chapters.
 
 <div id="cd-first">
 
@@ -29,64 +29,7 @@ int main()
 
 </div>
 
-Don't worry about the code just yet, there's time for that later. And don't leave just yet, I'll give a nicer version later on. All that matters now is that you're able to compile and run it. The makefile to build the project was given in the [setup](setup.html#ssec-cli-make), but I'll repeat it here. You can also find it on Tonc's examples folder under `code/basic/first`.
-
-```makefile
-#
-# Makefile for first.gba
-#
-
-PATH := $(DEVKITARM)/bin:$(PATH)
-
-# --- Project details -------------------------------------------------
-
-PROJ    := first
-TARGET  := $(PROJ)
-
-OBJS    := $(PROJ).o
-
-# --- Build defines ---------------------------------------------------
-
-PREFIX  := arm-none-eabi-
-CC      := $(PREFIX)gcc
-LD      := $(PREFIX)gcc
-OBJCOPY := $(PREFIX)objcopy
-
-ARCH    := -mthumb-interwork -mthumb
-SPECS   := -specs=gba.specs
-
-CFLAGS  := $(ARCH) -O2 -Wall -fno-strict-aliasing
-LDFLAGS := $(ARCH) $(SPECS)
-
-
-.PHONY : build clean
-
-# --- Build -----------------------------------------------------------
-# Build process starts here!
-build: $(TARGET).gba
-
-# Strip and fix header (step 3,4)
-$(TARGET).gba : $(TARGET).elf
-    $(OBJCOPY) -v -O binary $< $@
-    -@gbafix $@
-
-# Link (step 2)
-$(TARGET).elf : $(OBJS)
-    $(LD) $^ $(LDFLAGS) -o $@
-
-# Compile (step 1)
-$(OBJS) : %.o : %.c
-    $(CC) -c $< $(CFLAGS) -o $@
-        
-# --- Clean -----------------------------------------------------------
-
-clean : 
-    @rm -fv *.gba
-    @rm -fv *.elf
-    @rm -fv *.o
-
-#EOF
-```
+Don't worry about the code just yet, there's time for that later. And don't leave yet, I'll give a nicer version later on. All that matters for now is that you're able to compile and run it.
 
 <div class="cpt_fr" style="width:240px;">
 <img alt="picture of the first demo" src="./img/demo/first.png" id="fig:first">  
@@ -94,18 +37,20 @@ clean :
 **{*@fig:first}**: picture of the first demo
 </div>
 
-Build the project by opening <tt>first.pnproj</tt> and hitting Alt+1 or double-clicking `build.bat`. This will
+As explained in the [previous chapter](setup.html#sec-compile), you can run `make` in your terminal to build the project. Under the hood this does the following:
 
--   **compile** <tt>first.c</tt> to <tt>first.o</tt> (the `$(PROJ)` is replaced with ‘first’, remember?),
--   **link** the list of object files (currently only <tt>first.o</tt>) to <tt>first.elf</tt>,
--   **translate** <tt>first.elf</tt> to <tt>first.gba</tt> by stripping all excess ELF information,
+-   **compile** *first.c* to *first.o*,
+-   **link** the list of object files (currently only *first.o*) to *first.elf*,
+-   **translate** *first.elf* to *first.gba* by stripping all excess ELF information,
 -   **fix the header** so that the GBA will accept it.
 
-After the makefile has run, you should have a file called <tt>first.gba</tt>, if you don't there's a problem with your set-up because the code sure isn't wrong. I've made a list of potential problems [setup:dkp](setup.html#ssec-dkp-error); check if yours is one of them.
+After the makefile has run, you should have a file called *first.gba*. If you don't, there's a problem with your setup because the code sure isn't wrong! Go back to make sure you didn't miss anything - but if you're still having trouble, feel free to stop by on [Discord / IRC](https://gbadev.net/resources.html#community) or the [Forums](https://forum.gbadev.net/), there's a good chance someone will be able to help!
+
+<!-- I've made a list of [potential problems](setup.html#ssec-dkp-error); check if yours is one of them. -->
 
 If you do find yourself with a GBA executable, run it on hardware or your emulator of choice and you should get a red, a green, and a blue pixel at positions (120, 80), (136, 80) and (120, 96), respectively.
-<br>  
-Now, for the code itself …
+
+Now, for the code itself...
 
 ### Huh? {#ssec-first-huh}
 
@@ -113,7 +58,7 @@ If you're somewhat confused by it, you wouldn't be alone. I expect that unless y
 
 And that was kind of my point actually. If one were to hand this in for a test at a programming class, you would fail *so* hard. And if not, the professors should be fired. While the code show above does work, the fact that it's almost unreadable makes it bad code. Writing good code is not only about getting results, it's also about making sure *other* people can understand what's happening without too much trouble.
 
-The code of <tt>first.c</tt> also serves another purpose, namely as a reminder that GBA programming is *very* low-level. You interact directly with the memory, and not through multiple layers of abstraction brought by APIs. To be able to do that means you have to really understand how computers work, which all programmers should know at least to some degree. There are APIs (for lack of a better word) like HAM that take care of the lowest levels, which definitely has its merits as it allows you to deal with more important stuff like actual *game* programming, but on the other hand it hides a lot of details – details that sometimes are better left in the open.
+The code of *first.c* also serves another purpose, namely as a reminder that GBA programming is *very* low-level. You interact directly with the memory, and not through multiple layers of abstraction brought by APIs. To be able to do that means you have to really understand how computers work, which all programmers should know at least to some degree. There are APIs (for lack of a better word) like HAM that take care of the lowest levels, which definitely has its merits as it allows you to deal with more important stuff like actual *game* programming, but on the other hand it hides a lot of details – details that sometimes are better left in the open.
 <br>  
 Those who want a better, more intelligible, version of the previous code can skip the next section and move on to the [second](#sec-second) first demo. The warped minds who can't just let it go and want to have an explanation right now (for the record, I count myself among them), here's what's going on.
 
@@ -140,7 +85,7 @@ So, let's start over again and do it *right* this time. Or at least more right t
 -   We'll also create some **typedefs**, both for ease of use and to indicate conceptual types. For instance, a 16-bit color is essentially a halfword like any other, but if you typedef it as, say, `COLOR`, everyone will know that it's not a normal halfword, but has something to do with colors.
 -   Finally, instead of plotting pixels with an array access, which could still mean anything, well use a **subroutine** for it instead.
 
-Naturally, this will expand the total lines of code a bit. Quite a bit, in fact. But it is well worth it. The code is actually a two-parter. The actual code, the thing that has all the functionality of the first demo, can be found in <tt>second.c</tt>. All the items discussed above, the typedefs, #defines and inlines, are put in <tt>toolbox.h</tt>.
+Naturally, this will expand the total lines of code a bit. Quite a bit, in fact. But it is well worth it. The code is actually a two-parter. The actual code, the thing that has all the functionality of the first demo, can be found in *second.c*. All the items discussed above, the typedefs, #defines and inlines, are put in *toolbox.h*.
 
 ```c
 // toolbox.h: 
@@ -231,7 +176,7 @@ int main()
 }
 ```
 
-As you can see, the number of lines in <tt>toolbox.h</tt> is actually much larger than that of the real code. This may seem like a bit of a waste now, but this is only because it's such a small demo. None of the contents of <tt>toolbox.h</tt> is actually compiled, so there is no cost in terms of memory use. In fact, if it did it wouldn't belong in a header file, but that's a discussion I'll go into [another time](bitmaps.html#ssec-data-hdr). Right now, let's see what we actually have in <tt>toolbox.h</tt>
+As you can see, the number of lines in *toolbox.h* is actually much larger than that of the real code. This may seem like a bit of a waste now, but this is only because it's such a small demo. None of the contents of *toolbox.h* is actually compiled, so there is no cost in terms of memory use. In fact, if it did it wouldn't belong in a header file, but that's a discussion I'll go into [another time](bitmaps.html#ssec-data-hdr). Right now, let's see what we actually have in *toolbox.h*
 
 ### The toolbox {#ssec-2nd-toolbox}
 
@@ -245,7 +190,7 @@ I've also added a <dfn>conceptual typedef</dfn>. While it's true that, in princi
 
 To be able to work directly specific addresses in memory, you'll have to cast them to pointers or arrays and work with those. In this demo's case, the addresses we're interested in are `0600:0000` (VRAM) and `0400:0000` (the display control register). In the first demo I did the casts manually, but it's better to use names for them so that you don't have to remember all the numbers and also because nobody else would have any clue to what's going on.
 
-For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in tonclib's <tt>regs.h</tt>.
+For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in tonclib's *regs.h*.
 
 For those who aren't as familiar with pointers as you should (boy, are you gonna be in trouble <kbd>:P</kbd>), here is the structure of the REG_DISPCNT #define. I'm using `vu32` as a typedef for ‘volatile u32’ here.
 
@@ -284,9 +229,9 @@ A similar procedure is carried out for VRAM, only this is still in its pointer f
 
 The IO registers (not to be confused with the CPU registers) are a collection of switches in the form of bitfields that control various operations of the GBA. The IO registers can be found in the `0400:0000` range of memory, and are usually clumped into words or halfwords according to personal preference. To get anything done, you have to set specific bits of the IO registers. While you can try to remember all the numerical values of these bits, it's more convenient to use #defines instead.
 
-The toolbox header lists a number of the #defines I use for REG_DISPCNT. The full list can be found in <tt>vid.h</tt> of tonclib, and the register itself is described in the [video](video.html) chapter. For now, we only need DCNT_MODE3 and DCNT_BG2. The former sets the video mode to mode 3, which is simplest of the 3 available [bitmap modes](bitmaps.html), and the latter activates background 2. Out of a total of four, bg 2 is the only one available in the bitmap modes and you have to switch it on if you want anything to show up. You have to admit that these names are a lot more descriptive than `0x0003` and `0x0400`, right? <!-- If not, you are _banned_ from programming :P -->
+The toolbox header lists a number of the #defines I use for REG_DISPCNT. The full list can be found in *vid.h* of tonclib, and the register itself is described in the [video](video.html) chapter. For now, we only need DCNT_MODE3 and DCNT_BG2. The former sets the video mode to mode 3, which is simplest of the 3 available [bitmap modes](bitmaps.html), and the latter activates background 2. Out of a total of four, bg 2 is the only one available in the bitmap modes and you have to switch it on if you want anything to show up. You have to admit that these names are a lot more descriptive than `0x0003` and `0x0400`, right? <!-- If not, you are _banned_ from programming :P -->
 
-I've also added a list of useful color defines, even though I'm not using them in <tt>second.c</tt>. They may or may not be useful in the future, though, so it's good to have them around.
+I've also added a list of useful color defines, even though I'm not using them in *second.c*. They may or may not be useful in the future, though, so it's good to have them around.
 <br>  
 Creating the register #defines is probably the biggest part of header files. As a rough estimate, there are 100 registers with 16 bits each, so that would be 1600 #defines. That's a lot. The exact number may be smaller, but it is still large. Because the names of the #defines in and of themselves aren't important, you can expect different naming schemes for different people. I am partial to my own set of names, other older GBA coders may use PERN's names and more recent ones may use libgba's, which comes with devkitARM. Take your pick.
 
@@ -309,7 +254,7 @@ The second inline function is `RGB15()`, which creates a 16bit color from any gi
 
 ### The working code {#ssec-2nd-src}
 
-Making use of the contents of <tt>toolbox.h</tt> makes the code of the demo much more understandable.
+Making use of the contents of *toolbox.h* makes the code of the demo much more understandable.
 
 The first line in `main()` sets a few bits in the display control, commonly known as REG_DISPCNT. I use `DCNT_MODE3` to set the video mode to mode 3, and activate background 2 with `DCNT_BG2`. This translates to `0x0403` as before, but this method gives a better indication of what's happening than entering the raw number. Using a variable-like #define instead of the raw dereferenced pointer is also preferable; especially as the latter is sure to wig out people new to C.
 
@@ -317,7 +262,7 @@ So how do I know what bit does what to create the #defines in the first place? S
 
 Actually plotting the pixels is now done with the inline function `m3_plot()`, which is formatted much the same way as every kind of pixel plotter in existence: 2 coordinates and the color. Much better than raw memory access, even though it works exactly the same way. The colors themselves are now created with an inline too: `RGB15` takes 3 numbers for the red, green and blue components and ties them together to form a valid 16-bit color.
 
-Finally, there is an endless loop to prevent the program from ever ending. But aren't endless loops bad? Well usually yes, but not here. Remember what happens when PC programs end: control is kicked back to the operating system. Well, we don't *have* an operating system. So what happens after `main()` returns is undefined. It is possible to see what happens by looking at a file called <tt>ctrs0.S</tt>, which comes with your dev-kit, but that's not a thing for beginners so at the moment my advice is to simply not let it happen. Ergo, endless loop. For the record, there are better ways of stopping GBA programs, but this one's the easiest. And now we've reached the end of the demo.
+Finally, there is an endless loop to prevent the program from ever ending. But aren't endless loops bad? Well usually yes, but not here. Remember what happens when PC programs end: control is kicked back to the operating system. Well, we don't *have* an operating system. So what happens after `main()` returns is undefined. It is possible to see what happens by looking at a file called *ctrs0.S*, which comes with your dev-kit, but that's not a thing for beginners so at the moment my advice is to simply not let it happen. Ergo, endless loop. For the record, there are better ways of stopping GBA programs, but this one's the easiest. And now we've reached the end of the demo.
 
 #### Better, no?
 
@@ -627,10 +572,10 @@ There may not have been a real change in the number of lines, but the lines them
 
 If you're just starting GBA programming, chances are you're using the emulators that are out there, and will be content with those. However, if you look through the forums you'll see many people urging you to test on hardware regularly. They are absolutely right.
 
-Now, it isn't that the emulators are bad. On the contrary, in fact; the most popular emulators have things like tile, map and memory viewers that are essential to debugging. An emulator like VBA is very, very good, but not quite perfect. Take the Tonc demos, for example: they run the same on VBA as on a real GBA in all cases ... mostly. For one thing, timing is a real issue on most of them (the exception here is no$gba, which I've never seen off the mark by more than 2%, usually a lot less). Also, in a few rare occasions (like in [<tt>cbb_demo</tt>](regbg.html#sec-demo) and [<tt>win_demo</tt>](gfx.html#sec-win)) there were small but important differences between GBA and emulator outputs, and if you've never tested on the real thing, you'd never know.
+Now, it isn't that the emulators are bad. On the contrary, in fact; the most popular emulators have things like tile, map and memory viewers that are essential to debugging. An emulator like VBA is very, very good, but not quite perfect. Take the Tonc demos, for example: they run the same on VBA as on a real GBA in all cases ... mostly. For one thing, timing is a real issue on most of them (the exception here is no$gba, which I've never seen off the mark by more than 2%, usually a lot less). Also, in a few rare occasions (like in [*cbb_demo*](regbg.html#sec-demo) and [*win_demo*](gfx.html#sec-win)) there were small but important differences between GBA and emulator outputs, and if you've never tested on the real thing, you'd never know.
 
-One other thing that is very different is the colors. Since it's not back-lit the GBA screen is much darker than a PC monitor. Or maybe that's just my room `;)`. Also, on an emulator you have the luxury of scaling your view; the real GBA is always 3" screen. There's world of difference, trust me on this. Take that <tt>first.gba</tt> example I showed above: the pixels are so tiny it's almost impossible to see on a real GBA! Even an 8x8 tile is pretty small. Also, the use of a keyboard in an emu is *nothing* like holding a real GBA in your hands.
-<br>  
+One other thing that is very different is the colors. Since it's not back-lit the GBA screen is much darker than a PC monitor. Or maybe that's just my room `;)`. Also, on an emulator you have the luxury of scaling your view; the real GBA is always 3" screen. There's world of difference, trust me on this. Take that *first.gba* example I showed above: the pixels are so tiny it's almost impossible to see on a real GBA! Even an 8x8 tile is pretty small. Also, the use of a keyboard in an emu is *nothing* like holding a real GBA in your hands.
+
 And, of course, the whole idea of creating something that works on a console has an air of coolness that defies description. Well, almost anyway. The word is [progasm](http://www.catb.org/~esr/jargon/html/P/progasm.html). Says it all really, doesn't it?
 
 ### Multiboot & linkers {#ssec-testing-hw}
