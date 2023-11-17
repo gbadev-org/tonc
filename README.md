@@ -57,13 +57,13 @@ For example:
 *   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
 
     ```
-    sed -i -E 's,<span class="dfn">([^<]+)</span>,<dfn>\1</dfn>,g' pagename.md
+    sed -i '' -E 's,<span class="dfn">([^<]+)</span>,<dfn>\1</dfn>,g' pagename.md
     ```
 
 *   Section numbers should be removed from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
 
     ```
-    sed -i -E 's,^(##+) [0-9]+\.[0-9.]+,\1,g' pagename.md
+    sed -i '' -E 's,^(##+) [0-9]+\.[0-9.]+,\1,g' pagename.md
     ```
 
 *   Tables and Figures should be replaced with the raw HTML from the `-old.htm` file.
