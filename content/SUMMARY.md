@@ -6,7 +6,7 @@
 # GBA Basics
 
 - [GBA Hardware](./hardware.md)
-- [Setting up a development environment]()
+- [Setting up a development environment](./setup.md)
 - [My First GBA Demo](./first.md)
 - [Video Introduction](./video.md)
 - [The bitmap modes](./bitmaps.md)
