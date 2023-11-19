@@ -32,7 +32,7 @@
 - [Text systems](./text.md)
 - [Mode 7](./mode7.md)
 - [More Mode7 tricks](./mode7ex.md)
-- [Tonc's Text Engine]()
+- [Tonc's Text Engine](./tte.md)
 - [Whirlwind tour of ARM assembly](./asm.md)
 - [The Lab](./lab.md)
 
