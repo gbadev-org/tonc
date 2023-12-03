@@ -33,7 +33,7 @@
 - [Mode 7](./mode7.md)
 - [More Mode7 tricks](./mode7ex.md)
 - [Tonc's Text Engine]()
-- [Whirlwind tour of ARM assembly]()
+- [Whirlwind tour of ARM assembly](./asm.md)
 - [The Lab]()
 
 ---
