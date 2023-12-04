@@ -48,31 +48,35 @@ Authors: Cearn
 <!-- toc -->
 ```
 
+Add a link from `SUMMARY.md` to the new markdown file to add it to the table of contents.
+
 ### 2. Cleanup
 
 Next, go through the page and fix anything that's broken.
 
 For example:
 
-*   `<span class="dfn">` should be changed back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
+*   Change `<span class="dfn">` back to `<dfn>` (for some reason pandoc messes this up). Same goes for `<kbd>` and some other tags.
 
     ```
     sed -i '' -E 's,<span class="dfn">([^<]+)</span>,<dfn>\1</dfn>,g' pagename.md
     ```
 
-*   Section numbers should be removed from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
+*   Remove section numbers from headings (but the number in the page title should stay, e.g. `# 3. My first GBA demo`)
 
     ```
     sed -i '' -E 's,^(##+) [0-9]+\.[0-9.]+,\1,g' pagename.md
+    # For appendices, do this instead:
+    sed -i '' -E 's,^(##+) [A-G]\.[0-9.]+,\1,g' pagename.md
     ```
 
-*   Tables and Figures should be replaced with the raw HTML from the `-old.htm` file.
+*   Replace Tables and Figures with the raw HTML from the `-old.htm` file.
 
 *   Equations are coded in MathML, which displays in all browsers since 2023 according to [Can I use](https://caniuse.com/mathml).
     It's recommended to write equations in LaTeX first, using a live preview tool such as [Online LaTeX Equation Editor](https://latexeditor.lagrida.com/).
     Right-click the preview and choose Copy to Clipboard > MathML Code.
 
-*   Code blocks should have the correct language set on them (`c`, `asm`, `sh`, `makefile`)
+*   Set the correct language on each code block (`c`, `asm`, `sh`, `makefile`)
 
 *   Use backticks (`` ` ``) around code keywords and italics (`*`) around file names in the text.
 

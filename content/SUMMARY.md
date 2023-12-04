@@ -41,7 +41,7 @@
 [Appendix A - Numbers, bits and bit operations]()
 [Appendix B - Fixed-point math & LUTs]()
 [Appendix C - Vector and matrix math]()
-[Appendix D - More on makefiles and compiler options]()
+[Appendix D - More on makefiles and compiler options](./makefile.md)
 [Appendix E - Make via editors]()
 [Appendix F - References]()
 [Appendix G - Change log]()
