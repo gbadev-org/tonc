@@ -1960,13 +1960,13 @@ Printf bagage
 
 As wonderful as `printf()` is, there are some downsides to it too. First, it's a very heavy function that calls quite a large amount of functions which all have to be linked in. Second, it is pretty damn slow. Because it can do so much, it has to check for all these different cases. Also, for the string to decimal conversion it uses divisions, which is really bad for the GBA.
 
-Be aware of how much `printf()` costs. If it turns out to be a bottle-neck, try making your own slimmed down version. A decent `sprintf()` alternative is `posprintf()`, created by [Dan Posluns](http://www.danposluns.com/gbadev/){target="\_blank"}.
+Be aware of how much `printf()` costs. If it turns out to be a bottle-neck, try making your own slimmed down version. A decent `sprintf()` alternative is `posprintf()`, created by [Dan Posluns](http://www.danposluns.com/gbadev/).
 
 </div>
 
 ### VT100 escape sequences {#ssec-misc-vt100}
 
-Every book on C will tell you that you can place text on a console screen. What they usually don't tell you is that, in some environments, you can control formatting as well. One such environment is the [VT100](http://en.wikipedia.org/wiki/VT100){target="\_blank"}, which used <dfn>escape sequences</dfn> to indicate formatting. The libraries that devkitPro distributes for various systems use these sequences, so it's a good idea to support them as well.
+Every book on C will tell you that you can place text on a console screen. What they usually don't tell you is that, in some environments, you can control formatting as well. One such environment is the [VT100](http://en.wikipedia.org/wiki/VT100), which used <dfn>escape sequences</dfn> to indicate formatting. The libraries that devkitPro distributes for various systems use these sequences, so it's a good idea to support them as well.
 
 The general format for the codes is this:
 
