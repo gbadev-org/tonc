@@ -229,7 +229,7 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
   </table>
 
   <table border=1 cellpadding=2 cellspacing=0>
-  <caption><b>{*@tbl:multiply}a</b>: hex multiplication table</caption>
+  <caption><b>{*@tbl:multiply}b</b>: hex multiplication table</caption>
   <col span=17 align="right">
   <tr><th> x
     <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7 <th> 8
