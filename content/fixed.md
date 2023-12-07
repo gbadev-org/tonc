@@ -116,7 +116,7 @@ INLINE float fx2float(FIXED fx)
 
 The conversions are almost as simple as described above. The two places where things may be problematic are round-off inconsistencies and negative fractions. Note that I said they *may* be problematic; it depends on what you had in mind. I am not going to explain all the ins and out here, because they generally won't be much of a problem, but you need to be aware of them.
 
-If you're not new to programming, you will undoubtedly be aware of the problem of round-off from floats to ints: a simple cast conversion truncates a number, it does not really round it off. For example, ‘(int)1.7’ gives 1 as a result, not 2. The earlier macros have the same problem (if you can call it that). Float-to-int rounding is done by adding one half (0.5) to the float before rounding, which we can also apply to fixed-point conversion. In this case, of course, the value of one half depends on the number of fixed-point bits. For example, .8 fixeds, ½ is 0x80=128 (256/2), for .16 fixeds it is 0x8000=32768. Add this before shifting down and it'll be rounded off properly. There are actually multiple ways of rounding off, which you can read about in [this fixed-point introduction](http://www.bookofhook.com/Article/GameDevelopment/AnIntroductiontoFixedPoin.html)<span class="emphasis">\[b0rked\]</span>.
+If you're not new to programming, you will undoubtedly be aware of the problem of round-off from floats to ints: a simple cast conversion truncates a number, it does not really round it off. For example, ‘(int)1.7’ gives 1 as a result, not 2. The earlier macros have the same problem (if you can call it that). Float-to-int rounding is done by adding one half (0.5) to the float before rounding, which we can also apply to fixed-point conversion. In this case, of course, the value of one half depends on the number of fixed-point bits. For example, .8 fixeds, ½ is 0x80=128 (256/2), for .16 fixeds it is 0x8000=32768. Add this before shifting down and it'll be rounded off properly. There are actually multiple ways of rounding off, which you can read about in ["An Introduction to Fixed Point Math" by Brian Hook](https://web.archive.org/web/20060204155500/http://www.bookofhook.com/Article/GameDevelopment/AnIntroductiontoFixedPoin.html).
 
 And then there are negative numbers. Frankly, division on negative integers is always a bitch. The basic problem here is that they are always rounded towards zero: both +3/4 and −3/4 give 0. In some ways this makes sense, but in one way it doesn't: it breaks up the sequence of outputs around zero. This is annoying on its own, but what's worse is that right-shifting *doesn't* follow this behaviour; it always shifts towards negative infinity. In other words, for negative integer division, the division and right-shift operators are *not* the same. Which method you choose is a design consideration on your part. Personally, I'm inclined to go with shifts because they give a more consistent result.
 
@@ -642,7 +642,7 @@ An alternative way of looking at it is to go to hexadecimal floating point and t
   Floating-point representation of 1/7 in base <i>B</i>=16
 </caption>
 <tbody align="center">
-<tr><th> x <th> x&middot;B <th> x&middot;B\7 <th> x&middot;B%7
+<tr><th> x <th> x&middot;B <th> x&middot;&#x230A;B/7&#x230B; <th> x&middot;B%7
 <tr><th width=16> 1 <td> 16  <td> 2     <td> 2
 <tr><th> 2 <td> 32  <td> 4     <td> 4
 <tr><th> 4 <td> 64  <td> 9     <td> 1
@@ -659,7 +659,7 @@ So 1/3 in hex is zero, followed by a string of fives, or just *m*=0x55 in trunca
   border=1 cellpadding=2 cellspacing=0>
 <caption align="bottom">
   <b>*@tbl:rmdiv-bad</b>: 
-  <i>x</i>/3, using <i>m</i>= 256\3 = 0x55. Bad at 3, 6, &hellip;
+  <i>x</i>/3, using <i>m</i>= &#x230A;256/3&#x230B; = 0x55. Bad at 3, 6, &hellip;
 </caption>
 <tbody align="center">
 <tr><th>x
@@ -1124,7 +1124,7 @@ Look-up tables are essentially a collection of points sampled from a function. T
 <div class="cpt_fr" style="width:256px;">
   <img src="img/math/lutlerp.png" id="fig:lerp" 
     alt="lut lerp" width=256><br>
-  <b>*!@fig:lerp</b>: approximating a sine by direct 
+  <b>*@fig:lerp</b>: approximating a sine by direct 
   look-up or linear interpolation.
 </div>
 
