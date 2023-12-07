@@ -38,7 +38,7 @@
 
 ---
 
-[Appendix A - Numbers, bits and bit operations]()
+[Appendix A - Numbers, bits and bit operations](./numbers.md)
 [Appendix B - Fixed-point math & LUTs]()
 [Appendix C - Vector and matrix math]()
 [Appendix D - More on makefiles and compiler options](./makefile.md)
