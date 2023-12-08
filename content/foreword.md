@@ -4,7 +4,11 @@ Welcome to Tonc, a guide to Game Boy Advance programming originally published in
 
 You are reading a new, revamped version of it, powered by mdbook and now maintained by the community.
 
-> Work In Progress notice: we're currently in the process of finishing the port, so some sections may be incomplete, broken or unavailable. The original version can be found [here](https://www.coranac.com/tonc/text/).
+:::warning Work In Progress notice
+
+We're currently in the process of finishing the port, so some sections may be incomplete, broken or unavailable. The original version can be found [here](https://www.coranac.com/tonc/text/).
+
+:::
 
 ## Contributing
 
@@ -17,3 +21,6 @@ More resources about GBA development can be found at [gbadev.net](https://gbadev
 Jasper "cearn" Vijn is the original author, creating and maintaining Tonc till 2013.
 
 exelotl, avivace, PinoBatch, copyrat90, LunarLambda and gwilymk ported the contents to markdown and migrated the underlying rendering technology to mdbook.
+
+
+<br>
