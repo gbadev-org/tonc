@@ -8,6 +8,9 @@ language = "en"
 build-dir = "output"
 create-missing = false
 
+[preprocessor.pandocs]
+command = "cargo run -p pandocs-preproc --locked --release --"
+
 [output.html]
 git-repository-url = "https://github.com/gbadev-org/tonc"
 edit-url-template = "https://github.com/gbadev-org/tonc/edit/master/{path}"
