@@ -35,14 +35,9 @@ mv intro.htm intro-old.htm
 pandoc --from=html --to=markdown-fenced_divs-bracketed_spans-escaped_line_breaks-smart --wrap=none -o intro.md intro-old.htm
 ```
 
-Then, add metadata and replace the table of contents with a `<!-- toc -->` marker:
+Then replace the table of contents with a `<!-- toc -->` marker:
 
 ```md
-Title: Introduction to Tonc
-Date: 2003-09-01
-Modified: 2023-08-13
-Authors: Cearn
-
 # ii. Introduction to Tonc
 
 <!-- toc -->
