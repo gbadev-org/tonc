@@ -34,7 +34,7 @@
 - [More Mode7 tricks](./mode7ex.md)
 - [Tonc's Text Engine]()
 - [Whirlwind tour of ARM assembly](./asm.md)
-- [The Lab]()
+- [The Lab](./lab.md)
 
 ---
 
