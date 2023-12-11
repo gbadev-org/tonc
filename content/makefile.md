@@ -7,6 +7,12 @@ Authors: Cearn
 
 <!-- toc -->
 
+:::warning This chapter may be outdated
+
+This part may need an overhaul and some of the suggested tools or practices may be deprecated.
+
+:::
+
 ## Introduction {#sec-intro}
 
 Although I gave a quick introduction to makefiles and compiler flags in the [setup](setup.html) section, a more complex look into these items may prove useful as well. So I'll present and explain the makefiles that Tonc uses in more detail, as well as some other little things about makefiles and compiler/linker options. I hope that this will give you enough ammo to understand the makefiles that are out there and allow you to figure out the more complicated aspects of the make process yourself. This page is hardly a substitute for the full documentation on the maketool make, the assembler as, compiler gcc and the linker ld, but it'll have to do for now. You can get the full documentation on these tools at [GNU Manuals Online](https://www.gnu.org/manual/manual.html). You may also be interested in MrMrIce's make tutorial, which can be found in [gbadev.org](http://www.gbadev.org)'s documentation section.

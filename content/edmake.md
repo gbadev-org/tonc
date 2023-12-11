@@ -2,6 +2,12 @@
 
 <!-- toc -->
 
+:::warning This chapter may be outdated
+
+This part may need an overhaul and some of the suggested tools or practices may be deprecated.
+
+:::
+
 ## Introduction {#sec-intro}
 
 As good as makefiles are, they're still command-line driven processes, with all the problems attached to it. If you're in a Unix/Linux environment those problems are usually fairly small, but on a pure Windows system we have to work in a DOS-like Windows command prompt, which has a number of very ghastly flaws that can make your life miserable: not only is wringing through the directory structure not much fun, the non-intuitive way to copy/paste text and the inability to arrow through your commands to fix a typo are somewhat annoying too. Another thing that will wear your patience very quickly is not being able to scroll through the list of compilation errors that speeds across your itty-bitty Windows command prompt like a thundering herd of rabid elephants in a China shop. And you *know* it'd all be okay if you could just find the one at the start of the list and fix that. Now, you can get around the gross inadequacies of a Windows command prompt by using an MSYS-box instead. You'd still need to learn how to use the Bash shell to make the most of it, though. And you'd still have the extra window for the command line box.

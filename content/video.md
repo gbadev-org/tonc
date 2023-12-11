@@ -79,15 +79,11 @@ Tiled backgrounds work completely different. First, you store 8x8 pixel <dfn>til
 
 Finally, we have sprites. Sprites are small (8x8 to 64x64 pixels) graphical objects that can be transformed independently from each other and can be used in conjunction with either bitmap or background types.
 
-<div class="note">
-
-<div class="nhgood">
-Prefer tile modes over bitmap modes
-</div>
+:::tip Prefer tile modes over bitmap modes
 
 In almost all types of games, the tile modes will be more suitable. Most other tutorials focus on bitmap modes, but that's only because they are easier on beginners, not because of their practical value for games. The vast majority of commercial games use tile modes; that should tell you something.
 
-</div>
+:::
 
 Those are the three basic graphical types, though other classifications also spring to mind. For example, the bitmap and tiled backgrounds types, since they're mutually exclusive and use the entire screen, constitute the <dfn>background</dfn>-types. Also, it so happens that the tiles of tiled backgrounds and the sprites have the same memory layout (namely, in groups of 8x8 pixel tiles). This makes tiled backgrounds and sprites the tiled-types.
 

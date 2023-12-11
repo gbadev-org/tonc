@@ -650,17 +650,11 @@ A flash card is a GBA cart with a difference: it is completely rewritable. There
 
 A solution that's becoming more and more popular is using standard multimedia cards (eg. SD, CompactFlash) and an adapter like [GBAMP](http://www.gbamovie.com/) and [SuperCard](http://eng.supercard.cn). Memory cards can be very cheap (like $10) and bought in most electronics stores; the adapters are genereally $25 and up.
 
-<div id="nt-supercard" class="note">
-
-<div class="nhcare">
-
-Supercard vs waitstates.
-
-</div>
+:::warning Supercard vs waitstates
 
 There is one small technicaly problem with Supercards: they use slow memory that doesn't support what 3/1 ROM waitstates. This is a faster setting than the default 4/2 and anything that uses the former simply won't run. This shouldn't be a problem with most homebrew things, but a handful of binaries will fail and you wouldn't be able to make use of the speed-up yourself either.
 
-</div>
+:::
 
 #### Multiboot cable
 
