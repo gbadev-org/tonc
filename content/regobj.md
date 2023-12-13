@@ -1,8 +1,3 @@
-Title: Regular sprites
-Date: 2003-09-01
-Modified: 2023-09-09
-Authors: Cearn
-
 # 8. Regular sprites {#ch-}
 
 <!-- toc -->
@@ -19,29 +14,26 @@ According to Webster's, a sprite is “an imaginary being or spirit, as a fairy,
 
 Sprites are a little trickier to use than a bitmap background, but not by much. You just have to pay a little more attention to what you're doing. For starters, the graphics have to be grouped into 8×8 tiles; make sure your graphics converter can do that. Aside from the obvious actions such as enabling sprites in the display control and loading up the graphics and palette, you also have to set-up the attributes of the sprites correctly in OAM. Miss any of these steps and you'll see nothing. These things and more will be covered in this chapter.
 
-<div class="note">
-<div class="nhgood">
-Essential Sprite Steps
-</div>
+:::tip Essential Sprite Steps
+
 
 There are 3 things that you have to do right to get sprites to show up:
 
 -   Load the graphics and palette into object VRAM and palette.
 -   Set attributes in OAM to use the appropriate tiles and set the right size.
 -   Switch on objects in `REG_DISPCNT`, and set the mapping mode there too.
-</div>
 
-<div class="note">
-<div class="nhcare">
-Sprites aren't objects
-</div>
+:::
+
+:::tip Sprites aren't objects
 
 Or something like that. I know it sounds weird, but the more I think about it, the more I realize that sprites and objects shouldn't be considered interchangeable. The term ‘object’, is a hardware feature, controlled in OAM. Right now, I think that ‘sprite’ is more of a conceptual term, and should be reserved for actors, like playing characters, monsters, bullets, etc. These can in fact be built up of multiple hardware objects, or even use a background.
 
 You could also thing of it in this way: objects are *system* entities linked to the console itself, and sprites are *game* entities, living in the game world. The difference may be subtle, but an important one.
 
 This is merely my opinion, and I can't say how right I am in this. Tonc still switches back and forth between the two words because it's too late to do anything about it now. Mea culpa. I'd love to hear the opinion of others on the subject, so feel free to speak your mind if you want.
-</div>
+
+:::
 
 ## Sprite image data and mapping mode {#sec-tiles}
 

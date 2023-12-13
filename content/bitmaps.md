@@ -336,23 +336,20 @@ void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 
 This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in tonclib.
 
-<div class="note">
-<div class="nhcare">
-VRAM vs. byte writes
-</div>
+:::warning VRAM vs. byte writes
 
 You cannot write individual bytes into VRAM (or the palette or OAM for that matter). Halfwords or words only, please. If you want to write single bytes, you have to read the full (half)word, insert the byte, and put it back.
 
 Please don't skip this note, and make yourself aware of the full ramifications of this. Errors due to pointer-type mismatches are very easy to make, and [you may be writing to VRAM as bytes more often than you think](#ssec-data-memcpy).
-</div>
 
-<div class="note">
-<div class="nhcare">
-Generic vs. specific rendering routines
-</div>
+:::
+
+
+:::warning Generic vs. specific rendering routines
 
 Every kind of graphics surface needs its own pixel plotter. In principle, more complicated (multi-pixel) shapes are surface independent. For example, a line routine follows the same algorithm, but simply uses a different plotter for drawing pixels. These generic forms are great in terms of re-usability and maintainability, but can be *disastrous* when it comes to speed. Creating surface-specific renderers may be extra work, but can on occasion save you up to a factor of 100 in speed.
-</div>
+
+:::
 
 ### Complications of bitmap modes {#ssec-modes-details}
 
@@ -366,13 +363,12 @@ Page flipping can alleviate some of these items, but that's not available in mod
 
 So basically, use the bitmap modes for testing and/or static images, but not much else unless you know the tilemodes can't do what you want.
 
-<div class="note">
-<div class="nhbad">
-Bitmap modes are not for gaming
-</div>
+:::danger Bitmap modes are not for gaming
 
 Do not get too comfortable with bitmap modes. Though they're nice for gbadev introductory sections because they are easier to work with than tile modes, and they have advantages for 3D games, they are *not* suitable for most types of games because the GBA simply can't push pixels fast enough. Tinker with them to get a feel for IO registers and the like, then move on.
-</div>
+
+:::
+
 
 ## Page flipping {#sec-page}
 
@@ -392,15 +388,14 @@ While the procedure works great, there are some snares. For the first, consider 
 
 The second problem concerns a little nasty in the age-old method of animation. The canonical animation does this. Frame1: draw object. Frame2: erase old object, draw object in new state. This doesn't work for page flipping since Frame2 is written on an entirely different bitmap than Frame1, so trying to erase Frame1's old object doesn't. What you need to erase is the object from 2 frames ago. Again, easy solution, but you have be aware of the problem. (Of course, erasing the entire frame each time would work too, but who's got the time?)
 
-<div class="note">
-<div class="nhgood">
-Pageflipping, not double buffering
-</div>
+:::tip Pageflipping, not double buffering
 
 Another method of smoother animation is double buffering: draw on a secondary buffer (the backbuffer) and copy it to the screen when finished. This is a fundamentally different technique than page flipping! Even though both use two buffers, in page flipping you don't copy the backbuffer to the display buffer, you *make* backbuffer the display buffer.
 
 What the GBA does is page flipping, so refer to it as such.
-</div>
+
+:::
+
 
 ### GBA page flipping {#ssec-page-gba}
 
@@ -503,13 +498,11 @@ This section is a little boring (ok, very boring) but it needs to be said. While
 
 The first two subsections are about how to get graphics into your game, something that you'll really need to know. After that I'll discuss a few nasty and highly technical things that may or may not cause problems later on. These are optional and you can skip to the [data-loading/interpreting demo](#ssec-data-demo) at any time. That said, I urge you to read them anyway because they may save you a lot of debugging time.
 
-<div class="note">
-<div class="nhgood">
-Relax, it's only 1s and 0s
-</div>
+:::tip  Relax, it's only 1s and 0s
 
 When you get right down to it, everything on computers is merely a big mess of bits without any purpose by itself. It is the interaction between hardware and software that makes sequences of bits appear as valid executable code, a bitmap, music or whatever.
-</div>
+
+:::
 
 ### Yes, we have no files {#ssec-data-files}
 
@@ -517,14 +510,11 @@ This may be a good point to say a few words on data. Strictly speaking, *everyth
 
 All the game's data has to be added directly to the binary. There are a number of ways to do this. The most common way is to convert the raw binary files to C-arrays, then compile those and link them to the project. Well, the most common among homebrewers is probably converting to C arrays and using `#include` on them, but that's something that you should *never* do. Also popular are assembly arrays. These are a useful alternative to C arrays because a) they *can't* be `#include`d and b) because they bypass the compilation step and compilation of arrays is very intensive. Of course, you would have to know how to work with the assembler. Another nice thing about the assembler is that you can include binary files directly into them, eliminating the need for a converter. Lastly, while the GBA doesn't have a native file system, you can always write your own. A common one is [GBFS](https://pineight.com/gba/#gbfs) by the gbadev forum FAQ maintainer, tepples. Using a file system is actually the recommended method, but for now, I'll stick to C arrays because they are the easiest to use.
 
-<div class="note">
-<div class="nh">
-
-Ahem. Actually, we *do* have files
-</div>
+:::tip Ahem. Actually, we do have files
 
 There *were* no files in the past, but in July of 2006, [Chishm](https://web.archive.org/web/20120201074338/http://chishm.drunkencoders.com/) gave us libfat, which is a FAT-like file system for GBA and Nintendo DS. It is distributed via devkitPro Updater as well, so chances are you have it already.
-</div>
+
+:::
 
 #### Where do my arrays go?
 
@@ -541,13 +531,11 @@ Note that what I said about arrays is true for *all* arrays, not just data array
 #define IWRAM_CODE __attribute__((section(".iwram"), long_call))
 ```
 
-<div class="note">
-<div class="nhgood">
-Const is good
-</div>
+:::tip Const is good
 
 Data that you don't expect to change in your game should be defined as constant data using the `const` keyword, lest it trashes your IWRAM.
-</div>
+
+:::
 
 #### Converted and const arrays in C++
 
@@ -592,10 +580,7 @@ A good one is [gfx2gba](https://www.coranac.com/files/gba/gfx2gba.zip). This is 
 
 Personally, I use [Usenti](https://www.coranac.com/projects/#usenti), which is my own tool. This is a bitmap editor (paint program) with exporting options thrown in. It allows different file-types, different bitdepths, different output files, all modes, some map-exporting stuff, meta-tiling, compression and a few others. It may not be as powerful as big photo-editing tools as Photoshop, GIMP, Aseprite, and the like, but it gets the job done. If you're still drawing your graphics with Microsoft Paint, please stop that and use this one instead. The exporter is also available separately in the form of the open source project called [(win)grit](https://www.coranac.com/projects/#grit), which comes in a command-line interface (grit) and a GUI (wingrit). As of January 2007, it is also part of the devkitPro distribution.
 
-<div class="note">
-<div class="nh">
-Bitmap conversion via CLI
-</div>
+:::tip Bitmap conversion via CLI
 
 There are many command-line interfaces available for graphics conversion, but to make them function you need the correct flags. Here are examples for gfx2gba and grit, converting a bitmap *foo.bmp* to a C array for modes 3, 4 and 5. This is just an example, because this is not the place for a full discussion on them. Look in their respective readme's for more details.
 
@@ -614,7 +599,8 @@ There are many command-line interfaces available for graphics conversion, but to
 # mode 4 (C array; u32 fooBitmap[], u16 fooPal[]; foo.c foo.h)
     grit foo.bmp -gb -gB8
 ```
-</div>
+
+:::
 
 <div class="cpt_fr" style="width:222px;">
 <table id="tbl-endian"
@@ -643,8 +629,6 @@ Below, you can see a partial listing of modes.c, which contains the bitmap and t
 Well, that's not *quite* true. Only with `u32` arrays is proper [data alignment](#ssec-data-align) guaranteed, which is a good thing. More importantly, you have to be careful with the byte-order of multi-byte types. This is called the [endianness](numbers.html#ssec-bits-endian) of types. In a <dfn>little endian</dfn> scheme, least significant bytes will go first and in a <dfn>big endian</dfn>, most significant bytes will go first. See table 2 for an example using `0x01`, `0x02`, `0x03` and `0x04`. The GBA is a little endian machine, so the first word of the `modesBitmap` array, `0x7FE003E0` is the halfwords `0x03E0` (green) followed by `0x7FE0` (cyan). If you want more examples of this, open up VBA's memory viewer and play around with the 8-bit, 16-bit and 32-bit settings.
 
 The key point here: the data itself doesn't change when you use different data-types for the arrays, only the way you *represent* it does. That was also the point of the *bm_modes* demo: it's the same data in VRAM all the time; it's just used in a different way.
-
-<div style="font-size:95%;">
 
 ```c
 //======================================================================
@@ -680,17 +664,13 @@ const unsigned int modesPal[8]=
 };
 ```
 
-</div>
-
 Those 2700 lines represent a 77 kB bitmap. One *single* bitmap. In all likelihood, you'll need at least a couple of them to make anything worthwhile. Most games have lots of data in them, not only graphics but maps and sound and music as well. All this adds up to a huge amount of data, certainly too much for just EWRAM and maybe even for a full cart. That is why <dfn>compression</dfn> is also important. The [GBA BIOS](swi.html) has decompression routines for bit-packing, run-length encoding, LZ77 and Huffman. Converters sometimes have the appropriate compressors for these routines, which can drastically shrink the amount of memory used. Usenti and (win)grit support these compressors. So does gfx2gba, which even has some more. A tool that just does compression on binary files (but does it very well) is [GBACrusher](https://www.coranac.com/files/gba/GBACrusher.zip). I won't go into compression that much (or at all), but you can read up on the subject [here](https://web.archive.org/web/20180820012154/http://members.iinet.net.au/~freeaxs/gbacomp/).
 
-<div class="note">
-<div class="nhgood">
-Understanding data
-</div>
+:::tip Understanding data
 
 It is vital that you understand what data is, how the different datatypes work. Preferably endianness and alignment too. Emulators and hex editors can help you with this. Once you have compilation working, just make a few random arrays and see what they look like in the VBA memory viewer for a while.
-</div>
+
+:::
 
 ### `#include` code or data considered harmful {#ssec-data-hdr}
 
@@ -861,7 +841,7 @@ In most cases, the compiler will align things for you. It will put all halfwords
 
 The best example of breaking the rules is pointer casting. For example, most graphics converters will output the data as `u16` arrays, so you can copy it to VRAM with a simple `for` loop. You can speed up copying by roughly 160% if you copy by words (32-bit) rather than halfwords (16-bit). Run the *[txt_se2](text.html#ssec-demo-se2)* demo and see for yourself. All you have to do for this is one or two pointer casts, as shown here.
 
-<div id="cd-array-cpy">
+
 ```c
 #define fooSize ...
 const u16 fooData[]= { ... };
@@ -876,7 +856,7 @@ u32 *dst= (u32*)vid_mem, *src= (u32*)fooData;
 for(ii=0; ii<fooSize/4; ii++)
      dst[ii]= src[ii];
 ```
-</div>
+
 
 Both these routines copy `fooSize` bytes from `fooData` to VRAM. Only the second version is much faster because there are half as many loop iterations and also because the ARM CPU is just better at dealing with 32-bit chunks. The only danger here is that while `fooData` will be halfword aligned, it need *not* be word aligned, which is a requirement for the second version. For those readers that think casts like this and mis-alignment only happen to other people, think again: the faster copy routines (`memcpy()`, `CpuFastSet()`, and DMA too) cast to word pointers implicitly. Use them (and you should) and you run the risk of misalignment.
 
@@ -916,10 +896,7 @@ The *real* size is actually 12 bytes. Not only is this almost twice the size, if
 
 There are ways of forcing packing, using the ‘`__attribute__((packed))`’ attribute. If `struct FOO` had that, it really would be 7 bytes long. The downside of this is that the non-byte members could be mis-aligned, and the compiler emits code to put the value together byte for byte. This is very much slower than the non-packed version, so only use this attribute if you have no other choice. What happens with mis-aligned (half)words then I can't tell you though, but I'm sure it's not pretty.
 
-<div class="note">
-<div class="nh">
-Forcing alignment and packing
-</div>
+:::tip Forcing alignment and packing
 
 GCC has two attributes that allow you to force alignment of arrays, and remove member-alignment in `struct`s.
 
@@ -937,7 +914,7 @@ typedef struct FOO {...} ALIGN(4) FOO;
 struct FOO {...} PACKED;
 ```
 
-</div>
+:::
 
 #### Devkits and struct alignment {#sssec-devkit-align}
 
@@ -967,13 +944,11 @@ OBJ_ATTR a, b;
 b= a;   // No memcpy == no fail and over 10 times faster
 ```
 
-<div class="note">
-<div class="nhgood">
-Forcing struct-alignment is a Good Thing
-</div>
+:::tip Forcing struct-alignment is a Good Thing
 
 The rules for `struct` alignment have changed since devkitARM r19. Instead of being always word-aligned, they are now aligned as well as their members will allow. If this means they're not necessarily word-aligned, then they will use `memcpy()` for `struct` copies, which is slow for small structs, and may even be wrong (see [next section](#ssec-data-memcpy)). If you want to be able to do `struct` copies fast and safe, either force alignment or cast to other datatypes.
-</div>
+
+:::
 
 ### Copying, memcpy() and sizeof {#ssec-data-memcpy}
 
