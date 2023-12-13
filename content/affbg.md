@@ -1,8 +1,3 @@
-Title: Affine backgrounds
-Date: 2004-03-07
-Modified: 2023-09-13
-Author: Cearn
-
 # 12. Affine backgrounds {#ch-}
 
 <!-- toc -->

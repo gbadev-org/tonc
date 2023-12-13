@@ -1,8 +1,3 @@
-Title: More on makefiles and compiler options
-Date: 2003-09-01
-Modified: 2023-12-03
-Authors: Cearn
-
 # D. More on makefiles and compiler options {#ch-}
 
 <!-- toc -->

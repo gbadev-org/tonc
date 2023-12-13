@@ -1,8 +1,3 @@
-Title: Regular tiled backgrounds
-Date: 2003-09-01
-Modified: 2023-09-09
-Authors: Cearn
-
 # 9. Regular tiled backgrounds {#ch-}
 
 <!-- toc -->

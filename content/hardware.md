@@ -1,8 +1,3 @@
-Title: GBA Hardware
-Date: 2003-12-23
-Modified: 2023-09-09
-Authors: Cearn
-
 # 1. GBA Hardware {#ch-}
 
 <!-- toc -->

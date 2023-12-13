@@ -1,8 +1,3 @@
-Title: Mode 7 Part 1
-Date: 2003-11-27
-Modified: 2013-03-24
-Authors: Cearn
-
 # 20. Mode 7 Part 1 {#ch-}
 
 <!-- toc -->

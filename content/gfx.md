@@ -1,8 +1,3 @@
-Title: Graphic Effects
-Date: 2003-10-13
-Modified: 2023-09-11
-Author: Cearn
-
 # 13. Graphic Effects {#ch-}
 
 <!-- toc -->

@@ -1,8 +1,3 @@
-Title: Text Systems
-Date: 2005-05-19
-Modified: 2013-03-14
-Authors: Cearn
-
 # 19. Text systems {#ch-}
 
 <!-- toc -->

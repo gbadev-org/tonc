@@ -1,8 +1,3 @@
-Title: Introduction to Tonc
-Date: 2003-09-01
-Modified: 2023-08-13
-Authors: Cearn
-
 # Introduction
 
 <!-- toc -->

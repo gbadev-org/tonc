@@ -1,8 +1,3 @@
-Title: 18. Beep! GBA sound introduction
-Date: 2003-09-01
-Modified: 2023-09-24
-Authors: Cearn
-
 # 18. Beep! GBA sound introduction {#ch-}
 
 <!-- toc -->

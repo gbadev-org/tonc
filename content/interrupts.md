@@ -1,8 +1,3 @@
-Title: Interrupts
-Date: 2003-12-23
-Modified: 2013-03-24
-Authors: Cearn
-
 # 16. Interrupts
 
 <!-- toc -->

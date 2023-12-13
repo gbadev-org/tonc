@@ -1,8 +1,3 @@
-Title: The Bitmap modes (mode 3, 4, 5)
-Date: 2003-09-01
-Modified: 2023-09-05
-Authors: Cearn
-
 # 5. The Bitmap modes (mode 3, 4, 5) {#ch-}
 
 <!-- toc -->

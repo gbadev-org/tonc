@@ -1,8 +1,3 @@
-Title: Whirlwind Tour of ARM Assembly
-Date: 2006-05-05
-Modified: 2023-11-24
-Authors: Cearn
-
 # 23. Whirlwind Tour of ARM Assembly {#ch-}
 
 <!-- toc -->

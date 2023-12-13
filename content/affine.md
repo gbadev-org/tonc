@@ -1,8 +1,3 @@
-Title: The Affine Transformation Matrix
-Date: 2003-09-01
-Modified: 2023-09-06
-Authors: Cearn
-
 # 10. The Affine Transformation Matrix (a.k.a. **P**)
 
 <!-- toc -->

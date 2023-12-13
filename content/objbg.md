@@ -1,8 +1,3 @@
-Title: Sprite and background overview
-Date: 2004-03-01
-Modified: 2013-03-24
-Authors: Cearn
-
 # 7. Sprite and background overview
 
 <!-- toc -->

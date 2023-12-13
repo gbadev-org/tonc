@@ -1,8 +1,3 @@
-Title: The GBA buttons (a.k.a. keys)
-Date: 2003-09-28
-Modified: 2023-09-06
-Author: Cearn
-
 # 6. The GBA buttons (a.k.a. keys) {#ch-}
 
 <!-- toc -->
