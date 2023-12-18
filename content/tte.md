@@ -465,7 +465,7 @@ The more generalized routine, `se_drawg_s()` is a little more complex. It still 
 
 Anyway, after getting the pointer and pitch, the tile-index for the top-left of the glyph is calculated and put this into `se`. After that, we loop over the different tiles of the glyph in both directions. Note that the order of the loop is column-major, not row-major, because that's the way the default fonts were ordered.
 
-As it happens, column-major rendering tends to be more efficient for text, because glyphs are usually higher than they are wide. Also, for tilemap text `charW` and `charH` tend to be small – often 1 or 2. This means that it is extremely inefficient to use loops; we'll see how inefficient in subsection 22.7.5.. Unrolling them, like `se_drawg_w8h8()` and `se_drawg_w8h16()` do, gives a much better performance.
+As it happens, column-major rendering tends to be more efficient for text, because glyphs are usually higher than they are wide. Also, for tilemap text `charW` and `charH` tend to be small – often 1 or 2. This means that it is extremely inefficient to use loops; we'll see how inefficient in the ["Profiling the renderers" subsection](#ssec-misc-profile).. Unrolling them, like `se_drawg_w8h8()` and `se_drawg_w8h16()` do, gives a much better performance.
 
 ### Regular tilemap example {#ssec-test-se4}
 
@@ -523,7 +523,7 @@ void test_tte_se4()
 
 The code above demonstrates a few of the things you can do with TTE for tilemaps. The call to `tte_init_se()` initializes the system to display text on BG 0, using charblock 0 and screenblock 31 and to use the default font and renderer. Parameter five is the bit-unpack offset; by setting it to 14, all the 1-valued pixels in the font move to 14+1=15, the last index in a palette bank. I'm also setting a few other colors so that the palette will look like {@fig:img-test-se4}b.
 
-In step 3, I print some text with `tte_write()`. The different colors are done by using `#{cx:`_`num`_`}` in the string, which sets the special color-attribute to _num_. More on these kinds of commands in section 22.7.. Since the `se`-renderers add this value to the glyph index for the final output, it can be used for palette swapping.
+In step 3, I print some text with `tte_write()`. The different colors are done by using `#{cx:`_`num`_`}` in the string, which sets the special color-attribute to _num_. More on these kinds of commands in the ["Scripting, console IO and other niceties" section](#sec-misc).. Since the `se`-renderers add this value to the glyph index for the final output, it can be used for palette swapping.
 
 Step 4 demonstrates how to load up and use a second font. The `cyber16Font` is a rendition of the 8×16 font used in ye olde SNES game, Cybernator (see {@fig:img-cyber16}). This font was exported as 4bpp data so I can just copy it into VRAM directly, but I do need to use an offset because I want to keep the old font as well. The charblock now has two sets of glyphs (see {@fig:img-test-se4}c).
 
@@ -1061,7 +1061,7 @@ void test_tte_obj()
 
 Using tilemaps for text is nice, but will only work if the dimensions of the glyphs are multiples of 8. There are a few drawbacks in terms of readability: narrow characters such as ‘i’ will seem either overly wide, or be surrounded by many empty pixels. Also, you can't put many characters on a line because there are only so many tiles.
 
-Variable-width fonts (<dfn>vwf</dfn>; also known as proportional fonts) solve this problem. Using variable-width fonts on bitmaps is quite easy, as shown in section 22.4.. However, using it in tilemap modes is a little trickier: how do you draw on a tilemap where the tiles are 8×8 in size?
+Variable-width fonts (<dfn>vwf</dfn>; also known as proportional fonts) solve this problem. Using variable-width fonts on bitmaps is quite easy, as shown in the ["Bitmapped text" section](#sec-bmp).. However, using it in tilemap modes is a little trickier: how do you draw on a tilemap where the tiles are 8×8 in size?
 
 Well, you don't. Not exactly. The key is not to draw to the map, but to the tiles that the map shows.
 
@@ -1188,7 +1188,7 @@ The output of `test_chr4()` can be seen in {@fig:img-chr4-test}a. It's a white r
 
 #### Version 1 : pixel by pixel
 
-The easiest way to render glyphs to tiles is to follow the template from section 22.4.. This is done in the function below.
+The easiest way to render glyphs to tiles is to follow the template from the ["Bitmapped text" section](#sec-bmp).. This is done in the function below.
 
 ```c {#cd-chr4-drawg-b1cts-a .proglist}
 //! Simple version of chr4 renderer.
@@ -2238,7 +2238,7 @@ The `null()` renderer is a dummy renderer, used to find the overhead of the TTE 
 
 Half of the TTE overhead actually comes from the wrapping code; cursor setting and checking can be relatively slow. And I'm not even considering clipping here.
 
-For the bitmap and tile renderers, I've timed three versions. A ‘base’ version, using the template from `chr4_drawg_b1cts_base()` in section 22.6.2.; C-optimized versions, which are the default renderers; and a fast asm version.
+For the bitmap and tile renderers, I've timed three versions. A ‘base’ version, using the template from `chr4_drawg_b1cts_base()` in the ["Text rendering on tiles" section](#ssec-chr-drawg).; C-optimized versions, which are the default renderers; and a fast asm version.
 
 The `bmp16` variants are faster than the others because you don't have to mask items into the surface. What's interesting, though, is that the difference between `bmp8` and `chr4` is practically zero. This probably has something to do with the layout of the font itself.
 
