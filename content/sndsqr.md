@@ -794,7 +794,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
   <td>SSTAT_DISABLE, SSTAT_ENABLE
   <td><b>Master Sound Enable</b>. Must be set if any sound is to 
     be heard at all. Set this <b>before</b> you do anything else: 
-    the other registers can't be accessed otherwise, see GBATek 
+    the other registers can't be accessed otherwise, see GBATEK 
     for details. 
 </tbody>
 </table>
