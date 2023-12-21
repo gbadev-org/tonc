@@ -123,7 +123,7 @@ Usually, these two result in the same thing, but if multiple interrupts come in 
 
 ### The interrupt process {#ssec-isr-proc}
 
-The complete interrupt process is kind of tricky and part of it is completely beyond your control. What follows now is a list of things that you, the programmer, need to know. For the full story, see [GBATek : irq control](http://nocash.emubase.de/gbatek.htm#interruptcontrol).
+The complete interrupt process is kind of tricky and part of it is completely beyond your control. What follows now is a list of things that you, the programmer, need to know. For the full story, see [GBATek : irq control](https://problemkaputt.de/gbatek.htm#gbainterruptcontrol).
 
 1.  Interrupt occurs. Some black magic deep within the deepest dungeons of BIOS happens and the CPU is switched to IRQ mode and ARM state. A number of registers (`r0-r3, r12, lr`) are pushed onto the stack.
 2.  BIOS loads the address located at `0300:7FFC` and branches to that address.

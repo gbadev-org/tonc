@@ -322,7 +322,7 @@ This is very similar to the `obj_rotscale_ex()` function covered in the [off-cen
 
 ### Internal reference point registers {#ssec-bga-refpts}
 
-There's one more important thing left to mention about the displacement and transformation registers. Quoting directly from [GBA Tek](http://nocash.emubase.de/gbatek.htm#lcdiobgrotationscaling) (except the bracketed parts):
+There's one more important thing left to mention about the displacement and transformation registers. Quoting directly from [GBA Tek](https://problemkaputt.de/gbatek.htm#lcdiobgrotationscaling) (except the bracketed parts):
 
 > The above reference points \[the displacement registers\] are automatically copied to internal registers during each vblank, specifying the origin for the first scanline. The internal registers are then incremented by dmx \[`REG_BGxPB`\] and dmy \[`REG_BGxPD`\] after each scanline.
 > Caution: Writing to a reference point register by software outside of the Vblank period does immediately copy the new value to the corresponding internal register, that means: in the current frame, the new value specifies the origin of the *current* scanline (instead of the topmost scanline).

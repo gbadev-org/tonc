@@ -20,8 +20,8 @@ Anyway, about this chapter. A complete document on assembly is nothing less than
 
 With that information, you should be able to do a lot of stuff, or at least know how to make use of the various reference documents out there. This chapter is not an island, I am assuming you have some or all of the following documents:
 
-- The rather large official ARM7DTMI Technical manual (PDF): [DDI0210B_7TDMI_R4.pdf](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/index.html%0A).
-- GBATek instruction reference: [ARM](http://nocash.emubase.de/gbatek.htm#arminstructionset) / [THUMB](http://nocash.emubase.de/gbatek.htm#thumbinstructionset).
+- The rather large official ARM7TDMI Technical manual (PDF): [DDI0210B_7TDMI_R4.pdf](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/index.html%0A).
+- GBATek ARM CPU reference: [ARM + Thumb](https://problemkaputt.de/gbatek.htm#armcpureference).
 - Official ARM quick-references (PDF): [ARM + Thumb](http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf)
 - Re-eject's quick-references (PDF): [GAS](http://www.coranac.com/files/gba/re-ejected-gasref.pdf) / [ARM](http://www.coranac.com/files/gba/re-ejected-armref.pdf) / [THUMB](http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf). (note: minor syntax discrepancies at times)
 - GNU Assembler manual: [GAS](http://sourceware.org/binutils/docs/as/index.html).
@@ -1529,7 +1529,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
       <td style="border: 1px solid var(--bg);">
         <table id="tbl:waits" border=1 cellpadding=2 cellspacing=0>
           <caption align="bottom">
-            <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="http://nocash.emubase.de/gbatek.htm#memorymap">GBATek memory map</a>.
+            <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#memorymap">GBATek memory map</a>.
           </caption>
           <col>
             <col span=3 align="center">
@@ -1597,7 +1597,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
   </table>
 </div>
 
-{_@tbl:cycles} shows how much the instructions cost in terms of N/S/I cycles. How one can arrive to these cycle times is explained below. {_@tbl:waits} lists the buswidths, the waitstates and the access times in clock cycles for each section. Note that these are the default wait states, which can be altered in [REG_WAITCNT](http://nocash.emubase.de/gbatek.htm#systemcontrol).
+{_@tbl:cycles} shows how much the instructions cost in terms of N/S/I cycles. How one can arrive to these cycle times is explained below. {_@tbl:waits} lists the buswidths, the waitstates and the access times in clock cycles for each section. Note that these are the default wait states, which can be altered in [REG_WAITCNT](https://problemkaputt.de/gbatek.htm#systemcontrol).
 
 The data presented here is just an overview of the most important items, for all the gory details you should look them up in GBATek or the official documents.
 

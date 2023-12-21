@@ -68,7 +68,7 @@ For more information on the CPU, go to [www.arm.com](http://www.arm.com) or to t
 
 ## Memory Sections {#sec-memory}
 
-This section lists the various memory areas. It's basically a summary of the [GBATek](http://nocash.emubase.de/gbatek.htm) section on memory.
+This section lists the various memory areas. It's basically a summary of the [GBATek](https://problemkaputt.de/gbatek.htm) section on memory.
 
 <div class="cblock">
   <table border=1 cellspacing=0 cellpadding=2>
@@ -160,4 +160,4 @@ This section lists the various memory areas. It's basically a summary of the [GB
   </table>
 </div>
 
-The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The areas you will deal with them most are IO, PAL, VRAM and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like [GBATek](http://nocash.emubase.de/gbatek.htm) and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.
+The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The areas you will deal with them most are IO, PAL, VRAM and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like [GBATek](https://problemkaputt.de/gbatek.htm) and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.
