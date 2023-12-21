@@ -55,7 +55,7 @@ Naturally, the ARM site itself also has useful documents. Note that most of thes
 - [miscPDF 8031](http://www.arm.com/miscPDFs/8031.pdf). The **Arm Architecture Procedure Call Standard** (AAPCS). Explains how parameters are passed between functions. Required reading if you want to do assembly.
 - [PDF DAI0034A](http://www.arm.com/pdfs/DAI0034A_efficient_c.pdf). **Writing efficient C for ARM**. Although it's written with ARM's own compiler in mind, some tips will work for other toolchains as well.
 - [PDF DDI0210B](http://www.arm.com/pdfs/DDI0210B_7TDMI_R4.pdf) The big one: the complete **technical reference manual** for the ARM7TDMI.
-- **Instruction set reference sheets**. [ARM](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_arm.pdf) and [THUMB](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_thumb.pdf) versions.
+- **Instruction set reference sheets**. [ARM](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_arm.pdf) and [Thumb](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_thumb.pdf) versions.
 - Support faqs on **alignment issues**: [faqdev 1228](http://www.arm.com/support/faqdev/1228.html), [faqdev 1469](http://www.arm.com/support/faqdev/1469.html), and [faqip 3661](http://www.arm.com/support/faqip/3661.html).
 
 ## Tools {#sec-tools}

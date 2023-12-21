@@ -414,12 +414,12 @@ This section is about a sometimes useful optimization technique. It not only int
 
 You may have heard of the phrase “division by a constant is multiplication by its reciprocal”. This technique can be used to get rid of division and replace it with a much faster multiplication. For example *x*/3 = *x*·(1/3) = *x*·0.333333. At first glance, this doesn't seem to help your case: the integer form of 1/*y* is always zero by definition; the alternative to this is floating-point, which isn't so hot either, and you *still* need a division to get even there! This is all true, but the important thing is that these problems can be avoided. The integer/floating-point problem can be solved by using fixed-point instead. As for the division, remember that we're talking about division by a *constant*, and arithmetic on constants is done at compile-time, not runtime. So problems solved, right? Uhm, yeah. Sure. The *superficial* problems are solved, but now the two age-old problems of overflow and round-off rear their ugly heads again.
 
-Below is the code for the evaluation of “*x*/12”. The ARM-compiled code creates a .33 fixed-point for 1/12, then uses a 64bit multiplication for the division. On the other hand, the THUMB version doesn't (and indeed can't) do this and uses the standard, slow division routine. If you want to get rid of this time consuming division, you will have to take care of it yourself. for the record, yes I know that even if you know ARM assembly, why it does what it does may be hard to follow. That's what this section is for.
+Below is the code for the evaluation of “*x*/12”. The ARM-compiled code creates a .33 fixed-point for 1/12, then uses a 64bit multiplication for the division. On the other hand, the Thumb version doesn't (and indeed can't) do this and uses the standard, slow division routine. If you want to get rid of this time consuming division, you will have to take care of it yourself. for the record, yes I know that even if you know ARM assembly, why it does what it does may be hard to follow. That's what this section is for.
 
 ```armasm
 @ Calculating y= x/12
 
-@ === THUMB version ===
+@ === Thumb version ===
     ldr     r0, .L0     @ load numerator
     ldr     r0, [r0]
     mov     r1, #12     @ set denominator

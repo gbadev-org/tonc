@@ -652,7 +652,7 @@ This almost concludes demo section, except for one thing: the direct HBlank isr 
 
 ### Using ARM + IWRAM code {#ssec-demo-iwram}
 
-The master interrupt routines have to be ARM code. As we've always compiled to THUMB code, this would be something new. The reason that we've always compiled to THUMB code is that the 16bit buses of the normal code sections make ARM-code slow there. However, what we could do is put the ARM code in IWRAM, which has a 32bit bus (and no waitstates) so that it's actually beneficial to use ARM code there.
+The master interrupt routines have to be ARM code. As we've always compiled to Thumb code, this would be something new. The reason that we've always compiled to Thumb code is that the 16bit buses of the normal code sections make ARM-code slow there. However, what we could do is put the ARM code in IWRAM, which has a 32bit bus (and no waitstates) so that it's actually beneficial to use ARM code there.
 
 Compiling as ARM code is actually quite simple: use `-marm` instead of `-mthumb`. The IWRAM part is what causes the most problems. There are GCC extensions that let you specify which section a function should be in. Tonclib has the following macros for them:
 

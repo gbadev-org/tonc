@@ -14,7 +14,7 @@ Using software interrupts isn't too hard if it weren't for one thing: the `swi` 
 
 ## The BIOS functions {#sec-funs}
 
-Calling the BIOS functions can be done via the ‘<code>swi <i>n</i></code>’ instruction, where *n* is the BIOS call you want to use. Mind you, the exact numbers you need to use depends on whether your code is in ARM or THUMB state. In THUMB the argument is simply the *n* itself, but in ARM you need to use *n*<<16. Just like normal functions, the BIOS calls can have input and output. The first four registers (r0-r3) are used for this purpose; though the exact purpose and the number of registers differ for each call.
+Calling the BIOS functions can be done via the ‘<code>swi <i>n</i></code>’ instruction, where *n* is the BIOS call you want to use. Mind you, the exact numbers you need to use depends on whether your code is in ARM or Thumb state. In Thumb the argument is simply the *n* itself, but in ARM you need to use *n*<<16. Just like normal functions, the BIOS calls can have input and output. The first four registers (r0-r3) are used for this purpose; though the exact purpose and the number of registers differ for each call.
 
 Here's a list containing the names of each BIOS call. I am not going to say what each of them does since other sites have done that already and it seems pointless to copy their stuff verbatim. For full descriptions go to [GBATek](https://problemkaputt.de/gbatek.htm), for example. I will give a description of a few of them so you can get a taste of how they work.
 
@@ -238,7 +238,7 @@ Div:
     bx      lr
 ```
 
-This is assembly code for the GNU assembler (GAS); for Goldroad or ARM STD the syntax is likely to be slightly different. The first thing you need to do is give some <dfn>directives</dfn>, which tells some details about the following code. In this case, we use the ‘`.text`’ to put the code in the `text` section (ROM or EWRAM for multiboot). We also say that the code is THUMB code by using ‘`.code 16`’ or ‘`.thumb`’. If you place these at the top of the file, they'll hold for the rest of the thing. For each BIOS call, you'll need the following 6 items.
+This is assembly code for the GNU assembler (GAS); for Goldroad or ARM STD the syntax is likely to be slightly different. The first thing you need to do is give some <dfn>directives</dfn>, which tells some details about the following code. In this case, we use the ‘`.text`’ to put the code in the `text` section (ROM or EWRAM for multiboot). We also say that the code is Thumb code by using ‘`.code 16`’ or ‘`.thumb`’. If you place these at the top of the file, they'll hold for the rest of the thing. For each BIOS call, you'll need the following 6 items.
 
 -   **Word-alignment**. Or at least halfword alignment, but words are probably preferable. There are two directives for this, <code>.align <i>n</i></code> and <code>.balign <i>m</i></code>. The former aligns to 2<sup>*n*</sup> so requires ‘`.align 2`’; the latter aligns to *m* so you can just use ‘<code>balign <i>m</i></code>’. Note that both will only work on the *next* piece of code or data and no further, which is why it's best to add it for each function.
 -   **Scope**. The <code>.global <i>name</i></code> directive makes a symbol out of *name*, which will then be visible for other files in the project as well. A bit like `extern` or, rather, an anti-`static`.
@@ -287,7 +287,7 @@ This does exactly the same thing as the assembly version of `Div`. However, you 
 
 ### The <kbd>swi_call</kbd> macro {#ssec-use-swi-call}
 
-On the other hand, there are also BIOS calls that use no arguments, which can be run via a mere macro. The `swi_call(x)` macro will run the BIOS call *x*, and can be found in *swi.h*, and in Wintermute's [libgba](http://www.devkitpro.org), which is where I got it from. It's a little more refined than the `Div` function given above. First, it uses the `volatile` keyword, which should keep your optimizer from deleting the function (just like we did for all the registers). Secondly, it uses a <dfn>clobber list</dfn> (after the triple colons). This will tell the compiler which registers are used by the inline assembly. Thirdly, it will take care of the THUMB/ARM switch automatically. If you use the `-mthumb` compiler option, the compiler will define `__thumb__` for us, which we will now use to get the right swi-number. Clever, eh?
+On the other hand, there are also BIOS calls that use no arguments, which can be run via a mere macro. The `swi_call(x)` macro will run the BIOS call *x*, and can be found in *swi.h*, and in Wintermute's [libgba](http://www.devkitpro.org), which is where I got it from. It's a little more refined than the `Div` function given above. First, it uses the `volatile` keyword, which should keep your optimizer from deleting the function (just like we did for all the registers). Secondly, it uses a <dfn>clobber list</dfn> (after the triple colons). This will tell the compiler which registers are used by the inline assembly. Thirdly, it will take care of the Thumb/ARM switch automatically. If you use the `-mthumb` compiler option, the compiler will define `__thumb__` for us, which we will now use to get the right swi-number. Clever, eh?
 
 ```c
 #ifndef(__thumb__)

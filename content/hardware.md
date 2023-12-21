@@ -62,7 +62,7 @@ To get anything done, you use <dfn>memory-mapped IO</dfn>. Specific areas of mem
 
 ### CPU {#ssec-cpu}
 
-As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2<sup>24</sup> cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>THUMB</dfn>, which uses 16-bit instructions. THUMB instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be THUMB code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is THUMB code.
+As said, the GBA runs on a ARM7tdmi RISC chip at 16.78 MHz (2<sup>24</sup> cycles/second). It is a 32-bit chip that can run on two different instruction sets. First, there's is <dfn>ARM code</dfn>, which is a set of 32-bit instructions. Then there's <dfn>Thumb</dfn>, which uses 16-bit instructions. Thumb instructions are a subset of the ARM instruction set; since the instructions are shorter, the code can be smaller, but their power is also reduced. It is recommended that normal code be Thumb code in ROM, and for time-critical code to be ARM code and put in IWRAM. Since all tonc-demos are still rather simple, most (but not all) code is Thumb code.
 
 For more information on the CPU, go to [www.arm.com](http://www.arm.com) or to the [assembly chapter](asm.html)
 
@@ -98,7 +98,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td><code>0203:FFFFh</code></td>
         <td>256 KB</td>
         <td>16 bit</td>
-        <td>External work RAM. Is available for your code and data. If you're using a multiboot cable, this is where the downloaded code goes and execution starts (normally execution starts at ROM). Due to the 16-bit port, you want this section's code to be THUMB code.</td>
+        <td>External work RAM. Is available for your code and data. If you're using a multiboot cable, this is where the downloaded code goes and execution starts (normally execution starts at ROM). Due to the 16-bit port, you want this section's code to be Thumb code.</td>
       </tr>
       <tr>
         <th>IWRAM</th>
@@ -146,7 +146,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td>var</td>
         <td>var</td>
         <td>16 bit</td>
-        <td>Game Pak ROM. This is where the game is located and execution starts, except when you're running from a multiboot cable. This size is variable, but the limit is 32 MB. It's a 16-bit bus, so THUMB code is preferable over ARM code here.</td>
+        <td>Game Pak ROM. This is where the game is located and execution starts, except when you're running from a multiboot cable. This size is variable, but the limit is 32 MB. It's a 16-bit bus, so Thumb code is preferable over ARM code here.</td>
       </tr>
       <tr>
         <th>Cart RAM</th>

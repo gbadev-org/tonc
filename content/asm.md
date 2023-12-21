@@ -16,17 +16,17 @@ Speed/size issues aside, there are other reasons why learning assembly might be 
 
 A third reason, and not an inconsiderable one, is just for general coolness <kbd>=B)</kbd>. The very fact that it is harder than higher languages should appeal to your inner geek, who relishes such challenges. The simplicity of the statements themselves have an aesthetic quality as well: no messing about with classes, different loop styles, operator precedence, etc – it's one line, one opcode and never more than a handful of parameters.
 
-Anyway, about this chapter. A complete document on assembly is nothing less than a full user's manual for a CPU. This would require an entire book in itself, which is not something I'm aiming at. My intention here is to give you an introduction (but a thorough one) to ARM assembly. I'll explain the most important instructions of the ARM and THUMB instruction sets, what you can and cannot do with them (and a little bit about why). I'll also cover how to use GCC's assembler to actually assemble the code and how to make your assembly and C files work together. Lastly, I'll give an example of a fast memory copier as an illustration of both ARM and Thumb code.
+Anyway, about this chapter. A complete document on assembly is nothing less than a full user's manual for a CPU. This would require an entire book in itself, which is not something I'm aiming at. My intention here is to give you an introduction (but a thorough one) to ARM assembly. I'll explain the most important instructions of the ARM and Thumb instruction sets, what you can and cannot do with them (and a little bit about why). I'll also cover how to use GCC's assembler to actually assemble the code and how to make your assembly and C files work together. Lastly, I'll give an example of a fast memory copier as an illustration of both ARM and Thumb code.
 
 With that information, you should be able to do a lot of stuff, or at least know how to make use of the various reference documents out there. This chapter is not an island, I am assuming you have some or all of the following documents:
 
 - The rather large official ARM7TDMI Technical manual (PDF): [DDI0210B_7TDMI_R4.pdf](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/index.html%0A).
 - GBATek ARM CPU reference: [ARM + Thumb](https://problemkaputt.de/gbatek.htm#armcpureference).
 - Official ARM quick-references (PDF): [ARM + Thumb](http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf)
-- Re-eject's quick-references (PDF): [GAS](http://www.coranac.com/files/gba/re-ejected-gasref.pdf) / [ARM](http://www.coranac.com/files/gba/re-ejected-armref.pdf) / [THUMB](http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf). (note: minor syntax discrepancies at times)
+- Re-eject's quick-references (PDF): [GAS](http://www.coranac.com/files/gba/re-ejected-gasref.pdf) / [ARM](http://www.coranac.com/files/gba/re-ejected-armref.pdf) / [Thumb](http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf). (note: minor syntax discrepancies at times)
 - GNU Assembler manual: [GAS](http://sourceware.org/binutils/docs/as/index.html).
 
-If you want more ARM/THUMB guides, you'll have to find them yourself.
+If you want more ARM/Thumb guides, you'll have to find them yourself.
 
 ## General assembly {#sec-asm}
 
@@ -230,7 +230,7 @@ int main()
 @@ <function block>
     .align  2               @@ - 2^n alignment (n=2)
     .global PlotPixel3      @@ - Symbol name for function
-    .code   16              @@ - 16bit THUMB code (BOTH are required!)
+    .code   16              @@ - 16bit Thumb code (BOTH are required!)
     .thumb_func             @@ /
     .type   PlotPixel3, %function   @@ - symbol type (not req)
 @@ Declaration : void PlotPixel3(int x, int y, u16 clr)
@@ -317,7 +317,7 @@ After the initial shock of seeing a non-trivial assembly file for the first time
 
   In contrast, because `PlotPixel()` is a full function, the caller does not know what its internal code is, hence no optimizations are possible. The loop should reset the registers on _every iteration_ because `PlotPixel()` will clobber them, making the loop in `main()` unnecessarily long. Furthermore, `PlotPixel3()` doesn't know under what conditions it will be called, so there are no optimizations there either. That means piecing together the destination in every iteration, rather than just incrementing it like the inline version does. All in all, you get a line plotter that's nearly 4 times as slow _purely_ because you've used a function for a single line of code instead of inlining it via a macro or inline function. While anyone could have told you something like that would happen, actually looking at the differences leaves a stronger impression.
 
-There is a lot more that could be learned from this code, but I'll leave it at this for now. The main aim was to show you what assembly (in this case THUMB asm) looks like. In this small piece of code, you can already see many of the elements that go into a full program. Even though the lack of variable identifiers is a bit of a pain, it should be possible to follow along with the code, just as you would with a C program. See, it's not all that bad now, is it?
+There is a lot more that could be learned from this code, but I'll leave it at this for now. The main aim was to show you what assembly (in this case Thumb asm) looks like. In this small piece of code, you can already see many of the elements that go into a full program. Even though the lack of variable identifiers is a bit of a pain, it should be possible to follow along with the code, just as you would with a C program. See, it's not all that bad now, is it?
 
 <div class="note">
 
@@ -350,7 +350,7 @@ This rule should work on the generated output of `gcc -S`. Note that it will pro
 
 The ARM core is a [<dfn>RISC</dfn>](http://en.wikipedia.org/wiki/RISC) (Reduced Instruction Set Computer) processor. Whereas CISC (Complex Instruction Set Computer) chips have a rich instruction set capable of doing complex things with a single instruction, RISC architectures try to go for more generalized instructions and efficiency. They have a comparatively large number of general-purpose registers and data instructions usually use three registers: one destination and two operands. The length of each instruction is the same, easing the decoding process, and RISC processors strive for 1-cycle instructions.
 
-There are actually two instruction sets that the ARM core can use: ARM code with 32bit instructions, and a subset of this called THUMB, which has 16bit long instructions. Naturally, the ARM set is more powerful, but because the most used instructions can be found in both, an algorithm coded in THUMB uses less memory and may actually be faster if the memory buses are 16bit; which is true for GBA ROM and EWRAM and the reason why most of the code is compiled to THUMB. The focus in this section will be the ARM set, to learn THUMB is basically a matter of knowing which things you cannot do anymore.
+There are actually two instruction sets that the ARM core can use: ARM code with 32bit instructions, and a subset of this called Thumb, which has 16bit long instructions. Naturally, the ARM set is more powerful, but because the most used instructions can be found in both, an algorithm coded in Thumb uses less memory and may actually be faster if the memory buses are 16bit; which is true for GBA ROM and EWRAM and the reason why most of the code is compiled to Thumb. The focus in this section will be the ARM set, to learn Thumb is basically a matter of knowing which things you cannot do anymore.
 
 The GBA processor's full name is [ARM7TDMI](http://en.wikipedia.org/wiki/ARM7TDMI), meaning it's an ARM 7 code (aka ARM v4), which can read **T**HUMB code, has a **D**ebug mode and a fast **M**ultiplier. This chapter has this processor in mind, but most of it should be applicable to other chips in the ARM family as well.
 
@@ -539,7 +539,7 @@ The faster method of forming bigger numbers is a matter of debate. There are man
     ldr     r0,=511
 ```
 
-That there is only room for an 8bit number + 4bit rotate for immediate operands is something you'll just have to learn to live with. If the assembler occasionally complains about invalid constants, you now know what it means and how you can correct for it. Oh, and if you thought this was bad, think of how it would work for THUMB code, which only has 16 bits to work with.
+That there is only room for an 8bit number + 4bit rotate for immediate operands is something you'll just have to learn to live with. If the assembler occasionally complains about invalid constants, you now know what it means and how you can correct for it. Oh, and if you thought this was bad, think of how it would work for Thumb code, which only has 16 bits to work with.
 
 <div class="note">
 
@@ -884,7 +884,7 @@ They seem to work for devkitARM r15 and up (haven't checked older versions), but
 
 Higher languages typically have numerous methods for implementing choices, loops and function calls. The all come down to the same thing though: the ability to move the program counter and thereby diverting the flow of the program. This procedure is known as branching.
 
-There are three branching instructions in ARM: the simple branch `b` for ifs and loops, the branch with link `bl` used for function calls, and branch with exchange `bx` used for switching between ARM and THUMB code, returning from functions and out-of-section jumps. `b` and `bl` use a label as their argument, but `bx` uses a register with the address to branch to. Technically there are more ways of branching (PC is just another register, after all) but these three are the main ones.
+There are three branching instructions in ARM: the simple branch `b` for ifs and loops, the branch with link `bl` used for function calls, and branch with exchange `bx` used for switching between ARM and Thumb code, returning from functions and out-of-section jumps. `b` and `bl` use a label as their argument, but `bx` uses a register with the address to branch to. Technically there are more ways of branching (PC is just another register, after all) but these three are the main ones.
 
 #### Status flags and condition codes
 
@@ -1367,7 +1367,7 @@ Anyway, loops in assembly. Making a loop is the easiest thing in the world: just
     bne .LabelW
 ```
 
-In an incrementing for-loop you need to increment and then compare against the limit. In the decrementing while loop you subtract and test for zero. Because the zero-test is already part of every instruction, you don't need to compare separately. True, it's not much faster, maybe 10% or so, but many 10 percents here and there do add up. There are actually many versions of this kind of loop, here's another one using block-transfers. The benefit of those is that they also work in THUMB:
+In an incrementing for-loop you need to increment and then compare against the limit. In the decrementing while loop you subtract and test for zero. Because the zero-test is already part of every instruction, you don't need to compare separately. True, it's not much faster, maybe 10% or so, but many 10 percents here and there do add up. There are actually many versions of this kind of loop, here's another one using block-transfers. The benefit of those is that they also work in Thumb:
 
 ```asm {.proglist}
 @ Yet another version, using ldm/stm
@@ -1412,7 +1412,7 @@ You probably know this already, but this is a good time to repeat the warning: w
 
 #### Function calls
 
-Function calls use a special kind of branching instruction, namely `bl`. It works exactly like the normal branch, except that it saves the address after the `bl` in the link register (`r14` or `lr`) so that you know where to return to after the called function is finished. In principle, you can return with to the function using ‘`mov pc, lr`’, which points the program counter back to the calling function, but in practice you might be better off with `bx` (Branch and eXchange). The difference is that `bx` can also switch between ARM and THUMB states, which isn't possible with the `mov` return. Unlike `b` and `bl`, `bx` takes a register as its argument, instead of a label. This register will usually be `lr`, but the others are allowed as well.
+Function calls use a special kind of branching instruction, namely `bl`. It works exactly like the normal branch, except that it saves the address after the `bl` in the link register (`r14` or `lr`) so that you know where to return to after the called function is finished. In principle, you can return with to the function using ‘`mov pc, lr`’, which points the program counter back to the calling function, but in practice you might be better off with `bx` (Branch and eXchange). The difference is that `bx` can also switch between ARM and Thumb states, which isn't possible with the `mov` return. Unlike `b` and `bl`, `bx` takes a register as its argument, instead of a label. This register will usually be `lr`, but the others are allowed as well.
 
 There's also the matter of passing parameters to the function and returning values from it. In principle you're free to use any system you like, it is recommended to ARM's own [ARM Architecture Procedure Call Standard](http://www.arm.com/miscPDFs/8031.pdf) (AAPCS) for this. For the majority of the work this can be summarized like this.
 
@@ -1458,15 +1458,15 @@ Use <kbd>bx</kbd> instead of <kbd>mov pc,lr</kbd>
 
 </div>
 
-The `bx` instruction is what makes interworking between ARM and THUMB function possible. Interworking is good. Therefore, `bx` is good.
+The `bx` instruction is what makes interworking between ARM and Thumb function possible. Interworking is good. Therefore, `bx` is good.
 
 </div>
 
-This concludes the primary section on ARM assembly. There are more things like different processor states, and data-swap (`swp`) and co-processor instructions, but those are rare. If you need more information, look them up in the proper reference guides. The next two subsections cover instruction speeds and what an instruction actually looks like in binary, i.e., what the processor actually processes. Neither section is necessary in the strictest sense, but still informative. If you do not want to be informed, move on to the next section: [the THUMB instruction set](asm.html#sec-thumb).
+This concludes the primary section on ARM assembly. There are more things like different processor states, and data-swap (`swp`) and co-processor instructions, but those are rare. If you need more information, look them up in the proper reference guides. The next two subsections cover instruction speeds and what an instruction actually looks like in binary, i.e., what the processor actually processes. Neither section is necessary in the strictest sense, but still informative. If you do not want to be informed, move on to the next section: [the Thumb instruction set](asm.html#sec-thumb).
 
 ### Cycle counting {#ssec-misc-cycles}
 
-Since the whole reason for coding in asm is speed (well, that and space efficiency), it is important to know how fast each instruction is so that you can decide on which one to use where. The term ‘cycle’ actually has two different meanings: there is the <dfn>clock cycle</dfn>, which measures the amount of clock ticks, and there's <dfn>functional cycle</dfn> (for lack of a better word), which indicates the number of stages in an instruction. In an ideal world these two would be equal. However, this is the real world, where we have to deal with waitstates and buswidths, which make functional cycles cost multiple clock cycles. A <dfn>wait(state)</dfn> is the added cost for accessing memory; memory might just not be as fast as the CPU itself. Memory also as a fixed <dfn>buswidths</dfn>, indicating the maximum number of bits that can be sent in one cycle: if the data you want to transfer is larger than the memory bus can handle, it has to be cut up into smaller sections and put through, costing additional cycles. For example, ROM has a 16bit bus which is fine for transferring bytes or halfwords, but words are transferred as two halfwords, costing two functional cycles instead of just one. If you hadn't guessed already, this is why THUMB code is recommended for ROM/EWRAM code.
+Since the whole reason for coding in asm is speed (well, that and space efficiency), it is important to know how fast each instruction is so that you can decide on which one to use where. The term ‘cycle’ actually has two different meanings: there is the <dfn>clock cycle</dfn>, which measures the amount of clock ticks, and there's <dfn>functional cycle</dfn> (for lack of a better word), which indicates the number of stages in an instruction. In an ideal world these two would be equal. However, this is the real world, where we have to deal with waitstates and buswidths, which make functional cycles cost multiple clock cycles. A <dfn>wait(state)</dfn> is the added cost for accessing memory; memory might just not be as fast as the CPU itself. Memory also as a fixed <dfn>buswidths</dfn>, indicating the maximum number of bits that can be sent in one cycle: if the data you want to transfer is larger than the memory bus can handle, it has to be cut up into smaller sections and put through, costing additional cycles. For example, ROM has a 16bit bus which is fine for transferring bytes or halfwords, but words are transferred as two halfwords, costing two functional cycles instead of just one. If you hadn't guessed already, this is why Thumb code is recommended for ROM/EWRAM code.
 
 There are three types of functional cycles: the <dfn>non-sequential</dfn> (N), the <dfn>sequential</dfn> (S) and the <dfn>internal</dfn> (I) cycle. There is a fourth, the coprocessor cycle (C), but as the GBA doesn't have a coprocessor I'm leaving that one out.
 
@@ -1509,7 +1509,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
             <td>2S + 1N</td>
           </tr>
           <tr>
-            <td>THUMB bl</td>
+            <td>Thumb bl</td>
             <td>3S + 1N</td>
           </tr>
           <tr> 
@@ -1607,7 +1607,7 @@ The data presented here is just an overview of the most important items, for all
 
 - Block transfer behave like normal transfers, except that all accesses after the first are S<sub>d</sub>-cycles.
 
-- Branches need an extra 1N+1S for jumping to the new address and fetching the resetting the pipeline (I think). Anything that changes `pc` can be considered a branch. The THUMB `bl` is actually two instructions (or, rather, one instruction and an address), which is why that has an additional 1S.
+- Branches need an extra 1N+1S for jumping to the new address and fetching the resetting the pipeline (I think). Anything that changes `pc` can be considered a branch. The Thumb `bl` is actually two instructions (or, rather, one instruction and an address), which is why that has an additional 1S.
 
 - Register-shifted operations add 1I to the base cost because the value has to be read from the register before it can be applied.
 
@@ -1824,27 +1824,27 @@ Sigh. Yes, here are the mere twelve bits you can use for an immediate operand, d
 
 Anyway, the bit patterns of {@tbl:arm-add} is what the processor actually sees when you use an `add` instruction. You can see what the other instructions look like in the references I gave earlier, especially the quick references. The orthogonality of the whole instruction set shows itself in very similar formatting of a given class of instructions. For example, the data instructions only differ by the `TB` field: 4 for `add`, 2 for `sub`, et cetera.
 
-## THUMB assembly {#sec-thumb}
+## Thumb assembly {#sec-thumb}
 
-The THUMB instruction set is a subset of the full list of ARM instructions. The defining feature of THUMB instructions is that they're only 16 bits long. As a result a function in THUMB can be much shorter than in ARM, which can be beneficial if you don't have a lot of room to work with. Another point is that 16bit instructions will pass through a 16bit databus in one go and be executed immediately, whereas execution of 32bit instructions would have to wait for the second chunk to be fetched, effectively halving the instruction speed. Remember that ROM and EWRAM, the two main areas for code have 16bit buses, which is why THUMB instructions are advised for GBA programming.
+The Thumb instruction set is a subset of the full list of ARM instructions. The defining feature of Thumb instructions is that they're only 16 bits long. As a result a function in Thumb can be much shorter than in ARM, which can be beneficial if you don't have a lot of room to work with. Another point is that 16bit instructions will pass through a 16bit databus in one go and be executed immediately, whereas execution of 32bit instructions would have to wait for the second chunk to be fetched, effectively halving the instruction speed. Remember that ROM and EWRAM, the two main areas for code have 16bit buses, which is why Thumb instructions are advised for GBA programming.
 
-There are downsides, of course; you can't just cut the size of an instruction in half and expect to get away with it. Even though THUMB code uses many of the same mnemonics as ARM, functionality has been severely reduced. For example, the only instruction that can be conditional is the branch, `b`; instructions can no longer make use of shifts and rotates (these are separate instructions now), and most instructions can only use the lower 8 registers (`r0-r7`); the higher ones are still available, but you have to move things to the lower ones because you can use them.
+There are downsides, of course; you can't just cut the size of an instruction in half and expect to get away with it. Even though Thumb code uses many of the same mnemonics as ARM, functionality has been severely reduced. For example, the only instruction that can be conditional is the branch, `b`; instructions can no longer make use of shifts and rotates (these are separate instructions now), and most instructions can only use the lower 8 registers (`r0-r7`); the higher ones are still available, but you have to move things to the lower ones because you can use them.
 
-In short, writing efficient THUMB code is much more challenging. It's not exactly bondage-and-disciple programming, but if you're used to the full ARM set you might be in for a surprise now and then. THUMB uses most of ARM's mnemonics, but a lot of them are restricted in some way so learning how to code in THUMB basically comes down to what you _can't_ do anymore. With that in mind, this section will cover the differences between ARM and THUMB, rather than the THUMB set itself.
+In short, writing efficient Thumb code is much more challenging. It's not exactly bondage-and-disciple programming, but if you're used to the full ARM set you might be in for a surprise now and then. Thumb uses most of ARM's mnemonics, but a lot of them are restricted in some way so learning how to code in Thumb basically comes down to what you _can't_ do anymore. With that in mind, this section will cover the differences between ARM and Thumb, rather than the Thumb set itself.
 
 - **Removed instructions**. A few instructions have been cut altogether. Of the various multiplication instructions only `mul` remains, reverse subtractions (`rsb`, `rsc`) are gone, as are the swapping and coprocessor instructions, but those are rare anyway.
 
-- **‘New’ instructions**. The mnemonics are new, but really, they're just special cases of conventional ARM instructions. THUMB has separate shift/rotate opcodes: `lsl`, `lsr`, `asr` and `ror` codes, which are functionally equivalent to ‘`mov Rd, Rm, Op2`’. There is also a ‘`neg Rd,Rm`’ for _Rd_= 0−*Rm*, essentially an `rsb`. And I suppose you could call `push` and `pop` new, as they don't appear as ARM opcodes in some devkits.
+- **‘New’ instructions**. The mnemonics are new, but really, they're just special cases of conventional ARM instructions. Thumb has separate shift/rotate opcodes: `lsl`, `lsr`, `asr` and `ror` codes, which are functionally equivalent to ‘`mov Rd, Rm, Op2`’. There is also a ‘`neg Rd,Rm`’ for _Rd_= 0−*Rm*, essentially an `rsb`. And I suppose you could call `push` and `pop` new, as they don't appear as ARM opcodes in some devkits.
 
 - **No conditionals**. Except on branch. Hello, gratuitous labelling <kbd>:\\</kbd>.
 
-- The **Set Status** flag is always on. So in THUMB `sub` will always work as a `subs`, etc.
+- The **Set Status** flag is always on. So in Thumb `sub` will always work as a `subs`, etc.
 
 - **No barrel shifter**. Well, it still exist, of course; you just can't use it in conjunction with the instructions anymore. This is why there are separate bitshift/-rotate opcodes.
 
 - **Restricted register availability**. Unless explicitly stated otherwise, the instructions can only use `r0-r7`. The exceptions here are `add`, `mov` and `cmp`, which can at times use high-regs as operands. This restriction also applies to memory operations, with small exceptions: `ldr/str` can still use PC-or SP-relative stuff; `push` allows `lr` in its register list and `pop` allows `pc`. With these, you could return from functions quickly, but you should use `bx` for that anyway. Fortunately, `bx` also allows use of every register so you can still do ‘`bx lr`’.
 
-- **Little to no immediate or second operand support**. In ARM-code, most instructions allowed for a second operand _Op2_, which was either an immediate value or a (shifted) register. Most THUMB data instructions are of the form ‘_`ins`_` Rd, Rm`’ and correspond to the C assignment operators like `+=` and `|=`. Note that `Rm` is a register, not an immediate. The only instructions that break this pattern are the shift-codes, `add`, `sub`, `mov` and `cmp`, which can have both immediate values and second operands. See the reference docs for more details.
+- **Little to no immediate or second operand support**. In ARM-code, most instructions allowed for a second operand _Op2_, which was either an immediate value or a (shifted) register. Most Thumb data instructions are of the form ‘_`ins`_` Rd, Rm`’ and correspond to the C assignment operators like `+=` and `|=`. Note that `Rm` is a register, not an immediate. The only instructions that break this pattern are the shift-codes, `add`, `sub`, `mov` and `cmp`, which can have both immediate values and second operands. See the reference docs for more details.
 
 - **No write-back in memory instructions**. That means you will have to use at least one extra register and extra instructions when traversing arrays. There is one exception to this, namely block-transfers. The only surviving versions are `ldmia` and `stmia`, and in both versions the write-back is actually required.
 
@@ -1852,7 +1852,7 @@ In short, writing efficient THUMB code is much more challenging. It's not exactl
   <div style="margin:0.5em;">
     <table id="tbl:thumb-mem" border=1 cellpadding=2 cellspacing=0>
       <caption align="bottom">
-        <b>{*@tbl:thumb-mem}</b>. THUMB addressing mode availability.
+        <b>{*@tbl:thumb-mem}</b>. Thumb addressing mode availability.
       </caption>
       <colgroup>
         <col align="right" />
@@ -1894,7 +1894,7 @@ In short, writing efficient THUMB code is much more challenging. It's not exactl
   </div>
   Actually, ‘`ldrh Rd,=X`’ also seem to work, but these are actually converted into ‘`ldr Rd,=X`’ internally.
 
-Is that it? Well no, but it's enough. Remember, THUMB is essentially ARM Lite: it looks similar, but it has lost a lot of substance. I'd suggest learning THUMB code in that way too: start with ARM then learn what you can't do anymore. This list gives most of the things you need to know; for the rest, just read at the assembler messages you will get from time to time and learn from the experience.
+Is that it? Well no, but it's enough. Remember, Thumb is essentially ARM Lite: it looks similar, but it has lost a lot of substance. I'd suggest learning Thumb code in that way too: start with ARM then learn what you can't do anymore. This list gives most of the things you need to know; for the rest, just read at the assembler messages you will get from time to time and learn from the experience.
 
 ## GAS: the GNU assembler {#sec-gas}
 
@@ -1902,7 +1902,7 @@ The instructions are only part of functional assembly, you also need <dfn>direct
 
 This section covers the main directives of the GNU assembler, GAS. Since we're already working with the GNU toolchain, the choice for this assembler is rather obvious. GAS is already part of the normal build sequence, so there is no real loss of functionality, and you can work together with C files just as easily as with other assembly; it's all the same to GCC. Another nice feature is that you can use the preprocessor so if you have header files with just preprocessor stuff (#include and #define only), you can use those here as well. Of course, you could do that anyway because `cpp` is a standalone tool, but you don't have to resort to trickery here.
 
-But back to directives. In this section you'll see some of the most basic directives. This includes creating symbols for functions (both ARM and THUMB) and variables. With out these you wouldn't be able to do anything. I'll also cover basic datatypes and placing things in specific sections. There are many other directives as well, but these should be the most useful. For the full list, go to the [GAS manual](http://sourceware.org/binutils/docs-2.22/as/index.html) at www.gnu.org.
+But back to directives. In this section you'll see some of the most basic directives. This includes creating symbols for functions (both ARM and Thumb) and variables. With out these you wouldn't be able to do anything. I'll also cover basic datatypes and placing things in specific sections. There are many other directives as well, but these should be the most useful. For the full list, go to the [GAS manual](http://sourceware.org/binutils/docs-2.22/as/index.html) at www.gnu.org.
 
 ### Symbols {#ssec-gas-sym}
 
@@ -1910,7 +1910,7 @@ Data (variable and constant) and functions are collectively known as <dfn>symbol
 
 Now, unless you're using some notational device, a label tells you nothing about what it actually stands for: it gives you no information on whether it's data or a function, nor the number of arguments for the latter. There is ‘`.type, `_str_’ directive that lets you indicate if it's a function (_str_ = `%function`) or some form of data (_str_ = `%object`), but that's about it. Since you can tell that difference by looking at what's after the label anyway, I tend to leave this out. For other information, please comment on what the symbols mean.
 
-The directives you'd use for data will generally tell you what the datatypes are, but that's something for a later subsection. Right now, I'll discuss a few directives for functions. The most important one is ‘`.code `_`n`_’, where _n_ is 32 or 16 for ARM or THUMB code respectively. You can also use the more descriptive `.arm` and `thumb` directives, which do the same thing. These are global settings, remaining active until you change them. Another important directive is `.thumb_func`, which is **required** for interworking THUMB functions. This directive applies to the next symbol label. Actually, `.thumb_func` already implies `.thumb`, so adding the latter explicitly isn't necessary.
+The directives you'd use for data will generally tell you what the datatypes are, but that's something for a later subsection. Right now, I'll discuss a few directives for functions. The most important one is ‘`.code `_`n`_’, where _n_ is 32 or 16 for ARM or Thumb code respectively. You can also use the more descriptive `.arm` and `thumb` directives, which do the same thing. These are global settings, remaining active until you change them. Another important directive is `.thumb_func`, which is **required** for interworking Thumb functions. This directive applies to the next symbol label. Actually, `.thumb_func` already implies `.thumb`, so adding the latter explicitly isn't necessary.
 
 A very important and sneaky issue is alignment. **You** are responsible for aligning code and data, not the assembler. In C, the compiler did this for you and the only times you might have had problems was with [alignment mismatches](bitmaps.html#ssec-data-align) when casting, but here both code _and_ data can be misaligned; in assembly, the assembler just strings your code and data together as it finds it, so as soon as you start using anything other than words you have the possibility of mis-alignments.
 
@@ -1919,7 +1919,7 @@ Fortunately, alignment is very easy to do: ‘`.align `_`n`_’ aligns to the ne
 Here are a few examples of how these things would work in practice. Consider it standard boilerplate material for the creation and use of symbols.
 
 ```asm {.proglist}
-@ ARM and THUMB versions of m5_plot
+@ ARM and Thumb versions of m5_plot
 @ extern u16 *vid_page;
 @ void m5_plot(int x, int y, u16 clr)
 @ {   vid_page[y*160+x]= clr;    }
@@ -1943,7 +1943,7 @@ m5_plot_arm:                    @ Start of function definition
     strh    r2, [r1, r0]
     bx      lr
 
-@ THUMB function definition
+@ Thumb function definition
 @ void m5_plot_thumb(int x, int y, u16 clr)
     .align 2                    @ Align to word boundary
     .thumb_func                 @ This is a thumb function
@@ -1963,7 +1963,7 @@ m5_plot_thumb:                  @ Start of function definition
 
 The functions above show the basic template for functions: three lines of directives, and a label for the function. Note that there is no required order for the four directives, so you may see others as well. In fact, the `.global` directive can be separated completely from the rest of the function's code if you want. Also note the use of `.extern` to allow access to `vid_page`, which in tonclib always points to the current back buffer. To be honest, it isn't even necessary because GAS assumes that all unknown identifiers come from other files; nevertheless, I'd suggest you use it anyway, just for maintenance sake.
 
-And yes, these two functions do actually form functional mode 5 pixel plotters. As an exercise, try to figure out how they work and why they're coded the way they are. Also, notice that the THUMB function is only two instructions longer than the ARM version; if this were ROM-code, the THUMB version would be a whole lot faster due to the buswidth, which is exactly why THUMB code is recommended there.
+And yes, these two functions do actually form functional mode 5 pixel plotters. As an exercise, try to figure out how they work and why they're coded the way they are. Also, notice that the Thumb function is only two instructions longer than the ARM version; if this were ROM-code, the Thumb version would be a whole lot faster due to the buswidth, which is exactly why Thumb code is recommended there.
 
 <div class="note">
 
@@ -2144,9 +2144,9 @@ With this information, you should be able to create functions, variables and eve
 
 ## A real world example: fast 16/32-bit copiers {#sec-cpy}
 
-In the last section, I will present two assembly functions – one ARM and one THUMB – intended for copying data quickly and with safety checks for alignment. They are called `memcpy16()` and `memcpy32()` and I have already used these a number of times throughout Tonc. `memcpy32()` does what `CpuFastSet()` does, but without requiring that the word-count is a multiple of 8. Because this is a primary function, it's put in IWRAM as ARM code. `memcpy16()` is intended for use with 16bit data and calls `memcpy32()` if alignments of the source and destination allow it and the number of copies warrant it. Because its main job is deciding whether to use `memcpy32`, this function can stay in ROM as THUMB code.
+In the last section, I will present two assembly functions – one ARM and one Thumb – intended for copying data quickly and with safety checks for alignment. They are called `memcpy16()` and `memcpy32()` and I have already used these a number of times throughout Tonc. `memcpy32()` does what `CpuFastSet()` does, but without requiring that the word-count is a multiple of 8. Because this is a primary function, it's put in IWRAM as ARM code. `memcpy16()` is intended for use with 16bit data and calls `memcpy32()` if alignments of the source and destination allow it and the number of copies warrant it. Because its main job is deciding whether to use `memcpy32`, this function can stay in ROM as Thumb code.
 
-This is not merely an exercise; these functions are there to be used. They are optimized and take advantage of most of the features of ARM/THUMB assembly. Nearly everything covered in this chapter can be found here, so I hope you've managed to keep up. To make things a little easier, I've added the C equivalent code here too, so you can compare the two.
+This is not merely an exercise; these functions are there to be used. They are optimized and take advantage of most of the features of ARM/Thumb assembly. Nearly everything covered in this chapter can be found here, so I hope you've managed to keep up. To make things a little easier, I've added the C equivalent code here too, so you can compare the two.
 
 Also, these functions are not just for pure assembly projects, but can also be used in conjunction with C code, and I'll show you how to do this too. As you've already seen demos using these functions without any hint that they were assembly functions (apart from me saying so), this part isn't actually to hard. So that's the program for this section. Ready? Here we go.
 
@@ -2227,9 +2227,9 @@ memcpy32:
 
 ### memcpy16() {#ssec-cpy-16}
 
-The job of the halfword copier `memcpy16()` isn't really copying halfwords. If possible, it'll use `memcpy32()` for addresses that can use it, and do the remaining halfword parts (if any) itself. Because it doesn't do much copying on its own we don't have to waste IWRAM with it; the routine can stay as a normal THUMB function in ROM.
+The job of the halfword copier `memcpy16()` isn't really copying halfwords. If possible, it'll use `memcpy32()` for addresses that can use it, and do the remaining halfword parts (if any) itself. Because it doesn't do much copying on its own we don't have to waste IWRAM with it; the routine can stay as a normal Thumb function in ROM.
 
-Two factors decide whether or not jumping to `memcpy32()` is beneficial. First is the number of halfwords (`hwcount`) to copy. I've ran a number of checks and it seems that the break-even point is about 6 halfwords. At that point, the power of word copies in IWRAM already beats out the cost of function-call overhead and THUMB/ROM code.
+Two factors decide whether or not jumping to `memcpy32()` is beneficial. First is the number of halfwords (`hwcount`) to copy. I've ran a number of checks and it seems that the break-even point is about 6 halfwords. At that point, the power of word copies in IWRAM already beats out the cost of function-call overhead and Thumb/ROM code.
 
 The second is whether the incoming source and destination addresses can be resolved to word addresses. This is true if bit 1 of the source and destinations are equal (bit 0 is zero because these are valid halfword addresses), in other words: `(src^dst)&2` should not be zero. If it resolvable, do one halfword copy to word-align the addresses if necessary, then call `memcpy32()` for all the word copies. After than, adjust the original halfword stuff and if there is anything left (or if `memcpy32()` couldn't be used) copy by halfword.
 
@@ -2265,13 +2265,13 @@ The C version isn't exactly pretty due to all the casting and masking, but it wo
 
 Anyway, before the function actually starts I state the declaration, the use of the registers, and the standard boilerplate for functions. As I need more than 4 registers and I'm calling a function, I need to stack `r4` and `lr`. This time I am doing this at the start and end of the function because it's just too much of a hassle not to. One thing that may seem strange is why I pop `r4` and then `r3` separately, especially as it's `lr` that I need and not `r3`. Remember the register restrictions: `lr` is actually `r14`, which can be reached by `push`, but not `pop`. So I'm using `r3` here instead. I'm also doing this separately from the `r4`-pop because ‘`pop {r4,r3}`’ pops the registers in the wrong order (lower regs are loaded first).
 
-The rest of the code follows the structure of the C code; I've added numbered points to indicate where we are. Point 1 checks the size, and point 2 checks the relative alignment of source and destination. Note that what I actually do here is not AND with 2, but shift by 31, which pushes bit 1 into the carry bit; THUMB code can only AND between registers and rather than putting 2 in a register and ANDing, I just check the carry bit. You can also use the sign bit to shift to, of course, which is what GCC would do. I do something similar to check whether the pointers are already word-aligned or if I have to do that myself.
+The rest of the code follows the structure of the C code; I've added numbered points to indicate where we are. Point 1 checks the size, and point 2 checks the relative alignment of source and destination. Note that what I actually do here is not AND with 2, but shift by 31, which pushes bit 1 into the carry bit; Thumb code can only AND between registers and rather than putting 2 in a register and ANDing, I just check the carry bit. You can also use the sign bit to shift to, of course, which is what GCC would do. I do something similar to check whether the pointers are already word-aligned or if I have to do that myself.
 
 At point 4 I set up and call `memcpy32()`. Or, rather, I call `_call_via_r3`, which calls `memcpy32()`. I can't use ‘`bl memcpy32`’ directly because its in IWRAM and `memcpy16()` is in ROM and the distance is simply too big. The `_call_via_r3` is an intermediary (in ROM) consisting only of ‘`bx r3`’ and since `memcpy32()`'s address was in `r3` we got where we wanted to go. Returning from `memcpy32()` will work fine, as that was set by the call to `_call_via_r3`.
 
 The C code's point 5 consisted of adjusting the source and destination pointers to account for the work done by `memcpy32()`; in the assembly code, I'm being a very sneaky bastard by not doing any of that. The thing is, after `memcpy32()` is done `r0` and `r1` would _already_ be where I want them; while the rules say that `r0-r3` are clobbered by calling functions and should therefore be stacked, if I _know_ that they'll only end up the way I want them, do I really have to do the extra work? I think not. Fair enough, it's not recommended procedure, but where's the fun in asm programming if you can't cheat a little once in a while? Anyway, the right-shift from `r4` counters the left-shift into `r4` that I had before, corresponding to a `r2&1`; the test after it checks whether the result is zero, signifying that I'm done and I can get out now.
 
-Lastly, point 6 covers the halfword copying loop. I wouldn't have mentioned it here except for one little detail: the array is copied back to front! If this were ARM code I'd have used post-indexing, but this is THUMB code where no such critter exists and I'm restricted to using offsets. I could have used another register for an ascending offset (one extra instruction/loop), or incrementing the `r0` and `r1` (two extra per loop), or I could copy backwards which works just as well. Also note that I use `bcs` at the end of the loop and not `bne`; `bcs` is essential here because `r2` could already be 0 on the first count, which `bne` would miss.
+Lastly, point 6 covers the halfword copying loop. I wouldn't have mentioned it here except for one little detail: the array is copied back to front! If this were ARM code I'd have used post-indexing, but this is Thumb code where no such critter exists and I'm restricted to using offsets. I could have used another register for an ascending offset (one extra instruction/loop), or incrementing the `r0` and `r1` (two extra per loop), or I could copy backwards which works just as well. Also note that I use `bcs` at the end of the loop and not `bne`; `bcs` is essential here because `r2` could already be 0 on the first count, which `bne` would miss.
 
 ```asm {.proglist}
 @ === void memcpy16(void *dst, const void *src, uint hwcount); =============
