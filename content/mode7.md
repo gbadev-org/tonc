@@ -603,7 +603,7 @@ void m7_hbl_b()
 ```c
 // --- Type C ---
 // offset * (zoom * rotation)
-// Mixed fixed point: lam, lxr, lyr use .12
+// Mixed fixed point: lam, lcf, lsf use .12
 // lxr and lyr have different calculation methods
 void m7_hbl_c()
 {

@@ -590,9 +590,9 @@ A flash card is a GBA cart with a difference: it is completely rewritable. There
 
 A solution that's becoming more and more popular is using standard multimedia cards (eg. SD, CompactFlash) and an adapter like [GBAMP](http://www.gbamovie.com/) and [SuperCard](http://eng.supercard.cn). Memory cards can be very cheap (like $10) and bought in most electronics stores; the adapters are genereally $25 and up.
 
-:::warning Supercard vs waitstates
+:::warning SuperCard vs waitstates
 
-There is one small technicaly problem with Supercards: they use slow memory that doesn't support what 3/1 ROM waitstates. This is a faster setting than the default 4/2 and anything that uses the former simply won't run. This shouldn't be a problem with most homebrew things, but a handful of binaries will fail and you wouldn't be able to make use of the speed-up yourself either.
+There is one small technical problem with SuperCards: they use slow memory that doesn't support 3/1 ROM waitstates. This is a faster setting than the default 4/2 and anything that uses the former simply won't run. This shouldn't be a problem with most homebrew things, but a handful of binaries will fail and you wouldn't be able to make use of the speed-up yourself either.
 
 :::
 
@@ -627,6 +627,6 @@ But, like always, there's no such thing as a free lunch. What happens in a multi
 
 ### Compiling for real hardware {#ssec-testing-hwbuild}
 
-This is almost the same as for emulators. The only real things you have to worry about are a) that you can only use the binary after the `objcopy` treatment, and b) that you need to have a valid GBA header, which it usually doesn't. If the intro screen shows “GameBoy” as normal, but the “Nintendo” at the bottom is garbled, you have a bad header. To get a valid header, use a program called `gbafix.exe`. This is originally by [darkfader](http://darkfader.net/main/), but you can also find it at [www.devkitpro.org](http://www.devkitpro.org). I already mentioned the extra steps for a multiboot game earlier.
+This is almost the same as for emulators. The only real things you have to worry about are a) that you can only use the binary after the `objcopy` treatment, and b) that you need to have a valid GBA header, which it usually doesn't. If the intro screen shows “Game Boy” as normal, but the “Nintendo” at the bottom is garbled, you have a bad header. To get a valid header, use a program called `gbafix.exe`. This is originally by [darkfader](http://darkfader.net/main/), but you can also find it at [www.devkitpro.org](http://www.devkitpro.org). I already mentioned the extra steps for a multiboot game earlier.
 
 Flash kits usually come with software that can take care of all this stuff for you (or so I'm told, I don't have one). The Xboo zip-file also has a little app that sends your binary to the GBA.

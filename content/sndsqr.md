@@ -578,7 +578,7 @@ The register nomenclature seems particularly vexed when it comes to sound. There
   <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT
 <tr>
   <th> 6Ch		<td> channel 2 (sqr) freq, on
-  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND1FREQ
+  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND2FREQ
 <tr>
   <th> 70h		<td> channel 3 (wave) mode
   <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL
@@ -786,7 +786,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
 <tr class="bg0">	
   <td class="rof">0-3<td class="rclr1">1A-4A
   <td>SSTAT_SQR1, SSTAT_SQR2, SSTAT_WAVE, SSTAT_NOISE
-  <td><b>Active channels</b>. Indicates which DMA channels are 
+  <td><b>Active channels</b>. Indicates which DMG channels are 
     currently playing. They do <i>not</i> enable the channels; 
     that's what <code>REG_SNDDMGCNT</code> is for.
 <tr class="bg1">	
