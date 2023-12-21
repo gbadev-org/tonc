@@ -44,4 +44,4 @@
 [Appendix D - More on makefiles and compiler options](./makefile.md)
 [Appendix E - Make via editors](./edmake.md)
 [Appendix F - References](./refs.md)
-[Appendix G - Change log]()
+[Appendix G - Change log](./log.md)
