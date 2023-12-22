@@ -20,7 +20,7 @@ More resources about GBA development can be found at [gbadev.net](https://gbadev
 
 Jasper "cearn" Vijn is the original author, creating and maintaining Tonc till 2013.
 
-exelotl, avivace, PinoBatch, copyrat90, LunarLambda and gwilymk ported the contents to markdown and migrated the underlying rendering technology to mdbook.
+exelotl, avivace, PinoBatch, copyrat90, LunarLambda, gwilymk, and mtthgn ported the contents to markdown and migrated the underlying rendering technology to mdbook.
 
 ## Using this document
 
