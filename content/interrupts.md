@@ -449,7 +449,7 @@ Nested irqs are nasty
 
 Making a nested interrupt routine work is not a pleasant exercise when you only partially know what you're doing. For example, that different CPU modes used different stacks took me a while to figure out, and it took me quite a while to realize that the reason my nested isrs didn't work was because there are different link registers too.
 
-The `isr_master_nest` is largely based on libgba's interrupt dispatcher, but also borrows information from GBATEK and A. Bilyk and DekuTree's analysis of the whole thing as described in [forum:4063](http://forum.gbadev.org/viewtopic.php?t=4063). Also invaluable was the home-use debugger version of no$gba, hurray for breakpoints.
+The `isr_master_nest` is largely based on libgba's interrupt dispatcher, but also borrows information from GBATEK and A. Bilyk and DekuTree's analysis of the whole thing as described in [forum:4063](https://gbadev.net/forum-archive/thread/4/4063.html). Also invaluable was the home-use debugger version of no$gba, hurray for breakpoints.
 
 If you want to develop your own interrupt routine, these sources will help you immensely and will keep the loss of sanity down to somewhat acceptable levels.
 </div>

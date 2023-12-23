@@ -561,7 +561,7 @@ Remember the previous note
 
 </div>
 
-Is this worth a separate note? Maybe not, but the previous note is important enough to remember. It is not exactly intuitive that code should behave that way and if you found yourself staring at the enigmatic [invalid constant](http://forum.gbadev.org/viewtopic.php?t=9602) error message, you'd probably be lost without this bit of info.
+Is this worth a separate note? Maybe not, but the previous note is important enough to remember. It is not exactly intuitive that code should behave that way and if you found yourself staring at the enigmatic [invalid constant](https://gbadev.net/forum-archive/thread/8/9602.html) error message, you'd probably be lost without this bit of info.
 
 </div>
 
@@ -1623,7 +1623,7 @@ There is no 1S in loads!
 
 Official documentation gives 1S+1N<sub>d</sub>+1I as the timing of `ldr`, but this is not entirely accurate. It is actually 1**N**+1N<sub>d</sub>+1I. The difference is small and only visible for ROM instructions, but could be annoying if you're wondering why what you predicted and what you measured for your routine doesn't match exactly. This applies to `ldm` and perhaps `swp` too.
 
-See [forum:9602](http://forum.gbadev.org/viewtopic.php?t=9602) for a little more on the subject.
+See [forum:9602](https://gbadev.net/forum-archive/thread/8/9602.html) for a little more on the subject.
 
 </div>
 
@@ -2387,4 +2387,4 @@ extern "C" void memcpy32(void *dst, const void *src, uint wdcount) IWRAM_CODE;
 
 And that all folks. As far as this chapter goes anyway. Like all languages, it takes time to fully learn its ins and outs, but with this information and a couple of (quick)reference documents, you should be able to produce some nice ARM assembly, or at least be able to read it well enough. Just keep your wits about you when writing assembly, please. Not just in trying to avoid bugs, but also in keeping the assembly maintainable. Not paying attention in C is bad enough, but here it can be absolutely disastrous. Think of what you want to do first, _then_ start writing the instructions.
 
-Also remember: yes, assembly can be fun. Think of it as one of those shuffle-puzzles: you have a handful of pieces (the registers) and ways of manipulating them. The goal is to get to the final picture in then least amount of moves. For example, take a look at what an [optimized palette blend routine](http://forum.gbadev.org/viewtopic.php?p=53322#53322) would look like. Now it's your turn <kbd>:P</kbd>.
+Also remember: yes, assembly can be fun. Think of it as one of those shuffle-puzzles: you have a handful of pieces (the registers) and ways of manipulating them. The goal is to get to the final picture in then least amount of moves. For example, take a look at what an [optimized palette blend routine](https://gbadev.net/forum-archive/thread/8/6721.html#53322) would look like. Now it's your turn <kbd>:P</kbd>. <!-- note: Forum archive doesn't have anchors or syntax highlighting... we should fix that! -->

@@ -36,14 +36,14 @@ A few sites of (high-ranked) forum-dwellers. These guys have been around for a w
 - If you're looking for **C/C++ tutorials**, there seems to be some good stuff [here](http://www.cprogramming.com/tutorial.html)
 - DekuTree's [sound mixing tutorial](https://stuij.github.io/deku-sound-tutorial/). Whereas Belogic shows the basics of sound programming, this sight guides you through the steps of making a sound/music mixer.
 - [www.drunkencoders.com](http://www.drunkencoders.com). This is the new home of **the PERN project**, the original series of tutorials for gba development. PERN was set for a complete renewal, but that seems to have been deprioritised in favor of the DS, which you will also find a lot about there.
-- jake2431 has been gathering **NDS / C / GBA tutorial links** on the gbadev [forum:8353](http://forum.gbadev.org/viewtopic.php?t=8353)
+- jake2431 has been gathering **NDS / C / GBA tutorial links** on the gbadev [forum:8353](https://gbadev.net/forum-archive/thread/18/8353.html)
 
 ### Reference documents {#ssec-ref}
 
 - The [**comp.lang.c FAQ**](http://c-faq.com/). Pretty long, but very useful if you're learning C as well as GBA programming.
 - A document on [**C coding standards**](https://web.archive.org/web/20110624025547/http://www.jetcafe.org/~jim/c-style.html), one of many floating around. If you've based your code on any of the non-tonc tutorials out there you **_need_** to read this. The standard doesn't have to be followed religiously, but adopting most of them would be a good idea and would solve a lot of the bad habits the other sites teach.
 - Mr Lee has a few things to say about [optimization](https://web.archive.org/web/20170907095140/http://leto.net/docs/C-optimization.php). These are simple optimization that cost nothing or little in readability.
-- The [**gbadev forum FAQ**](http://forum.gbadev.org/viewtopic.php?t=418). Essential reading, whether you're new or not. Bookmark it, make a local copy, print it out; I don't care, but get FAQed.
+- The [**gbadev forum FAQ**](https://gbadev.net/forum-archive/thread/14/418.html). Essential reading, whether you're new or not. Bookmark it, make a local copy, print it out; I don't care, but get FAQed.
 - The [**GBATEK**](https://problemkaputt.de/gbatek.htm). reference document. This is basically the GBA-coders' bible (only this one _is_ a worthwhile read). The information density is very high and maybe a little perplexing if you're just starting, but when you get the hang of it, it's pretty much all you'll require. Is also part of HAMLib's documentation.
 - The [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm), a another reference document. At least partially based on GBATEK. Not as rich, but probably more understandable.
 - [www.gnu.org](http://www.gnu.org/manual/manual.html#Development). **GCC documentation** in various formats. These sites have manuals on the GCC toolchains and other things. Get the files for the assembler (**AS**), compiler (**GCC**), linker (**LD**) and preferably the maketool (**make**) as well. The preprocessor manual (**cpp**) may be useful as well.
@@ -66,8 +66,8 @@ If you're still using Notepad to write your GBA code, don't. Do yourself a favor
 
 - **[ConTEXT](https://archive.org/details/tucows_349269_ConTEXT)**. A while back there was a thread where someone asked for a replacement editor for Notepad since, and I quote, “Notepad SUCKS!”. The name ConTEXT popped up a couple of times, and I find it very nice indeed, and not just for coding purposes. It allows for custom highlighters, integrated shell commands (to run makefiles for example) and attachable help files
 - [**Programmer's Notepad**](http://www.pnotepad.org/) (PN). Good and versatile text editor. Comes with the devkitPro installation.
-- **[Eclipse IDE](http://www.eclipse.org)**. While I haven't had time to work with it firsthand, a good number of gbadev forum-dwellers swear by it. You can read how to set it up for GBA development in [forum:5271](http://forum.gbadev.org/viewtopic.php?t=5271).
-- **[Dev-C++](http://www.bloodshed.net/)**. Dev-C++ is another IDE that comes up often and maybe worth a look. [forum:1736](http://forum.gbadev.org/viewtopic.php?t=1736) has info on how to set it up, but it's an old thread so you may have to do a little extra work.
+- **[Eclipse IDE](http://www.eclipse.org)**. While I haven't had time to work with it firsthand, a good number of gbadev forum-dwellers swear by it. You can read how to set it up for GBA development in [forum:5271](https://gbadev.net/forum-archive/thread/14/5271.html).
+- **[Dev-C++](http://www.bloodshed.net/)**. Dev-C++ is another IDE that comes up often and maybe worth a look. [forum:1736](https://gbadev.net/forum-archive/thread/7/1736.html) has info on how to set it up, but it's an old thread so you may have to do a little extra work.
 
 ### Graphics tools {#ssec-tools-gfx}
 

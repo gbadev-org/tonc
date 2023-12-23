@@ -317,7 +317,7 @@ For some reason, there are a lot of bad programming practices among the GBA deve
 
     Unfortunately, if you're new to programming you might not recognize the bad and adopt the standards exhibited by some sources. *Do not learn C programming from GBA tutorials!* I'd almost extent that suggestion to on-line tutorials in general, especially short ones. Books are usually more accurate and provide a better insight into the material. (But again, [not always.](http://www.coranac.com/documents/taptngba/))
 
--   **RTFAQ / RTFR**. Read the [gbadev forum FAQ](http://forum.gbadev.org/viewtopic.php?t=418). Should go without saying. It covers a lot of common problems. Additionally, read the fuckin reference, by which I mean [GBATEK](https://problemkaputt.de/gbatek.htm), which covers just about everything.
+-   **RTFAQ / RTFR**. Read the [gbadev forum FAQ](https://gbadev.net/forum-archive/thread/14/418.html). Should go without saying. It covers a lot of common problems. Additionally, read the fuckin reference, by which I mean [GBATEK](https://problemkaputt.de/gbatek.htm), which covers just about everything.
 
 -   **Makefiles are good**. Many tutorials use batchfiles for building projects. This is a very easy method, I agree, but in the long run, it's very inefficient, Windows only and is prone to maintainability problems. Makefiles are better for Real World projects, even though there may be a hurdle setting them up initially. Fortunately, you don't have to worry about it that much, because DevkitPro comes with a **template makefile/project** (see `${DEVKITPRO}/examples/gba/template`) where all you need to do is say in which directories the source/header/data files are kept. The makefiles I use for the advanced and lab projects are an adaptation of these.
 
@@ -329,7 +329,7 @@ For some reason, there are a lot of bad programming practices among the GBA deve
 
     In a very real way, the 32bit integer is the *only* datatype the GBA has. The rest are essentially emulated, which carries a small performance penatly (2 extra shift instructions for bytes and halfwords). Do **not** use `u8` or `u16` for loop-indices for example, doing so can cut the speed of a loop *in half*! (The belief that using smaller types means lower memory-use only holds for aggregates and maybe globals; for local variables it actually *costs* memory). Likewise, if you have memory to copy or fill, using words can be about twice as fast as halfwords. Just be careful when casting, because an ARM CPU is very picky when it comes to [alignment](bitmaps.html#ssec-data-align).
 
--   **Data in header files is *bad*, very bad**. I'll go in a little detail about it when talking about [data](bitmaps.html#ssec-data-hdr). And see also [here](http://forum.gbadev.org/viewtopic.php?t=2605) and [here](http://forum.gbadev.org/viewtopic.php?t=3687).
+-   **Data in header files is *bad*, very bad**. I'll go in a little detail about it when talking about [data](bitmaps.html#ssec-data-hdr). And see also [here](https://gbadev.net/forum-archive/thread/4/2605.html) and [here](https://gbadev.net/forum-archive/thread/14/3687.html).
 
 Those are points where other GBA tutorials often err. It's not an exclusive list, but the main points are there I think. There are also a few things on (C) programming in general that I'd like to mention here.
 
