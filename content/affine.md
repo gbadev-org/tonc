@@ -137,7 +137,7 @@ A forward texture mapping via affine matrix **A**.
 
 ### Affine transformations
 
-The transformations you can do with a 2D matrix are called <dfn>[affine](http://en.wikipedia.org/wiki/Affine){target="_blank"}</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see {@fig:metroid_texture}b).
+The transformations you can do with a 2D matrix are called <dfn>[affine](https://en.wikipedia.org/wiki/Affine_geometry)</dfn> transformations. The technical definition of an affine transformation is one that preserves parallel lines, which basically means that you can write them as matrix transformations, or that a rectangle will become a parallelogram under an affine transformation (see {@fig:metroid_texture}b).
 
 Affine transformations include rotation and scaling, but *also* shearing. This is why I object to the name “Rot/Scale”: that term only refers to a special case, not the general transformation. It is akin to calling colors shades of red: yes, reds are colors too, but not all colors are reds, and to call them that would give a distorted view of the subject.
 
@@ -585,7 +585,7 @@ Affine transformations are part of mathematics and, generally speaking, math num
 
 The first one is that the matrix elements are not floats, but integers. The reason behind this is that <span class="ack">the GBA has no floating point unit!</span> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
 
-This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](http://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
+This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](https://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
 
 ```c
     // Floating point == Bad!!

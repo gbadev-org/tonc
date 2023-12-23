@@ -1237,7 +1237,7 @@ Horizontally, there are several issues to be aware of. The first is the width of
     </math>
 </table>
 
-That last approximation stems from the first couple of terms of the [Taylor series](http://en.wikipedia.org/wiki/Taylor's_theorem){target="\_blank"} of the arctangent. Interestingly enough, even _R_ ≈ _D_ seems somewhat adequate. Anyway, filling in *W* = 240 and *D* = 256 gives *P* = 1720, which isn't a very convenient map size, is it? Now, it is possible to create a map of any size and update VRAM if we go outside the screenblock's boundaries (commercial games do it all the time), but doing so would distract for the subject at hand, so you know what? We're going to bend the rules a bit and just force *P* = 1024.
+That last approximation stems from the first couple of terms of the [Taylor series](https://en.wikipedia.org/wiki/Taylor's_theorem){target="\_blank"} of the arctangent. Interestingly enough, even _R_ ≈ _D_ seems somewhat adequate. Anyway, filling in *W* = 240 and *D* = 256 gives *P* = 1720, which isn't a very convenient map size, is it? Now, it is possible to create a map of any size and update VRAM if we go outside the screenblock's boundaries (commercial games do it all the time), but doing so would distract for the subject at hand, so you know what? We're going to bend the rules a bit and just force *P* = 1024.
 
 “Wait a sec ... you can't do that!” Well, yes I can actually. I'm not _supposed_ to do it, but that's another issue. The fact of the matter is that, I don't think there is a _single_ mode 7 game that scrolls the backdrop properly! For example, the Mario Kart's often use multiple backgrounds with different scrolling speeds in their backdrops, which is absolutely ridiculous, mathematically speaking, because looking around doesn't change relative lines of sight. But I guess nobody noticed or at least nobody cares. What I'm trying to say is: we're in good company <kbd>:P</kbd>
 
@@ -2423,7 +2423,7 @@ Disregarding priority bits for the moment, the order of objects on-screen is det
   </tr>
 </table>
 
-What needs to be done is sort the objects in OAM according to depth; a kind of [Z-buffer](http://en.wikipedia.org/wiki/Z-buffering) for objects. The depth of a sprite is simply _z_<sub>c</sub>, and we need to fill OAM with the sprite's object attributes in order of ascending _z_<sub>c</sub>. For good measure, it's probably a good idea to give hidden objects the maximum depth-value possible or to leave them out of the sorting process entirely.
+What needs to be done is sort the objects in OAM according to depth; a kind of [Z-buffer](https://en.wikipedia.org/wiki/Z-buffering) for objects. The depth of a sprite is simply _z_<sub>c</sub>, and we need to fill OAM with the sprite's object attributes in order of ascending _z_<sub>c</sub>. For good measure, it's probably a good idea to give hidden objects the maximum depth-value possible or to leave them out of the sorting process entirely.
 
 There are many possible strategies for sorting the objects. My own choice aright now would be to not sort the sprites or objects directly but to create an **index table**, which indicates the order the sprites' attributes should go into OAM. The pseudo-code for this is given below. Which algorithm you use to sort the keys doesn't really matter at this time, as long as it does the job. I'm sure that faster methods can be found, but probably at the expense of more code and I want to keep things relatively simple.
 

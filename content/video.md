@@ -84,8 +84,8 @@ Those are the three basic graphical types, though other classifications also spr
 
 ## Display registers: REG_DISPCNT, REG_DISPSTAT and REG_VCOUNT {#sec-vid-regs}
 
-There are three I/O registers that you will encounter when doing anything graphical: the display control `REG_DISPCNT (0400:0000h)`, the display status `REG_DISPSTAT (0400:0004h)` and the scanline counter `REG_VCOUNT (0400:0006h)`. Those names are simply defines to the memory locations and can, in principle, be chosen at will. However, we will use the names as they appear in the [Pern Project](http://www.thepernproject.com), which are the most common.
-<br>  
+There are three I/O registers that you will encounter when doing anything graphical: the display control `REG_DISPCNT (0400:0000h)`, the display status `REG_DISPSTAT (0400:0004h)` and the scanline counter `REG_VCOUNT (0400:0006h)`. Those names are simply defines to the memory locations and can, in principle, be chosen at will. However, we will use the names as they appear in the [Pern Project](http://www.drunkencoders.com), which are the most common.
+
 The REG_DISPCNT register is the primary control of the screen. The bit-layout of this register and their meanings can be found in the following table. This is the general format I will use for registers or register-like sections. The details of the format have already been explained in the [preface](intro.html#ssec-note-reg).
 
 <div class="reg">

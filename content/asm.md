@@ -20,9 +20,9 @@ Anyway, about this chapter. A complete document on assembly is nothing less than
 
 With that information, you should be able to do a lot of stuff, or at least know how to make use of the various reference documents out there. This chapter is not an island, I am assuming you have some or all of the following documents:
 
-- The rather large official ARM7TDMI Technical manual (PDF): [DDI0210B_7TDMI_R4.pdf](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0210c/index.html%0A).
-- GBATEK ARM CPU reference: [ARM + Thumb](https://problemkaputt.de/gbatek.htm#armcpureference).
-- Official ARM quick-references (PDF): [ARM + Thumb](http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf)
+- The rather large official ARM7TDMI Technical manual: [DDI0210B.pdf](https://documentation-service.arm.com/static/5f4786a179ff4c392c0ff819?token=).
+- GBATEK's ARM CPU reference: [ARM + Thumb](https://problemkaputt.de/gbatek.htm#armcpureference).
+- Official ARM quick-references (PDF): [ARM + Thumb](https://documentation-service.arm.com/static/5ed66080ca06a95ce53f932d?token=)
 - Re-eject's quick-references (PDF): [GAS](http://www.coranac.com/files/gba/re-ejected-gasref.pdf) / [ARM](http://www.coranac.com/files/gba/re-ejected-armref.pdf) / [Thumb](http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf). (note: minor syntax discrepancies at times)
 - GNU Assembler manual: [GAS](http://sourceware.org/binutils/docs/as/index.html).
 
@@ -73,9 +73,9 @@ ldmia   r2, {r0, r1}    // Load multiple:           r0= r2[0]; r1= r2[1];
 
 ### Variables: registers, memory and the stack {#ssec-asm-var}
 
-In HLLs you have variables to work on, in assembly you can have registers, variables (that is, specific ranges in memory), and the stack. A [<dfn>register</dfn>](http://en.wikipedia.org/wiki/Processor_register) is essentially a variable inside the chip itself, and can be accessed quickly. The downside is that there are usually only a few of them, from just one to perhaps a few dozen. Most programs will require a lot more, which is why you can put variables in addressable memory as well. There's a lot more bytes in memory than in registers, but it'll also be slower to use. Note that both registers and memory are essentially **global** variables, change them in one function and you'll have changed them for the rest of the program. For local variables, you can use the stack.
+In HLLs you have variables to work on, in assembly you can have registers, variables (that is, specific ranges in memory), and the stack. A [<dfn>register</dfn>](https://en.wikipedia.org/wiki/Processor_register) is essentially a variable inside the chip itself, and can be accessed quickly. The downside is that there are usually only a few of them, from just one to perhaps a few dozen. Most programs will require a lot more, which is why you can put variables in addressable memory as well. There's a lot more bytes in memory than in registers, but it'll also be slower to use. Note that both registers and memory are essentially **global** variables, change them in one function and you'll have changed them for the rest of the program. For local variables, you can use the stack.
 
-The [<dfn>stack</dfn>](http://en.wikipedia.org/wiki/Stack_%28data_structure%29) is a special region of memory used as, well, a stack: a Last-In, First-Out mechanism. There will be a special register called the <dfn>stack pointer</dfn> (SP for short) which contains the address of the top of the stack. You can _push_ variables onto the top of the stack for safe keeping, and then _pop_ them off once you're done with them, restoring the registers to their original values. The address of the stack (that is, the top of the stack, the contents of SP) is not fixed: it grows as you move deeper in the code's hierarchy, and shrinks as you move out again. The point is that each block of code should clean up after itself so that the stack pointer is the same before and after it. If not, prepare for a spectacular failure of the rest of the program.
+The [<dfn>stack</dfn>](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) is a special region of memory used as, well, a stack: a Last-In, First-Out mechanism. There will be a special register called the <dfn>stack pointer</dfn> (SP for short) which contains the address of the top of the stack. You can _push_ variables onto the top of the stack for safe keeping, and then _pop_ them off once you're done with them, restoring the registers to their original values. The address of the stack (that is, the top of the stack, the contents of SP) is not fixed: it grows as you move deeper in the code's hierarchy, and shrinks as you move out again. The point is that each block of code should clean up after itself so that the stack pointer is the same before and after it. If not, prepare for a spectacular failure of the rest of the program.
 
 For example, suppose you have functions `foo()` and which uses registers A, B, C and D. Function `foo()` calls function `bar()`, which also uses A, B and C, but in a different context than `foo()`. To make sure `foo()` would still work, `bar()` pushes A, B and C onto the stack at its start, then uses them the way it wants, and then pops them off the stack into A, B and C again when it ends. In pseudo code:
 
@@ -307,7 +307,7 @@ After the initial shock of seeing a non-trivial assembly file for the first time
 
   Calling and returning from functions uses the `bl` and `bx` instructions. What isn't very clear from this code, except in my added comments, is that the arguments of the functions are put in registers r0-r3. What you definitely don't see is that if there are more than 4 parameters, these are put on the stack, and that the return value is put in r0.
 
-  You _also_ don't see that r0-r3 (and r12) are expected to be trashed in each function, so that the functions calling them should save their values if they want to use them after the call. The other registers (r4-r15) should be pushed into the stack by the called function. The standard procedure for function calling can be found in the [AAPCS](http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042d/IHI0042D_aapcs.pdf%0A). Failure to adhere to this standard will break your code if you try to combine it with C or other asm.
+  You _also_ don't see that r0-r3 (and r12) are expected to be trashed in each function, so that the functions calling them should save their values if they want to use them after the call. The other registers (r4-r15) should be pushed into the stack by the called function. The standard procedure for function calling can be found in the [AAPCS](https://github.com/ARM-software/abi-aa/releases/download/2023Q3/aapcs32.pdf). Failure to adhere to this standard will break your code if you try to combine it with C or other asm.
 
 - Loading the CLR_LIME color (0x03E0) doesn't happen in one go, but is spread over two instructions: a move and a shift. Why not move it in one go? Well, because it can't. The ARM architecture only allows byte-sized immediate values; bigger things have to be constructed in other ways. I'll get back to this later.
 
@@ -348,11 +348,11 @@ This rule should work on the generated output of `gcc -S`. Note that it will pro
 
 ## The ARM instruction set {#sec-arm}
 
-The ARM core is a [<dfn>RISC</dfn>](http://en.wikipedia.org/wiki/RISC) (Reduced Instruction Set Computer) processor. Whereas CISC (Complex Instruction Set Computer) chips have a rich instruction set capable of doing complex things with a single instruction, RISC architectures try to go for more generalized instructions and efficiency. They have a comparatively large number of general-purpose registers and data instructions usually use three registers: one destination and two operands. The length of each instruction is the same, easing the decoding process, and RISC processors strive for 1-cycle instructions.
+The ARM core is a [<dfn>RISC</dfn>](https://en.wikipedia.org/wiki/RISC) (Reduced Instruction Set Computer) processor. Whereas CISC (Complex Instruction Set Computer) chips have a rich instruction set capable of doing complex things with a single instruction, RISC architectures try to go for more generalized instructions and efficiency. They have a comparatively large number of general-purpose registers and data instructions usually use three registers: one destination and two operands. The length of each instruction is the same, easing the decoding process, and RISC processors strive for 1-cycle instructions.
 
 There are actually two instruction sets that the ARM core can use: ARM code with 32bit instructions, and a subset of this called Thumb, which has 16bit long instructions. Naturally, the ARM set is more powerful, but because the most used instructions can be found in both, an algorithm coded in Thumb uses less memory and may actually be faster if the memory buses are 16bit; which is true for GBA ROM and EWRAM and the reason why most of the code is compiled to Thumb. The focus in this section will be the ARM set, to learn Thumb is basically a matter of knowing which things you cannot do anymore.
 
-The GBA processor's full name is [ARM7TDMI](http://en.wikipedia.org/wiki/ARM7TDMI), meaning it's an ARM 7 code (aka ARM v4), which can read **T**HUMB code, has a **D**ebug mode and a fast **M**ultiplier. This chapter has this processor in mind, but most of it should be applicable to other chips in the ARM family as well.
+The GBA processor's full name is [ARM7TDMI](https://en.wikipedia.org/wiki/ARM7TDMI), meaning it's an ARM 7 code (aka ARM v4), which can read **T**HUMB code, has a **D**ebug mode and a fast **M**ultiplier. This chapter has this processor in mind, but most of it should be applicable to other chips in the ARM family as well.
 
 ### Basic features {#ssec-arm-base}
 
@@ -1330,7 +1330,7 @@ The later terms in the AND are only evaluated if earlier expressions were true. 
     ...
 ```
 
-As always, alternative solutions will present themselves for your specific situation. Also note that you can transform ANDs into ORs using [De Morgan's Laws](http://en.wikipedia.org/wiki/De_Morgan_duality).
+As always, alternative solutions will present themselves for your specific situation. Also note that you can transform ANDs into ORs using [De Morgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws).
 
 ##### Loops
 
@@ -1414,7 +1414,7 @@ You probably know this already, but this is a good time to repeat the warning: w
 
 Function calls use a special kind of branching instruction, namely `bl`. It works exactly like the normal branch, except that it saves the address after the `bl` in the link register (`r14` or `lr`) so that you know where to return to after the called function is finished. In principle, you can return with to the function using ‘`mov pc, lr`’, which points the program counter back to the calling function, but in practice you might be better off with `bx` (Branch and eXchange). The difference is that `bx` can also switch between ARM and Thumb states, which isn't possible with the `mov` return. Unlike `b` and `bl`, `bx` takes a register as its argument, instead of a label. This register will usually be `lr`, but the others are allowed as well.
 
-There's also the matter of passing parameters to the function and returning values from it. In principle you're free to use any system you like, it is recommended to ARM's own [ARM Architecture Procedure Call Standard](http://www.arm.com/miscPDFs/8031.pdf) (AAPCS) for this. For the majority of the work this can be summarized like this.
+There's also the matter of passing parameters to the function and returning values from it. In principle you're free to use any system you like, it is recommended to ARM's own [ARM Architecture Procedure Call Standard](https://github.com/ARM-software/abi-aa/releases/download/2023Q3/aapcs32.pdf) (AAPCS) for this. For the majority of the work this can be summarized like this.
 
 - The first 4 arguments go into r0-r3. Later ones go on the stack, in order of appearance.
 - The return value goes into r0.
@@ -1529,7 +1529,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
       <td style="border: 1px solid var(--bg);">
         <table id="tbl:waits" border=1 cellpadding=2 cellspacing=0>
           <caption align="bottom">
-            <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#memorymap">GBATEK memory map</a>.
+            <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#gbamemorymap">GBATEK memory map</a>.
           </caption>
           <col>
             <col span=3 align="center">
@@ -1597,7 +1597,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
   </table>
 </div>
 
-{_@tbl:cycles} shows how much the instructions cost in terms of N/S/I cycles. How one can arrive to these cycle times is explained below. {_@tbl:waits} lists the buswidths, the waitstates and the access times in clock cycles for each section. Note that these are the default wait states, which can be altered in [REG_WAITCNT](https://problemkaputt.de/gbatek.htm#systemcontrol).
+{_@tbl:cycles} shows how much the instructions cost in terms of N/S/I cycles. How one can arrive to these cycle times is explained below. {_@tbl:waits} lists the buswidths, the waitstates and the access times in clock cycles for each section. Note that these are the default wait states, which can be altered in [REG_WAITCNT](https://problemkaputt.de/gbatek.htm#gbasystemcontrol).
 
 The data presented here is just an overview of the most important items, for all the gory details you should look them up in GBATEK or the official documents.
 
@@ -1902,7 +1902,7 @@ The instructions are only part of functional assembly, you also need <dfn>direct
 
 This section covers the main directives of the GNU assembler, GAS. Since we're already working with the GNU toolchain, the choice for this assembler is rather obvious. GAS is already part of the normal build sequence, so there is no real loss of functionality, and you can work together with C files just as easily as with other assembly; it's all the same to GCC. Another nice feature is that you can use the preprocessor so if you have header files with just preprocessor stuff (#include and #define only), you can use those here as well. Of course, you could do that anyway because `cpp` is a standalone tool, but you don't have to resort to trickery here.
 
-But back to directives. In this section you'll see some of the most basic directives. This includes creating symbols for functions (both ARM and Thumb) and variables. With out these you wouldn't be able to do anything. I'll also cover basic datatypes and placing things in specific sections. There are many other directives as well, but these should be the most useful. For the full list, go to the [GAS manual](http://sourceware.org/binutils/docs-2.22/as/index.html) at www.gnu.org.
+But back to directives. In this section you'll see some of the most basic directives. This includes creating symbols for functions (both ARM and Thumb) and variables. With out these you wouldn't be able to do anything. I'll also cover basic datatypes and placing things in specific sections. There are many other directives as well, but these should be the most useful. For the full list, go to the [GAS manual](https://sourceware.org/binutils/docs-2.22/as/index.html) at www.gnu.org.
 
 ### Symbols {#ssec-gas-sym}
 
@@ -2375,7 +2375,7 @@ Use \`extern "C"' for C++
 
 </div>
 
-Declarations for C++ work a little different, due to the [name mangling](http://en.wikipedia.org/wiki/Name_mangling) it expects. To indicate that the function name is _not_ mangled, add ‘`extern "C"`’ to the declaration.
+Declarations for C++ work a little different, due to the [name mangling](https://en.wikipedia.org/wiki/Name_mangling) it expects. To indicate that the function name is _not_ mangled, add ‘`extern "C"`’ to the declaration.
 
 ```c++ {.proglist}
 // C++ declarations of memcpy32() and memcpy16()

@@ -180,11 +180,11 @@ ROM fixed!            # <--- header fixed
 
 The steps are as follows:
 
-1. **Compile/assemble the sources**. We turn the human readable C or C++ files (`.c`/`.cpp`) or assembly files (`.s`/`.asm`) to a binary format known as [object files](http://en.wikipedia.org/wiki/Object_code) (`.o`). There is one object file for each source file.
+1. **Compile/assemble the sources**. We turn the human readable C or C++ files (`.c`/`.cpp`) or assembly files (`.s`/`.asm`) to a binary format known as [object files](https://en.wikipedia.org/wiki/Object_code) (`.o`). There is one object file for each source file.
     
     The tool for this is called `arm-none-eabi-gcc`. Actually, this is just a front-end for the real compiler, but that's just details. The `arm-none-eabi-` here is a prefix which means this version of GCC produces machine code for bare-metal ARM platforms; other target platforms have different prefixes. Note that C++ uses `g++` instead of `gcc`.
 
-2. **Link the object files**. After that, the separate object files are linked into a single executable [ELF](http://en.wikipedia.org/wiki/Executable_and_Linkable_Format) file. Any precompiled code libraries (`.a`) you may have specified are linked at this stage too.
+2. **Link the object files**. After that, the separate object files are linked into a single executable [ELF](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format) file. Any precompiled code libraries (`.a`) you may have specified are linked at this stage too.
     
     You can actually compile and link at the same time, but it is good practice to keep them separate: serious projects usually contain multiple source files and you don't want to have to wait for the whole world to recompile when you only changed one. This becomes even more important when you start adding data (graphics, music, etc).
     

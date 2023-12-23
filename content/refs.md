@@ -6,25 +6,25 @@
 
 ### Essentials {#ssec-essential}
 
-- [www.devkitpro.org](http://www.devkitpro.org/). Home of **devkitARM**, the toolchain of choice for GBA development. And NDS and more. Updated regularly and you can find a **libgba** and sample code here too.
+- [www.devkitpro.org](https://devkitpro.org/). Home of **devkitARM**, the toolchain of choice for GBA development. And NDS and more. Updated regularly and you can find a **libgba** and sample code here too.
 - [www.gbadev.org](http://www.gbadev.org). GBA development hub. Tools, documents, tutorials can all be found here. A visit to the [forum](http://forum.gbadev.org) is highly recommended if you're just starting, whether you have problems or not. If you do have a problem, chances are you're not the first and that it has been solved before here. Just remember the [rules of posting](http://www.albinoblacksheep.com/flash/posting.php) before you start a topic.
-- [No\$gba](http://nocash.emubase.de/). Martin Korth's site. You can find the immensely complete (though Spartan) [GBATEK](https://problemkaputt.de/gbatek.htm) reference document and the most accurate emulator [here](http://nocash.emubase.de/gba.htm), both of which are insanely great. Though the freeware version doesn't have any debug screens, the \$15 homebrew version does.
+- [Nocash](http://nocash.emubase.de/). Martin Korth's site. You can find the immensely complete (though Spartan) [GBATEK](https://problemkaputt.de/gbatek.htm) reference document and the [No\$gba](http://nocash.emubase.de/gba.htm) emulator, both of which are insanely great.
 - [vba.ngemu.com](http://vba.ngemu.com), The **VisualBoy Advance** emulator. Not as accurate as no\$gba when it comes to timings, but still very, very good, and has a more friendly interface and all kinds of cool viewers for tiles, maps, IO registers and the like.
 
 ### Alternative dev environments {#ssec-altdev}
 
-- [www.ngine.de](http://www.ngine.de), Host of **HAM**. HAM is a full C developer environment for the GBA, complete with IDE, palette and map editor and, of course, compiler. There is also an extension library called [HEL](http://www.console-dev.de) with extra (and optimized) code. Taking a look at that would be a good idea.
+- [www.ngine.de](http://www.ngine.de), Host of **HAM**. HAM is a full C developer environment for the GBA, complete with IDE, palette and map editor and, of course, compiler. There is also an extension library called [HEL](http://www.console-dev.de/project/hel-library-for-gba/) with extra (and optimized) code. Taking a look at that would be a good idea.
 - **DragonBasic**. If you don't like all the intricacies of C/asm, you might try this BASIC-like environment. The project is a little, uhm, asleep right now, though.
-- [Catapult](http://www.nocturnal-central.com/). Don't know too much about Catapult, but from what I've seen, it seems to work a little bit like Gamemaker: you create images/sound and scripts that Catapult ties together into a ROM image. Catapult comes complete with graphic, map and sound editors, tutorials, samples, emulator and probably more.
+- [Catapult](https://web.archive.org/web/20071106103247/http://www.nocturnal-central.com/catapult.php). Don't know too much about Catapult, but from what I've seen, it seems to work a little bit like Gamemaker: you create images/sound and scripts that Catapult ties together into a ROM image. Catapult comes complete with graphic, map and sound editors, tutorials, samples, emulator and probably more.
 
 ### Personal sites {#ssec-personal}
 
 A few sites of (high-ranked) forum-dwellers. These guys have been around for a while and you can learn a lot from playing their demos and browsing through their source code.
 
-- [darkfader.net](http://darkfader.net/main/). Darkfader's site, with information, tools, demos, code not only for GBA development, but many other systems as well.
-- [deku.gbadev.org](http://deku.gbadev.org/). DekuTree64's site has more than just the sound mixer; there's also some demos (with source) and tools like **quither**, a quantizer / ditherer for 16 color tiles.
-- Headspin had put together [this overview](http://members.iinet.net.au/~freeaxs/gbacomp/) of various items, incluning the different compression routines and music players available.
-- [www.thingker.com](http://www.thingker.com/gba/). Scott Lininger's site with a number of demos, including **multiplayer** code, which seems very hard to come by.
+- [darkfader.net](https://www.darkfader.net/main/). Darkfader's site, with information, tools, demos, code not only for GBA development, but many other systems as well.
+- [deku.rydia.net](https://web.archive.org/web/20160203205842/http://deku.rydia.net/). DekuTree64's site has more than just the sound mixer; there's also some demos (with source) and tools like **quither**, a quantizer / ditherer for 16 color tiles.
+- Headspin had put together [this overview](https://web.archive.org/web/20220512153726/https://members.iinet.net.au/~freeaxs/gbacomp/) of various items, incluning the different compression routines and music players available.
+- [www.thingker.com](https://web.archive.org/web/20050205230410/http://www.thingker.com:80/gba/). Scott Lininger's site with a number of demos, including **multiplayer** code, which seems very hard to come by.
 - [www.console-dev.de](http://www.console-dev.de). Peter Schaut's site, with VisualHam, the HAMlib IDE; HEL, the HAM addon library; katie, a data-management tool and more.
 - [www.pineight.com](http://www.pineight.com/). Site of gbadev faq maintainer, tepples. There are a number of interesting things here. Special mentions for **Tetanus on Drugs**, a zonked-out version of tetris (can't call it a clone as it is so much more), and **GBFS**, a file system for the GBA.
 
@@ -41,22 +41,22 @@ A few sites of (high-ranked) forum-dwellers. These guys have been around for a w
 ### Reference documents {#ssec-ref}
 
 - The [**comp.lang.c FAQ**](http://c-faq.com/). Pretty long, but very useful if you're learning C as well as GBA programming.
-- A document on [**C coding standards**](http://www.jetcafe.org/~jim/c-style.html), one of many floating around. If you've based your code on any of the non-tonc tutorials out there you **_need_** to read this. The standard doesn't have to be followed religiously, but adopting most of them would be a good idea and would solve a lot of the bad habits the other sites teach.
-- Mr Lee has a few things to say about [optimization](http://leto.net/docs/C-optimization.php). These are simple optimization that cost nothing or little in readability.
+- A document on [**C coding standards**](https://web.archive.org/web/20110624025547/http://www.jetcafe.org/~jim/c-style.html), one of many floating around. If you've based your code on any of the non-tonc tutorials out there you **_need_** to read this. The standard doesn't have to be followed religiously, but adopting most of them would be a good idea and would solve a lot of the bad habits the other sites teach.
+- Mr Lee has a few things to say about [optimization](https://web.archive.org/web/20170907095140/http://leto.net/docs/C-optimization.php). These are simple optimization that cost nothing or little in readability.
 - The [**gbadev forum FAQ**](http://forum.gbadev.org/viewtopic.php?t=418). Essential reading, whether you're new or not. Bookmark it, make a local copy, print it out; I don't care, but get FAQed.
 - The [**GBATEK**](https://problemkaputt.de/gbatek.htm). reference document. This is basically the GBA-coders' bible (only this one _is_ a worthwhile read). The information density is very high and maybe a little perplexing if you're just starting, but when you get the hang of it, it's pretty much all you'll require. Is also part of HAMLib's documentation.
 - The [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm), a another reference document. At least partially based on GBATEK. Not as rich, but probably more understandable.
-- [www.gnu.org](http://www.gnu.org/manual/manual.html#Development). **GCC documentation** in various formats. CHM versions (with search functions) can be found [here](http://htmlhelp.berlios.de/books/chm.php). These sites have manuals on the GCC toolchains and other things. Get the files for the assembler (**AS**), compiler (**GCC**), linker (**LD**) and preferably the maketool (**make**) as well. The preprocessor manual (**cpp**) may be useful as well.
+- [www.gnu.org](http://www.gnu.org/manual/manual.html#Development). **GCC documentation** in various formats. These sites have manuals on the GCC toolchains and other things. Get the files for the assembler (**AS**), compiler (**GCC**), linker (**LD**) and preferably the maketool (**make**) as well. The preprocessor manual (**cpp**) may be useful as well.
 
 ### ARM docs {#ssec-arm}
 
 Naturally, the ARM site itself also has useful documents. Note that most of these are pdfs.
 
-- [miscPDF 8031](http://www.arm.com/miscPDFs/8031.pdf). The **Arm Architecture Procedure Call Standard** (AAPCS). Explains how parameters are passed between functions. Required reading if you want to do assembly.
-- [PDF DAI0034A](http://www.arm.com/pdfs/DAI0034A_efficient_c.pdf). **Writing efficient C for ARM**. Although it's written with ARM's own compiler in mind, some tips will work for other toolchains as well.
-- [PDF DDI0210B](http://www.arm.com/pdfs/DDI0210B_7TDMI_R4.pdf) The big one: the complete **technical reference manual** for the ARM7TDMI.
-- **Instruction set reference sheets**. [ARM](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_arm.pdf) and [Thumb](http://www.arm.com/pdfs/QRC0001H_rvct_v2.1_thumb.pdf) versions.
-- Support faqs on **alignment issues**: [faqdev 1228](http://www.arm.com/support/faqdev/1228.html), [faqdev 1469](http://www.arm.com/support/faqdev/1469.html), and [faqip 3661](http://www.arm.com/support/faqip/3661.html).
+- [miscPDF 8031](https://github.com/ARM-software/abi-aa/releases/download/2023Q3/aapcs32.pdf). The **Arm Architecture Procedure Call Standard** (AAPCS). Explains how parameters are passed between functions. Required reading if you want to do assembly.
+- [PDF DAI0034A](http://netwinder.osuosl.org/pub/netwinder/docs/arm/DAI0034vA.pdf). **Writing efficient C for ARM**. Although it's written with ARM's own compiler in mind, some tips will work for other toolchains as well.
+- [PDF DDI0210B](https://documentation-service.arm.com/static/5f4786a179ff4c392c0ff819?token=) The big one: the complete **technical reference manual** for the ARM7TDMI.
+- **Instruction set reference sheets**. [ARM + Thumb](https://documentation-service.arm.com/static/5ed66080ca06a95ce53f932d?token=) combined.
+- Support faqs on **alignment issues**: [faqdev 1228](https://web.archive.org/web/20080331064522/http://www.arm.com/support/faqdev/1228.html), [faqdev 1469](https://web.archive.org/web/20070202123419/http://www.arm.com/support/faqdev/1469.html), and [faqip 3661](https://web.archive.org/web/20090117030418/http://www.arm.com/support/faqip/3661.html).
 
 ## Tools {#sec-tools}
 
@@ -64,8 +64,8 @@ Naturally, the ARM site itself also has useful documents. Note that most of thes
 
 If you're still using Notepad to write your GBA code, don't. Do yourself a favor and just … don't, OK? Though I personally use Visual C for writing code, there are some other very nice tools for the job, both in terms of general text editors as IDEs.
 
-- **[ConTEXT](http://www.fixedsys.com/context)**. A while back there was a thread where someone asked for a replacement editor for Notepad since, and I quote, “Notepad SUCKS!”. The name ConTEXT popped up a couple of times, and I find it very nice indeed, and not just for coding purposes. It allows for custom highlighters, integrated shell commands (to run makefiles for example) and attachable help files
-- [**Programmer's Notepad**](http://www.pnotepad.org/) (PN). Good and versatile text editor. Comes with the devkitPRO installation.
+- **[ConTEXT](https://archive.org/details/tucows_349269_ConTEXT)**. A while back there was a thread where someone asked for a replacement editor for Notepad since, and I quote, “Notepad SUCKS!”. The name ConTEXT popped up a couple of times, and I find it very nice indeed, and not just for coding purposes. It allows for custom highlighters, integrated shell commands (to run makefiles for example) and attachable help files
+- [**Programmer's Notepad**](http://www.pnotepad.org/) (PN). Good and versatile text editor. Comes with the devkitPro installation.
 - **[Eclipse IDE](http://www.eclipse.org)**. While I haven't had time to work with it firsthand, a good number of gbadev forum-dwellers swear by it. You can read how to set it up for GBA development in [forum:5271](http://forum.gbadev.org/viewtopic.php?t=5271).
 - **[Dev-C++](http://www.bloodshed.net/)**. Dev-C++ is another IDE that comes up often and maybe worth a look. [forum:1736](http://forum.gbadev.org/viewtopic.php?t=1736) has info on how to set it up, but it's an old thread so you may have to do a little extra work.
 
@@ -75,7 +75,7 @@ Just as Notepad sucks for coding (and anything apart from the simplest text edit
 
 - **[gfx2gba](http://www.ohnehirn.de/tools/)**. Command-line converter of graphics with interesting features such as tile-stripping, palette merging and supports all bitdepths and BIOS compression routines. Note that there are two converters named gfx2gba; you'll want the one my Markus. The HAM distribution includes this tool.
 - **[The GIMP](http://www.gimp.com)**. Very complete GNU-based bitmap/photo editor.
-- **[Graphics Gale](http://www.tempest-j.com/gale/e/)** is a very complete graphics editor. It has all the tools you would expect a bitmap editor to have, a proper palette editor and an animation tool.
+- **[Graphics Gale](https://graphicsgale.com/us/)** is a very complete graphics editor. It has all the tools you would expect a bitmap editor to have, a proper palette editor and an animation tool.
 - **[Usenti](http://www.coranac.com/projects/#usenti)**. This is my own bitmap editor. It may not be as advanced as Graphics Gale, but that does make the interface a lot easier. Aside from that it has some very interesting palette tweaking options like a palette swapper and sorter, and can export to GBA formats in binary, ASM and C code.
 
 ### Map Editors {#ssec-tools-map}
