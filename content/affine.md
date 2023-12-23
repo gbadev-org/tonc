@@ -585,7 +585,7 @@ Affine transformations are part of mathematics and, generally speaking, math num
 
 The first one is that the matrix elements are not floats, but integers. The reason behind this is that <span class="ack">the GBA has no floating point unit!</span> All floating-point operations have to be done in software and without an FPU, that's going to be pretty slow. Much slower than integer math, at any rate. Now, when you think about this, it does create some problems with precision and all that. For example, the (co)sine and functions have a range between −1 and 1, a range which isn't exactly large when it comes to integers. However, the range would be much greater if one didn't count in units of 1, but in fractions, say in units of 1/256. The \[−1, +1\] range then becomes \[−256, +256\],
 
-This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](https://en.wikipedia.org/wiki/Fixed-point_arithmetic){target="_blank"}. The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
+This strategy of representing real numbers with scaled integers is known as <dfn>fixed point arithmetic</dfn>, which you can read more about in [this appendix](fixed.html) and on [wikipedia](https://en.wikipedia.org/wiki/Fixed-point_arithmetic). The GBA makes use of fixed point for its affine parameters, but you can use it for other things as well. The **P**-matrix elements are 8.8 fixed point numbers, meaning a halfword with 8 integer bits and 8 fractional bits. To set a matrix to identity (1s on the diagonals, 0s elsewhere), you wouldn't use this:
 
 ```c
     // Floating point == Bad!!
@@ -623,7 +623,7 @@ So fixed point math is used because floating point math is just to slow for effi
 
 Rather than using the functions directly, we'll use a time-honored tradition to weasel our way out of using costly math functions: we're going to build a <dfn>look-up table</dfn> (LUT) containing the sine and cosine values. There are a number of ways to do this. If you want an easy strategy, you can just declare two arrays of 360 8.8f numbers and fill them at initialization of your program. However, this is a poor way of doing things, for reasons explained in the [section on LUTs](fixed.html#sec-lut) in the appendix.
 
-Tonclib has a single sine lut which can be used for both sine and cosine values. The lut is called `sin_lut`, a `const short` array of 512 4.12f entries (12 fractional bits), created by my [excellut](http://www.coranac.com/projects/#excellut){target="_blank"} lut creator. In <i>tonc_math.h</i> you can find two inline functions that retrieve sine and cosine values:
+Tonclib has a single sine lut which can be used for both sine and cosine values. The lut is called `sin_lut`, a `const short` array of 512 4.12f entries (12 fractional bits), created by my [excellut](http://www.coranac.com/projects/#excellut) lut creator. In <i>tonc_math.h</i> you can find two inline functions that retrieve sine and cosine values:
 
 ```c
 //! Look-up a sine and cosine values
