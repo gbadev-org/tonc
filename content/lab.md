@@ -53,7 +53,7 @@ IWRAM_CODE void id_sort_shell(int keys[], u8 ids[], int count)
     {
         // division is done by reciprocal multiplication. So no worries.
         inc /= 3;                   // for ARM compile
-        // inc = (inc*0x5556)>>16); // for THUMB compile
+        // inc = (inc*0x5556)>>16); // for Thumb compile
         for(ii=inc; ii<count; ii++)
         {
             u32 jj, id0= ids[ii]; 

@@ -17,7 +17,7 @@ I'll also show how you can add some basic scripting to change cursor positions, 
 
 And, of course, there will be demos. Oh, will there be demos. There are about 10 of them in fact, so I'm going to do things a little bit differently than before: there will be one project containing a menu with all the examples. Not all examples will be shown here because that'd just be too much.
 
-Lastly, it is expected that by now you have a decent knowledge of GBA programming, so I'm going to keep the amount of GBA-specific exposition to a minimum. When you see functions used that haven't been covered already, turn to GBATek, the project's code or tonclib's code for details.
+Lastly, it is expected that by now you have a decent knowledge of GBA programming, so I'm going to keep the amount of GBA-specific exposition to a minimum. When you see functions used that haven't been covered already, turn to GBATEK, the project's code or tonclib's code for details.
 
 ## Basic design {#sec-design}
 
@@ -25,7 +25,7 @@ Lastly, it is expected that by now you have a decent knowledge of GBA programmin
 
 The following list has the things I most wanted in TTE:
 
-- **A comprehensive and extensible set of glyph writers, usable for all occasions**. Well _almost_ all occasions. The old system worked for regular backgrounds, bitmap modes and objects, I'm now extending that set to affine backgrounds and tile-rendering. If what you need isn't present in the standard set, you can easily create your own writer and use that one instead. The writer will accept [UTF-8](http://en.wikipedia.org/wiki/UTF-8) strings, meaning you're not limited to 256 characters.
+- **A comprehensive and extensible set of glyph writers, usable for all occasions**. Well _almost_ all occasions. The old system worked for regular backgrounds, bitmap modes and objects, I'm now extending that set to affine backgrounds and tile-rendering. If what you need isn't present in the standard set, you can easily create your own writer and use that one instead. The writer will accept [UTF-8](https://en.wikipedia.org/wiki/UTF-8) strings, meaning you're not limited to 256 characters.
 - **Fonts: arbitrary widths and heights and variable width characters**. Instead of being limited to 8x8@1 glyphs; the standard writers in TTE are able to use fonts of any width and height (within reason: no screen-filling glyphs please) and variable width fonts (again, within reason: VWF for tilemaps makes little sense). In principle, there are possibilities to use arbitrary bitdepths as well, but the standard renderers are limited to 1bpp.
 - **A simple writer-interface independent of surface details**. For the old system I had `m3_puts()`, `se_puts()`, `obj_puts()` and such. This worked, but it meant you had to use something different for the different modes. In TTE, there are different initializers for the different modes to set up the system, and a single string writer `tte_write()` that just works.
 - **Scripting for text parameters**. By that I mean that you can control parameters like position and output color by the strings themselves. The functionality for this is pretty basic, but it works well enough. Note: this is _not_ a full dialog system! That said, it should be possible to build one around it.
@@ -127,7 +127,7 @@ Please note that how the data in a `TFont` is used depends almost entirely on th
 
 - Bitpacked to **1 bpp**, for size reasons. And for rendering speed too, actually, since memory loads are expensive.
 - Tiled-by-glyph. The data for each glyph is contingent with `cellSize` bytes between each glyph. This is similar to how 1D object work with one important difference:
-- the tiles in each glyph are **column-major** (tile 1 is under tile 0). This in contrast to objects, which tend to be [row-major](http://en.wikipedia.org/wiki/Row-major_order) (tile 1 is to the right of tile 0). I will refer to this format as **tile-strips**. The reason behind this choice will be given later.
+- the tiles in each glyph are **column-major** (tile 1 is under tile 0). This in contrast to objects, which tend to be [row-major](https://en.wikipedia.org/wiki/Row-major_order) (tile 1 is to the right of tile 0). I will refer to this format as **tile-strips**. The reason behind this choice will be given later.
 
 There are exceptions to this, but most renderers presented here will use this format. If you want to make your own renderers, you're free to use any format for the data you think is appropriate.
 
@@ -875,7 +875,7 @@ Preparing the right halfword is only part of the work. If `cursorX` (i.e., `x0`)
 
 ### Example : sub-pixel rendering {#ssec-bmp-demo}
 
-For the demo of this section, I'd like to use a technique called [<dfn>sub-pixel rendering</dfn>](http://en.wikipedia.org/wiki/Subpixel_rendering). This is a method for effectively tripling the horizontal resolution for rendering by ‘borrowing’ colors from other pixels.
+For the demo of this section, I'd like to use a technique called [<dfn>sub-pixel rendering</dfn>](https://en.wikipedia.org/wiki/Subpixel_rendering). This is a method for effectively tripling the horizontal resolution for rendering by ‘borrowing’ colors from other pixels.
 
 Consider the letter ‘A’ as shown in {@fig:img-subpx}a. As you know, each pixel is composed of three colors: red, green and blue. These are the sub-pixels. The letter on the sub-pixel grid looks like {@fig:img-subpx}b. Notice how the colors are still grouped by pixels, which on the sub-pixel grid gives very jagged edges. The trick to sub-pixel rendering is to shift groups of sub-pixels left or right, resulting in smoother edges ({@fig:img-subpx}c). Now combine the pixels to RGB colors again to get {@fig:img-subpx}d. Zoomed in as it is in {@fig:img-subpx}, sub-pixel rendering may not look like much, but when used in the proper size the effects can be quite stunning.
 
@@ -891,7 +891,7 @@ Consider the letter ‘A’ as shown in {@fig:img-subpx}a. As you know, each pix
   </div>
 </div>
 
-Sub-pixel rendering isn't useful for everything. Because it muddles the concept of pixel and color a little, it's only useful for gray-scale images. This does make it great for text, of course. Secondly, the order in which the sub-pixels are ordered also matters. The process shown in **{@fig:img-subpx}** will work for RGB-ordered screens, but would fail quite spectacularly when the pixels are BGR-ordered. Going into all the gritty details it too much to do here, so I'll refer you to [http://www.grc.com/ctwhat.htm](http://www.grc.com/ctwhat.htm), which explains the concept in more detail and gives a few examples too.
+Sub-pixel rendering isn't useful for everything. Because it muddles the concept of pixel and color a little, it's only useful for gray-scale images. This does make it great for text, of course. Secondly, the order in which the sub-pixels are ordered also matters. The process shown in **{@fig:img-subpx}** will work for RGB-ordered screens, but would fail quite spectacularly when the pixels are BGR-ordered. Going into all the gritty details it too much to do here, so I'll refer you to [http://www.grc.com/ctwhat.htm](https://www.grc.com/ctwhat.htm), which explains the concept in more detail and gives a few examples too.
 
 <div class="cpt_fr" style="width:128px;">
   <img src="img/tte/yesh1.png" id="fig:img-yesh" width=128 alt="4&times;8 subpixel font">
@@ -917,7 +917,7 @@ void test_tte_bmp16()
     tte_init_con();
 
     const char *str=
-    "http://en.wikipedia.org/wiki/Subpixel_rendering :\n"
+    "https://en.wikipedia.org/wiki/Subpixel_rendering :\n"
     "Subpixel rendering is a way to increase the "
     "apparent \nresolution of a computer's liquid crystal "
     "display (LCD).\nIt takes advantage of the fact that "
@@ -990,7 +990,7 @@ The way object text is handled in TTE works, but it the implementation is not ex
 
 ### Example: letters. Onna path {#ssec-obj-demo}
 
-The defining characteristic of objects is that they're separate from backgrounds; they can move around the screen independently. Object text is most likely used for text that is dynamic or has to travel along some sort of path. In this case, I'll make them fly on a parameterized path called a [Lissajous curve](http://en.wikipedia.org/wiki/Lissajous_curve) (see {@fig:img-test-obj}).
+The defining characteristic of objects is that they're separate from backgrounds; they can move around the screen independently. Object text is most likely used for text that is dynamic or has to travel along some sort of path. In this case, I'll make them fly on a parameterized path called a [Lissajous curve](https://en.wikipedia.org/wiki/Lissajous_curve) (see {@fig:img-test-obj}).
 
 <div class="cpt_fr" style="width:240px;">
   <img src="img/tte/test_tte_obj.png" id="fig:img-test-obj" alt="Object text on a path.">
@@ -1225,7 +1225,7 @@ Instead of plotting pixel individually, you can also plot multiple pixels simult
 
 The next function is TTE's main glyph renderer for tiles, and it is a doozy. There are two stages for the rendering in the inner loop: bit unpacking the source byte, `raw` and splitting the prepared pixel `px` into two adjacent tiles. These correspond to steps 3 and 4, respectively.
 
-Normally, the bitunpack is done in a loop, but sometimes it's faster to do it in other ways. For details, see my document on [bit tricks](http://www.coranac.com/documents/bittrick/#sec-bup). The first five lines of step 3 do the unpacking. For example, it turns a binary `0001 1011` into a hexadecimal `0x00011011`. This is then multiplied by 15 and `ink` to give the pixel mask `pxmask` and the colored pixels `px`, respectively.
+Normally, the bitunpack is done in a loop, but sometimes it's faster to do it in other ways. For details, see my document on [bit tricks](https://www.coranac.com/documents/bittrick/#sec-bup). The first five lines of step 3 do the unpacking. For example, it turns a binary `0001 1011` into a hexadecimal `0x00011011`. This is then multiplied by 15 and `ink` to give the pixel mask `pxmask` and the colored pixels `px`, respectively.
 
 Step 4 distributes the word with the pixels over two tiles if necessary. In step 1, left and right shifts were prepared to supply the bit offsets for this procedure. Now, for larger glyphs this will mean that certain destination words are used twice, but this can't be helped (actually it can, but the procedure is ugly and possibly not worth it). An alternative to this is using the destination once and read (and unpack/color) the source twice; however, as VRAM is considerably faster than ROM I doubt this would be beneficial.
 
@@ -1698,7 +1698,7 @@ char *tte_cmd_default(const char *str)
 
 Like I said, ugly; but it'll have to do for now. The incoming pointer points to the first character past the '`#{`'. The command tags are all single or double-lettered; the switch looks for a recognized letter and acts accordingly.
 
-One of the tags is '`X`', which sets the absolute X-coordinate of the cursor. The `tc->cursorX` will be set to the argument if it is present, or to the left margin if it is not. Note the use of [`strtol()`](http://www.cplusplus.com/reference/clibrary/cstdlib/strtol.html) here. This is a very interesting function. Not only does it work for both decimal and hex strings, but through the second argument you can retrieve a pointer to right after the number in the string. Alternatives would be `sscanf()` or `atoi()`, but `strtol()` is nicer.
+One of the tags is '`X`', which sets the absolute X-coordinate of the cursor. The `tc->cursorX` will be set to the argument if it is present, or to the left margin if it is not. Note the use of [`strtol()`](https://en.cppreference.com/w/c/string/byte/strtol) here. This is a very interesting function. Not only does it work for both decimal and hex strings, but through the second argument you can retrieve a pointer to right after the number in the string. Alternatives would be `sscanf()` or `atoi()`, but `strtol()` is nicer.
 
 After handling a tag, it'll look for more tags, or exit if the end delimiter or end of string is found.
 
@@ -1831,9 +1831,9 @@ typedef struct {
 } devoptab_t;
 ```
 
-The key to making the standard console routines work on a GBA is to redirect the default `write_r` for console output to one of our own making. Before explaining how this works, I want you to understand that this comes very close to black magic. It involves descending to the roots of the library and there is next to no documentation about how this stuff works. This story is the closest thing I could find to a full description: [http://www.embedded.com/story/OEG20020103S0073](http://www.embedded.com/story/OEG20020103S0073), but this isn't high on explanations either.
+The key to making the standard console routines work on a GBA is to redirect the default `write_r` for console output to one of our own making. Before explaining how this works, I want you to understand that this comes very close to black magic. It involves descending to the roots of the library and there is next to no documentation about how this stuff works. This story is the closest thing I could find to a full description: [Embedding GNU: Newlib, Part 2](https://web.archive.org/web/20100209210107/https://www.embedded.com/story/OEG20020103S0073), but this isn't high on explanations either.
 
-To put it in other way: you're in a cave; it's pitch black and there are [grues](<http://en.wikipedia.org/wiki/Grue_(monster)>) about.
+To put it in other way: you're in a cave; it's pitch black and there are [grues](<https://en.wikipedia.org/wiki/Grue_(monster)>) about.
 
 Now that that's done, let's continue. The first step is creating our replacement writer. In TTE's case, this is `tte_con_write()`. It is almost identical to `tte_write()`, but has to fit in the format given by `devoptab_t.write_r`. It comes down to this:
 
@@ -1876,7 +1876,7 @@ int tte_con_write(struct _reent *r, int fd, const char *text, int len)
 }
 ```
 
-While I've added documentation for the arguments here, it's mostly based on guesswork. The `r` parameter contains [re-entrancy](http://en.wikipedia.org/wiki/Reentrant) information, useful if you have multiple threads. Since the GBA is a single-thread system, this should not concern us. I believe `fd` is a file handle of some sort, but since we're not writing to files this again does not concern us.
+While I've added documentation for the arguments here, it's mostly based on guesswork. The `r` parameter contains [re-entrancy](https://en.wikipedia.org/wiki/Reentrancy_(computing)) information, useful if you have multiple threads. Since the GBA is a single-thread system, this should not concern us. I believe `fd` is a file handle of some sort, but since we're not writing to files this again does not concern us.
 
 The real arguments of interest are `text` and `len`. The `text` argument points to the buffer with the string to render. In the case of `printf()`, it's the string _after_ formatting: all codes like `%d` are already done. And now for the most important part: `text` is **not** null-terminated. This is why there's a length variable as well.
 
@@ -1960,13 +1960,13 @@ Printf bagage
 
 As wonderful as `printf()` is, there are some downsides to it too. First, it's a very heavy function that calls quite a large amount of functions which all have to be linked in. Second, it is pretty damn slow. Because it can do so much, it has to check for all these different cases. Also, for the string to decimal conversion it uses divisions, which is really bad for the GBA.
 
-Be aware of how much `printf()` costs. If it turns out to be a bottle-neck, try making your own slimmed down version. A decent `sprintf()` alternative is `posprintf()`, created by [Dan Posluns](http://www.danposluns.com/gbadev/).
+Be aware of how much `printf()` costs. If it turns out to be a bottle-neck, try making your own slimmed down version. A decent `sprintf()` alternative is `posprintf()`, created by [Dan Posluns](https://www.danposluns.com/gbadev/).
 
 </div>
 
 ### VT100 escape sequences {#ssec-misc-vt100}
 
-Every book on C will tell you that you can place text on a console screen. What they usually don't tell you is that, in some environments, you can control formatting as well. One such environment is the [VT100](http://en.wikipedia.org/wiki/VT100), which used <dfn>escape sequences</dfn> to indicate formatting. The libraries that devkitPro distributes for various systems use these sequences, so it's a good idea to support them as well.
+Every book on C will tell you that you can place text on a console screen. What they usually don't tell you is that, in some environments, you can control formatting as well. One such environment is the [VT100](https://en.wikipedia.org/wiki/VT100), which used <dfn>escape sequences</dfn> to indicate formatting. The libraries that devkitPro distributes for various systems use these sequences, so it's a good idea to support them as well.
 
 The general format for the codes is this:
 
@@ -1974,7 +1974,7 @@ The general format for the codes is this:
 CSI n1;n2 ... letter
 ```
 
-_CSI_ here is the ASCII code for the <dfn>command sequence indicator</dfn>, which in this case is the escape character (27, 0x1B or 033) followed by '\['. The letter at the end denotes the kind of formatting code, and _n1_, _n2_ … are the formatting parameters. Wikipedia has a nice overview of the standard set [here](http://en.wikipedia.org/wiki/ANSI_escape_code) and there's another one at [http://local.wasp.uwa.edu.au/\~pbourke/dataformats/vt100/](http://local.wasp.uwa.edu.au/~pbourke/dataformats/vt100/). Note that not all of the codes are supported in the devkitPro libraries. The ones you'll encounter most are the following:
+_CSI_ here is the ASCII code for the <dfn>command sequence indicator</dfn>, which in this case is the escape character (27, 0x1B or 033) followed by '\['. The letter at the end denotes the kind of formatting code, and _n1_, _n2_ … are the formatting parameters. Wikipedia has a nice overview of the standard set [here](https://en.wikipedia.org/wiki/ANSI_escape_code) and there's another one here: [VT100 commands and control sequences](https://web.archive.org/web/20080813073220/http://local.wasp.uwa.edu.au/~pbourke/dataformats/vt100/). Note that not all of the codes are supported in the devkitPro libraries. The ones you'll encounter most are the following:
 
 <div class="lblock">
   <table id="tbl:vt100" border=1 cellpadding=2 cellspacing=0>
@@ -2046,9 +2046,9 @@ I'm trying to keep my implementation as close to the standard as possible. This 
 
 ### UTF-8 {#ssec-misc-utf}
 
-You may have heard of a little thing called [ASCII](http://en.wikipedia.org/wiki/ASCII). This is (or was; I'm not sure) the standard encoding for character strings. Each character is 1 byte long, giving 256 numbers for letters, numbers et cetera. {\*@fig:img-verdana9} and {@fig:img-verdana9-b4} contain character 32 to 255, as they usually appear on Windows. ASCII works fine for Western languages but are completely inadequate for languages like Japanese, which have thousands of characters. To remedy this, they came up with Unicode, which has 16 bits per character.
+You may have heard of a little thing called [ASCII](https://en.wikipedia.org/wiki/ASCII). This is (or was; I'm not sure) the standard encoding for character strings. Each character is 1 byte long, giving 256 numbers for letters, numbers et cetera. {\*@fig:img-verdana9} and {@fig:img-verdana9-b4} contain character 32 to 255, as they usually appear on Windows. ASCII works fine for Western languages but are completely inadequate for languages like Japanese, which have thousands of characters. To remedy this, they came up with Unicode, which has 16 bits per character.
 
-An intermediate between this is [UTF-8](http://en.wikipedia.org/wiki/UTF-8). This still uses 8-bit characters for the lower 128 ASCII codes, but bytes over 0x80 denote the start of a multi-byte code, where it and a few of the following characters form a single, larger character of up to 21 bits.
+An intermediate between this is [UTF-8](https://en.wikipedia.org/wiki/UTF-8). This still uses 8-bit characters for the lower 128 ASCII codes, but bytes over 0x80 denote the start of a multi-byte code, where it and a few of the following characters form a single, larger character of up to 21 bits.
 
 UTF-8 is a nice way of having your cake and eating it too: you can still use normal characters for Latin characters, meaning it'll still work with ASCII programs, but you also have a method of representing bigger numbers.
 
@@ -2164,7 +2164,7 @@ As of devkitArm r22, `printf()` and the other stdio functions use the UTF-8 loca
 
 It's always a good idea to see how fast the things you make are. This is particularly true when the functions are complex, like most of the bitmap and tile renderers are.
 
-{\*@tbl:tte-profile} lists the cycles per glyph for the majority of the available renderers. These have been measured with the string (and library code) in ROM with the default waitstates, under -O2 optimization. The font used was verdana 9, with has a cell size of 8x16, meaning it can be used for both fixed and variable widths with ease. The test string was a 194 character line from [Portal](<http://en.wikipedia.org/wiki/Portal_(video_game)>):
+{\*@tbl:tte-profile} lists the cycles per glyph for the majority of the available renderers. These have been measured with the string (and library code) in ROM with the default waitstates, under -O2 optimization. The font used was verdana 9, with has a cell size of 8x16, meaning it can be used for both fixed and variable widths with ease. The test string was a 194 character line from [Portal](<https://en.wikipedia.org/wiki/Portal_(video_game)>):
 
 > “Please note that we have added a consequence for failure. Any contact with the chamber floor will result in an 'unsatisfactory' mark on your official testing record followed by death. Good luck!”
 

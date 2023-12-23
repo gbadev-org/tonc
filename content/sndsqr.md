@@ -8,7 +8,7 @@ Apart from graphics and interaction, there is one other sense important to games
 
 The GBA has six sound channels. The first four are roughly the same as the original Game Boy had: two square wave generators (channels 1 and 2), a sample player (channel 3) and a noise generator (channel 4). Those are also referred to as the DMG channels after the Game Boy's code name "Dot Matrix Game." New are two Direct Sound channels A and B (not to be confused with Microsoft's DirectSound, the DirectX component). These are 8-bit digital pulse code modulation (PCM) channels.
 
-I should point out that I really know very little about sound programming, mostly because I'm not able to actually put together a piece of music (it's kinda hard to do that when you already have music playing). If you want to really learn about sound programming, you should look at [Belogic.com](http://www.belogic.com), where almost everybody got their information from, and [deku.gbadev.org](https://deku.gbadev.org/program/sound1.html), which shows you how to build a sound mixer. Both of these sites are excellent.
+I should point out that I really know very little about sound programming, mostly because I'm not able to actually put together a piece of music (it's kinda hard to do that when you already have music playing). If you want to really learn about sound programming, you should look at [Belogic.com](http://www.belogic.com), where almost everybody got their information from, and [deku.gbadev.org](https://stuij.github.io/deku-sound-tutorial/), which shows you how to build a sound mixer. Both of these sites are excellent.
 <!-- as of 2023-09, belogic.com uses a self-signed certificate -->
 
 I may not know much about sound creation/programming, but at its core sound is a wave in matter; waves are mathematical critters, and I *do* know a thing or two about math, and that's kind of what I'll do here for the square wave generators.
@@ -578,7 +578,7 @@ The register nomenclature seems particularly vexed when it comes to sound. There
   <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT
 <tr>
   <th> 6Ch		<td> channel 2 (sqr) freq, on
-  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND1FREQ
+  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND2FREQ
 <tr>
   <th> 70h		<td> channel 3 (wave) mode
   <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL
@@ -786,7 +786,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
 <tr class="bg0">	
   <td class="rof">0-3<td class="rclr1">1A-4A
   <td>SSTAT_SQR1, SSTAT_SQR2, SSTAT_WAVE, SSTAT_NOISE
-  <td><b>Active channels</b>. Indicates which DMA channels are 
+  <td><b>Active channels</b>. Indicates which DMG channels are 
     currently playing. They do <i>not</i> enable the channels; 
     that's what <code>REG_SNDDMGCNT</code> is for.
 <tr class="bg1">	
@@ -794,7 +794,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
   <td>SSTAT_DISABLE, SSTAT_ENABLE
   <td><b>Master Sound Enable</b>. Must be set if any sound is to 
     be heard at all. Set this <b>before</b> you do anything else: 
-    the other registers can't be accessed otherwise, see GBATek 
+    the other registers can't be accessed otherwise, see GBATEK 
     for details. 
 </tbody>
 </table>
@@ -1817,4 +1817,4 @@ There are two arrays here, `notes` and `lens`, and a loop over all elements. We 
 
 The point I'm trying to make is that it's very well possible to play a tune with just the tone generators. Technically you don't need digitized music and all that stuff to play something. Of course, it'll sound better if you do, but if you just need a little jingle the tone generators may be all you need. Twelve years of Game Boy games using only tone generators prove this. Just define some notes (the nybble format for octaves and notes will do) and some lengths and you have the basics already. You could even use more than one channel for different effects.
 
-If you understood that, then get this: the note+length+channel idea is pretty much what tracked music (mod, it, xm, etc) does, only they use a more sophisticated wave than a square wave. But the principle is the same. Getting it to work takes a little more effort, but that's what Deku's [sound mix tutorial](https://deku.gbadev.org/program/sound1.html) is for.
+If you understood that, then get this: the note+length+channel idea is pretty much what tracked music (mod, it, xm, etc) does, only they use a more sophisticated wave than a square wave. But the principle is the same. Getting it to work takes a little more effort, but that's what Deku's [sound mix tutorial](https://stuij.github.io/deku-sound-tutorial/) is for.

@@ -12,7 +12,7 @@ Whereas sound and joypad functionality have to make do with only a few measly re
 
 As said, the entire GBA screen is refreshed every 60th of a second, but there's more to it than that. After a scanline has been drawn (the HDraw period, 240 pixels), there is a pause (HBlank, 68 pixels) before it starts drawing the next scanline. Likewise, after the 160 scanlines (VDraw) is a 68 scanline blank (VBlank) before it starts over again. To avoid tearing, positional data is usually updated at the VBlank. This is why most games run at 60 or 30 fps. (FYI, syncing at the VBlank is also why we in PAL countries often had slower games: PAL TVs run (ran) at 50Hz, hence only 50 fps instead of 60, hence a 17% slower game if nobody bothered to account for it. Few companies ever did <kbd>:(</kbd> ).
 
-Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#Graphics%20Hardware%20Overview) and [GBATek](http://nocash.emubase.de/gbatek.htm#lcddimensionsandtimings) give you some interesting details about the timings of the display. A full screen refresh takes exactly 280896 cycles, divided by the clock speed gives a framerate of 59.73. From the Draw/Blank periods given above you can see that there are 4 cycles per pixel, and 1232 cycles per scanline. You can find a summary of timing details in table 4.1.
+Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#Graphics%20Hardware%20Overview) and [GBATEK](https://problemkaputt.de/gbatek.htm#lcddimensionsandtimings) give you some interesting details about the timings of the display. A full screen refresh takes exactly 280896 cycles, divided by the clock speed gives a framerate of 59.73. From the Draw/Blank periods given above you can see that there are 4 cycles per pixel, and 1232 cycles per scanline. You can find a summary of timing details in table 4.1.
 
 <br>  
 
@@ -84,8 +84,8 @@ Those are the three basic graphical types, though other classifications also spr
 
 ## Display registers: REG_DISPCNT, REG_DISPSTAT and REG_VCOUNT {#sec-vid-regs}
 
-There are three I/O registers that you will encounter when doing anything graphical: the display control `REG_DISPCNT (0400:0000h)`, the display status `REG_DISPSTAT (0400:0004h)` and the scanline counter `REG_VCOUNT (0400:0006h)`. Those names are simply defines to the memory locations and can, in principle, be chosen at will. However, we will use the names as they appear in the [Pern Project](http://www.thepernproject.com), which are the most common.
-<br>  
+There are three I/O registers that you will encounter when doing anything graphical: the display control `REG_DISPCNT (0400:0000h)`, the display status `REG_DISPSTAT (0400:0004h)` and the scanline counter `REG_VCOUNT (0400:0006h)`. Those names are simply defines to the memory locations and can, in principle, be chosen at will. However, we will use the names as they appear in the [Pern Project](http://www.drunkencoders.com), which are the most common.
+
 The REG_DISPCNT register is the primary control of the screen. The bit-layout of this register and their meanings can be found in the following table. This is the general format I will use for registers or register-like sections. The details of the format have already been explained in the [preface](intro.html#ssec-note-reg).
 
 <div class="reg">

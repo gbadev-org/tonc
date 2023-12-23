@@ -108,7 +108,7 @@ Code:
 
 ### Jul 23, 2006 (v1.2.4)
 
-- ![new](./img/log/bul_new.png) Added a rather long chapter on [ARM/THUMB assembly](asm.html). This is still a draft version, though. Most of the content is there, but I still need to reshuffle sections and spell/grammer check the whole thing.
+- ![new](./img/log/bul_new.png) Added a rather long chapter on [ARM/Thumb assembly](asm.html). This is still a draft version, though. Most of the content is there, but I still need to reshuffle sections and spell/grammer check the whole thing.
 - And yet more spell fixes <span class="kbd">\>\_\<</span>.
 
 ### Jun 3, 2006 (v1.2.3)
@@ -145,7 +145,7 @@ Probable upcoming changes
 
 I intend to make a few changes in tonc's code. First, I'll try to decouple the code in the basic demos from tonclib, which should make them easier to understand as you won't have to browse through all the other stuff. Second, this will allow me to rework and optimize tonclib, which is now hampered in some areas by me having to keep a number of things simpler than I'd like to. Now, this is what I'd _like_ to do; I can't really tell when (if) I will get round to it.
 
-Also, I have half a mind of changing the current DMA demo to [this one](http://forum.gbadev.org/viewtopic.php?t=9023), which simply looks a lot cooler, even though there's is a lot more magic going on. Meh, we'll see.
+Also, I have half a mind of changing the current DMA demo to [this one](https://gbadev.net/forum-archive/thread/9/9023.html), which simply looks a lot cooler, even though there's is a lot more magic going on. Meh, we'll see.
 
 ### Mar 21, 2006 (v1.2)
 
@@ -166,7 +166,7 @@ More non-final updates. Quite a lot actually.
 - ![new](./img/log/bul_new.png) Added a subsection on [tribool keystates](keys.html#ssec-adv-tri). In fact, nearly all of the demos that might benefit from these have been altered to use them. One line of code instead of four lines, and faster to boot. Seems like a win to me.
 - ![new](./img/log/bul_new.png) Added a subsection on the [proper build procedure](bitmaps.html#ssec-data-proc), which was still missing from that whole section. This is pretty much **required reading** for anyone how has been following non-tonc tutorials and adopted their coding standards.
 - Merged the fixed-point and LUT chapters, and rewrote most of both.
-- jake2431 has been gathering a lot of useful links in this thread: [forum:8353](http://forum.gbadev.org/viewtopic.php?t=8353). If you're new to C and/or GBA/NDS programming, I recommend you check it out.
+- jake2431 has been gathering a lot of useful links in this thread: [forum:8353](https://gbadev.net/forum-archive/thread/18/8353.html). If you're new to C and/or GBA/NDS programming, I recommend you check it out.
 
 ### Jan 27, 2006 (v1.1)
 
@@ -195,9 +195,9 @@ Final update. Probably. Not because I'm done with this thing, but because there 
 - ![upgrade](./img/log/bul_upgr.png) Restyled the register tables.
 - ![upgrade](./img/log/bul_upgr.png) I finally realised how I could do matrices in pure html instead of images so pretty much _all_ equations are now html. I expect it's quite close to MathML, but since MSIE doesn't support it natively and I don't want to worry you with an extra download (which may not even work on older versions), this'll do for now. (Now if you'll excuse me, I going to lie down to get the feeling in my brain back)
 - ![upgrade](./img/log/bul_upgr.png) All sections, equations, tables etc now have id's for linking too and (maybe) automatic numbering if I figure out how.
-- ![upgrade](./img/log/bul_upgr.png) `int_demo` now uses a separate file for the direct isr and makes proper use of sections and ARM/THUMB code. See the [demo description](interrupts.html#sec-demo) for more.
+- ![upgrade](./img/log/bul_upgr.png) `int_demo` now uses a separate file for the direct isr and makes proper use of sections and ARM/Thumb code. See the [demo description](interrupts.html#sec-demo) for more.
 
-That's about it I think, but it should be enough. I hve bits and pieces of the tonc2 text, examples and lib, though maybe not in their final forms. They are available, but only on request. If anyone has suggestions or requests I'll see what I can do. This also goes for mistakes (the ones that the compiler/linker can't catch) you've made that you think others might make too. I know a good number of them already from the forum (like that you should <span class="ack">NOT</span> use bytes or halfwords for local variables, since it can really kill performance, `int` or `u32` only, **_please!_**. Pretty please. With sugar on top. And frosting and whipped-cream.) Don't need to know every little thing though, especially if it's already covered by the well-done [gbadev forum FAQ](http://forum.gbadev.org/viewtopic.php?t=418) or already covered in here somewhere.
+That's about it I think, but it should be enough. I hve bits and pieces of the tonc2 text, examples and lib, though maybe not in their final forms. They are available, but only on request. If anyone has suggestions or requests I'll see what I can do. This also goes for mistakes (the ones that the compiler/linker can't catch) you've made that you think others might make too. I know a good number of them already from the forum (like that you should <span class="ack">NOT</span> use bytes or halfwords for local variables, since it can really kill performance, `int` or `u32` only, **_please!_**. Pretty please. With sugar on top. And frosting and whipped-cream.) Don't need to know every little thing though, especially if it's already covered by the well-done [gbadev forum FAQ](https://gbadev.net/forum-archive/thread/14/418.html) or already covered in here somewhere.
 
 If anyone knows how I can keep track of all the header/equation/figure numbering automatically (without CSS2, which isn't properly supported by MSIE <kbd>:(</kbd> ) that would be _very_ helpful. Actually, the numbering itself isn't the problem, _referencing_ them is.
 
@@ -322,7 +322,7 @@ Working on a vector/matrix page, some reshuffling of page-order and yet more ran
 
 ### Mar 24, 2004 (v0.96)
 
-Replaced the assembly listing in [swi.htm](swi_htm) with the proper THUMB listing. I'd forgotten I wasn't using ARM code anymore.
+Replaced the assembly listing in [swi.htm](swi_htm) with the proper Thumb listing. I'd forgotten I wasn't using ARM code anymore.
 
 ### Mar 20, 2004 (v0.96)
 

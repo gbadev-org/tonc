@@ -14,19 +14,19 @@ As good as makefiles are, they're still command-line driven processes, with all 
 
 Fortunately, there are ways to avoid any kind of command line box altogether. Unless you're using something as dreadful as the standard Windows Notepad, there is a good chance you can run make or any other tool directly from your code editor. In this case, I'd like to take a look at three of them
 
--   [Context](http://www.fixedsys.com/context)
+-   [ConTEXT](https://archive.org/details/tucows_349269_ConTEXT)
 -   [Programmer's Notepad](http://www.pnotepad.org/). Yes, the one that comes with devkitARM.
 -   Microsoft Visual C++
 
-Context and PN are basically advanced forms of text editors, of which there are quite a few. Most of these will allow tabbed files, search&replace, customizable syntax highlighting, macros and shell commands. If you're still using Windows Notepad for, well, *anything* really, you owe it to yourself to download one of the more advanced text editors and use that as a replacement. The glorified edit-box known as Notepad should not be allowed anywhere near any kind of plain text file unless there is no way around it. Every one of the programmers' editors you can google up is likely to be superior to Notepad in every single way, and some of them even allow you to replace the actual notepad.exe. While this has become harder since Windows XP Service Pack 2 because system file protection keeps resurrecting it, in my opinion it's well worth the effort to shoot it down permanently.
+ConTEXT and PN are basically advanced forms of text editors, of which there are quite a few. Most of these will allow tabbed files, search&replace, customizable syntax highlighting, macros and shell commands. If you're still using Windows Notepad for, well, *anything* really, you owe it to yourself to download one of the more advanced text editors and use that as a replacement. The glorified edit-box known as Notepad should not be allowed anywhere near any kind of plain text file unless there is no way around it. Every one of the programmers' editors you can google up is likely to be superior to Notepad in every single way, and some of them even allow you to replace the actual notepad.exe. While this has become harder since Windows XP Service Pack 2 because system file protection keeps resurrecting it, in my opinion it's well worth the effort to shoot it down permanently.
 
-Ahem, sorry about that. Sometimes I get a little carried away when I remember how much the standard Windows tools suck at times. Anyway, onto the show. In the remaining part of this chapter, I'll show how you can get Context and PN to run make for the currently open makefile. The last section of this chapter will cover setting up MSVC for the job. If you're not interested in any of this, feel free to skip to the [next chapter](first.html) at any time.
+Ahem, sorry about that. Sometimes I get a little carried away when I remember how much the standard Windows tools suck at times. Anyway, onto the show. In the remaining part of this chapter, I'll show how you can get ConTEXT and PN to run make for the currently open makefile. The last section of this chapter will cover setting up MSVC for the job. If you're not interested in any of this, feel free to skip to the [next chapter](first.html) at any time.
 
-## Make via Context {#sec-context}
+## Make via ConTEXT {#sec-context}
 
-[Context](http://www.fixedsys.com/context) is a lightweight free text editor that I use for most of plain text editing. It can do all the things that programmer's editors are supposed to do, it has a Notepad replacer and a tool that allows me to export code to an html format, which has been very useful indeed for writing tonc. It does have one or two minor flaws, but none that I particularly mind.
+[ConTEXT](https://archive.org/details/tucows_349269_ConTEXT) is a lightweight free text editor that I use for most of plain text editing. It can do all the things that programmer's editors are supposed to do, it has a Notepad replacer and a tool that allows me to export code to an html format, which has been very useful indeed for writing tonc. It does have one or two minor flaws, but none that I particularly mind.
 
-The shell commands manager can be found under Options-\>Environment Options...-\>Execute Keys (@fig:ctxt-make), and works on an extension basis. In my case, that means .mak. Context allows 4 commands per extension, and I'm using F9 to make the ‘build’ target and F10 for a clean operation.
+The shell commands manager can be found under Options-\>Environment Options...-\>Execute Keys (@fig:ctxt-make), and works on an extension basis. In my case, that means .mak. ConTEXT allows 4 commands per extension, and I'm using F9 to make the ‘build’ target and F10 for a clean operation.
 
 F9 : make build
 
@@ -46,7 +46,7 @@ Be sure that the devkitARM and msys bin directories are in the system path, or c
 
 <img src="img/setup/ctxt_make.png" 
   alt="context commands" id="fig:ctxt-make"><br>
-<b>{*@fig:ctxt-make}</b>: Context shell commands.
+<b>{*@fig:ctxt-make}</b>: ConTEXT shell commands.
 </div>
 
 ## Make via Programmer's Notepad 2 {#sec-pn2}

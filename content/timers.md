@@ -192,4 +192,4 @@ int main()
 }
 ```
 
-This was a rather simple use of timers. Of course, I could have just as easily used the VBlank to keep track of the seconds, which is how it's usually done anyway. The hardware timers are usually reserved for timed DMA's, which are used in [sound mixers](http://deku.gbadev.org), not for game timers. There is one other use that comes to mind, though, namely profiling: examining how fast your functions are. One of the [text system demos](text.html#ssec-demo-se2) uses that to check the speeds of a few copying routines.
+This was a rather simple use of timers. Of course, I could have just as easily used the VBlank to keep track of the seconds, which is how it's usually done anyway. The hardware timers are usually reserved for timed DMA's, which are used in [sound mixers](https://stuij.github.io/deku-sound-tutorial/g), not for game timers. There is one other use that comes to mind, though, namely profiling: examining how fast your functions are. One of the [text system demos](text.html#ssec-demo-se2) uses that to check the speeds of a few copying routines.
