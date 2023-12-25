@@ -1,15 +1,54 @@
 /* Base styles and content styles */
 
+@import '../fonts/fira_code.css';
 @import 'variables.css';
+
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('../fonts/SourceSans3-Regular.otf.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('../fonts/SourceSans3-It.otf.woff') format('woff');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('../fonts/SourceSans3-Semibold.otf.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('../fonts/SourceSans3-SemiboldIt.otf.woff') format('woff');
+  font-weight: bold;
+  font-style: italic;
+}
 
 :root {
     /* Browser default font-size is 16px, this way 1 rem = 10px */
     font-size: 62.5%;
     color-scheme: var(--color-scheme);
+    /* TODO: Why is important needed here? */
+    --mono-font: "Fira Code" !important;
+    --mono-font-size: 1.6rem;
+}
+
+.sidebar {
+    font-size: 1.6rem !important;
+}
+math {
+    font-size: 1.9rem;
 }
 
 html {
-    font-family: "Open Sans", sans-serif;
+    font-family: 'SourceSans3', sans-serif;
     color: var(--fg);
     background-color: var(--bg);
     text-size-adjust: none;
@@ -18,13 +57,15 @@ html {
 
 body {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+    font-weight: 400;
     overflow-x: hidden;
 }
 
 code {
     font-family: var(--mono-font) !important;
-    font-size: var(--code-font-size);
+    font-weight: 500;
+    font-size: var(--mono-font-size);
     direction: ltr !important;
 }
 
