@@ -1,9 +1,6 @@
 # B. Fixed-Point Numbers and LUTs
 
--   [What are fixed-point numbers](#sec-intro).
--   [Fixed-point math](#sec-fmath).
--   [Faking division](#sec-rmdiv).
--   [Look-up Tables](#sec-lut).
+<!-- toc -->
 
 ## What are fixed-point numbers {#sec-intro}
 

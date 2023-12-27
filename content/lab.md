@@ -1,7 +1,6 @@
 # 24. The Lab
 
--   [Lab introduction](#sec-intro).
--   [Priority and drawing order](#sec-prio).
+<!-- toc -->
 
 ## Lab introduction {#sec-intro}
 
