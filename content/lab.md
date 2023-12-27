@@ -1,4 +1,4 @@
-# 24. The Lab {#ch-}
+# 24. The Lab
 
 -   [Lab introduction](#sec-intro).
 -   [Priority and drawing order](#sec-prio).

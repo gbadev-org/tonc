@@ -1,4 +1,4 @@
-# B. Fixed-Point Numbers and LUTs {#ch-}
+# B. Fixed-Point Numbers and LUTs
 
 -   [What are fixed-point numbers](#sec-intro).
 -   [Fixed-point math](#sec-fmath).

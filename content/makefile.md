@@ -1,4 +1,4 @@
-# D. More on makefiles and compiler options {#ch-}
+# D. More on makefiles and compiler options
 
 <!-- toc -->
 

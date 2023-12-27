@@ -1,4 +1,4 @@
-# G. Change Log {#ch-}
+# G. Change Log
 
 ### Mar 2013 (1.4.1)
 

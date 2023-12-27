@@ -1,4 +1,4 @@
-# C. Vectors and Matrices {#ch-}
+# C. Vectors and Matrices
 
 <!-- toc -->
 

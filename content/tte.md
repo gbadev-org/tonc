@@ -1,4 +1,4 @@
-# 22. Tonc's Text Engine {#ch-}
+# 22. Tonc's Text Engine
 
 <!-- toc -->
 

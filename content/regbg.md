@@ -1,4 +1,4 @@
-# 9. Regular tiled backgrounds {#ch-}
+# 9. Regular tiled backgrounds
 
 <!-- toc -->
 

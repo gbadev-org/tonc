@@ -1,4 +1,4 @@
-# 21. Mode 7 Part 2 {#ch-}
+# 21. Mode 7 Part 2
 
 <!-- toc -->
 

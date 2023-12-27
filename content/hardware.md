@@ -1,4 +1,4 @@
-# 1. GBA Hardware {#ch-}
+# 1. GBA Hardware
 
 <!-- toc -->
 

@@ -1,4 +1,4 @@
-# 11. Affine sprites {#ch-}
+# 11. Affine sprites
 
 <!-- toc -->
 

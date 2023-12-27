@@ -1,4 +1,4 @@
-# 19. Text systems {#ch-}
+# 19. Text systems
 
 <!-- toc -->
 

@@ -1,4 +1,4 @@
-# 12. Affine backgrounds {#ch-}
+# 12. Affine backgrounds
 
 <!-- toc -->
 

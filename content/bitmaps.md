@@ -1,4 +1,4 @@
-# 5. The Bitmap modes (mode 3, 4, 5) {#ch-}
+# 5. The Bitmap modes (mode 3, 4, 5)
 
 <!-- toc -->
 

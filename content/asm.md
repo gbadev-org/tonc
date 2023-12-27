@@ -1,4 +1,4 @@
-# 23. Whirlwind Tour of ARM Assembly {#ch-}
+# 23. Whirlwind Tour of ARM Assembly
 
 <!-- toc -->
 

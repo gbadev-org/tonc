@@ -1,4 +1,4 @@
-# E. Make via editors {#ch-}
+# E. Make via editors
 
 <!-- toc -->
 

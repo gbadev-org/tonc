@@ -1,4 +1,4 @@
-# F. References and links {#ch-}
+# F. References and links
 
 <!-- toc -->
 

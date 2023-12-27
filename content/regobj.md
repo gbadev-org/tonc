@@ -1,4 +1,4 @@
-# 8. Regular sprites {#ch-}
+# 8. Regular sprites
 
 <!-- toc -->
 
