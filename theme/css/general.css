@@ -67,6 +67,7 @@ code {
     font-weight: 500;
     font-size: var(--mono-font-size);
     direction: ltr !important;
+    font-variant-ligatures: none;
 }
 
 /* make long words/inline code not x overflow */
