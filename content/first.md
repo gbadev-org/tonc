@@ -92,7 +92,7 @@ Naturally, this will expand the total lines of code a bit. Quite a bit, in fact.
 //
 // === NOTES ===
 // * This is a _small_ set of typedefs, #defines and inlines that can 
-//   be found in tonclib, and might not represent the 
+//   be found in libtonc, and might not represent the 
 //   final forms.
 
 
@@ -190,7 +190,7 @@ I've also added a <dfn>conceptual typedef</dfn>. While it's true that, in princi
 
 To be able to work directly specific addresses in memory, you'll have to cast them to pointers or arrays and work with those. In this demo's case, the addresses we're interested in are `0600:0000` (VRAM) and `0400:0000` (the display control register). In the first demo I did the casts manually, but it's better to use names for them so that you don't have to remember all the numbers and also because nobody else would have any clue to what's going on.
 
-For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in tonclib's *regs.h*.
+For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in libtonc's *regs.h*.
 
 For those who aren't as familiar with pointers as you should (boy, are you gonna be in trouble <kbd>:P</kbd>), here is the structure of the REG_DISPCNT #define. I'm using `vu32` as a typedef for ‘volatile u32’ here.
 
@@ -229,7 +229,7 @@ A similar procedure is carried out for VRAM, only this is still in its pointer f
 
 The IO registers (not to be confused with the CPU registers) are a collection of switches in the form of bitfields that control various operations of the GBA. The IO registers can be found in the `0400:0000` range of memory, and are usually clumped into words or halfwords according to personal preference. To get anything done, you have to set specific bits of the IO registers. While you can try to remember all the numerical values of these bits, it's more convenient to use #defines instead.
 
-The toolbox header lists a number of the #defines I use for REG_DISPCNT. The full list can be found in *vid.h* of tonclib, and the register itself is described in the [video](video.html) chapter. For now, we only need DCNT_MODE3 and DCNT_BG2. The former sets the video mode to mode 3, which is simplest of the 3 available [bitmap modes](bitmaps.html), and the latter activates background 2. Out of a total of four, bg 2 is the only one available in the bitmap modes and you have to switch it on if you want anything to show up. You have to admit that these names are a lot more descriptive than `0x0003` and `0x0400`, right? <!-- If not, you are _banned_ from programming :P -->
+The toolbox header lists a number of the #defines I use for REG_DISPCNT. The full list can be found in *vid.h* of libtonc, and the register itself is described in the [video](video.html) chapter. For now, we only need DCNT_MODE3 and DCNT_BG2. The former sets the video mode to mode 3, which is simplest of the 3 available [bitmap modes](bitmaps.html), and the latter activates background 2. Out of a total of four, bg 2 is the only one available in the bitmap modes and you have to switch it on if you want anything to show up. You have to admit that these names are a lot more descriptive than `0x0003` and `0x0400`, right? <!-- If not, you are _banned_ from programming :P -->
 
 I've also added a list of useful color defines, even though I'm not using them in *second.c*. They may or may not be useful in the future, though, so it's good to have them around.
 <br>  
@@ -237,7 +237,7 @@ Creating the register #defines is probably the biggest part of header files. As 
 
 #### Macros and inline functions
 
-You can also create #defines that work a little like functions. These are called <dfn>macros</dfn>. I'm not using them here, but there are plenty to be found in tonclib's headers. Like all #defines, macros are part of the preprocessor, not the compiler, which means that the debugger never sees them and they can have many hidden errors in them. For that reason, they have been depreciated in favor of [<dfn>inline functions</dfn>](http://gcc.gnu.org/onlinedocs/gcc-4.0.2/gcc/Inline.html). They have all the benefits of macros (i.e., integrated into the functions that call them so that they're fast), but are still function-like in syntax and resolved at compile time. At least that's the theory, in practice they're not *quite* as speedy as macros, but often preferable anyway.
+You can also create #defines that work a little like functions. These are called <dfn>macros</dfn>. I'm not using them here, but there are plenty to be found in libtonc's headers. Like all #defines, macros are part of the preprocessor, not the compiler, which means that the debugger never sees them and they can have many hidden errors in them. For that reason, they have been depreciated in favor of [<dfn>inline functions</dfn>](http://gcc.gnu.org/onlinedocs/gcc-4.0.2/gcc/Inline.html). They have all the benefits of macros (i.e., integrated into the functions that call them so that they're fast), but are still function-like in syntax and resolved at compile time. At least that's the theory, in practice they're not *quite* as speedy as macros, but often preferable anyway.
 
 One inline function I'm using is `m3_plot()`, which, as you may have guessed, is used to plot pixels in mode 3. In mode 3, VRAM is just a matrix of 16bit colors, so all we have to do to plot a pixel is enter a halfword in the right array element. `m3_plot()` looks exactly like a normal function, but because the ‘`static inline`’ in front of it makes it an inline function. Note that inlining is only a recommendation to the compiler, not a commandment, and it only works if optimizations are switched on.
 
@@ -258,7 +258,7 @@ Making use of the contents of *toolbox.h* makes the code of the demo much more u
 
 The first line in `main()` sets a few bits in the display control, commonly known as REG_DISPCNT. I use `DCNT_MODE3` to set the video mode to mode 3, and activate background 2 with `DCNT_BG2`. This translates to `0x0403` as before, but this method gives a better indication of what's happening than entering the raw number. Using a variable-like #define instead of the raw dereferenced pointer is also preferable; especially as the latter is sure to wig out people new to C.
 
-So how do I know what bit does what to create the #defines in the first place? Simple, I looked them up in [GBATEK](https://problemkaputt.de/gbatek.htm), the essential reference to GBA programming. For every IO register I use in these pages I'll give a description of the bits and a list of #defines as they're defined in tonclib. The formats for these descriptions were given in the [preface](intro.html#ssec-note-reg), and the table for REG_DISPCNT can be found in the [video chapter](video.html#sec-vid-regs).
+So how do I know what bit does what to create the #defines in the first place? Simple, I looked them up in [GBATEK](https://problemkaputt.de/gbatek.htm), the essential reference to GBA programming. For every IO register I use in these pages I'll give a description of the bits and a list of #defines as they're defined in libtonc. The formats for these descriptions were given in the [preface](intro.html#ssec-note-reg), and the table for REG_DISPCNT can be found in the [video chapter](video.html#sec-vid-regs).
 
 Actually plotting the pixels is now done with the inline function `m3_plot()`, which is formatted much the same way as every kind of pixel plotter in existence: 2 coordinates and the color. Much better than raw memory access, even though it works exactly the same way. The colors themselves are now created with an inline too: `RGB15` takes 3 numbers for the red, green and blue components and ties them together to form a valid 16-bit color.
 

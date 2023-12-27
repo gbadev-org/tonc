@@ -52,7 +52,7 @@ This arrangement allows for the most basic cases and allows for some variations 
 
 > **Semi-obsolete**
 > 
-> I have another text system here that is much more powerful (as in, really working on every video mode and has a printf too) than what's described in this page. However, it's rather large, not completely finished and it would take some time to write the description page and alter the text to fit the demos again. A tonclib version that has the relevant changes can be found at [http://www.coranac.com/files/misc/tonclib-1.3b.rar](http://www.coranac.com/files/misc/tonclib-1.3b.rar).
+> I have another text system here that is much more powerful (as in, really working on every video mode and has a printf too) than what's described in this page. However, it's rather large, not completely finished and it would take some time to write the description page and alter the text to fit the demos again. A libtonc version that has the relevant changes can be found at [http://www.coranac.com/files/misc/tonclib-1.3b.rar](http://www.coranac.com/files/misc/tonclib-1.3b.rar).
 
 
 ## Text system internals {#sec-in}
@@ -1303,7 +1303,7 @@ int main()
 
 The code should be self-explanatory. I have five functions for the things I want to profile. I chose separate functions because then I know optimisation will not interfere (it sometimes moves code around). After running these functions, I set-up my text functions and print out the results.
 
-The profiling itself uses two macros, `profile_start()` and `profile_stop()`. These can be found in `core.h` of tonclib. What the macros do is start and stop timers 2 and 3, and then return the time in between the calls. This does mean that the code you're profiling cannot use those timers.
+The profiling itself uses two macros, `profile_start()` and `profile_stop()`. These can be found in `core.h` of libtonc. What the macros do is start and stop timers 2 and 3, and then return the time in between the calls. This does mean that the code you're profiling cannot use those timers.
 
 ```c
 INLINE void profile_start()

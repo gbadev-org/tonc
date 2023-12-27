@@ -12,7 +12,7 @@ I'll also show how you can add some basic scripting to change cursor positions, 
 
 And, of course, there will be demos. Oh, will there be demos. There are about 10 of them in fact, so I'm going to do things a little bit differently than before: there will be one project containing a menu with all the examples. Not all examples will be shown here because that'd just be too much.
 
-Lastly, it is expected that by now you have a decent knowledge of GBA programming, so I'm going to keep the amount of GBA-specific exposition to a minimum. When you see functions used that haven't been covered already, turn to GBATEK, the project's code or tonclib's code for details.
+Lastly, it is expected that by now you have a decent knowledge of GBA programming, so I'm going to keep the amount of GBA-specific exposition to a minimum. When you see functions used that haven't been covered already, turn to GBATEK, the project's code or libtonc's code for details.
 
 ## Basic design {#sec-design}
 
@@ -118,7 +118,7 @@ Each cell has one glyph, but the actual glyphs can be smaller than the cells (wh
 
 For fixed-width or fixed-height fonts, members `charW` and `charH` denote the actual character width and height. For fonts of variable widths, the `widths` member points to the a byte-array containing the widths of the glyphs and something similar is true for the `heights`. `charOffset` is the (ASCII) character the data starts at. Font sheets often start at a space (' '), so this tends to be 32. `charCount` is the number of characters and can be used if you need to copy the whole sheet to VRAM (like in the case of tile-mapping).
 
-Please note that how the data in a `TFont` is used depends almost entirely on the glyph renderer. Most renderers that come with tonclib expect this format:
+Please note that how the data in a `TFont` is used depends almost entirely on the glyph renderer. Most renderers that come with libtonc expect this format:
 
 - Bitpacked to **1 bpp**, for size reasons. And for rendering speed too, actually, since memory loads are expensive.
 - Tiled-by-glyph. The data for each glyph is contingent with `cellSize` bytes between each glyph. This is similar to how 1D object work with one important difference:

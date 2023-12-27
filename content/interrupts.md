@@ -181,7 +181,7 @@ The actual switchboard is only one part of the whole; I also need a couple of st
 
 All of these functions do something like this: disable interrupts (`REG_IME`=0), do their stuff and then re-enable interrupts. It's a good idea to do this because being interrupted while mucking about with interrupts is not pretty. The functions concerned with service routines will also take a function pointer (the `fnptr` type), and also return a function pointer indicating the previous isr. This may be useful if you want to try to chain them.
 
-Below you can see the structs, tables, and the implementation of `irq_enable()` and `irq_add()`. In both functions, the `__irq_senders[]` array is used to determine which bit to set in which register to make sure things send interrupt requests. The `irq_add()` function goes on to finding either the requested interrupt in the current table to replace, or an empty slot to fill. The other routines are similar. If you need to see more, look in *tonc_irq.h/.c* in tonclib.
+Below you can see the structs, tables, and the implementation of `irq_enable()` and `irq_add()`. In both functions, the `__irq_senders[]` array is used to determine which bit to set in which register to make sure things send interrupt requests. The `irq_add()` function goes on to finding either the requested interrupt in the current table to replace, or an empty slot to fill. The other routines are similar. If you need to see more, look in *tonc_irq.h/.c* in libtonc.
 
 ```c
 //! Interrups Indices
@@ -297,7 +297,7 @@ fnptr irq_add(enum eIrqIndex irq_id, fnptr isr)
 The main task of the master ISR is to seek out the raised interrupt in `___isr_table`, and acknowledge it in both `REG_IF` and `REG_IFBIOS`. If there is an irq-specific service routine, it should call it; otherwise, it should just exit to BIOS again. In C, it would look something like this.
 
 ```c
-// This is mostly what tonclib's isr_master does, but
+// This is mostly what libtonc's isr_master does, but
 // you really need asm for the full functionality
 IWRAM_CODE void isr_master_c()
 {

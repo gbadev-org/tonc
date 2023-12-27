@@ -958,9 +958,9 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
 </table>
 </div>
 
-### Bonus demo: the 'text' in text bg and introducing tonclib {#ssec-demo-hello}
+### Bonus demo: the 'text' in text bg and introducing libtonc {#ssec-demo-hello}
 
-Woo, bonus demo! This example will serve a number of purposes. The first is to introduce tonclib, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)) that can be shared among projects.
+Woo, bonus demo! This example will serve a number of purposes. The first is to introduce libtonc, a library of code to make life on the GBA a bit easier. In past demos, I've been using *toolbox.h/c* to store useful macros and functions. This is alright for very small projects, but as code gets added, it becomes very hard to maintain everything. It's better to store common functionality in [libraries](https://en.wikipedia.org/wiki/Library_(computing)) that can be shared among projects.
 
 The second reason is to show how you can output text, which is obviously an important ability to have. Tonclib has an extensive list of options for text rendering – too much to explain here – but its interface is pretty easy. For details, visit the [Tonc Text Engine chapter](tte.html).
 
@@ -1011,7 +1011,7 @@ Yes, it is indeed a “hello world” demo, the starting point of nearly every i
 
 Tonc's support for text goes through `tte_` functions. In this case, `tte_init_se_default()` sets up background 0 for tile-mapped text. It also loads the default 8×8 font into charblock 0 (see {@fig:hello}b). After that, you can write to text with `tte_write`. The sequence `#{P:x,y}` is the formatting command that TTE uses to position the cursor. There are a number of these, some of which you'll also see in later chapters.
 
-From this point on, I'll make liberal use of tonclib's text capabilities in examples for displaying values and the like. This will mostly happen without explanation, because that won't be part of the demo. Again, to see the internals, go to the [TTE chapter](tte.html).
+From this point on, I'll make liberal use of libtonc's text capabilities in examples for displaying values and the like. This will mostly happen without explanation, because that won't be part of the demo. Again, to see the internals, go to the [TTE chapter](tte.html).
 
 #### Creating and using code libraries
 
@@ -1038,7 +1038,7 @@ $(PROJ).elf : $(OBJS)
 
 Of course, these archives can get pretty big if you dump a lot of stuff in there. You might wonder if all of it is linked when you add a library to your project. The answer is no, it is not. The linker is smart enough to use only the files which functions you're actually referencing. In the case of this demo, for example, I'm using various text functions, but none of the [affine](affine.html) functions or tables, so those are excluded. Note that the exclusion goes by *file*, not by *function*. If you only have one file in the library (or `#include`d everything, which amounts to the same thing), everything will be linked.
 
-I intend to use tonclib in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of tonclib can be found in the *tonclib* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/tonclib/).
+I intend to use libtonc in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of libtonc can be found in the *libtonc* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/libtonc/).
 
 <div class="note">
 <div class="nhgood">
@@ -1047,7 +1047,7 @@ Better copy and fill routines: memcpy16/32 and memset16/32
 
 </div>
 
-Now that I am using tonclib as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
+Now that I am using libtonc as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
 
 ```c
 void memset16(void *dest, u16 hw, uint hwcount);

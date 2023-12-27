@@ -6,7 +6,7 @@ Maintaince update. also includes things from the [errata page](http://www.corana
 
 - ![fix](./img/log/bul_excl.png) Changed from `arm-eabi` to `arm-none-eabi`.
 - ![upgrade](./img/log/bul_upgr.png) Little html fixes here and there. Thank Glod for directory search-and-replace tools.
-- ![fix](./img/log/bul_excl.png) `all code`: since GCC 4.7 broke my assembly functions, I've recompiled all code with the latest devkitArm (currently 40) for asm compatilibity. The examples and tonclib should all work again. I still have to adjust the text to match though.
+- ![fix](./img/log/bul_excl.png) `all code`: since GCC 4.7 broke my assembly functions, I've recompiled all code with the latest devkitArm (currently 40) for asm compatilibity. The examples and libtonc should all work again. I still have to adjust the text to match though.
 - `asm.htm`: fixed non-matching variable names in [data sections](asm.html#ssec-gas-dsec)'s code snippet. Thanks, Gdogg
 - `gfx.htm`: removed a lost semicolon in the [blending demo](gfx.html#ssec-bld-demo).
 - `hardware.htm`: IO-ram upper limit was given as `0401:03FF`, which should be `0400:03FF`. Thanks, G M.
@@ -41,13 +41,13 @@ I think that'll be all then.
 - ![swap](./img/log/bul_swap.png) text/code: the [irq chapter](interrupts.html) and its demo uses the new master ISR.
 - ![fix](./img/log/bul_excl.png) text: Fixed the brown text in the pdf. For anyone who has the same problem with CutePDF, go to `CutePDF printer->Properties->Paper/Quality->Advanced->Graphic->Image Color Management` and make sure `ICM Method` is not set to `Host system`. How silly of me not to look there first.
 - text: Finally removed the obsolete section for IRQ-handling with older devkits.
-- ![new](./img/log/bul_new.png) tonclib: There is a new system for text called TTE. It's pretty cool. Read more about it in [tte.htm](tte.html).
-- ![new](./img/log/bul_new.png) tonclib: New rendering functions. There are now ‘TSurface’ structs defining a rendering surface and basic primitive renderers for different surface types. Functionality includes: pixel, line rectangle renderers, a blitter and floodfill. Key surface types: 16bpp bitmap, 8bpp bitmap and 4bpp tiles.
-- ![new](./img/log/bul_new.png) tonclib: Color adjustment functions. Fading, blending, brightness and more.
-- ![new](./img/log/bul_new.png) tonclib: Added [tonccpy and toncset](http://www.coranac.com/2008/01/25/tonccpy/), memcpy and memset replacements that actually work for VRAM as well.
-- ![new](./img/log/bul_new.png) tonclib: Put tonclib documentation online: [http://www.coranac.com/man/tonclib/index.htm](http://www.coranac.com/man/tonclib/index.htm).
-- ![new](./img/log/bul_new.png) tonclib: Added `tonc_libgba.h`, a header with most of the libgba constants and functions names mapped to tonc equivalents.
-- ![swap](./img/log/bul_swap.png) tonclib: Changed the master ISR to one that doesn't automatically enable interrupt nesting. It's a bit of a downgrade, but it's probably more appropriate. This shouldn't affect anyone that didn't use nested interrupts. The old version is still available, it's just not the default.
+- ![new](./img/log/bul_new.png) libtonc: There is a new system for text called TTE. It's pretty cool. Read more about it in [tte.htm](tte.html).
+- ![new](./img/log/bul_new.png) libtonc: New rendering functions. There are now ‘TSurface’ structs defining a rendering surface and basic primitive renderers for different surface types. Functionality includes: pixel, line rectangle renderers, a blitter and floodfill. Key surface types: 16bpp bitmap, 8bpp bitmap and 4bpp tiles.
+- ![new](./img/log/bul_new.png) libtonc: Color adjustment functions. Fading, blending, brightness and more.
+- ![new](./img/log/bul_new.png) libtonc: Added [tonccpy and toncset](http://www.coranac.com/2008/01/25/tonccpy/), memcpy and memset replacements that actually work for VRAM as well.
+- ![new](./img/log/bul_new.png) libtonc: Put libtonc documentation online: [http://www.coranac.com/man/tonclib/index.htm](http://www.coranac.com/man/tonclib/index.htm).
+- ![new](./img/log/bul_new.png) libtonc: Added `tonc_libgba.h`, a header with most of the libgba constants and functions names mapped to tonc equivalents.
+- ![swap](./img/log/bul_swap.png) libtonc: Changed the master ISR to one that doesn't automatically enable interrupt nesting. It's a bit of a downgrade, but it's probably more appropriate. This shouldn't affect anyone that didn't use nested interrupts. The old version is still available, it's just not the default.
 
 ### Dec 2007 (1.3b)
 
@@ -88,23 +88,23 @@ Text:
 
 Code:
 
-- ![new](./img/log/bul_new.png) tonclib: All new tonclib, with new file structure. All files are prefixed with `tonc` so the don't interfere with outside files. The types, memory map and register #defines are centralized in _types_, _memmap_ and _memdef_. The main file to include is now `tonc.h`.
+- ![new](./img/log/bul_new.png) libtonc: All new libtonc, with new file structure. All files are prefixed with `tonc` so the don't interfere with outside files. The types, memory map and register #defines are centralized in _types_, _memmap_ and _memdef_. The main file to include is now `tonc.h`.
 
-- ![new](./img/log/bul_new.png) tonclib: Doxygen comments all around. The resulting documentation can be found in `tonclib.chm`.
+- ![new](./img/log/bul_new.png) libtonc: Doxygen comments all around. The resulting documentation can be found in `tonclib.chm`.
 
-- ![new](./img/log/bul_new.png) tonclib: a few of the new items. A brand new interrupt handler for nested, prioritized interrupts. Mode 3/5 line drawers. A new .12f sine LUT with support functions as well as lerping functions. All fixed-point macros are now inlines.
+- ![new](./img/log/bul_new.png) libtonc: a few of the new items. A brand new interrupt handler for nested, prioritized interrupts. Mode 3/5 line drawers. A new .12f sine LUT with support functions as well as lerping functions. All fixed-point macros are now inlines.
 
-- ![new](./img/log/bul_new.png) tonclib: The `BGINFO` struct and functions are gone. Wasn't worth much anyway. Also removed are internal OAM shadows; it's better that you can define them when needed and can save IWRAM by potentially storing them in EWRAM. All OAM functions now use general object pointers, rather than buffers.
+- ![new](./img/log/bul_new.png) libtonc: The `BGINFO` struct and functions are gone. Wasn't worth much anyway. Also removed are internal OAM shadows; it's better that you can define them when needed and can save IWRAM by potentially storing them in EWRAM. All OAM functions now use general object pointers, rather than buffers.
 
-- ![new](./img/log/bul_new.png) tonclib: yet another Great Renaming. Among other things: The leading underscore for zero-#defines are gone. I thought it was a good way if guarding against potential unsafe operations, but they just look too weird to use. And there was much rejoicing. Some macros have lots their `_ON` prefix when it's obvious that that's what they do. OAM structs are now `OBJ_ATTR` and `OBJ_AFFINE` and supporting functions are now prefixed `obj_` and `obj_aff_`. `BGAFF_EX` is now `BG_AFFINE` and used in most affine BG functions. A complete list can be found in `tonc_legacy.h`, which you can #include to keep compatibility with older code.
+- ![new](./img/log/bul_new.png) libtonc: yet another Great Renaming. Among other things: The leading underscore for zero-#defines are gone. I thought it was a good way if guarding against potential unsafe operations, but they just look too weird to use. And there was much rejoicing. Some macros have lots their `_ON` prefix when it's obvious that that's what they do. OAM structs are now `OBJ_ATTR` and `OBJ_AFFINE` and supporting functions are now prefixed `obj_` and `obj_aff_`. `BGAFF_EX` is now `BG_AFFINE` and used in most affine BG functions. A complete list can be found in `tonc_legacy.h`, which you can #include to keep compatibility with older code.
 
-- ![new](./img/log/bul_new.png) projects: the structure of the projects hierarchy has been altered. The demos have been categorized as basic, extended or advanced, which correspond with the tonc-text parts. Basic demos are simpler, with simple makefiles. They are completely self-sufficient, which should help learning the ropes. The extended demos have more complete makefiles and make use of tonclib. The advanced demos have devkitPro-like makefiles. As much as I'd like to, the actual DKP templates don't quite suit my purposes (sorry, Dave <span class="kbd">:P</span>) so I rolled my own. The advanced demos also make use of assembly files for data.
+- ![new](./img/log/bul_new.png) projects: the structure of the projects hierarchy has been altered. The demos have been categorized as basic, extended or advanced, which correspond with the tonc-text parts. Basic demos are simpler, with simple makefiles. They are completely self-sufficient, which should help learning the ropes. The extended demos have more complete makefiles and make use of libtonc. The advanced demos have devkitPro-like makefiles. As much as I'd like to, the actual DKP templates don't quite suit my purposes (sorry, Dave <span class="kbd">:P</span>) so I rolled my own. The advanced demos also make use of assembly files for data.
 
   The project folders also contain `.pnproj` files, which can be opened and run from Programmer's Notepad.
 
 - ![new](./img/log/bul_new.png) projects: New projects. `m3_demo`, for drawing in mode 3. There are also a couple of new ones in the `lab` folder. They don't have discussions yet, but they're worth checking out. `bigmap` should be of particular interest.
 
-- ![upgrade](./img/log/bul_upgr.png) projects: Update projects. All projects have been updated to the new tonclib. The DMA, irq and mode 7 demos have had drastic changes in content. `dma_demo` is now about using HDMA effects, in this case making a circular window. `irq_demo` uses the new irq handler to uts fullests with nested interrupts and changing irq priorities. As for `mode7ex`, well, you'd better just see for yourself.
+- ![upgrade](./img/log/bul_upgr.png) projects: Update projects. All projects have been updated to the new libtonc. The DMA, irq and mode 7 demos have had drastic changes in content. `dma_demo` is now about using HDMA effects, in this case making a circular window. `irq_demo` uses the new irq handler to uts fullests with nested interrupts and changing irq priorities. As for `mode7ex`, well, you'd better just see for yourself.
 
 ### Jul 23, 2006 (v1.2.4)
 
@@ -143,7 +143,7 @@ Probable upcoming changes
 
 </div>
 
-I intend to make a few changes in tonc's code. First, I'll try to decouple the code in the basic demos from tonclib, which should make them easier to understand as you won't have to browse through all the other stuff. Second, this will allow me to rework and optimize tonclib, which is now hampered in some areas by me having to keep a number of things simpler than I'd like to. Now, this is what I'd _like_ to do; I can't really tell when (if) I will get round to it.
+I intend to make a few changes in tonc's code. First, I'll try to decouple the code in the basic demos from libtonc, which should make them easier to understand as you won't have to browse through all the other stuff. Second, this will allow me to rework and optimize libtonc, which is now hampered in some areas by me having to keep a number of things simpler than I'd like to. Now, this is what I'd _like_ to do; I can't really tell when (if) I will get round to it.
 
 Also, I have half a mind of changing the current DMA demo to [this one](https://gbadev.net/forum-archive/thread/9/9023.html), which simply looks a lot cooler, even though there's is a lot more magic going on. Meh, we'll see.
 
@@ -156,9 +156,9 @@ More non-final updates. Quite a lot actually.
 - ![swap](./img/log/bul_swap.png) Tossed chapter order around a bit. I've moved [keys](keys.html) up to right after [bitmaps](bitmaps.html), which is a much better place for it anyway.
 - ![upgrade](./img/log/bul_upgr.png) Updated [First Demo](first.html), [Bitmap Modes](bitmaps.html), [Regular sprites](regobj.html), [Regular Backgrounds](regbg.html), [Affine Sprites](affobj.html), [Affine Backgrounds](affbg.html), [Graphic effects](gfx.html), and [Timers](timers.html) with full or nearly full code of their demos.
 - ![upgrade](./img/log/bul_upgr.png) [First Demo](first.html) now has two demos, one purely with hardcode numbers (muwahaha!), and one according to more sound programming principles. Also described these in much more detail.
-- ![upgrade](./img/log/bul_upgr.png) Added two demos to [Regular Backgrounds](regbg.html), one of which introduces tonclib and its text functions, which will come back a lot lateron. Speaking of which …
-- ![upgrade](./img/log/bul_upgr.png) Recoded `bld_demo`, `m7_demo`, `mos_demo`, `obj_aff`, and `tmr_demo` to use tonclib's text so that it's clearer what you're changing.
-- ![upgrade](./img/log/bul_upgr.png) Replaced copiers/fillers with tonclib's `memcpy16/32` and `memset16/32` in most demos after [its introduction](regbg.html#ssec-demo-hello).
+- ![upgrade](./img/log/bul_upgr.png) Added two demos to [Regular Backgrounds](regbg.html), one of which introduces libtonc and its text functions, which will come back a lot lateron. Speaking of which …
+- ![upgrade](./img/log/bul_upgr.png) Recoded `bld_demo`, `m7_demo`, `mos_demo`, `obj_aff`, and `tmr_demo` to use libtonc's text so that it's clearer what you're changing.
+- ![upgrade](./img/log/bul_upgr.png) Replaced copiers/fillers with libtonc's `memcpy16/32` and `memset16/32` in most demos after [its introduction](regbg.html#ssec-demo-hello).
 - ![upgrade](./img/log/bul_upgr.png) Added [field defines](intro.html#ssec-note-reg) to a lot of register tables.
 - ![upgrade](./img/log/bul_upgr.png) Restructed part of [keys.htm](keys.html) for better explanations of the various functions I use.
 - ![new](./img/log/bul_new.png) Added a nasty piece on [division by reciprocal multiplication](fixed.html#sec-rmdiv). Not for the squeemish.
