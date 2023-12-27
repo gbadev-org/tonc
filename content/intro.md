@@ -4,17 +4,22 @@
 
 ## Organisation {#sec-org}
 
-<div class="cpt_fr" style="width:120px;">
+<!-- <div class="cpt_fr" style="width:120px;">
   <img alt="Tonc directory structure" src="./img/toncdirs.png" id="fig:toncdirs">
 
   **{*@fig:toncdirs}**: directories.
-</div>
+</div> -->
 
-TONC consists of three parts: a <dfn>text</dfn> section, the actual tutorial, a <dfn>code</dfn> section, which contains all the source code and makefiles of the various demos, and a <dfn>bin</dfn> section that contains binaries of the demo. Though they are separate zip files, they work best when used together. You can find the zip files further down this page. If you unzip them in one directory, say `tonc`, you'll get the structure depicted in @fig:toncdirs.
+TONC consists of three components: a <dfn>text</dfn> section (the actual tutorial), an <dfn>examples</dfn> repo with all the source code & makefiles of the various demos, and a library called <dfn>libtonc</dfn> which holds all the useful/reusable code introduced throughout the tutorial.
+
+Previously these were all distributed as zip files, but times have changed and now they exist in separate git repositories. They will now be explained in more detail:
+
 
 ### Tonc text {#ssec-org-text}
 
-The text section covers the principles of GBA programming in detail. The focus here is not so much on how to get something done, but how things actually *work*, and why it's done the way it's done. After that the how often comes naturally. Every chapter has one of more demonstrations of the covered theory, and a brief discussion of the demo itself. Please, do not make the mistake of only reading the demo discussion: to properly understand how things work you need to read the text in full. While there are optional parts, and whole pages of boring text that seem to have little to do with actual GBA coding, they are there for a reason, usually there's extra conceptual information or gotchas.
+The text section, which you're reading now, covers the principles of GBA programming in detail. The focus here is not so much on how to get something done, but how things actually *work*, and why it's done the way it's done. After that the *how* often comes naturally. Every chapter has one of more demonstrations of the covered theory, and a brief discussion of the demo itself.
+
+Please, do not make the mistake of only reading the demo discussion: to properly understand how things work you need to read the text in full. While there are optional parts, and whole pages of boring text that seem to have little to do with actual GBA coding, they are there for a reason, usually there's extra conceptual information or gotchas.
 
 At first, the text part had only very little code in it, because I figured the demo code would be at hand and flicking between them would not be annoying. Well, I've realized that I figured wrong and am in the process of including more of the code into these pages; maybe not quite enough to copy-paste and get a clean compile, but enough to go with the explanations of the demos.
 
@@ -22,33 +27,28 @@ The main language will be C, and a smidgeon of assembly. These are the two main 
 
 GBA programming is done close to the hardware, so I hope you know your pointers, [hexadecimal numbers](numbers.html#sec-num) and [boolean algebra/bit-operations](numbers.html#sec-bitops). There's also a fair amount of math here, mostly [vector and matrix](matrix.html) stuff so I hope your linear algebra is up to speed. Lastly, I am assuming your intellectual capacities exceed those of a random lab monkey, so I won't elaborate on what I consider trivial matters too much.
 
-Aside from the introduction and appendices, the text is divided into 3 parts. First there's ‘basics’, which explains the absolute essentials for getting anything done. This includes setting up the development environment, basic use of graphics and buttons. It also contains text on what it means to do low level programming and programming efficiently; items that in my view you'd better learn sooner rather than later. The second part covers most of the other items of the GBA like special graphic effects, timers and interrupts. The final section covers more advanced items that uses elements from all chapters.This includes writing text (yes, that's an advanced topic on the GBA), mode 7 graphics and a chapter on ARM assembly.
+Aside from the introduction and appendices, the text is divided into 3 parts. First there's ‘basics’, which explains the absolute essentials for getting anything done. This includes setting up the development environment, basic use of graphics and buttons. It also contains text on what it means to do low level programming and programming efficiently; items that in my view you'd better learn sooner rather than later. The second part covers most of the other items of the GBA like special graphic effects, timers and interrupts. The final section covers more advanced items that uses elements from all chapters. This includes writing text (yes, that's an advanced topic on the GBA), mode 7 graphics and a chapter on ARM assembly.
 
-  
+The Markdown source for the text is all [available on GitHub](https://github.com/gbadev-org/tonc), so please feel free to contribute if you find a typo or something that can be improved.
+
+<!--
+TODO: maybe provide links to PDF and 'offline' html downloads?
 
 Individual html: [tonc-text.zip](http://www.coranac.com/files/tonc-text.zip) (663 kb)  
 Compiled html (CHM, v1.4 version): [tonc.chm](http://www.coranac.com/files/tonc.chm) (1.2 MB).  
 PDF: [tonc.pdf](http://www.coranac.com/files/tonc.pdf) (3.1 MB)
+-->
 
-### Tonc code {#ssec-org-code}
+### Tonc code (libtonc & examples) {#ssec-org-code}
 
-The source code to all the demos mentioned in the text can be found in the `code` directory. Like the text, the code is divided into 3 main parts: basic, extended and advanced. The basic projects are (hopefully) pretty newbie friendly. They're completely self-contained so you can toy with them and not worry about screwing up other parts. The extended projects take their GBA-related code from <dfn>tonclib</dfn>, a library with all my #defines and important functions. The advanced demos also use `tonclib` liberally and will use some assembly files, even if it is just for data. There is also a `lab` directory with a few interesting projects, but which might not be quite ready. Still interesting to look at, though.
+The source code to all the demos mentioned in the text can be found in the [libtonc-examples](https://github.com/gbadev-org/libtonc-examples) repository. Like the text, the examples themselves are divided into 3 parts: *basic*, *extended* and *advanced*. There is also a `lab` directory with a few interesting projects, but which might not be quite ready. Still interesting to look at, though.
 
-Unlike most GBA tutorials, tonc uses **makefiles** rather than batchfiles to build the projects, because they're just Plain Better than batchfiles. However, as a lot of you will probably never seen them before, these also come in three stages of difficulty. There is a master makefile, `tonc.mak`, in the code root directory that can drive the projects, and the `vc6` directory has a Visual C++ project that you can use if you're on Windows and have Visual Studio version.
+The language we'll be using is **C** with a dash of assembly (but *not* C++). I am working under the assumption that you are familiar with this language. If not, go learn it first because I'm not going to show you; this is not a C course. I do have some links to C tutorials in the [references](refs.html#ssec-tut).
 
-Pretty much all of the general functions used in tonc can be found in `tonclib`. This includes text writers for all modes, BIOS routines, a pretty advanced interrupt dispatcher, safe and fast memory copy and fill routines and much more. It's well worth stealing from.
+Unlike some older GBA tutorials, tonc uses **makefiles** instead of batch scripts to build the example projects, because they're just Plain Better™. How to use these will be explained in the next chapter, but if you just wanted to check out the pre-compiled example ROMs, those are still available here: [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip).
 
-  
+The examples depend on [libtonc](https://github.com/gbadev-org/libtonc), a library containing all the important #defines and functions introduced throughout the tutorial. This also includes text writers for all video modes, BIOS routines, a pretty advanced interrupt dispatcher, safe and fast memory copy and fill routines and much more. Historically `libtonc` was included alongside the examples, but nowadays it comes with devkitARM, so you don't have to download it yourself.
 
-Download [tonc-code.zip](http://www.coranac.com/files/tonc-code.zip) (198 kb).
-
-### Tonc binaries {#ssec-org-bin}
-
-The **`bin`** directory contains the binaries of the demos. Each of them has been tested on a number of emulators, and on hardware using a homemade Xboo communication cable (see [www.devkitpro.org](http://www.devkitpro.org) for instructions on how to make one). In most instances they behave exactly the same. The readme `tonc_bins.txt` indicates when and where hardware and emulators disagree.
-
-  
-
-Download [tonc-bin.zip](http://www.coranac.com/files/tonc-bin.zip) (167 kb).
 
 ### Statement of Purpose {#ssec-org-sop}
 
@@ -59,8 +59,6 @@ I wrote Tonc for two reasons. Firstly, as a way to organize my own thoughts. You
 -   [Bad programming habits](first.html#ssec-notes-bad). Adding code/data to projects by [#including the files](bitmaps.html#ssec-data-hdr), Using ancient [toolchains](setup.html#sec-alt), non-optimal compiler settings and data-types, and inefficient (sometimes *very* inefficient) code.
 
 If you are new and have followed the other tutorials, everything will seem to work fine, so what's the problem? Well, that's part of the problem actually. Everything will *seem* fine, until you start bigger projects, at which time you'll find hidden errors and that slow code really bogs things down and you'll have unlearn all the bad habits you picked up and redo everything from the start. The GBA is one of the few platforms where efficient coding still means something, and sometimes all it takes is a change of datatype or compiler switch. These things are better done right from the start.
-
-  
 
 I've tried to go for completeness first, simplicity second. As a certain wild-haired scientist once said: “Make things as simple as possible, but no simpler.” This means things can seem a little technical at times, but that's only because things *are* pretty technical at times, and there's no sense in pretending they're not.
 
@@ -185,37 +183,23 @@ The full list of REG_DISPSTAT can be found [here](video.html#tbl-reg-dispstat). 
 
 Lastly, as shorthand for a specific bit in a register, I will use accolades. The number will be a hexadecimal number. For example, REG_DISPCNT{0} is the VBlank status bit (VbS above), and REG_DISPCNT{8-F} would be the whole byte for the VCount trigger.
 
-## Prerequisites {#sec-cnd}
-
-The text and code have been created and found to work under the following conditions. If you find you have a problem, show me yours and maybe we can find and fix it.
-
--   **Programming language**. The language we'll be using is **C** with a dash of assembly (but *not* C++). I am working under the assumption that you are familiar with this language. If not, go learn it first because I'm not going to show you; this is not a C course. I do have some links to C tutorials in the [references](refs.html#ssec-tut).
-
--   **Compiler**. Obviously, you need a compiler that can turn C code into a GBA binary. I'm using the completely **free** [devkitARM](https://devkitpro.org) (dkARM) toolchain, which is based on the [GNU compiler collection (GCC)](http://www.gnu.org). Setup instructions and samples can be found on the site, and in my [setup](setup.html) section, of course. dkARM has become the standard over the past year or so; if you are still using the older DevKit Advance, you might think about switching. I can't say how difficult it would be to get [HAM](http://www.ngine.de)*b0rked* to accept my code/makefiles, but it shouldn't be too hard. If you use the official Arm ADS, sorry but you're on your own there.
-
-    To write and manage my code I use Visual C++ 6.0, but I am not using its native make tool (`NMAKE`), because it's not very portable and seems to be pretty weak as well. Instead, I use `GNU make`, which usually comes with any of the devkits.
-
--   **Binaries**. You'll also need something that can run the binaries. On the emu side, I use either [VisualBoy Advance](http://vba.ngemu.com) (VBA) v1.7 or higher, and [no$gba](http://nocash.emubase.de/gba.htm), freeware edition. But as nice as these emulators are, you *must* be able to test on a real GBA too if you're serious about this stuff. Get yourself a flash card or, if you're on a budget, you can always build a multiboot cable like Xboo yourself. If you shop around you should be able to get the components for about $5.
-
--   **OS**. I use the Windows operation system (Win 98 and WinXP) and when referring to commands or programs I'm more or less assuming you are too. The GBA and devkits couldn't care less. However, a Linux user, for example, would have little use for a Visual C project and wouldn't be able to use [Usenti](http://www.coranac.com/projects/#usenti) (my bitmap editor) or [excellut](http://www.coranac.com/projects/#excellut) (my Excel LUT builder).
-
--   **Browser**. I've tested these pages with MSIE 6 and 7, Firefox, and sometimes Opera too. With one or two exceptions, (\<nobr\>), everything is valid HTML 4.01 and CSS 2. However, IE isn't a compliant browser so there are one or two minor glitches. Firefox on the other hand is *too* compliant and pretty much ignores column-based layout in tables (CSS and HTML standards conflict on this issue). But again, these situations aren't too significant. In case you want a print-out, it'll come out as if the browser window was roughly 640 pixels wide. Personally, I prefer setting the font to ‘smaller’; I feel that I lose the perspective in the ‘normal’ font-size. Note that the entire text is roughly 300 pages long, so consider shrinking the pages and don't forget to fill the tray when you're done.
 
 ## On errors, suggestions {#sec-feedback}
 
-As much as I've tried to weed out things like spelling/grammar errors and broken links, I'm sure some have slipped by. If you find some, mail [me](mailto:cearn@coranac.com) about it. That's right, I'm actually asking for spell-flames. Currently, I'm refitting the pages to fit my HTML auto-numbering tool, but it's a lot stuff to go through (over 1M in plain text), and I may miss something; if you see things like *\[\[ref:foo\]\]* in unfinished sections, those probably shouldn't be there. Of course, if things are unclear or \*gasp\* incorrect, or if you have suggestions, I'd like to know that as well.
+As much as we (cearn and the gbadev.net community) have tried to weed out things like spelling/grammar errors and broken links, it's surely possible some have slipped by. If you find some, please raise an issue (or even better, make a pull request) on the [GitHub repo](https://github.com/gbadev-org/tonc). Of course, if things are unclear or _\*gasp\*_ incorrect, or if you have suggestions, we'd like to know that as well! You can also reach us on [Discord / IRC](https://gbadev.net/resources.html#community) or the [Forums](https://forum.gbadev.net/).
 
-20130324, ADDENDUM. Since it's now been over half a decade since all of this was written, I'm fairly certain many of the links are dead by now. I'll try to clean them up when I can, but I'm not sure it's worth the trouble. You have been warned.
 
 And, of course:
 
-> This distribution is provided as is, without warranty of any kind. I cannot be held liable for any damage arising out of the use or inability to use this distribution. Code has been tested on emulator and real hardware as well as I could, but I can't guarantee 100% correctness.  
-> The code may be used and/or modified as you see fit. The text and code were intended to go together; if you have to separate the text from the code, at least provide a link to where both originated (i.e., this site).  
-> Both text and code can be modified by me at any time. Check in once in a while to see if anything's changed. Time stamps are at the bottom of every page, and at the top of all source-files. There is also a [log](log.html) in the appendices.
+> This distribution is provided as is, without warranty of any kind. I cannot be held liable for any damage arising out of the use or inability to use this distribution. Code has been tested on emulator and real hardware as well as I could, but I can't guarantee 100% correctness.
+> Both text and code may be modified at any time. Check in once in a while to see if anything's changed. <!--Time stamps are at the bottom of every page, and at the top of all source-files.--> There is also a [log](log.html) in the appendices.
 
 OK that's it. Have fun.
 
 <div style="margin-left:1.2cm;">
-- Jasper Vijn (cearn at coranac dot com)  
-(Mar 24, 2013)
+
+-- _Jasper Vijn_ (cearn at coranac dot com) and the _gbadev.net_ community<br>
+
+<!--(Mar 24, 2013)-->
+<!-- TODO: figure out how to put the build date here? -->
 </div>
