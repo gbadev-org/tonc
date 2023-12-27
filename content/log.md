@@ -1,5 +1,13 @@
 # G. Change Log
 
+### Dec 27, 2023 - Initial content port and mdbook setup
+
+This pre-release includes all the contents from the TONC tutorial ported faithfully to the markdown format, rendered by mdbook. Some features are implemented with additional mdbook preprocessors.
+
+The "Install" chapter also received a complete overhaul and the new version is included in this release. The original port of this part is anyway available in commit [7a3ac73](https://github.com/gbadev-org/tonc/commit/7a3ac731efe03af6f7debbcc7dce3b222cd23b65).
+
+The porting was curated by @exelotl @avivace @LunarLambda @pinobatch @mtthgn @copyrat90 @gwilymk .
+
 ### Mar 2013 (1.4.1)
 
 Maintaince update. also includes things from the [errata page](http://www.coranac.com/documents/tonc-errata/)
