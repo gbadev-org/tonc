@@ -1,8 +1,3 @@
-Title: Tonc's Text Engine
-Date: 2008-03-01
-Modified: 2023-11-18
-Authors: Cearn
-
 # 22. Tonc's Text Engine {#ch-}
 
 <!-- toc -->
