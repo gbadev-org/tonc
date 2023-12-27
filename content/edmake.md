@@ -1,4 +1,4 @@
-# E. Make via editors {#ch-}
+# E. Make via editors
 
 <!-- toc -->
 
@@ -130,7 +130,7 @@ make -f tonc.mak build
 
 Why? Because we won't be using the standard VC make (NMAKE), but the GNU make (make). Why? Because it's free, platform-independent and usually comes with the devkit, making your project more portable, is more powerful and better documented as well. Why? Because ... just because, OK? This is the command that is executed when you press Rebuild (F7). The -f flag says which makefile to use. Inside a makefile you can have multiple sub-projects; in this case the one called build is the active one.
 
-The other settings aren't important for our purposes so leave them as they are. Yes, the output filename too; the makefile will take care of that. By the way, note that the workspace in @fig:msvc-make-cfg shows three projects: tonc and tonclib for actual tonc stuff, and a vault project. A standard practice of mine to have one vault project where I can store source-files I don't want compiled but do want to have available for reference (such as templates and examples). All my workspaces have one and I can highly recommend them.
+The other settings aren't important for our purposes so leave them as they are. Yes, the output filename too; the makefile will take care of that. By the way, note that the workspace in @fig:msvc-make-cfg shows three projects: tonc and libtonc for actual tonc stuff, and a vault project. A standard practice of mine to have one vault project where I can store source-files I don't want compiled but do want to have available for reference (such as templates and examples). All my workspaces have one and I can highly recommend them.
 
 <div class="cpt" style="width:584px">
 

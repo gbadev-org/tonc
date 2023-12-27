@@ -1,4 +1,4 @@
-# A. Numbers, bits and bit operations {#ch-}
+# A. Numbers, bits and bit operations
 
 <!-- toc -->
 

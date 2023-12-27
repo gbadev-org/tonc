@@ -1,4 +1,4 @@
-# 21. Mode 7 Part 2 {#ch-}
+# 21. Mode 7 Part 2
 
 <!-- toc -->
 
@@ -2747,7 +2747,7 @@ This function is probably as fast as you can make it in C, and it the compiler d
   </tr>
 </table>
 
-You can get β via an arctan LUT of 160 entries, one for each scanline (hey, you could even put that into _p_<sub>d</sub>!), and then use a 1/sine LUT. You have to be careful to use large enough LUTs, though. Since the arguments of LUTs are integers, β will be truncated, and you will lose a _lot_ of accuracy though this, especially near the horizon. Now, I haven't actually tried the trig-way yet, but I have done some basic tests in Excel which would suggest that with a 1/sine LUT of 512/circle, you'd get λ-errors well over 10% near the horizon, and errors around 1% everywhere else. With that in mind, I'd suggest 1024/circle at least. Or interpolating between LUT entries, which you can do with tonclib's `lu_lerp16()` and `lu_lerp32()` functions.
+You can get β via an arctan LUT of 160 entries, one for each scanline (hey, you could even put that into _p_<sub>d</sub>!), and then use a 1/sine LUT. You have to be careful to use large enough LUTs, though. Since the arguments of LUTs are integers, β will be truncated, and you will lose a _lot_ of accuracy though this, especially near the horizon. Now, I haven't actually tried the trig-way yet, but I have done some basic tests in Excel which would suggest that with a 1/sine LUT of 512/circle, you'd get λ-errors well over 10% near the horizon, and errors around 1% everywhere else. With that in mind, I'd suggest 1024/circle at least. Or interpolating between LUT entries, which you can do with libtonc's `lu_lerp16()` and `lu_lerp32()` functions.
 
 Aside from going triggy with it, you can probably speed up the division as well in a number of ways. But before you go and optimize this, ask yourself if you really need it first. Premature optimization is the root of all evil, after all.
 

@@ -1,4 +1,4 @@
-# 6. The GBA buttons (a.k.a. keys) {#ch-}
+# 6. The GBA buttons (a.k.a. keys)
 
 <!-- toc -->
 

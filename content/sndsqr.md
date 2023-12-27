@@ -1,4 +1,4 @@
-# 18. Beep! GBA sound introduction {#ch-}
+# 18. Beep! GBA sound introduction
 
 <!-- toc -->
 

@@ -1,4 +1,4 @@
-# 13. Graphic Effects {#ch-}
+# 13. Graphic Effects
 
 <!-- toc -->
 

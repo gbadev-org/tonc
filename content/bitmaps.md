@@ -1,4 +1,4 @@
-# 5. The Bitmap modes (mode 3, 4, 5) {#ch-}
+# 5. The Bitmap modes (mode 3, 4, 5)
 
 <!-- toc -->
 
@@ -251,7 +251,7 @@ void m3_fill(COLOR clr)
 
 Now, note what I'm doing here: instead of treating VRAM as an array of 16-bit values which are appropriate for 16bpp colors, I'm using a 32-bit pointer and filling VRAM with a 32-bit variable containing two colors. When filling large chunks of memory, it makes no difference if I fill it in *N* 16-bit chunks, or ½*N* 32-bit chunks. However, because you only use half the number of iterations in the latter case, it's roughly twice as fast. In C, it's perfectly legal to do something like this (provided that strict aliasing is satisfied) and often actually useful. This is why it's important to know the principles of [data and memory](#sec-data). Also note that I'm using pointer arithmetic here instead of array indices. While the compiler generally make the conversion itself, doing it manually is still often a little faster. (When in doubt, read the assembly language that GCC generates.)
 
-While this method is already twice as fast as the ‘normal’ method, there are actually much faster methods as well. We will meet these later, when we stop using separate toolkit files and start using tonclib, the code library for tonc. Tonclib contains the functions described above (only faster), as well as 8bpp variations of the `bmp16_` routines and interfaces for mode 4 and mode 5.
+While this method is already twice as fast as the ‘normal’ method, there are actually much faster methods as well. We will meet these later, when we stop using separate toolkit files and start using libtonc, the code library for tonc. Tonclib contains the functions described above (only faster), as well as 8bpp variations of the `bmp16_` routines and interfaces for mode 4 and mode 5.
 
 Below you can find the main code for *m3_demo*, which uses the `m3_` functions to draw some items on the screen. Technically, it's bad form to use this many magic numbers, but for demonstration purposes it should be okay. The result can be seen in {@fig:m3-demo}.
 
@@ -334,7 +334,7 @@ void generic_rect(int left, int top, int right, int bottom, COLOR clr)
 }
 ```
 
-This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in tonclib.
+This is the generic template for a rectangle drawing routine. As long as you have a functional pixel plotter, you're in business. However, business will be *very* slow in mode 4, because of the complicated form of the plotter. In all likelihood, it'll be so slow to make it useless for games. There is a way out, though. The reason `m4_plot()` is slow is because you have to take care not to overwrite the other pixel. However, when you're drawing a horizontal line (basically the `ix` loop here), chances are that you'll have to give that other pixel the same color anyway, so you needn't bother with read-mask-write stuff except at the edges. The implementation of this faster (*much* faster) line algorithm and subsequently rectangle drawer is left as an exercise for the reader. Or you can seek out *tonc_bmp8.c* in libtonc.
 
 :::warning VRAM vs. byte writes
 
@@ -961,7 +961,7 @@ Both of these have to do with the basic function of `memcpy()`, namely to be a f
 1.  When both source and destinations are word aligned.
 2.  When you are copying more than 16 bytes.
 
-This is usually the case so I figured it'd be safe enough for the demos. There are also look-alikes in tonclib that do the same thing only better, namely `memcpy16()` and `memcpy32()`, but these are in assembly so I thought I wouldn't lay them on you so soon. Highly recommended for later though.
+This is usually the case so I figured it'd be safe enough for the demos. There are also look-alikes in libtonc that do the same thing only better, namely `memcpy16()` and `memcpy32()`, but these are in assembly so I thought I wouldn't lay them on you so soon. Highly recommended for later though.
 
 On a related subject, there is also `memset()` for memory fills. Be careful with that one, because that will *only* work with bytes. Tonclib also includes 16- and 32-bit versions of this routine, but also in assembly.
 

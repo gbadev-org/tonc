@@ -1,4 +1,4 @@
-# D. More on makefiles and compiler options {#ch-}
+# D. More on makefiles and compiler options
 
 <!-- toc -->
 
@@ -128,7 +128,7 @@ AA := $(AA) -c
 
 You would like this to behave as the C operator `+=`, but in the first case the expansion is done recursively, meaning that you get an endless loop. The second version does what you expect to happen. Simply expanded variables make things more predictable, which is a good thing. See the make manual for more details on this. Oh, in case you were wondering, the assignment operator is available for makefiles as well.
 
-In this case I've defined variables for the project's name (int_demo), the extension (gba) and the directory where I keep all my utility routines (../tonclib). It's a good practice to do this, because you can modify and use it to suit another project without too much trouble.
+In this case I've defined variables for the project's name (int_demo), the extension (gba) and the directory where I keep all my utility routines (../libtonc). It's a good practice to do this, because you can modify and use it to suit another project without too much trouble.
 
 The second part defines the source files (not the object files, but the actual C and assembly files) of the project. Note the use of `$(UDIR)` in many of the names. Note also that the definition of `CFILES` is split over two lines using a backslash (`\`). When you do this, though, make *absolutely* sure it's the last character on the line. If you put, say, a space behind it, you'll regret it. Some editors have an option with which you can show non-printable characters; try it if you suspect these kinds of errors (will work for the tab requirement as well).
 
@@ -138,7 +138,7 @@ And the third part is where it gets interesting. The form
 $(var:a=b)
 ```
 
-is called <dfn>substitution reference</dfn>, one of the many forms of pattern substitution. In this case it looks at variable *var* and if it finds the string *a* at the end of a word, it'll be replaced by string *b*. I've used this to turn the lists of .s and .c files into lists of object files. GNU Make is full of string-transformation commands such as this. Look at tonclib.mak for some others.
+is called <dfn>substitution reference</dfn>, one of the many forms of pattern substitution. In this case it looks at variable *var* and if it finds the string *a* at the end of a word, it'll be replaced by string *b*. I've used this to turn the lists of .s and .c files into lists of object files. GNU Make is full of string-transformation commands such as this. Look at libtonc.mak for some others.
 
 ### 2: Tools settings {#ssec-make-tool}
 

@@ -387,6 +387,10 @@ caption[align="bottom"], div.cblock caption[align="bottom"] {
   margin-top: 6px;
 }
 
+caption.reg, tr.bits {
+  white-space: nowrap;
+}
+
 tr.bits, tr.bf, col.bits, col.bf, col.def { text-align: center; }
 col.bits, col.bf, col.def { vertical-align: top; }
 tr.bits, col.bits { font: 90% var(--mono-font); }

@@ -1,9 +1,6 @@
-# B. Fixed-Point Numbers and LUTs {#ch-}
+# B. Fixed-Point Numbers and LUTs
 
--   [What are fixed-point numbers](#sec-intro).
--   [Fixed-point math](#sec-fmath).
--   [Faking division](#sec-rmdiv).
--   [Look-up Tables](#sec-lut).
+<!-- toc -->
 
 ## What are fixed-point numbers {#sec-intro}
 
@@ -1103,7 +1100,7 @@ INLINE s32 lu_cos(u32 theta)
 
 #### Presenting excellut
 
-I haven't actually used the generator shown above for the LUTs in tonclib. Rather, I've used my own [excellut](http://www.coranac.com/projects/#excellut). This is not a program, but an Excel file. Yes, I did say Excel. The thing about using a spreadsheet program for building LUTs is that you can make *any* kind of mathematical table with it, test whether it has the desired accuracy and plot it and everything. Then after you're satisfied, you can then just export part of the spreadsheet in the manner of your choice. How's that for flexibility?
+I haven't actually used the generator shown above for the LUTs in libtonc. Rather, I've used my own [excellut](http://www.coranac.com/projects/#excellut). This is not a program, but an Excel file. Yes, I did say Excel. The thing about using a spreadsheet program for building LUTs is that you can make *any* kind of mathematical table with it, test whether it has the desired accuracy and plot it and everything. Then after you're satisfied, you can then just export part of the spreadsheet in the manner of your choice. How's that for flexibility?
 
 #### Accuracy and resolution
 
