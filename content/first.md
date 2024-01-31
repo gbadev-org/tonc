@@ -368,39 +368,31 @@ Here are a few examples of code that, while functional, could be improved in ter
 
 Above, I noted that use of non-ints can be problematic. Because this bad habit is particularly common under GBA and NDS code (both homebrew *and* commercial), I'd like to show you an example of this.
 
-<pre class="proglist">
-<span class="cmt">// Force a number into range [min, max&gt;</span>
-<span class="keyw">#define</span> CLAMP(x, min, max)   \
-    ( (x)&gt;=(max) ? ((max)-<span class="num">1</span>) : <!--
--->( ((x)&lt;(min)) ? (min) : (x) ) )
+```c
+// Force a number into range [min, max>
+#define CLAMP(x, min, max)   \
+    ( (x)>=(max) ? ((max)-1) : ( ((x)<(min)) ? (min) : (x) ) )
 
-<span class="cmt">// Change brightness of a palette (kinda) (70)</span>
-<span class="keyw">void</span> pal_brightness(u16 *pal, <span 
-class="rem">u16</span> size, <span class="rem">s8</span> bright)
+// Change brightness of a palette (kinda) (70)
+void pal_brightness(u16 *pal, u16 size, s8 bright)
 {
-    <span class="rem">u16</span> ii;
-    <span class="rem">s8</span> r, g, b;
+    u16 ii;
+    s8 r, g, b;
 
-    <span class="keyw">for</span>(ii=<span class="num">0</span>; ii&lt;size; ii++)
+    for(ii=0; ii<size; ii++)
     {
-        r= (pal[ii]    )&amp;<span class="num">31</span>;
-        g= (pal[ii] &gt;&gt;<span class="num">5</span>)&amp;<span 
-class="num">31</span>;
-        b= (pal[ii]&gt;&gt;<span class="num">10</span>)&amp;<span 
-class="num">31</span>;
+        r= (pal[ii]    )&31;
+        g= (pal[ii] >>5)&31;
+        b= (pal[ii]>>10)&31;
 
-        r += bright;    r= CLAMP(r, <span 
-class="num">0</span>, <span class="num">32</span>);
-        g += bright;    g= CLAMP(g, <span 
-class="num">0</span>, <span class="num">32</span>);
-        b += bright;    b= CLAMP(b, <span 
-class="num">0</span>, <span class="num">32</span>);
+        r += bright;    r= CLAMP(r, 0, 32);
+        g += bright;    g= CLAMP(g, 0, 32);
+        b += bright;    b= CLAMP(b, 0, 32);
 
-        pal[ii]= r |(g&lt;&lt;<span class="num">5</span>) | (b&lt;&lt;<span 
-class="num">10</span>);
+        pal[ii]= r |(g<<5) | (b<<10);
     }
 }
-</pre>
+```
 
 This routine brightens or darkens a palette by adding a brightness-factor to the color components, each of which is then clamped to the range \[0,31⟩ to avoid funky errors. The basic algorithm is sound, even the implementation is, IMHO, pretty good. What isn't good, however is the datatypes used. Using `s8` and `u16` here adds an extra shift-pair practically every time any variable is used! The loop itself compiles to about 90 Thumb instructions. In contrast, when using `int`s for everything except `pal` the loop is only 45 instructions long. Of course the increase in size means an increase in time as well: the int-only version is 78% faster than the one given above. To repeat that: **the code has doubled in size and slowed down by 78% *just* by using the wrong datatype**!
 <br>  
