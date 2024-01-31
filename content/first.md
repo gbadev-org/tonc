@@ -368,31 +368,30 @@ Here are a few examples of code that, while functional, could be improved in ter
 
 Above, I noted that use of non-ints can be problematic. Because this bad habit is particularly common under GBA and NDS code (both homebrew *and* commercial), I'd like to show you an example of this.
 
-```c
-// Force a number into range [min, max>
+<pre><code>// Force a number into range [min, max&gt;
 #define CLAMP(x, min, max)   \
-    ( (x)>=(max) ? ((max)-1) : ( ((x)<(min)) ? (min) : (x) ) )
+    ( (x)&gt;=(max) ? ((max)-1) : ( ((x)&lt;(min)) ? (min) : (x) ) )
 
 // Change brightness of a palette (kinda) (70)
-void pal_brightness(u16 *pal, u16 size, s8 bright)
+void pal_brightness(u16 *pal, <span class="rem">u16</span> size, <span class="rem">s8</span> bright)
 {
-    u16 ii;
-    s8 r, g, b;
+    <span class="rem">u16</span> ii;
+    <span class="rem">s8</span> r, g, b;
 
-    for(ii=0; ii<size; ii++)
+    for(ii=0; ii&lt;size; ii++)
     {
-        r= (pal[ii]    )&31;
-        g= (pal[ii] >>5)&31;
-        b= (pal[ii]>>10)&31;
+        r= (pal[ii]    )&amp;31;
+        g= (pal[ii] &gt;&gt;5)&amp;31;
+        b= (pal[ii]&gt;&gt;10)&amp;31;
 
         r += bright;    r= CLAMP(r, 0, 32);
         g += bright;    g= CLAMP(g, 0, 32);
         b += bright;    b= CLAMP(b, 0, 32);
 
-        pal[ii]= r |(g<<5) | (b<<10);
+        pal[ii]= r |(g&lt;&lt;5) | (b&lt;&lt;10);
     }
 }
-```
+</code></pre>
 
 This routine brightens or darkens a palette by adding a brightness-factor to the color components, each of which is then clamped to the range \[0,31⟩ to avoid funky errors. The basic algorithm is sound, even the implementation is, IMHO, pretty good. What isn't good, however is the datatypes used. Using `s8` and `u16` here adds an extra shift-pair practically every time any variable is used! The loop itself compiles to about 90 Thumb instructions. In contrast, when using `int`s for everything except `pal` the loop is only 45 instructions long. Of course the increase in size means an increase in time as well: the int-only version is 78% faster than the one given above. To repeat that: **the code has doubled in size and slowed down by 78% *just* by using the wrong datatype**!
 <br>  
