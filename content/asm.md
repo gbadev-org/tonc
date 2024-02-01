@@ -40,7 +40,7 @@ In the snippet below you can find a few examples of additions and memory reads i
 
 Another point I must make here is that even for a given processor, there can be differences in how you write assembly. Assemblers aren't difficult to write, and there's nothing to stop you from using a different kind of syntax. Apart from the wrath of other programmers, of course.
 
-```asm {.proglist}
+```armasm
 // Some examples
 // Addition and memory loads in different assemblies
 
@@ -79,7 +79,7 @@ The [<dfn>stack</dfn>](https://en.wikipedia.org/wiki/Stack_(abstract_data_type))
 
 For example, suppose you have functions `foo()` and which uses registers A, B, C and D. Function `foo()` calls function `bar()`, which also uses A, B and C, but in a different context than `foo()`. To make sure `foo()` would still work, `bar()` pushes A, B and C onto the stack at its start, then uses them the way it wants, and then pops them off the stack into A, B and C again when it ends. In pseudo code:
 
-```asm {.proglist}
+```armasm
 // Use of stack in pseudo-asm
 
 // Function foo
@@ -138,7 +138,7 @@ The normal operation for a computer is to take instructions one by one and execu
 
 The technical term for this redirection is <dfn>branching</dfn>, though the term ‘jump’ is used as well. With branching you can create things like loops (infinite loops, mind you) and implement subroutines. The usual mnemonic for branching is something like `b` or `j(mp)`
 
-```asm {.proglist}
+```armasm
 // Asm version of the while(1) { ... } endless loop
 
 // Label for (possible) branching destination
@@ -160,7 +160,7 @@ These condition flags are stores in the <dfn>Program Status Register</dfn> (PSR)
 
 Below you can see a simple example of a basic for-loop. The `cmp` instruction compares `A` to 16 and sets the PSR flags accordingly. The instruction `bne` stands for ‘branch if Not Equal’, which corresponds to a clear Z-flag. the reason for the Zero-flag's involvement is that the equality of two numbers is indicated by whether the difference between them is zero or not. So if there's a difference between `A` and 16, we jump back to `for_start`; if not, then we continue with the rest of the code.
 
-```asm {.proglist}
+```armasm
 // Asm version of for(A=0; A != 16; A++)
 
     mov     A, #0
@@ -180,12 +180,12 @@ The number and names of the conditional codes depends on the platform. The ARM h
 
 Before getting into ARM assembly itself, I'd like to show you a real-life example it. Assembly is an intermediary step of the build process, and you can capture GCC's assembly output by using the ‘`-S`’ or ‘`-save-temps`’ flags. This gives you the opportunity to see what the compiler is actually doing, to compare the C and assembly versions of a given algorithm, and provides quick pointers on how to code non-trivial things in assembly, like function calling, structures, loops etc. This section is optional, and you may not understand all the things here, but it is very educational nonetheless.
 
-```Makefile {.proglist}
+```Makefile
 # Makefile settings for producing asm output
     $(CC) $(RCFLAGS) -S $<
 ```
 
-```c {.proglist}
+```c
 // gen_asm.c :
 //   plotting two horizontal lines using normal and inline functions.
 #include <tonc.h>
@@ -215,7 +215,7 @@ int main()
 }
 ```
 
-```asm {.proglist}
+```armasm
 @@ gen_asm.s :
 @@ Generated ASM (-O2 -mthumb -mthumb-interwork -S)
 @@ Applied a little extra formatting and comments for easier reading.
@@ -335,7 +335,7 @@ Looking at other people's code (in this case GCC's assembly) is a nice way of le
 
 The assembler of the GNU toolchains is known as the GNU assembler or GAS, and the tool's name is `arm-none-eabi-as`. You can call this directly, or you can use the familiar `arm-none-eabi-gcc` to act as a gateway. The latter is probably a better choice, as it'll allow the use of the C preprocessor with ‘`-x assembler-with-cpp`’. That's right, you can then use macros, C-style comments _and_ #include if you wish. A rule for assembling things might look something like this.
 
-```asm {.proglist}
+```armasm
 AS      := arm-none-eabi-gcc
 ASFLAGS := -x assembler-with-cpp
 
@@ -419,7 +419,7 @@ On most processors, you can only use branches conditionally, but on ARM systems 
 
 These kinds of conditionals shouldn't be used blindly, though. Even though you won't execute the instruction if the conditional fails, you still need to read it from memory, which costs one cycle. As a rough guideline, after about 3 skipped instructions, the branch would actually be faster.
 
-```asm {.proglist}
+```armasm
 @ // r2= max(r0, r1):
 @ r2= r0>=r1 ? r0 : r1;
 
@@ -462,7 +462,7 @@ There are four barrel-shift operations: left shift (`lsl`), logical right-shift 
 
 Now this may seem like esoteric functionality, but it's actually very useful and more common than you think. One application is multiplications by 2<sup>n</sup>±1, without resorting to relatively slow multiplication instructions. For example, _x_\*9 is the same as _x_\*(1+8) = *x* + *x*\*8 = _x_+(_x_\<\<3). This can be done in a single `add`. Another use is in loading values from arrays, for which indices would have to be multiplied by the size of the elements to get the right addresses.
 
-```asm {.proglist}
+```armasm
 @ Multiplication by shifted add/sub
 
 add r0, r1, r1, lsl #3      @ r0= r1+(r1<<3) = r1*9
@@ -529,7 +529,7 @@ This means that you can create values like 255 (_n_=255, _r_=0) and 0x06000000 (
 
 The faster method of forming bigger numbers is a matter of debate. There are many factors involved: the number in mind, memory section, instruction set and amount of space left, all interacting in nasty ways. It's probably best not to worry about it too much, but as a guideline, I'd say if you can do it in two data instructions do so; if not, use a load. The easiest way of creating big numbers is with a special form of the `ldr` instruction: ‘`ldr Rd,=num`’ (note: no ‘#’!). The assembler will turn this into a mov if the number allows it, or an `ldr` if it doesn't. The space that the number needs will be created automatically as well.
 
-```asm {.proglist}
+```armasm
     @ form 511(0x101) with mov's
     mov     r0, #256    @ 256= 1 ror 24, so still valid
     add     r0, #255    @ 256+255 = 511
@@ -636,7 +636,7 @@ Lastly, the multiplication formats. At the table indicates, you cannot use immed
 
 The instruction `mla` stands for ‘multiply with accumulate’, which can be handy for dot-products and the like. The `mull` and `mlal` instructions are for 64bit arithmetic, useful for when you expect the result not to fit into 32bit registers.
 
-```asm {.proglist}
+```armasm
 @ Possible variations of data instructions
 add     r0, r1, #1          @ r0 = r2 + 1
 add     r0, r1, r2          @ r0 = r1 + r2
@@ -695,7 +695,7 @@ Memory ops vs C pointers/arrays
 
 To make the comparison to C a little easier, I will sometimes indicate what happens using pointers, but in order to do that I will have to indicate the type of the pointer somehow. I could use some horrid casting notation, but it would be easiest to use a form of arrays for this, and use the register-name + an affix to show the data type. I'll use ‘\_w’ for words, ‘\_h’ for halfwords, and ‘\_b’ for bytes, and ‘\_sw’, etc. for their signed versions. For example, `r0_sh` would indicate that `r0` is a signed halfword pointer. This is just a useful bit of shorthand, not actually part of assembly itself.
 
-```asm {.proglist}
+```armasm
 @ Basic load/store examples. Assume r1 contains a word-aligned address
 ldr     r0, [r1]    @ r0= *(u32*)r1; //or r0= r1_w[0];
 str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[1]= r0;
@@ -717,7 +717,7 @@ And then there are the so-called <dfn>write-back</dfn> modes. In the pre-index m
 
 There are two forms of write-back, pre-indexing and post-indexing. Pre-indexing write-back works much like the normal write-back and is indicated by an exclamation mark after the brackets: ‘`ldr Rd, [Rn, `_`Op2`_`]!`’. Post-indexing doesn't add _Op2_ to the address (and `Rn`) until _after_ the memory access; its format is ‘`ldr Rd, [Rn], `_`Op2`_’.
 
-```asm {.proglist}
+```armasm
 @ Examples of addressing modes
 @ NOTE: *(u32*)(address+ofs) is the same as ((u32*)address)[ofs/4]
 @   That's just how array/pointer offsets work
@@ -752,7 +752,7 @@ PC-relative instructions are common, and have a special shorthand that is easier
 
 If the label is near enough you can also use `adr`, which is assembled to a PC-add instruction. This will not create a pool-entry.
 
-```asm {.proglist}
+```armasm
 @ Normal pc-relative method:
 @   create a nearby pool and load from it
     ldr     r0, .Lpool      @ Load a value
@@ -763,7 +763,7 @@ If the label is near enough you can also use `adr`, which is assembled to a PC-a
     .word   far_var
 ```
 
-```asm {.proglist}
+```armasm
 @ Shorthand: use ldr= and GCC will manage the pool for you
     ldr     r0,=0x06010000  @ Load a value
     ldr     r0,=far_var     @ Load far_var's address
@@ -782,8 +782,7 @@ All the things you can do with `ldr/str`, you can do with the byte and halfword 
 
 Oh, one more thing: alignment. In C, you could rely on the compiler to align variables to their preferred boundaries. Now that you're taking over from the compiler, it stands to reason that you're also in charge of alignment. This can be done with the ‘.align _n_’ directive, with aligns the next piece of code or data to a 2^n^ boundary. Actually, you're supposed to properly align code as well, something I'm taking for granted in these snippets because it makes things easier.
 
-```asm {.proglist}
-    mov     r2, #1
+<pre><code class="language-armasm hljs">    mov     r2, #1
 @ Byte loads
     adr     r0, bytes
     ldrb    r3, bytes       @ r3= bytes[0];     // r3= 0x000000FF= 255
@@ -793,16 +792,16 @@ Oh, one more thing: alignment. In C, you could rely on the compiler to align var
     adr     r0, hwords
     ldrh    r3, hwords+2    @ r3= words[1];     // r3= 0x0000FFFF= 65535
     ldrsh   r3, [r0, #2]    @ r3= (s16)r0_h[1]; // r3= 0xFFFFFFFF= -1
-    ldrh    r3, [r0, r2, lsl #1]    @ r3= r0_h[1]? No! Illegal instruction :(
+    <span class="rem">ldrh    r3, [r0, r2, lsl #1]    @ r3= r0_h[1]? <b>No! Illegal instruction :(</b></span>
 
 @ Byte array: u8 bytes[3]= { 0xFF, 1, 2 };
 bytes:
     .byte   0xFF, 1, 2
 @ Halfword array u16 hwords[3]= { 0xF001, 0xFFFF, 0xF112 };
-    .align  1    @ align to even bytes REQUIRED!!!
+    .align  1    @ align to even bytes <b>REQUIRED!!!</b>
 hwords:
     .hword  0xF110, 0xFFFF, 0xF112
-```
+</code></pre>
 
 #### Block transfers
 
@@ -820,7 +819,7 @@ This register list can be comma separated, or hyphenated to indicate a range. Fo
 
 The block-transfer opcodes can take a number of affixes that determine how the block extends from the base register `Rd`. The four possibilities are: `-IA`/`-IB` (Increment After/Before) and `-DA`/`-DB` (Decrement After/Before). The differences are essentially those between pre/post-indexing and incrementing or decrementing from the base address. It should be noted that these increments/decrements happen regardless of whether the base register carries an exclamation mark or not: that thing only indicates that the base register _itself_ is updated afterwards.
 
-```asm {.proglist}
+```armasm
     adr     r0, words+16    @ u32 *src= &words[4];
                             @             r4, r5, r6, r7
     ldmia   r0, {r4-r7}     @ *src++    :  0,  1,  2,  3
@@ -1118,7 +1117,7 @@ With these points in mind, the conditional codes shouldn't be too hard to unders
 
 Let's start with the most basic of branches, `b`. This is the most used branch, used to implement normal conditional code and loops of all kinds. It is most often used in conjunction with one of the 16 conditional codes of {@tbl:cnd-afx}. Most of the times a branch will look something like this:
 
-```asm {.proglist}
+```armasm
 @ Branch example, pseudo code
     data-ops, Rd, Rn, Op2   @ Data operation to set the flags
     bcnd-code .Llabel       @ Branch upon certain conditions
@@ -1131,7 +1130,7 @@ Let's start with the most basic of branches, `b`. This is the most used branch, 
 
 First, you have a data processing instruction that sets the status flags, usually a `subs` or `cmp`, but it can be any one of them. Then a `b`_cond_ diverts the flow to `.Llabel` if the conditions are met. A simple example of this would be a division routine which checks if the denominator is zero first. For example, the `Div()` routine that uses [BIOS Call](bios.html) #6 could be safeguarded against division by 0 like this:
 
-```asm {.proglist}
+```armasm
 @ int DivSafe(int num, int den);
 @ \param num    Numerator (in r0)
 @ \param den    Denominator (in r1)
@@ -1151,7 +1150,7 @@ The numerator and denominator will be in registers r0 and r1, respectively. The 
 
 Now in this case I used a branch, but in truth, it wasn't even necessary. The non-branch part consists of one instruction, and the branched part of two, so using conditional instructions throughout would have been both shorter and faster:
 
-```asm {.proglist}
+```armasm
 @ Second version using conditionally executed code
 DivSafe:
     cmp     r1, #0
@@ -1179,14 +1178,14 @@ In the first `DivSafe` snippet, the internal branch destination used a `.L` pref
 
 Any sort of branch will create a fork in the road and, depending on the conditions, one road will be taken more often. That would be the <dfn>major</dfn> branch. The other one would be the <dfn>minor</dfn> branch, probably some sort of exception. The branch instruction, `b`, represents a deviation from the normal road and is relatively costly, therefore it pays to have to branch to the exceptions. Consider these possibilities:
 
-```c {.proglist}
+```c
 // Basic if statement in C
 if(r0 == 0)
 {   /* IF clause */   }
 ...
 ```
 
-```asm {.proglist}
+```armasm
 @ === asm-if v1 : 'bus stop' branch ===
     cmp     r0, #0
     beq     .Lif
@@ -1221,7 +1220,7 @@ Even though all you have now is `b`, it doesn't mean you can't implement branchi
 
 The `if-elseif` is an extension of the normal `if-else`, and from it you can extend to longer `if-elseif-else` chains. In this case I want to look at a wrapping algorithm for keeping numbers within certain boundaries: the number _x_ should stay within range \[_mn_, _mx_⟩, if it exceeds either boundary it should come out the other end. In C it looks like this:
 
-```c {.proglist}
+```c
 // wrap(int x, int mn, int mx), C version:
 int res;
 if(x >= mx)
@@ -1234,7 +1233,7 @@ else
 
 The straightforward compilation would be:
 
-```asm {.proglist}
+```armasm
 @ r0= x ; r1= mn ; r2= mx
     cmp     r0, r2
     blt     .Lx_lt_mx       @ if( x >= mx )
@@ -1254,7 +1253,7 @@ This is what GCC gives, and it's pretty good. The ordering of the clauses remain
 
 And now an optimized version. First, a `cmp` is equivalent to `sub` except that it doesn't put the result in a register. However, as we need the result later on anyway, we might as well combine the ‘`cmp`’ and ‘`sub`’. Secondly, the clauses are pretty small, so we can use conditional ops as well. The new version would be:
 
-```asm {.proglist}
+```armasm
 @ Optimized wrapper
     subs    r3, r0, r2      @ r3= x-mx
     addge   r0, r3, r1      @   x= x-mx + mn
@@ -1267,7 +1266,7 @@ And now an optimized version. First, a `cmp` is equivalent to `sub` except that 
 
 Cleans up nicely, wouldn't you say? Less branches, less code and it matches the C code more closely. We can even get rid of the last branch too because we can execute the `subs` conditionally as well. Because `ge` and `lt` are each others complements there won't be any interference. So the final version is:
 
-```asm {.proglist}
+```armasm
 @ Optimized wrapper, version 2
     subs    r3, r0, r2      @ r3= x-mx
     addge   r0, r3, r1      @   x= x-mx + mn
@@ -1282,7 +1281,7 @@ Of course, it isn't always possible to optimize to such an extent. However, if t
 
 Higher languages often allow you to string multiple conditions together using logical AND (`&&`) and logical OR (`||`). What the books often won't say is that these are merely shorthand notations of a chain of `if`s. Here's what actually happens.
 
-```c {.proglist}
+```c
 // === if(x && y) { /* clause */ } ===
 if(x)
 {
@@ -1299,7 +1298,7 @@ else if(y)
 
 The later terms in the AND are only evaluated if earlier expressions were true. If not, they're simply skipped. Much fun can be had if the second term happens to be a function with side effects. A logical OR is basically an if-else chain with identical clauses; this is just for show of course, in the final version there's one clause which is branched to. In assembly, these would look something like this.
 
-```asm {.proglist}
+```armasm
 @ if(r0 != 0 && r1 != 0) { /* clause */ }
     cmp     r0, #0
     beq     .Lrest
@@ -1318,7 +1317,7 @@ The later terms in the AND are only evaluated if earlier expressions were true. 
     ...
 ```
 
-```asm {.proglist}
+```armasm
 @ if( r0 != 0 || r1 != 0 ){ /* clause */ }
     cmp     r0, #0
     bne     .Ltrue
@@ -1340,7 +1339,7 @@ In short, optimization is pretty much all about loops, especially inner loops. I
 
 Anyway, loops in assembly. Making a loop is the easiest thing in the world: just branch to a previous label. The differences between `for`, `do-while` and `while` loops are a matter of where you increment and test. In C, you usually use a for-loop with an incrementing index. In assembly, it's customary to use a while-loop with a decrementing index. Here are two examples of a word-copy loop that should show you why.
 
-```asm {.proglist}
+```armasm
 @ Asm equivalents of copying 16 words.
 @ u32 *dst=..., *src= ..., ii    // r0, r1, r2
 
@@ -1369,7 +1368,7 @@ Anyway, loops in assembly. Making a loop is the easiest thing in the world: just
 
 In an incrementing for-loop you need to increment and then compare against the limit. In the decrementing while loop you subtract and test for zero. Because the zero-test is already part of every instruction, you don't need to compare separately. True, it's not much faster, maybe 10% or so, but many 10 percents here and there do add up. There are actually many versions of this kind of loop, here's another one using block-transfers. The benefit of those is that they also work in Thumb:
 
-```asm {.proglist}
+```armasm
 @ Yet another version, using ldm/stm
 
     add     r2, r0, #16
@@ -1423,7 +1422,7 @@ There's also the matter of passing parameters to the function and returning valu
 
 Below is a real-world example of function calling, complete with parameter passing, stackwork and returning from the call. The function `oamcpy()` copies OBJ_ATTRs. The function uses the same argument order as `memcpy()`, and these need to be set by the calling function; before and after the call, `lr` is pushed and popped. These two things are part of what's called the function overhead, which can be disastrous for small functions, as we've already seen. Inside `oamcpy()` we either jump back immediately if the count was 0, or proceed with the copies and then return. Note that `r4` is stacked here, because that's what the caller expects; if I hadn't and the caller used `r4` as well, I'd be screwed and rightly so. I should probably point out that `r12` is usually considered a scratch register as well, which I could have used here instead of `r4`, removing the need for stacking.
 
-```asm {.proglist}
+```armasm
 @ Function calling example: oamcpy
 @ void oamcpy(OBJ_ATTR *dst, const OBJ_ATTR *src, u32 nn);
 @ Parameters: r0= dst; r1= src; r2= nn;
@@ -1805,9 +1804,8 @@ Now, the top 20 bits indicate the kind of instruction it is and which registers 
 
 Sigh. Yes, here are the mere twelve bits you can use for an immediate operand, divided into a 4bit rotate part and 8bit immediate part. The allowable immediate values are given by `IN ror 2*IR`. This seems like a small range, but interestingly enough you can get quite far with just these. It does mean that you can never load variable addresses into a register in one go; you have to get the address first with a PC-relative load and then load its value.
 
-```asm {.proglist}
-@ Forming 511(0x101)
-    mov     r0, #511    @ Illegal instruction! D:
+<pre><code class="language-armasm hljs">@ Forming 511(0x101)
+    <span class="rem">mov     r0, #511    @ <b>Illegal instruction! D:</b></span>
 
     mov     r0, #256    @ 256= 1 ror 24, so still valid
     add     r0, #255    @ 256+255 = 511
@@ -1820,7 +1818,7 @@ Sigh. Yes, here are the mere twelve bits you can use for an immediate operand, d
     ldr     r0,=511
 .L0:
     .word   511
-```
+</code></pre>
 
 Anyway, the bit patterns of {@tbl:arm-add} is what the processor actually sees when you use an `add` instruction. You can see what the other instructions look like in the references I gave earlier, especially the quick references. The orthogonality of the whole instruction set shows itself in very similar formatting of a given class of instructions. For example, the data instructions only differ by the `TB` field: 4 for `add`, 2 for `sub`, et cetera.
 
@@ -1918,7 +1916,7 @@ Fortunately, alignment is very easy to do: ‘`.align `_`n`_’ aligns to the ne
 
 Here are a few examples of how these things would work in practice. Consider it standard boilerplate material for the creation and use of symbols.
 
-```asm {.proglist}
+```armasm
 @ ARM and Thumb versions of m5_plot
 @ extern u16 *vid_page;
 @ void m5_plot(int x, int y, u16 clr)
@@ -1975,7 +1973,7 @@ GCC 4.7 note: symbol-type for functions now required
 
 As of GCC 4.7, the `.type` directive is pretty much required for functions. Or, rather, it is required if you want ARM and Thumb interworking to work. Just add the following line to each function definition:
 
-```proglist
+```armasm
     .type [function-name] STT_FUNC
 ```
 
@@ -2007,19 +2005,18 @@ And now for adding data to your code. The main data directives are `.byte`, `.hw
 
 You can see some examples below; note that what should have been the `hword_var` will definitely be misaligned and hence useless.
 
-```asm {.proglist}
-    .align 2
+<pre><code class="language-armasm hljs">    .align 2
 word_var:               @ int word_var= 0xCAFEBABE
     .word   0xCAFEBABE
 word_array:             @ int word_array[4]= { 1,2,3,4 }
     .word   1, 2, 3, 4      @ NO comma at the end!!
 byte_var:               @ char byte_var= 0;
     .byte   0
-hword_var:              @ NOT short hword_var= 0xDEAD;
-    .hword  0xDEAD      @   due to bad alignment!
+hword_var:              <span class="rem">@ NOT short hword_var= 0xDEAD;</span>
+    .hword  0xDEAD      <span class="rem">@   due to bad alignment!</span>
 str_array:                 @ Array of NULL-terminated strings:
-    .string "Hello", "Nurse!"
-```
+    .string &quot;Hello&quot;, &quot;Nurse!&quot;
+</code></pre>
 
 ### Data sections {#ssec-gas-dsec}
 
@@ -2029,7 +2026,7 @@ Traditionally, the section for code is called `.text` and that for data is calle
 
 These data sections can be used to indicate different kinds of data symbols. For example, constants (C keyword `const`) should go into `.rodata`. Non-zero (and non-const, obviously) initialised data goes into `.data`, and zero or uninitialized data is to be placed into `.bss`. Now, you still have to indicate the amount of storage you need for each bss-variable. This can be done with ‘`.space `_`n`_’, which indicates _n_ zero bytes (see also `.fill` and `.skip`), or ‘`.comm `_`name`_`, `_`n`_`, `_`m`_’, which creates a bss symbol called _name_, allocates _n_ bytes for it and aligns it to _m_ bytes too. GCC likes to use this for uninitialized variables.
 
-```c {.proglist}
+```c
 // C symbols and their asm equivalents
 
 // === C versions ===
@@ -2040,7 +2037,7 @@ const u32 cst_array[4]= { 1, 2, 3, 4 };
 u8 charlut[256] EWRAM_BSS;
 ```
 
-```asm {.proglist}
+```armasm
 @ === Assembly versions ===
 @ Removed alignment and global directives for clarity
 
@@ -2080,7 +2077,7 @@ Assembly for data exporters
 
 Assembly is a good format for exporting data to. Assembling arrays is faster than compilation, the files can be bigger and you can control alignment more easily. Oh, any you can't be tempted to #include the data, because that simply will not work.
 
-```asm {.proglist}
+```armasm
     .section .rodata    @ in ROM, please
     .align  2           @ Word alignment
     .global foo         @ Symbol name
@@ -2104,7 +2101,7 @@ That was data in different sections, now for code. The normal section for code i
 
 Another interesting point is how to call the function once you have it in IWRAM. The problem is that IWRAM is too far away from ROM to jump to in one go, so to make it work you have to load the address of your function in a register and then jump to it using `bx`. And set `lr` to the correct return address, of course. The usual practice is to load the function's address into a register and branch to a dummy function that just consists of a `bx` using that register. GCC has these support functions under the name `_call_via_`_`rx`_, where _rx_ is the register you want to use. These names follow the GCC naming scheme as given in {@tbl:regnames}.
 
-```asm {.proglist}
+```armasm
 @ --- ARM function in IWRAM: ---
     .section .iwram, "ax", %progbits
     .align 2
@@ -2156,7 +2153,7 @@ This function will copy words. _Fast_. The idea is to use 8-fold block-transfers
 
 One could write a function for this in C, which is done below. However, even though GCC does use block-transfers for the BLOCK struct-copies, I've only seen it go up to 4-fold `ldm/stm`s. Furthermore, it tends to use more registers than strictly necessary. You could say that GCC doesn't do its job properly, but it's hard to understand what humans mean, alright? If you want it done as efficient as possible, do it your damn self. Which is exactly what we're here to do, of course.
 
-```c {.proglist}
+```c
 // C equivalent of memcpy32
 typedef struct BLOCK { u32 data[8]; } BLOCK;
 
@@ -2192,7 +2189,7 @@ Another point is comments. Comments are even more important in assembly than in 
 
 Also, it's a good idea to always add section, alignment and code-set before a function-label. Yes, these things aren't strictly necessary, but what if some yutz decides to add a function in the middle of the file which screws up these things for functions that follow it? Lastly, try to distinguish between symbol-labels and branch-labels. GCC's take on this is starting the latter with ‘`.L`’, which is as good of a convention as any.
 
-```asm {.proglist}
+```armasm
 @ === void memcpy32(void *dst, const void *src, uint wdcount) IWRAM_CODE; =============
 @ r0, r1: dst, src
 @ r2: wdcount, then wdcount>>3
@@ -2233,7 +2230,7 @@ Two factors decide whether or not jumping to `memcpy32()` is beneficial. First i
 
 The second is whether the incoming source and destination addresses can be resolved to word addresses. This is true if bit 1 of the source and destinations are equal (bit 0 is zero because these are valid halfword addresses), in other words: `(src^dst)&2` should not be zero. If it resolvable, do one halfword copy to word-align the addresses if necessary, then call `memcpy32()` for all the word copies. After than, adjust the original halfword stuff and if there is anything left (or if `memcpy32()` couldn't be used) copy by halfword.
 
-```c {.proglist}
+```c
 // C equivalent of memcpy16
 void memcpy16(void *dst, const void *src, uint hwcount)
 {
@@ -2273,7 +2270,7 @@ The C code's point 5 consisted of adjusting the source and destination pointers 
 
 Lastly, point 6 covers the halfword copying loop. I wouldn't have mentioned it here except for one little detail: the array is copied back to front! If this were ARM code I'd have used post-indexing, but this is Thumb code where no such critter exists and I'm restricted to using offsets. I could have used another register for an ascending offset (one extra instruction/loop), or incrementing the `r0` and `r1` (two extra per loop), or I could copy backwards which works just as well. Also note that I use `bcs` at the end of the loop and not `bne`; `bcs` is essential here because `r2` could already be 0 on the first count, which `bne` would miss.
 
-```asm {.proglist}
+```armasm
 @ === void memcpy16(void *dst, const void *src, uint hwcount); =============
 @ Reglist:
 @  r0, r1: dst, src
@@ -2335,7 +2332,7 @@ memcpy16:
 
 While you're working on uncrossing your eyes, a little story on how you can call these functions from C. It's ridiculously simple actually: all you need is a declaration. Yup, that's it. GCC does really care about the language the functions are in, all it asks is that they have a consistent memory interface, as covered in the AAPCS. As I've kept myself to this standard (well, mostly), there is no problem here.
 
-```c {.proglist}
+```c
 // Declarations of memcpy32() and memcpy16()
 void memcpy16(void *dst, const void *src, uint hwcount);
 void memcpy32(void *dst, const void *src, uint wdcount) IWRAM_CODE;
@@ -2377,7 +2374,7 @@ Use \`extern "C"' for C++
 
 Declarations for C++ work a little different, due to the [name mangling](https://en.wikipedia.org/wiki/Name_mangling) it expects. To indicate that the function name is _not_ mangled, add ‘`extern "C"`’ to the declaration.
 
-```c++ {.proglist}
+```c++
 // C++ declarations of memcpy32() and memcpy16()
 extern "C" void memcpy16(void *dst, const void *src, uint hwcount);
 extern "C" void memcpy32(void *dst, const void *src, uint wdcount) IWRAM_CODE;

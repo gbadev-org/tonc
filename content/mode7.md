@@ -556,78 +556,75 @@ extern VECTOR cam_pos;          // Camera position
 extern FIXED g_cosf, g_sinf;    // cos(phi) and sin(phi), .8f
 ```
 
-```c
-// --- Type A ---
-// (offset * zoom) * rotation
-// All .8 fixed
+<pre><code class="language-c hljs">// --- Type A ---
+<span class="rem">// (offset * zoom) * rotation
+// All .8 fixed</span>
 void m7_hbl_a()
 {
     FIXED lam, xs, ys;
 
-    lam= cam_pos.y*lu_div(REG_VCOUNT)>>16;  // .8*.16/.16 = .8
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;16;  // .8*.16/.16 = .8
 
     // Calculate offsets (.8)
     xs= 120*lam;
     ys= M7_D*lam;
 
-    REG_BG2PA= (g_cosf*lam)>>8;
-    REG_BG2PC= (g_sinf*lam)>>8;
+    REG_BG2PA= (g_cosf*lam)&gt;&gt;8;
+    REG_BG2PC= (g_sinf*lam)&gt;&gt;8;
 
-    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)>>8 );
-    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)>>8 );
+    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)&gt;&gt;8 );
+    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)&gt;&gt;8 );  
 }
-```
+</code></pre>
 
-```c
-// --- Type B ---
-// (offset * zoom) * rotation
-// Mixed fixed point: lam, xs, ys use .12
+<pre><code class="language-c hljs">// --- Type B ---
+<span class="rem">// (offset * zoom) * rotation
+// Mixed fixed point: lam, xs, ys use .12</span>
 void m7_hbl_b()
 {
     FIXED lam, xs, ys;
 
-    lam= cam_pos.y*lu_div(REG_VCOUNT)>>12;  // .8*.16/.12 = .12
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;12;  // .8*.16/.12 = .12
 
     // Calculate offsets (.12f)
     xs= 120*lam;
     ys= M7_D*lam;
 
-    REG_BG2PA= (g_cosf*lam)>>12;
-    REG_BG2PC= (g_sinf*lam)>>12;
+    REG_BG2PA= (g_cosf*lam)&gt;&gt;12;
+    REG_BG2PC= (g_sinf*lam)&gt;&gt;12;
 
-    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)>>12 );
-    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)>>12 );
+    REG_BG2X = cam_pos.x - ( (xs*g_cosf-ys*g_sinf)&gt;&gt;12 );
+    REG_BG2Y = cam_pos.z - ( (xs*g_sinf+ys*g_cosf)&gt;&gt;12 );   
 }
-```
+</code></pre>
 
-```c
-// --- Type C ---
-// offset * (zoom * rotation)
+<pre><code class="language-c hljs">// --- Type C ---
+<span class="rem">// offset * (zoom * rotation)
 // Mixed fixed point: lam, lcf, lsf use .12
-// lxr and lyr have different calculation methods
+// lxr and lyr have different calculation methods</span>
 void m7_hbl_c()
 {
     FIXED lam, lcf, lsf, lxr, lyr;
 
-    lam= cam_pos.y*lu_div(REG_VCOUNT)>>12;  // .8*.16 /.12 = 20.12
-    lcf= lam*g_cosf>>8;                     // .12*.8 /.8 = .12
-    lsf= lam*g_sinf>>8;                     // .12*.8 /.8 = .12
-
-    REG_BG2PA= lcf>>4;
-    REG_BG2PC= lsf>>4;
+    lam= cam_pos.y*lu_div(REG_VCOUNT)&gt;&gt;12;  // .8*.16 /.12 = 20.12
+    lcf= lam*g_cosf&gt;&gt;8;                     // .12*.8 /.8 = .12
+    lsf= lam*g_sinf&gt;&gt;8;                     // .12*.8 /.8 = .12
+    
+    REG_BG2PA= lcf&gt;&gt;4;
+    REG_BG2PC= lsf&gt;&gt;4;
 
     // Offsets
-    // Note that the lxr shifts down first!
+    // Note that the lxr shifts down first! 
 
     // horizontal offset
-    lxr= 120*(lcf>>4);      lyr= (M7_D*lsf)>>4;
+    lxr= 120*(lcf&gt;&gt;4);      lyr= (M7_D*lsf)&gt;&gt;4;
     REG_BG2X= cam_pos.x - lxr + lyr;
 
     // vertical offset
-    lxr= 120*(lsf>>4);      lyr= (M7_D*lcf)>>4;
+    lxr= 120*(lsf&gt;&gt;4);      lyr= (M7_D*lcf)&gt;&gt;4; 
     REG_BG2Y= cam_pos.z - lxr - lyr;
 }
-```
+</code></pre>
 
 ### The discussion (technical) {#ssec-order-disc}
 

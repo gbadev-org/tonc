@@ -11,7 +11,9 @@
 
 ## Introduction {#sec-intro}
 
-```c{#cd-hello}
+<div id="{#cd-hello}">
+
+```c
 #include <stdio.h>
 
 int main()
@@ -20,6 +22,8 @@ int main()
     return 0;
 }
 ```
+
+</div>
 
 Aaah, yes, “Hello world”: the canonical first example for every C course and system. Except for consoles. While printing text on a PC is the easiest thing in the world, it is actually a little tricky on a console. It's not that there's no `printf()` function, but rather that there is nowhere for it to write to or even a font to write with (and that's hardly the full list of things to consider). Nope, if you want to be able to display text, you'll have to build the whole thing from scratch yourself. And you do want to be able to write text to the screen,
 
@@ -103,10 +107,7 @@ Another restriction is that the font must be bitpacked to 1bpp. I have a couple 
 
 As for the font data itself, here is the whole thing.
 
-<div style="font-size:90%">
-
-```c{#cd-toncfont}
-const unsigned int toncfontTiles[192]=
+<pre id="cd-toncfont"><code class="language-c hljs">const unsigned int toncfontTiles[192]=
 {
     0x00000000, 0x00000000, 0x18181818, 0x00180018, 0x00003636, 0x00000000, 0x367F3636, 0x0036367F,
     0x3C067C18, 0x00183E60, 0x1B356600, 0x0033566C, 0x6E16361C, 0x00DE733B, 0x000C1818, 0x00000000,
@@ -118,7 +119,7 @@ const unsigned int toncfontTiles[192]=
     0x06186000, 0x00006018, 0x007E0000, 0x0000007E, 0x60180600, 0x00000618, 0x3060663C, 0x00180018,
 
     0x5A5A663C, 0x003C067A, 0x7E66663C, 0x00666666, 0x3E66663E, 0x003E6666, 0x06060C78, 0x00780C06,
-    0x6666361E, 0x001E3666, 0x1E06067E, 0x007E0606, 0x1E06067E, 0x00060606, 0x7606663C, 0x007C6666,
+    0x6666361E, 0x001E3666, <span class="rem">0x1E06067E</span>, <span class="rem">0x007E0606</span>, 0x1E06067E, 0x00060606, 0x7606663C, 0x007C6666,
     0x7E666666, 0x00666666, 0x1818183C, 0x003C1818, 0x60606060, 0x003C6660, 0x0F1B3363, 0x0063331B,
     0x06060606, 0x007E0606, 0x6B7F7763, 0x00636363, 0x7B6F6763, 0x00636373, 0x6666663C, 0x003C6666,
     0x3E66663E, 0x00060606, 0x3333331E, 0x007E3B33, 0x3E66663E, 0x00666636, 0x3C0E663C, 0x003C6670,
@@ -135,9 +136,7 @@ const unsigned int toncfontTiles[192]=
     0x36630000, 0x0063361C, 0x66660000, 0x0C183C66, 0x307E0000, 0x007E0C18, 0x0C181830, 0x00301818,
     0x18181818, 0x00181818, 0x3018180C, 0x000C1818, 0x003B6E00, 0x00000000, 0x00000000, 0x00000000,
 };
-```
-
-</div>
+</code></pre>
 
 Yes, this is the _entire_ font, fitting nicely on one single page. This is what bitpacking can do for you but, like any compression method, it may be a little tricky seeing that it is indeed the font given earlier, so here's a little explanation of what you got in front of you.
 

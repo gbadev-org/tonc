@@ -866,7 +866,7 @@ There are many ways of ensuring proper alignment. The easiest way is to not mix 
 
 One other area where alignment can cause problems is in `struct` definitions. Look at the following code. Here we have a `struct` named `FOO` consisting of one byte, *b*, one word *w* and one halfword *h*. So that's 1+4+2=7 bytes for the `struct` right? Wrong. Because of the alignment requirement, *w* doesn't immediately follow *b* but leaves 3 bytes of padding. When defining arrays of this type, you'll also see that there are also two padding bytes after *h*, because otherwise later array entries would run into trouble.
 
-``` {#cd-struct-align .proglist}
+```c
 // one byte, one word, one halfword. 7 byte struct? 
 // Well let's see ...
 struct FOO
