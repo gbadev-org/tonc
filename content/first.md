@@ -368,7 +368,7 @@ Here are a few examples of code that, while functional, could be improved in ter
 
 Above, I noted that use of non-ints can be problematic. Because this bad habit is particularly common under GBA and NDS code (both homebrew *and* commercial), I'd like to show you an example of this.
 
-<pre><code>// Force a number into range [min, max&gt;
+<pre><code class="language-c hljs">// Force a number into range [min, max&gt;
 #define CLAMP(x, min, max)   \
     ( (x)&gt;=(max) ? ((max)-1) : ( ((x)&lt;(min)) ? (min) : (x) ) )
 

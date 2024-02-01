@@ -310,7 +310,7 @@ div.nh, div.nhgood, div.nhbad, div.nhcare {
 
 /* TODO: can we use colours from the syntax highlighting style instead? */
 /*       (or just tweak them a bit per-theme) */
-div.nhbad, span.rem, .ack {
+div.nhbad, .rem, .ack {
   color: #ec1256;
 }
 div.nhgood {
@@ -318,6 +318,10 @@ div.nhgood {
 }
 div.nhcare {
   color: #e88f42;
+}
+.hljs span.rem, .hljs span.rem * {
+  color: #ec1256;
+  text-decoration: underline wavy;
 }
 
 /* --- picture+caption frames --- */
