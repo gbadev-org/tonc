@@ -782,8 +782,7 @@ All the things you can do with `ldr/str`, you can do with the byte and halfword 
 
 Oh, one more thing: alignment. In C, you could rely on the compiler to align variables to their preferred boundaries. Now that you're taking over from the compiler, it stands to reason that you're also in charge of alignment. This can be done with the ‘.align _n_’ directive, with aligns the next piece of code or data to a 2^n^ boundary. Actually, you're supposed to properly align code as well, something I'm taking for granted in these snippets because it makes things easier.
 
-```armasm
-    mov     r2, #1
+<pre><code class="language-armasm hljs">    mov     r2, #1
 @ Byte loads
     adr     r0, bytes
     ldrb    r3, bytes       @ r3= bytes[0];     // r3= 0x000000FF= 255
@@ -793,16 +792,16 @@ Oh, one more thing: alignment. In C, you could rely on the compiler to align var
     adr     r0, hwords
     ldrh    r3, hwords+2    @ r3= words[1];     // r3= 0x0000FFFF= 65535
     ldrsh   r3, [r0, #2]    @ r3= (s16)r0_h[1]; // r3= 0xFFFFFFFF= -1
-    ldrh    r3, [r0, r2, lsl #1]    @ r3= r0_h[1]? No! Illegal instruction :(
+    <span class="rem">ldrh    r3, [r0, r2, lsl #1]    @ r3= r0_h[1]? <b>No! Illegal instruction :(</b></span>
 
 @ Byte array: u8 bytes[3]= { 0xFF, 1, 2 };
 bytes:
     .byte   0xFF, 1, 2
 @ Halfword array u16 hwords[3]= { 0xF001, 0xFFFF, 0xF112 };
-    .align  1    @ align to even bytes REQUIRED!!!
+    .align  1    @ align to even bytes <b>REQUIRED!!!</b>
 hwords:
     .hword  0xF110, 0xFFFF, 0xF112
-```
+</code></pre>
 
 #### Block transfers
 
@@ -1805,9 +1804,8 @@ Now, the top 20 bits indicate the kind of instruction it is and which registers 
 
 Sigh. Yes, here are the mere twelve bits you can use for an immediate operand, divided into a 4bit rotate part and 8bit immediate part. The allowable immediate values are given by `IN ror 2*IR`. This seems like a small range, but interestingly enough you can get quite far with just these. It does mean that you can never load variable addresses into a register in one go; you have to get the address first with a PC-relative load and then load its value.
 
-```armasm
-@ Forming 511(0x101)
-    mov     r0, #511    @ Illegal instruction! D:
+<pre><code class="language-armasm hljs">@ Forming 511(0x101)
+    <span class="rem">mov     r0, #511    @ <b>Illegal instruction! D:</b></span>
 
     mov     r0, #256    @ 256= 1 ror 24, so still valid
     add     r0, #255    @ 256+255 = 511
@@ -1820,7 +1818,7 @@ Sigh. Yes, here are the mere twelve bits you can use for an immediate operand, d
     ldr     r0,=511
 .L0:
     .word   511
-```
+</code></pre>
 
 Anyway, the bit patterns of {@tbl:arm-add} is what the processor actually sees when you use an `add` instruction. You can see what the other instructions look like in the references I gave earlier, especially the quick references. The orthogonality of the whole instruction set shows itself in very similar formatting of a given class of instructions. For example, the data instructions only differ by the `TB` field: 4 for `add`, 2 for `sub`, et cetera.
 
@@ -2007,19 +2005,18 @@ And now for adding data to your code. The main data directives are `.byte`, `.hw
 
 You can see some examples below; note that what should have been the `hword_var` will definitely be misaligned and hence useless.
 
-```armasm
-    .align 2
+<pre><code class="language-armasm hljs">    .align 2
 word_var:               @ int word_var= 0xCAFEBABE
     .word   0xCAFEBABE
 word_array:             @ int word_array[4]= { 1,2,3,4 }
     .word   1, 2, 3, 4      @ NO comma at the end!!
 byte_var:               @ char byte_var= 0;
     .byte   0
-hword_var:              @ NOT short hword_var= 0xDEAD;
-    .hword  0xDEAD      @   due to bad alignment!
+hword_var:              <span class="rem">@ NOT short hword_var= 0xDEAD;</span>
+    .hword  0xDEAD      <span class="rem">@   due to bad alignment!</span>
 str_array:                 @ Array of NULL-terminated strings:
-    .string "Hello", "Nurse!"
-```
+    .string &quot;Hello&quot;, &quot;Nurse!&quot;
+</code></pre>
 
 ### Data sections {#ssec-gas-dsec}
 

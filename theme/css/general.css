@@ -321,6 +321,8 @@ div.nhcare {
 }
 .hljs span.rem, .hljs span.rem * {
   color: #ec1256;
+}
+.wavy {
   text-decoration: underline wavy;
 }
 

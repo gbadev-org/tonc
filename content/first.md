@@ -373,10 +373,10 @@ Above, I noted that use of non-ints can be problematic. Because this bad habit i
     ( (x)&gt;=(max) ? ((max)-1) : ( ((x)&lt;(min)) ? (min) : (x) ) )
 
 // Change brightness of a palette (kinda) (70)
-void pal_brightness(u16 *pal, <span class="rem">u16</span> size, <span class="rem">s8</span> bright)
+void pal_brightness(u16 *pal, <span class="rem wavy">u16</span> size, <span class="rem wavy">s8</span> bright)
 {
-    <span class="rem">u16</span> ii;
-    <span class="rem">s8</span> r, g, b;
+    <span class="rem wavy">u16</span> ii;
+    <span class="rem wavy">s8</span> r, g, b;
 
     for(ii=0; ii&lt;size; ii++)
     {

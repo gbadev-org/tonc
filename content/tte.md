@@ -858,13 +858,13 @@ void bmp8_drawg_b1cts(uint gid)
 
 The only real difference with `bmp16_drawg_b1cts` is in the inner-most loop. The no-byte-write issue for VRAM means that we need to write two pixels in one pass. To do this, I retrieve and unpack two bits into two bytes and use them to create the new pixels and the pixel masks. The first line in the inner loop does the unpacking. It transforms the bit-pattern _`ab`_ into `0000 000`_`a`_` 0000 000`_`b`_. Both bytes in this halfword are now 0 or 1, depending on whether _a_ and _b_ were on or off. By multiplying with `ink` and 255, you can get the colored pixels and the appropriate mask for insertion.
 
-```
+<pre><code class="language-sh hljs">
 # 2-bit to 2-byte unpacking.
-0000 0000  hgfe dcba    p  = raw (start)
-0000 0000  0000 00ba    p &= 3
-0000 000b  a000 00ba    p |= p<<7;
-0000 000b  0000 000a    p &= ~0xFE;
-```
+0000 0000  hgfe dcb<b>a</b>    p  = raw (start)
+0000 0000  0000 00<span class="rem">b<b>a</b></span>    p &amp;= 3
+0000 000<span class="rem"><b>b</b>  a</span>000 00b<b>a</b>    p |= p&lt;&lt;7;
+0000 000<b>b</b>  0000 000<b>a</b>    p &amp;= ~0xFE;
+</code></pre>
 
 Preparing the right halfword is only part of the work. If `cursorX` (i.e., `x0`) is odd, then the glyph should be plotted to an odd starting location as well. However, the destination pointer `dstL` is halfword pointer and these must always be halfword aligned. To take care of this, note that unpacking the pattern ‘`abcd efgh`’ to an odd boundary is equivalent to unpacking ‘`a bcde fgh`**`0`**’ to an even boundary. This is exactly what the extra shift by `odd` is for.
 
