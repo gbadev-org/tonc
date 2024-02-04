@@ -285,10 +285,7 @@ dfn {
 }
 
 div.note {
-  width: 94%;
-  margin: 0.7em auto;
-  padding: 4px 10px;
-  page-break-inside: avoid;
+  border-color: var(--fg);
   background-color: var(--table-alternate-bg);
 }
 div.note p, div.note ul {

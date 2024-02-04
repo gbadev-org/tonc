@@ -60,13 +60,11 @@ Also, don't forget that the sprites have their own palette which starts at `0500
 </table>
 </div>
 
-<div class="note">
-<div class="nhcare">
-Bitmap modes and Object VRAM
-</div>
+:::warning Bitmap modes and Object VRAM
 
 Only the higher sprite block is available for sprites in modes 3-5. Indexing still starts at the lower block, though, so the tile range is 512-1023.
-</div>
+
+:::
 
 ### The sprite mapping mode {#ssec-map}
 
@@ -104,10 +102,7 @@ From a GBA-programming viewpoint, it is easier to use 1D mapping, as you don't h
 </table>
 </div>
 
-<div class="note">
-<div class="nh">
-Object data conversion via CLI
-</div>
+:::note Object data conversion via CLI
 
 Some command-line interfaces can tile bitmaps for use with objects (and tilemaps). In some cases, they can also convert images with multiple sprite-frames to a set of object tiles in 1D object mapping mode. If *foo.bmp* is a 64×16 bitmap with 4 16×16 objects, here's how you can convert it to 8×8 4bpp tiles using gfx2gba and grit (flags for 1D mapping are given in brackets)
 
@@ -124,15 +119,14 @@ Some command-line interfaces can tile bitmaps for use with objects (and tilemaps
 ```
 
 Two notes on the 1D mapping flags here. First, gfx2gba can only meta-tile (-T) square objects; for something like 16×8 objects you'd need to do the 1D mapping yourself. Second, grit's meta-tiling flags (`-Mw` and `-Mh`) can be anything, and use tile units, not pixels.
-</div>
 
-<div class="note">
-<div class="nh">
-Size units: tiles vs pixels
-</div>
+:::
+
+:::note Size units: tiles vs pixels
 
 The default unit for bitmap dimensions is of course the pixel, but in tiled graphics it is sometimes more useful to use tiles as the basic unit, that is, the pixel size divided by 8. This is especially true for backgrounds. In most cases the context will suffice to indicate which one is meant, but at times I will denote the units with a ‘p’ for pixels or ‘t’ for tiles. For example, a 64x64p sprite is the same as a 8×8t sprite.
-</div>
+
+:::
 
 ## Sprite control: Object Attribute Memory {#sec-oam}
 
@@ -702,21 +696,17 @@ As I said, loading the sprites happens at **point (1)** in the code. If you paid
 
 I am also loading its palette into the sprite palette. That's *sprite* palette (<span class="kbd">0500:0200</span>), not background palette. Load it to the wrong place and you won't see anything.
 
-<div class="note">
-<div class="nhgood">
-Finding tile addresses
-</div>
+:::tip Finding tile addresses
 
 Use `tile_mem` or a macro to find the addresses to copy your tiles too, it's much more readable and maintainable than calculating them manually. You should not have any hard-coded VRAM addresses in your code, ever.
-</div>
 
-<div class="note">
-<div class="nhbad">
-OAMData
-</div>
+:::
+
+:::danger OAMData
 
 Headers from other sites sometimes `#define OAMData` as part of VRAM. It is not. Rename it.
-</div>
+
+:::
 
 #### Setting attributes
 
@@ -734,10 +724,7 @@ Note that these coordinates mark the **top-left** of the sprite. Also, the numbe
 
 You might see code that clears the lower bits of the attributes and then directly ORRs in *x* and *y*. This is not a good idea, because negative values are actually represented by upper half of a datatype's range. −1 for example is all bits set (0xFFFFFFFF). Without masking off the higher bits, negative values would overwrite the rest of the attribute bits, which would be bad.
 
-<div class="note">
-<div class="nhcare">
-Mask your coordinates
-</div>
+:::warning Mask your coordinates
 
 If you're making a sprite positioning function or use someone else's **make sure** you mask off the bits in *x* and *y* before you insert them into the attributes. If not, negative values will overwrite the whole attribute.
 
@@ -752,7 +739,7 @@ This is good:
 ```c
 obj->attr0= (obj->attr0 &~ 0x00FF) | (y & 0x00FF);
 ```
-</div>
+:::
 
 #### Position variables and using tribools
 

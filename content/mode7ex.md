@@ -553,13 +553,7 @@ Aside from being correct, this matrix has two nice properties. Firstly, the colu
 
 One last thing here: if you were to rotate the camera system by 180° around **i**, this would give you a forward pointing **w** and a downward pointing **v**, both of which decrease the number of awkward minus signs in later calculations, at the expense of an awkward camera frame. Whether you want to do this is up to you.
 
-<div class="note">
-
-<div class="nh">
-
-Matrix transforms and the system they occur in.
-
-</div>
+:::note Matrix transforms and the system they occur in.
 
 I said that to mimic the rotations of **C** you to tilt your head first (θ), then rotate your body (φ). You might think that you can get the same effect by doing it the other way: turn first, then look down. However, this is incorrect.
 
@@ -567,7 +561,7 @@ It may _feel_ the same, but in the second case you'd not actually be using the *
 
 I know it's a subtle point, but there really is an important difference. Try visualizing it with a 90° rotation in both orders, maybe that'd help.
 
-</div>
+:::
 
 ### The projection plane {#ssec-try-proj}
 
@@ -2565,13 +2559,7 @@ M7_SPRITE m7_sprites[SPR_COUNT];
 M7_LEVEL m7_level;
 ```
 
-<div class="note">
-
-<div class="nhgood">
-
-Type and order of struct members
-
-</div>
+:::tip Type and order of struct members
 
 My usual advice is to use ints for your data types, but for structs this may not always be the best thing to do. Local variables may not use up memory, but structs do. And when you have arrays of structs, the extra space that word-sized members cost adds up quickly. So in that case feel free to use non-ints.
 
@@ -2579,7 +2567,7 @@ Having said that, when it's time to use those members it can pay to copy its dat
 
 Also, and this is _very_ important, you won't be saving any space if you don't pay attention to the order of the members. An int will still require word-alignment, even when it comes right after a byte member. The compiler may add padding after bytes and halfwords to ensure the next member is correctly aligned. It'd be best if you ordered the members in such a way that there's as little padding as possible.
 
-</div>
+:::
 
 ### Background functions {#ssec-code-bg}
 
@@ -2751,17 +2739,11 @@ You can get β via an arctan LUT of 160 entries, one for each scanline (hey, you
 
 Aside from going triggy with it, you can probably speed up the division as well in a number of ways. But before you go and optimize this, ask yourself if you really need it first. Premature optimization is the root of all evil, after all.
 
-<div class="note">
-
-<div class="nh">
-
-Speed-ups for affine calculations
-
-</div>
+:::note Speed-ups for affine calculations
 
 Tried three optimizations recently. First, ARM/IWRAM, which brings the thing down to 23k-58k cycles. Then, a little refactoring that presented itself in a discussion with sgeos: the camera vectors can resolve to a smaller set of variables, saving 10-20%. Then, the trig thing, which can bring the whole thing down to 10-20k or even 7k-14k max, depending on whether you get cos(β) and 1/sin(θ+β) via large luts, or smaller luts and linear interpolation. Once you get the math, shifts, and signs in order, it works like a charm.
 
-</div>
+:::
 
 #### The mode 7 HBlank interrupt routine
 
@@ -3125,19 +3107,13 @@ void m7_translate_level(M7_CAM *cam, const VECTOR *dir)
 
 If you're not really familiar with matrices they may seem bright and scary, but they can be a lifesaver once you get used to them a bit. There is a _reason_ why large 3D systems use them non-stop; doing everything by raw trig is hard, very hard. Matrices allow you to work within whatever coordinate system is most natural to the task at hand, and then transform to whatever system you need in the end. If you have any work related to geometry, learning more about the basics of linear algebra (the rules for vector and matrix use) is well worth the effort.
 
-<div class="note">
-
-<div class="nh">
-
-Side note : centering on a sprite
-
-</div>
+:::note Side note : centering on a sprite
 
 As an example of how easy matrices can make life, consider the issue of centering the camera on a given sprite and then rotating around it. You have the camera matrix **C**, the distance you want to view from, _Z_ and presumably the sprite position, **x**<sub>w</sub>. What you need to do is: move the camera to the sprite's position, then take _Z_ steps back. In other words **a**<sub>cw</sub> = **x**<sub>w</sub>+**C**·(0, 0, _Z_), which boils down to **a**<sub>cw</sub> = **x**<sub>w</sub>+Z**w**,
 
 Once you know the camera matrix, positioning it practically writes itself.
 
-</div>
+:::
 
 ## Concluding remarks {#sec-conc}
 

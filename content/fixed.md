@@ -34,17 +34,11 @@ int d= 0x280;       // 0x280/256 = 640/256 = 2.50
 
 The affine registers aren't the only places fixed-points are used, though that's where they are the most recognizable. The [blend weights](gfx.html#sec-blend) are essentially fixed-point numbers as well, only they are 1.4 fixeds, not .8 fixeds. This is an important point, actually: the position you set the fixed-point to is arbitrary, and you can even switch the position as you go along. Now, the numbers themselves won't tell you where the point is, so it is important to either remember it yourself or better yet, write it down in the comments. Trust me, you do not want to guess at the fixed-point position in the middle of a lengthy algorithm.
 
-<div class="note">
-
-<div class="nhgood">
-
-Comment your fixed-point position
-
-</div>
+:::tip Comment your fixed-point position
 
 When you use fixed-point variables, try to indicate the fixed-point format for them, especially when you need them for longer calculations, where the point may shift position depending on the operations you use.
 
-</div>
+:::
 
 ### Fixed-point and signs {#ssec-fix-sign}
 
@@ -52,17 +46,11 @@ Fixed-point numbers are supposed to be a poor man's replacement for floating-poi
 
 Another point of notice is the way signed fixeds are often indicated. You may see things of the form ‘1.*n*.*f*’. This is meant to indicate one sign bit, *n* integer bits and *f* fractional bits. Technically speaking, this is **false**. Fixed-point numbers are just plain integers, just interpreted as fractions. That means they follow [two's complement](numbers.html#bits-int-neg) and that, while a set top bit does indicate a negative number, it isn't *the* sign bit. As I mentioned, ‘−1’ in two's complement is `0xFFFFFFFF`, not `0x80000001` as is the case with sign and magnitude. You might not think much of this distinction and that it's obvious that it's still two's complement, but considering that floating-point formats *do* have a separate sign bit, I'd say it's worth remembering.
 
-<div class="note">
-
-<div class="nhcare">
-
-Signed fixed format notation
-
-</div>
+:::warning Signed fixed format notation
 
 Signed fixed-point formats are sometimes indicated as ‘1.*n*.*f*’. From that, you might think they have a separate sign bit like floating-point formats, but this is **not correct**. They're still regular integers, using two's complement for negative numbers.
 
-</div>
+:::
 
 ## Fixed-point math {#sec-fmath}
 
@@ -147,17 +135,11 @@ And then there are negative numbers. Frankly, division on negative integers is a
 
 The negative division nasty is even worse when you try to deal with the fractional part. Masking with AND effectively destroys the sign of a number. For example, a 8.8 −2¼ is −0x0240 = 0xFDC0. Mask that with 0xFF and you'll get 0xC0 = ¾, a positive number, and the wrong fraction as well. On the other hand 0xFDC0\>\>8 is −3, for better or for worse, and −3 + ¾ is indeed −2¼, so in that sense it does work out. The question whether or not it works for *you* is something you'll have to decide on your own. If you want to display the fixed numbers somehow (as, say -2.40 in this case), you'll have to be a little more creative than just shifts and masks. Right now, I'm not even touching that one.
 
-<div class="note">
-
-<div class="nhcare">
-
-Converting negative fixed-point numbers
-
-</div>
+:::warning Converting negative fixed-point numbers
 
 The conversion from negative fixed-point numbers to integers is a particularly messy affair, complicated by the fact that there are multiple, equally valid solutions. Which one you should choose is up to you. If you can, avoid the possibility; the fixed→int conversion is usually reserved for the final stages of arithmetic and if you can somehow ensure that those numbers will be positive, do so.
 
-</div>
+:::
 
 ### Arithmetical operations {#ssec-fmath-ops}
 
@@ -397,17 +379,11 @@ As you can see, the principles of fixed-point math aren't that difficult or magi
 
 ## Faking division (optional) {#sec-rmdiv}
 
-<div class="note">
-
-<div class="nhcare">
-
-Math heavy and optional
-
-</div>
+:::warning Math heavy and optional
 
 This section is about a sometimes useful optimization technique. It not only introduces the technique, but also derives its use and safety limits. As such, there is some nasty math along the way. Chances are you're perfectly safe without detailed knowledge of this section, but it can help you get rid of some slow divisions if the need is there.
 
-</div>
+:::
 
 You may have heard of the phrase “division by a constant is multiplication by its reciprocal”. This technique can be used to get rid of division and replace it with a much faster multiplication. For example *x*/3 = *x*·(1/3) = *x*·0.333333. At first glance, this doesn't seem to help your case: the integer form of 1/*y* is always zero by definition; the alternative to this is floating-point, which isn't so hot either, and you *still* need a division to get even there! This is all true, but the important thing is that these problems can be avoided. The integer/floating-point problem can be solved by using fixed-point instead. As for the division, remember that we're talking about division by a *constant*, and arithmetic on constants is done at compile-time, not runtime. So problems solved, right? Uhm, yeah. Sure. The *superficial* problems are solved, but now the two age-old problems of overflow and round-off rear their ugly heads again.
 
@@ -551,13 +527,7 @@ y = \left\lfloor x/a \right\rfloor = \left\lfloor (x \cdot m)/n \right\rfloor + 
 
 I'm using the floor (&#x230A;*p*/*q*&#x230B;) to indicate integer division, which is basically the rounded down version of real division. As usual, modulo is the remainder and calculated usually calculated with *p* − *r·q*. The key to the approximation of 1/*a* is in terms *m* and *n*. In our case *n* will be a power of two *n*=2<sup>F</sup> so that we can use shifts, but it need not be. δ is an error term that is inherent in any approximation. Note that I'm only using positive integers here; for negative numbers you need to add one to the result if you want to mimic a ‘true’ division. (Or, subtract the sign bit, which work just as well as you can see in the ARM assembly shown above.)
 
-<div class="note">
-
-<div class="nh">
-
-Faking negative divisions and rounding
-
-</div>
+:::note Faking negative divisions and rounding
 
 This section is about positive numbers. If you want the standard integer-division result (round toward zero), you will have to add one if the numerator is negative. This can be done quickly by subtracting the sign-bit.
 
@@ -570,7 +540,7 @@ y -= y>>31;         // convert to /-like division
 
 If you want to round to minus infinity you'll have to do something else. But I'm not quite sure what, to be honest.
 
-</div>
+:::
 
 ### Theory {#ssec-rmdiv-try}
 
@@ -948,17 +918,11 @@ The lower-limit for *n* follows from the fact that, by (6), max(*m·A*) = *n*+*A
 
 And that's basically it. There's a little more to it, of course. As you'll be multiplying, the product *m·A* must fit inside a variable. The practical limit of numbers will therefore be around 16 bits. You can sometimes ease this limitation a little bit by shifting out the lower zero-bits of *A*. For example, for *A*=10=5·2, you can right-shift *x* once before doing the whole calculation. Even 360 is 45·8, and you can save three bits this way. Also, note that even if you surpass the limits, there's a good chance that the thing is still correct or only off by a small amount (check @eq:aprx-fail). You should be able to find the true answer relatively quickly then.
 
-<div class="note">
-
-<div class="nhgood">
-
-ARM ‘int/const int’ division is always safe
-
-</div>
+:::tip ARM 'int/const int' division is always safe
 
 We can now see why GCC can always safely optimize 32bit divisions. The maxima of 32bit *x* and *A* are, of course, 2<sup>32</sup>. The safety limit for this is 2<sup>64</sup>−2<sup>32</sup>, which will always fit in the 64bit result of `smull`.
 
-</div>
+:::
 
 Of course, you don't want to have to type in these things all the time. So here are two macros that can do the work for you. They look horrible, but the preprocessor and compiler know how to handle them. I'd advise against converting these to inline functions, because for some reason there is a good chance you will lose any advantages the code is supposed to bring.
 
@@ -979,31 +943,25 @@ Never forget that this is something of a hack and **only** works when *A* is con
 
 The reciprocal multiplier *m* is *not* merely &#x230A;*n*/*A*&#x230B;, for reasons of round-off error. Always round up. In other words:
 
-*m* = &#x230A;(*n*+*A*−1) / *A*&#x230B;
+> *m* = &#x230A;(*n*+*A*−1) / *A*&#x230B;
 
 Then there's the matter of failed divisions, i.e. where the approximation differs from the ‘true’ &#x230A;*x*/*A*&#x230B;. The exact condition doesn't really matter, but it is useful to know the safe ranges of *x*, and conversely what *n* you need for a given *x*-range. Again, because the important terms are constant they can be figured out in advance. Note that the relations given below represent *A* limit, not *the* limit. The actual numbers for failure may be a bit looser, but depend on the circumstances and as such, relations for those would be more complex.
 
-*x* \< *n* / (*m·a* − *n*)
+> *x* \< *n* / (*m·a* − *n*)
 
-*n* \> *x*(*A*−1)
+> *n* \> *x*(*A*−1)
 
 Lastly, if you have absolutely no idea what this whole section was about, I'd advise against using this strategy. It is a partially safe optimisation technique for division and while it can be a good deal faster that the normal division, it might not be worth it in non-critical areas. Just, use your judgement.
 
-<div class="note">
-
-<div class="nh">
-
-Altenative method
-
-</div>
+:::note Altenative method
 
 There is an alternative method for reciprocal multiplication: instead of rounding *n*/*A* up, you can also add 1 to *x* for
 
-*y* = &#x230A;*x* / *A*&#x230B; ≈ (*x*+1) × &#x230A;*N* / *A* / *N*&#x230B;
+> *y* = &#x230A;*x* / *A*&#x230B; ≈ (*x*+1) × &#x230A;*N* / *A* / *N*&#x230B;
 
 This will also get rid of the problems described by @tbl:rmdiv-bad. The safety conditions are almost the same as before, but there is some difference for division of negative *x*. If you *really* must know, details are available on request.
 
-</div>
+:::
 
 ## Look-up Tables {#sec-lut}
 
@@ -1167,17 +1125,11 @@ That's the version for 32-bit LUTs, there is also a 16-bit version called `lu_le
 
 These functions work for every kind of LUT, expect for a little snag at the upper boundary. Say you have a LUT of *N* entries. The functions use *x*+1, which is likely not to exist for the final interval between *N*−1 and *N*. This could seriously throw the interpolation off at that point. Rather than covering that as a special case, add an extra point to the LUT. The `sinlut` actually has 513 points, and not 512. (Actually, it has 514 points to keep things word-aligned, but that's beside the point.)
 
-<div class="note">
-
-<div class="nhcare">
-
-Lerping at the upper boundary
-
-</div>
+:::warning Lerping at the upper boundary
 
 Linear interpolation needs the sampling point above and below *x*, which can cause problems at the upper boundary. Add an extra sampling point there to “finish the fence’, as it were.
 
-</div>
+:::
 
 The direct look-up is also known as 0-order interpolation; linear interpolation is first order. Higher orders also exists but require more surrounding points and more and complexer calculations. Only attempt those if you really, really have to.
 

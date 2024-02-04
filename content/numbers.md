@@ -569,7 +569,7 @@ I've already mentioned this before, but it's important enough to state it again:
 
 Here are a few guidelines for choosing signed or unsigned types. Intrinsically signed types are numbers that have a physical counterpart: position, velocity, that kind of stuff. A key feature of these is that you're supposed to do arithmetic on them. Variables that act as switches are usually unsigned, the bitflags for enabling features on a GBA are primary examples. These usually use logical operations like masking and inverting (see the section on [bit operations](#sec-bitops)). Then there are quantities and counters. These can be either signed or unsigned, but consider starting with signed, then switch to unsigned if you really have to. Again, these are just recommendations, not commandments that will land you in eternal damnation if you break them.
 
-<div class="note">
+:::note
 
 Unsigned and signed types can behave differently under type casting, comparison and bit-operations. A byte *x* containing FFh could mean a signed −1 or an unsigned 255. In that case:
 
@@ -585,7 +585,7 @@ Unsigned and signed types can behave differently under type casting, comparison 
 </table>
 </div>
 
-</div>
+:::
 
 ### Characters {#ssec-bits-char}
 

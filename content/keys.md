@@ -183,10 +183,11 @@ INLINE u32 key_was_up(u32 key)      {   return ~__key_prev & key;   }
 
 The key states are stored in `__key_curr` and `__key_prev`. The function that updates them is `key_poll()`. Note that this function already inverts REG_KEYINPUT, so that the variables are active high, which makes later operations more intuitive. For example, to test whether A is currently down (pressed), just mask `__key_curr` with `KEY_A`, the bit for A. This is what `key_is_down()` does. While `KEY_DOWN_NOW()` gives (almost) the same answer, I would still recommend using `key_is_down()` instead.
 
-<div class="note">
-  <div class="nhgood">Invert REG_KEYINPUT reads as soon as possible</div>
-  The things that you might check the keystates for are simply easier in active-high settings. Therefore, it is a good idea to make the keystate variables work that way.
-</div>
+:::tip Invert REG_KEYINPUT reads as soon as possible
+
+The things that you might check the keystates for are simply easier in active-high settings. Therefore, it is a good idea to make the keystate variables work that way.
+
+:::
 
 ### Transitional states {#ssec-adv-trans}
 

@@ -319,17 +319,11 @@ After the initial shock of seeing a non-trivial assembly file for the first time
 
 There is a lot more that could be learned from this code, but I'll leave it at this for now. The main aim was to show you what assembly (in this case Thumb asm) looks like. In this small piece of code, you can already see many of the elements that go into a full program. Even though the lack of variable identifiers is a bit of a pain, it should be possible to follow along with the code, just as you would with a C program. See, it's not all that bad now, is it?
 
-<div class="note">
-
-<div class="nhcare">
-
-On working by example
-
-</div>
+:::warning On working by example
 
 Looking at other people's code (in this case GCC's assembly) is a nice way of learning how to make things work, it is _not_ a substitute for the manual. It may show you how to get something done, there is always the danger of getting them done wrongly or inefficiently. Programming is hardly ever trivial and you are likely to miss important details: the compiler may not be not optimising correctly, you could misinterpret the data, etc. This kind of learning often leads to [cargo-cult programming](http://www.catb.org/~esr/jargon/html/C/cargo-cult-programming.html), which often does more harm than good. If you want examples of these problems, look at nearly all other GBA tutorials and a lot of the available GBA demo code out there.
 
-</div>
+:::
 
 ### Assembling assembly {#ssec-gen-as}
 
@@ -442,17 +436,11 @@ These kinds of conditionals shouldn't be used blindly, though. Even though you w
 
 Another optional item is whether or not the status flags are set. Test instructions like `cmp` always set them, but most of the other require an ‘`-s`’ affix. For example, `sub` would not set the flags, but `sub`**`s`** would. Because this kinda clashes with the plural ‘s’, I'm using adding an apostrophe for the plural form, so `subs` means `sub` with status flags, but `sub`'s means multiple `sub` instructions.
 
-<div class="note">
-
-<div class="nhgood">
-
-All instructions are conditional
-
-</div>
+:::tip All instructions are conditional
 
 Each instruction of the ARM set can be run conditionally, allowing shorter, cleaner and faster code.
 
-</div>
+:::
 
 #### The barrel shifter
 
@@ -474,17 +462,11 @@ ldr r0, [r1, r2, lsl #2]    @ u32 *r1; r0= r1[r2]
 
 Other uses are certainly possible as well. Like the conditional, you might not really need use of shifted `add`'s and such, but they allow for some _wonderfully_ optimized code in the hands of the clever programmer. These are things that make assembly fun.
 
-<div class="note">
-
-<div class="nhgood">
-
-Shifts are free!
-
-</div>
+:::tip Shifts are free!
 
 Or at least very nearly so. Shifts-by-value can be performed at no extra cost, and shifts-by-register cost only one cycle. Actually, bit-rotates behave like this as well, but they're rather rare and since I don't know of the correct term that encompasses both, I'll use the word “shift” for both.
 
-</div>
+:::
 
 #### Restricted use of immediate values
 
@@ -541,29 +523,17 @@ The faster method of forming bigger numbers is a matter of debate. There are man
 
 That there is only room for an 8bit number + 4bit rotate for immediate operands is something you'll just have to learn to live with. If the assembler occasionally complains about invalid constants, you now know what it means and how you can correct for it. Oh, and if you thought this was bad, think of how it would work for Thumb code, which only has 16 bits to work with.
 
-<div class="note">
-
-<div class="nhcare">
-
-The only valid immediate values are rotated bytes
-
-</div>
+:::warning The only valid immediate values are rotated bytes
 
 When instructions allow immediate values, the only permissible values are those that can be reduced to a byte rotated by an even number. 0xFF and 0x100 are allowed, but 0x101 is not. This has consequences for data operations, but also for memory addressing since it will not be possible to load a full 32bit address in one go. You can either construct the larger value out of smaller parts, or use a load-assignment construct: ‘`ldr `_`Rd`_`,=`_`num`_’ which the assembler will convert into a `mov` if possible, or a PC-relative load if not.
 
-</div>
+:::
 
-<div class="note">
-
-<div class="nhgood">
-
-Remember the previous note
-
-</div>
+:::tip Remember the previous note
 
 Is this worth a separate note? Maybe not, but the previous note is important enough to remember. It is not exactly intuitive that code should behave that way and if you found yourself staring at the enigmatic [invalid constant](https://gbadev.net/forum-archive/thread/8/9602.html) error message, you'd probably be lost without this bit of info.
 
-</div>
+:::
 
 ### Data instructions {#ssec-arm-data-ins}
 
@@ -685,13 +655,7 @@ Here _op_ is either `ldr` or `str`. Because they're so similar in appearance, I 
 
 The first register here, `Rd` can be either the destination or source register. The thing between brackets always denotes the memory address; `ldr` means load _from_ memory, in which case `Rd` is the destination, and `str` means store _to_ memory, so `Rd` would be the source there. `Rn` is known as the <dfn>base register</dfn>, for reasons that we will go into later, and _Op2_ often serves as an offset. The combination works very much like array indexing and pointer arithmetic.
 
-<div class="note">
-
-<div class="nh">
-
-Memory ops vs C pointers/arrays
-
-</div>
+:::note Memory ops vs C pointers/arrays
 
 To make the comparison to C a little easier, I will sometimes indicate what happens using pointers, but in order to do that I will have to indicate the type of the pointer somehow. I could use some horrid casting notation, but it would be easiest to use a form of arrays for this, and use the register-name + an affix to show the data type. I'll use ‘\_w’ for words, ‘\_h’ for halfwords, and ‘\_b’ for bytes, and ‘\_sw’, etc. for their signed versions. For example, `r0_sh` would indicate that `r0` is a signed halfword pointer. This is just a useful bit of shorthand, not actually part of assembly itself.
 
@@ -701,7 +665,7 @@ ldr     r0, [r1]    @ r0= *(u32*)r1; //or r0= r1_w[0];
 str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[1]= r0;
 ```
 
-</div>
+:::
 
 #### Addressing modes
 
@@ -740,13 +704,7 @@ fooData:
     .word   0x0000F002
 ```
 
-<div class="note">
-
-<div class="nhgood">
-
-PC-relative specials
-
-</div>
+:::tip PC-relative specials
 
 PC-relative instructions are common, and have a special shorthand that is easier and shorter to use than creating a pool of data to load from. The format for this is ‘`ldr Rd,=`_`foo`_’, where _foo_ is a label or an immediate value. In both cases, a pool is created to hold these numbers automatically. Note that the value for the label is its _address_, not the address' contents.
 
@@ -772,7 +730,7 @@ If the label is near enough you can also use `adr`, which is assembled to a PC-a
 
 Note that I'm not actually creating `far_var` here; just storage room for its address. Creation of variables is covered later.
 
-</div>
+:::
 
 #### Data types
 
@@ -867,17 +825,11 @@ The block transfers are also used for stack-work. There are four types of stacks
   </table>
 </div>
 
-<div class="note">
-
-<div class="nhcare">
-
-push and pop are not universal ARM instructions
-
-</div>
+:::warning push and pop are not universal ARM instructions
 
 They seem to work for devkitARM r15 and up (haven't checked older versions), but DevKitAdv for example doesn't accept them. Just try and see what happens.
 
-</div>
+:::
 
 ### Conditionals and branches {#ssec-arm-cnd}
 
@@ -1162,17 +1114,11 @@ DivSafe:
 
 If the denominator is not zero, the `mvneq` and `subeq` are essentially skipped. Actually, not so much skipped, but turned into `nop`: non-operations. So is `swine` (i.e., `swi` + `ne`, no piggies here) if it is zero. True, the division line has increased by a cycle, not taking the branch makes the exception line a little faster and the function itself has shrunk from 7 to 5 instructions.
 
-<div class="note">
-
-<div class="nhgood">
-
-Symbol vs internal labels
-
-</div>
+:::tip Symbol vs internal labels
 
 In the first `DivSafe` snippet, the internal branch destination used a `.L` prefix, while the function label did not. The `.L` prefix is used by GCC to indicate labels for the sake of labels, as opposed to symbol labels like `DivSafe`. While not required, it's a useful convention.
 
-</div>
+:::
 
 #### Major and minor branches
 
@@ -1383,31 +1329,19 @@ This is one of those occasions where knowing assembly can help you write efficie
 
 When dealing with loops, be extremely careful with how you start and stop the loop. It's very easy to come up with a loop that runs once too often or too little. I'm pretty sure these two versions are correct. The way I usually check it is to see how it runs when the count should be 1 or 2. If that works out, larger numbers will too.
 
-<div class="note">
-
-<div class="nhgood">
-
-Merge comparisons with data instructions
-
-</div>
+:::tip Merge comparisons with data instructions
 
 The **Z** status flag revolves around the number zero, so if you use 0 to compare to you can often combine the comparison with the data instruction that sets the flags.
 
 This is also true for testing individual bits. The **N** and **C** flags are effectively bits 31 and 32, respectively. If you can manipulate the algorithm to use those, you don't need a `cmp` or `tst`.
 
-</div>
+:::
 
-<div class="note">
-
-<div class="nhcare">
-
-“No, there is another”
-
-</div>
+:::warning “No, there is another”
 
 You probably know this already, but this is a good time to repeat the warning: watch out for off-by-one errors (also known as [obi-wan errors](http://www.catb.org/~esr/jargon/html/O/obi-wan-error.html)). It is just way too easy to do one iteration too few or too many, so always check whether the code you have does the right thing. Goes for other programming languages too, of course.
 
-</div>
+:::
 
 #### Function calls
 
@@ -1449,17 +1383,11 @@ oamcpy:
     pop     {lr}        @ Restore lr
 ```
 
-<div class="note">
-
-<div class="nhgood">
-
-Use <kbd>bx</kbd> instead of <kbd>mov pc,lr</kbd>
-
-</div>
+:::tip Use bx instead of mov pc,lr
 
 The `bx` instruction is what makes interworking between ARM and Thumb function possible. Interworking is good. Therefore, `bx` is good.
 
-</div>
+:::
 
 This concludes the primary section on ARM assembly. There are more things like different processor states, and data-swap (`swp`) and co-processor instructions, but those are rare. If you need more information, look them up in the proper reference guides. The next two subsections cover instruction speeds and what an instruction actually looks like in binary, i.e., what the processor actually processes. Neither section is necessary in the strictest sense, but still informative. If you do not want to be informed, move on to the next section: [the Thumb instruction set](asm.html#sec-thumb).
 
@@ -1612,19 +1540,13 @@ The data presented here is just an overview of the most important items, for all
 
 - Multiplies are 1S operations, plus 1I for every significant byte of the _second_ operand. Yes, this does mean that the cost is asymmetric in the operands. If you can estimate the ranges of values for the operands, try to put the lower one in the second operand. Another 1I is required for the add of `mla`, and one more for long multiplications.
 
-<div class="note">
-
-<div class="nhcare">
-
-There is no 1S in loads!
-
-</div>
+:::warning There is no 1S in loads!
 
 Official documentation gives 1S+1N<sub>d</sub>+1I as the timing of `ldr`, but this is not entirely accurate. It is actually 1**N**+1N<sub>d</sub>+1I. The difference is small and only visible for ROM instructions, but could be annoying if you're wondering why what you predicted and what you measured for your routine doesn't match exactly. This applies to `ldm` and perhaps `swp` too.
 
 See [forum:9602](https://gbadev.net/forum-archive/thread/8/9602.html) for a little more on the subject.
 
-</div>
+:::
 
 ### Anatomy of an addition {#ssec-arm-add}
 
@@ -1963,13 +1885,7 @@ The functions above show the basic template for functions: three lines of direct
 
 And yes, these two functions do actually form functional mode 5 pixel plotters. As an exercise, try to figure out how they work and why they're coded the way they are. Also, notice that the Thumb function is only two instructions longer than the ARM version; if this were ROM-code, the Thumb version would be a whole lot faster due to the buswidth, which is exactly why Thumb code is recommended there.
 
-<div class="note">
-
-<div class="nhcare">
-
-GCC 4.7 note: symbol-type for functions now required
-
-</div>
+:::warning GCC 4.7 note: symbol-type for functions now required
 
 As of GCC 4.7, the `.type` directive is pretty much required for functions. Or, rather, it is required if you want ARM and Thumb interworking to work. Just add the following line to each function definition:
 
@@ -1979,21 +1895,15 @@ As of GCC 4.7, the `.type` directive is pretty much required for functions. Or, 
 
 `STT_FUNC` is an internal macro that expands to the correct attribute (presumably `%function`). Replace `[function-name]` with the real function name.
 
-</div>
+:::
 
-<div class="note">
-
-<div class="nhbad">
-
-Implicit extern considered harmful
-
-</div>
+:::danger Implicit extern considered harmful
 
 The `.extern` directive for external symbols is actually not required: GAS assumes that unknown identifiers are external. While I can see the benefits of implicit declarations/definitions, I still think that it is a _bad_ idea. If you've ever misspelled an identifier in languages that have implicit definitions, you'll know why.
 
 And yes, I know this is actually a non-issue because it'll get caught by the linker anyway, but explicitly mentioning externals is probably still a good idea. <kbd>:P</kbd>
 
-</div>
+:::
 
 ### Definition of variables {#ssec-gas-data}
 
@@ -2067,13 +1977,7 @@ charlut:
     .space 256
 ```
 
-<div class="note">
-
-<div class="nhgood">
-
-Assembly for data exporters
-
-</div>
+:::tip Assembly for data exporters
 
 Assembly is a good format for exporting data to. Assembling arrays is faster than compilation, the files can be bigger and you can control alignment more easily. Oh, any you can't be tempted to #include the data, because that simply will not work.
 
@@ -2093,7 +1997,7 @@ foo:
 
 You need a const section, word alignment, a symbol declaration and definition and the data in soe form of array. To make use of it, make a suitable declaration of the array in C and you're all set.
 
-</div>
+:::
 
 ### Code sections {#ssec-gas-csec}
 
@@ -2125,17 +2029,11 @@ _call_via_r3:
 
 The `_call_by_`_`rx`_ indirect branching is how function calling works when you use the `-mlong-calls` compiler flag. It's a little slower than straight branching, but generally safer. Incidentally, this is also how interworking is implemented.
 
-<div class="note">
-
-<div class="nh">
-
-Standard and special sections
-
-</div>
+:::note Standard and special sections
 
 Sections `.text`, `.data` and `.bss` are standard GAS sections and do not need explicit mention of the `.section` directive. Sections `.ewram`, `.iwram`, `.rodata` and `.sbss` and more GBA specific, and do need `.section` in front of them.
 
-</div>
+:::
 
 With this information, you should be able to create functions, variables and even place them into the right sections. This is probably 90% of whay you might want to do with directives already. For the remaining few, read the manual or browse through GCC generated asm. Both should point you in the right direction.
 
@@ -2352,25 +2250,13 @@ See? They can be called just as any other C function. Of course, you have to ass
 
 You do need to take care to provide the **correct** declaration, though. The declaration tells the compiler how a function expects to be called, in this case destination and source pointers (in that order), and the number of (half)words to transfer. It is legal to change the order of the parameters or to add or remove some – the function won't _work_ anymore, but the compiler does allow it. This is true of C functions too and should be an obvious point, but assembly functions don't provide an easy check to determine if you've used the correct declaration, so please be careful.
 
-<div class="note">
-
-<div class="nhgood">
-
-Make the declaration fit the function
-
-</div>
+:::tip Make the declaration fit the function
 
 This is a very important point. Every function has expectations on how it's called. The section, return-type and arguments of the declaration must match the function's, lest chaos ensues. The best way would be not explicitly mention the full declaration near the function definition, so that the user just has to copy-paste it.
 
-</div>
+:::
 
-<div class="note">
-
-<div class="nhgood">
-
-Use \`extern "C"' for C++
-
-</div>
+:::tip Use 'extern "C"' for C++
 
 Declarations for C++ work a little different, due to the [name mangling](https://en.wikipedia.org/wiki/Name_mangling) it expects. To indicate that the function name is _not_ mangled, add ‘`extern "C"`’ to the declaration.
 
@@ -2380,7 +2266,7 @@ extern "C" void memcpy16(void *dst, const void *src, uint hwcount);
 extern "C" void memcpy32(void *dst, const void *src, uint wdcount) IWRAM_CODE;
 ```
 
-</div>
+:::
 
 And that all folks. As far as this chapter goes anyway. Like all languages, it takes time to fully learn its ins and outs, but with this information and a couple of (quick)reference documents, you should be able to produce some nice ARM assembly, or at least be able to read it well enough. Just keep your wits about you when writing assembly, please. Not just in trying to avoid bugs, but also in keeping the assembly maintainable. Not paying attention in C is bad enough, but here it can be absolutely disastrous. Think of what you want to do first, _then_ start writing the instructions.
 

@@ -159,11 +159,11 @@ const BG_AFFINE bg_aff_default= { 256, 0, 0, 256, 0, 0 };
 REG_BG_AFFINE[2] = bg_aff_default;
 ```
 
-<div class="note">
-  <div class="nhcare">Regular vs affine tilemap scrolling</div>
+:::warning Regular vs affine tilemap scrolling
 
   Affine tilemaps use **different** scrolling registers! Instead of REG_BG*x*HOFS and REG_BG*x*VOFS, they use REG_BG*x*X and REG_BG*x*Y. Also, these are 32bit fixed point numbers, not halfwords.
-</div>
+
+:::
 
 ## Positioning and transforming affine backgrounds {#sec-aff-ofs}
 
@@ -344,11 +344,11 @@ The screen entries themselves are also different from those of regular backgroun
 
 And that's about it, really. No, wait there's one more issue: you have to be careful when filling or changing the map because *VRAM can only be accessed 16 or 32 bits at a time*. So if you have your map stored in an array of bytes, you'll have to cast it to `u16` or `u32` first. Or use [DMA](dma.html). OK, now I'm done.
 
-<div class="note">
-  <div class="nhcare">Regular vs affine tilemap mapping differences</div>
+:::warning Regular vs affine tilemap mapping differences
 
   There are two important differences between regular and affine map formats. First, affine screen entries are merely one-byte tile indices. Secondly, the maps use a linear layout, rather than the division into 32x32t maps that bigger regular maps use.
-</div>
+
+:::
 
 ## *sbb_aff* demo {#sec-demo}
 

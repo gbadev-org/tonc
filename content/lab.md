@@ -102,19 +102,13 @@ Think of how a basic sort works. You have *N* elements to sort. In principle, ea
 
 Fortunately, there are faster methods, you'd want at least an *O*(*N*·log~2~(*N*)) for sorting algorithms, and as you can see from the aforementioned wiki, there are plenty of those and shellsort is one of them. Unfortunately, even this can be quite expensive. Again, with *N*=128 this is still about 900, and you can be sure the multiplier can be high, as in 80+. With ARM+IWRAM, I can manage to bring that down to 20-30, and a simple exercise in assembly gives me an acceptable 13 to 22 × *N*·log~2~(*N*).
 
-<div class="note">
-
-<div class="nh">
-
-The Big O Notation
-
-</div>
+:::note The Big O Notation
 
 The ‘Big O’ or order notation is a useful expression for comparing algorithms. The notation is *O*( f(*N*) ), where *N* is the number of elements to work on and f(*N*) a function, usually a combination of powers and logarithms. It shows how the runtime of an algorithm rises with increasing *N*. As lower order functions will eventually be overtaken by higher order ones, the former is generally preferable.
 
 The keyword here, though, is ‘eventually’. It does not mention the scale of the algorithm, which varies from case to case. In some cases if *N* is low enough and the scales are different enough, a higher-order routine may actually outperform a lower-order one.
 
-</div>
+:::
 
 Now, I'll be the first to admit that the current design isn't exactly optimal anyway. Using linked lists instead of an index table may work faster, and there are other things too (the division isn't a problem, as [it can be faked](fixed.html#sec-rmdiv)). However, then it wouldn't be quite as simple anymore, which is what I was going for here.
 
@@ -396,13 +390,7 @@ Immediately after this is the second hack, creating the sort key.
 
 The last part of the function updates the OAM shadow to OAM, either with or without sorting.
 
-<div class="note">
-
-<div class="nh">
-
-Sorting disabled objects
-
-</div>
+:::note Sorting disabled objects
 
 Incidentally, you could easily modify the sort-key creation to account for disabled/hidden objects. All you'd have to do is assign the highest (signed) value to the sort-key, in this case 0x7FFFFFFF.
 
@@ -413,7 +401,7 @@ else
     *key++= 0x7FFFFFFF;
 ```
 
-</div>
+:::
 
 #### Rest of code
 

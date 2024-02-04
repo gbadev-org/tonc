@@ -487,21 +487,17 @@ while(1)
 }
 ```
 
-<div class="note">
-<div class="nhgood">
-Prefer VBlankIntrWait() over vid_vsync()
-</div>
+:::tip Prefer VBlankIntrWait() over vid_vsync()
 
 Waiting for the VBlank via `vid_vsync()` (or its functional equivalent) is not a good idea: it wastes too much battery power. The recommended procedure is using `VBlankIntrWait()` to halt the processor, to be woken again on the VBlank interrupt.
-</div>
 
-<div class="note">
-<div class="nhcare">
-Acknowledging IntrWait routines
-</div>
+:::
+
+:::warning Acknowledging IntrWait routines
 
 `VBlankIntrWait()` is only one of the BIOS's `IntrWait()` routines that can stop the CPU until an interrupt has been raised. However, it doesn't look at `REG_IF` but at `REG_IFBIOS` (0300:7FF8) for the acknowledgement of the interrupt. If your game locks up after trying `VBlankIntrWait()`, this may be why. Note that you may find the address under other names, as there isn't really an official one for it.
-</div>
+
+:::
 
 ## Final thoughts {#sec-concs}
 

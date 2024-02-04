@@ -184,15 +184,13 @@ p_{c} & p_{d}
 
 Note that the origin of the transformation is *center* of the sprite, not the top-left corner. This is worth remembering if you want to align your sprite with other objects, which we'll do later.
 
-<div class="note">
-<div class="nhgood">
-Essential affine sprite steps
-</div>
+:::tip Essential affine sprite steps
 
 -   Set-up an object as usual: load graphics and palette, set `REG_DISPCNT`, set-up an OAM entry.
 -   Set bit 8 of attribute 0 to enable affinity for that object, and choose an object affine matrix to use (attribute 1, bits 8-12).
 -   Set that obj affine matrix to something other than all zeroes, for example the identity matrix.
-</div>
+
+:::
 
 ## Graphical artifacts {#sec-artifact}
 
@@ -302,13 +300,11 @@ The center pixel is the reference point of the transformation algorithm, which h
 </table>
 </div>
 
-<div class="note">
-<div class="nhcare">
-The offsets measure distance from the center pixel, not center position.
-</div>
+:::warning The offsets measure distance from the center pixel, not center position.
 
 The offsets that are calculated from the affine matrix use the distances from the center pixel (*w*/2, *h*/2), not the center point. As such, there is a half a pixel deviation from the mathematical transformation, which may result in a ±pixel offset for the sprite as a whole and lost texture edges.
-</div>
+
+:::
 
 ### The wrapping artifact {#ssec-wrap}
 

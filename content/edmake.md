@@ -140,13 +140,7 @@ The other settings aren't important for our purposes so leave them as they are. 
 
 </div>
 
-<div class="note">
-
-<div class="nhgood">
-
-Converting GCC reports to MSVC reports
-
-</div>
+:::tip Converting GCC reports to MSVC reports
 
 When you build a normal MSVC project, it will report and errors and warnings and double-clicking on these will bring to to the line that spawned it. This does not work for devkitARM because GCC has a slightly different reporting format.
 
@@ -165,7 +159,7 @@ make -f tonc.mak build 2>&1 | sed -e 's|\(\w\+\):\([0-9]\+\):|\1(\2):|'
 
 The `2>&1 | ` feeds the standard output of make to the standard input of the sed. The rest is a sed command that finds the parts before the first two colons, and converts them to the parenthesized format the MSVC expects. Note that tonc's build line is slightly more complicated because of its directory structure but the line above is what really matters.
 
-</div>
+:::
 
 #### Phase 3b: Build configurations
 
@@ -181,25 +175,13 @@ This one isn't strictly necessary, but may be useful. In Visual C++ you can have
 
 And that's about it as far as Visual C++ is concerned. You still have to actually create the referenced makefile (tonc.mak in this case). You know how to create a textfile, don't you? Another thing to remember about makefile projects is that all build commands are inside the makefile; the files mentioned in the File Viewer are just for show and are not compiled by themselves like ‘normal’ VC projects.
 
-<div class="note">
-
-<div class="nh">
-
-Easy switching between devkits in tonc.mak
-
-</div>
+:::note Easy switching between devkits in tonc.mak
 
 Tonc's makefiles are of such nature that each can stand on its own, but can also be called from a central makefile tonc.mak, with the `DEMO` variable. I've also put a `CROSS` (which houses the prefix) variable in there which overrides `CROSS` of the individual makefiles. Changing it in tonc.mak effectively changes it everywhere.
 
-</div>
+:::
 
-<div class="note">
-
-<div class="nhgood">
-
-Getting rid of MSVC 6.0's useless directories
-
-</div>
+:::tip Getting rid of MSVC 6.0's useless directories
 
 It appears that Visual Studio 6 (and higher too?) has a very annoying habit of creating all kinds of extra directories for each project added to a workspace and for each project configuration. Directories that you probably never intend to use, and *certainly* never asked for, and which clutter up your project. Removing them from disk doesn't solve the problem, because they'll just reappear merely by selecting the project/configuration.
 
@@ -218,4 +200,4 @@ No, I don't exactly know what I'm doing, but yes when you remove the directories
 
 Now, if anyone does have a reference guide for DSP files, or can tell me whether this obnoxious behaviour is still present in later MSVC iterations, I'm all ears.
 
-</div>
+:::

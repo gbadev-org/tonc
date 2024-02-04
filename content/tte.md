@@ -742,19 +742,13 @@ So yes, spam your code width locals for loop-invariant, memory-based quantities.
 
 Both the pointer work and pre-loading variables are actually the job of the compiler's optimizer, but the current version of GCC doesn't do these very well or at all. Also, sometimes it _can't_ do this optimization. When functions are called between memory dereferences, the compiler has to reload the data because those functions may have changed their contents. Obviously, this wouldn't happen for locals.
 
-<div id="nt-local" class="note">
-
-<div class="nhgood">
-
-Use local variables for struct members and globals
-
-</div>
+:::tip Use local variables for struct members and globals
 
 Struct members and global variables live in memory, not CPU registers. Before the CPU can use their data, they have to be loaded from memory into registers first, and this often happen more times then necessary. Since memory access (especially ROM access) is slower than register access, this can really bog down an algorithm if the thing is used more than once. You can avoid this needless work by creating local variables for them.
 
 Aside from the speed-boost, local variables can use shorter names, resulting in shorter and more readable code in the parts that actually do the work. It's win-freakin'-win, baby.
 
-</div>
+:::
 
 ### Glyph and surface formats {#ssec-srf-format}
 
@@ -971,17 +965,11 @@ void obj_drawg(uint gid)
 
 And, yes, I know that this use of the `dst` member is somewhat … unorthodox; but it wasn't used here anyway so why not. I am considering using something more proper, but not just yet. Also, remember that this system assumes that the font is already loaded into VRAM and that this can take up a _lot_ of the available tiles. Using the verdana 9 font, that'd be 2\*240 = 480 tiles. That's nearly half of object VRAM. A safer alternative would be to load the necessary tiles dynamically, but that would require more resource management.
 
-<div class="note">
-
-<div class="nhcare">
-
-TTE object text is ugly
-
-</div>
+:::warning TTE object text is ugly
 
 The way object text is handled in TTE works, but it the implementation is not exactly pretty. The way I'm using `TTC.dst` here is, well, bad. There is a good chance I'll clean it up a bit later, or at the very least hide the implementation better.
 
-</div>
+:::
 
 ### Example: letters. Onna path {#ssec-obj-demo}
 
@@ -1795,17 +1783,11 @@ After handling a tag, it'll look for more tags, or exit if the end delimiter or 
 
 I should point out that at present the commands are still fragile, so be careful with this stuff. For example, the positioning commands will simply move the cursor, but not clip to the margins. Also take care with the font and string commands (`f` and `s`, respectively). `tte_cmd_default()` doesn't test whether the index is out of the bounds of the arrays, so you could end up with … odd things. At some point, I hope to fix these things, but it's not a priority right now. If anyone has something more robust that I can use, please speak up.
 
-<div id="nt-tte-cmd" class="note">
-
-<div class="nhcare">
-
-TTE formatting commands : caveat emptor.
-
-</div>
+:::warning TTE formatting commands : caveat emptor.
 
 The current commands in TTE aren't exactly idiot-proof yet. If you stick to sensible things, it should work quite nicely. But it is still easy to shoot yourself in the foot if you're not careful.
 
-</div>
+:::
 
 ### Using console I/O {#ssec-misc-conio}
 
@@ -1945,19 +1927,13 @@ int main()
 }
 ```
 
-<div id="nt-printf" class="note">
-
-<div class="nhcare">
-
-Printf bagage
-
-</div>
+:::warning Printf bagage
 
 As wonderful as `printf()` is, there are some downsides to it too. First, it's a very heavy function that calls quite a large amount of functions which all have to be linked in. Second, it is pretty damn slow. Because it can do so much, it has to check for all these different cases. Also, for the string to decimal conversion it uses divisions, which is really bad for the GBA.
 
 Be aware of how much `printf()` costs. If it turns out to be a bottle-neck, try making your own slimmed down version. A decent `sprintf()` alternative is `posprintf()`, created by [Dan Posluns](https://www.danposluns.com/gbadev/).
 
-</div>
+:::
 
 ### VT100 escape sequences {#ssec-misc-vt100}
 
@@ -2027,17 +2003,11 @@ _CSI_ here is the ASCII code for the <dfn>command sequence indicator</dfn>, whic
 
 If you compare this list to {@tbl:tte-cmd}, you'll see that most of these codes have corresponding TTE commands. You can use either, but if you plan to make something that's supposed to be cross-platform, use the VT100 codes.
 
-<div class="note">
-
-<div class="nhcare">
-
-Deviations from the standard
-
-</div>
+:::warning Deviations from the standard
 
 I'm trying to keep my implementation as close to the standard as possible. This is mainly because TTE uses other things just 8x8 characters on a regular background. In particular, scrolling is absent here and there are no color codes. Yet.
 
-</div>
+:::
 
 ### UTF-8 {#ssec-misc-utf}
 
@@ -2143,17 +2113,11 @@ Both `tte_write()` and `tte_write_con()` use `utf_decode_char()` when the string
 
 There is, however, one catch to using UTF-8 with stdio. Internally, stdio is really picky about what's acceptable. For example, the copywrite symbol, © is extended number 0xA9. In non-UTF-8, you could use just 0xA9 in a string and it'd use the right symbol. However, 0xA9 alone wouldn't fit any of the formats from {\*@tbl:utf8}, so it's an invalid code in UTF-8. While `utf8_decode_char()` is forgiving in this case, stdio isn't, an will interpret it as a terminator. In other words, be careful with extended ASCII character; you _have_ to use the proper UTF-8 formats if you want to use the stdio functions.
 
-<div id="nt-stdio-utf8" class="note">
-
-<div class="nhcare">
-
-Printf, UTF-8, and extended ASCII
-
-</div>
+:::warning Printf, UTF-8, and extended ASCII
 
 As of devkitArm r22, `printf()` and the other stdio functions use the UTF-8 locale. This effectively means that you cannot use characters like ‘©’ and ‘è’ directly like you used to in older versions. You need to use the full multi-byte UTF-8 notations.
 
-</div>
+:::
 
 ### Profiling the renderers {#ssec-misc-profile}
 

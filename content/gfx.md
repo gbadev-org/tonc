@@ -77,10 +77,11 @@ To use mosaic you must do two things. First, you need to enable mosaic. For indi
 
 The <dfn>stretch</dfn> is across how many pixels the base-pixel is stretched. This corresponds to *w<sub>m</sub>*−1 or *h<sub>m</sub>*−1. With a nybble for each effect, you have stretches between 0 and 15, giving mosaic widths and heights between 1 and 16.
 
-<div class="note">
-  <div class="nhgood">Enabling mosaic</div>
-  For backgrounds, set bit 7 of REG_BGxCNT. For sprites, set bit 12 in attribute 0. Then set the mosaic levels in REG_MOSAIC.
-</div>
+:::tip Enabling mosaic
+
+For backgrounds, set bit 7 of REG_BGxCNT. For sprites, set bit 12 in attribute 0. Then set the mosaic levels in REG_MOSAIC.
+
+:::
 
 ### A small mosaic demo {#ssec-mos-demo}
 
@@ -183,10 +184,11 @@ On a code design note, I could have used two if-blocks here, one for objects and
 
 You should really see the demo on hardware, by the way. Somehow both VBA and no$gba are both flawed when it comes to mosaic. After VBA 1.7.2, it has a problem with horizontal sprite mosaic. I do believe I've seen inconsistencies between hardware and scrolling mosaiced backgrounds, but can't remember where I saw it. As for no$gba, vertical mosaic appears to be disabled for both sprites and backgrounds.
 
-<div class="note">
-  <div class="nhcare">Emulators and mosaic</div>
-  VBA and no$gba, the most popular GBA emulators both have problems with mosaic. Watch your step.
-</div>
+:::warning Emulators and mosaic
+
+VBA and no$gba, the most popular GBA emulators both have problems with mosaic. Watch your step.
+
+:::
 
 ## Blending {#sec-blend}
 
@@ -750,14 +752,15 @@ There is little in the way of macros or bit-defines here because they're not rea
 
 There are still a few things you should know about windows. First of all, when you turn on windowing in `REG_DISPCNT`, nothing will show up. There are two reasons for this. Firstly, the boundary registers are all 0, so the whole screen is basically winOut. Secondly, and this is really important: a background or object will only show up in the windows in which it is enabled! This means that unless at least *some* bits have been set in `REG_WININ` or `REG_WINOUT` nothing will show. This presents you with an effective way of hiding stuff, as we'll see in the demo. There is a third thing that you must remember, namely that win0 takes precedence over win1, which in turn takes precedence over winOut. I'm not sure how winObj fits into this yet.
 
-<div class="note">
-  <div class="nhgood">Windowing necessities</div>
-  To make windowing work for you, you need to do the following things:
+:::tip Windowing necessities
 
-  - Enable windows in `REG_DISPCNT`
-  - Indicate in which window you want things to show up by setting the appropriate bits in `REG_WININ` and `REG_WINOUT`. You **must** set at least some bits here if you have windowing enabled, or nothing will show up at all!
-  - Set the desired window sizes in `REG_WINxH/V`. If you don't, everything will be considered in the Out-window.
-</div>
+To make windowing work for you, you need to do the following things:
+
+- Enable windows in `REG_DISPCNT`
+- Indicate in which window you want things to show up by setting the appropriate bits in `REG_WININ` and `REG_WINOUT`. You **must** set at least some bits here if you have windowing enabled, or nothing will show up at all!
+- Set the desired window sizes in `REG_WINxH/V`. If you don't, everything will be considered in the Out-window.
+
+:::
 
 ### Caveats {#ssec-win-caveat}
 
@@ -767,15 +770,15 @@ There's something really weird going on when either the top or bottom is outside
 -   Also, if you move the bottom from, 161 to 160, the window will also cover the whole length, but only for a frame or so.
 -   The points mentioned above assume *T*<*B*. If the top is bigger, then the effect is reversed.
 
-<div class="note">
-  <div class="nhcare">Windowing weirdness not on emulators</div>
+:::warning Windowing weirdness not on emulators
 
-  This behaviour does *not* appear on the emulators I've tested on.
+This behaviour does *not* appear on the emulators I've tested on.
 
-  VBA clips the windows, like common sense would lead you to believe. (Of course, common sense also tells you that the Sun orbits the Earth or that the stars are pinpricks on a large black canvas. Common sense is hardly common).
+VBA clips the windows, like common sense would lead you to believe. (Of course, common sense also tells you that the Sun orbits the Earth or that the stars are pinpricks on a large black canvas. Common sense is hardly common).
 
-  MappyVM and BoycottAdvance simply remove the window if any of the boundaries goes off the screen.
-</div>
+MappyVM and BoycottAdvance simply remove the window if any of the boundaries goes off the screen.
+
+:::
 
 ### Demo: there's a rocket in my pocket {#ssec-win-demo}
 

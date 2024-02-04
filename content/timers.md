@@ -115,13 +115,11 @@ Secondly, ask yourself this: what happens when you disable the timer again? Well
 
 Lastly, given a certain *n*, then the timer will overflow after *T*= `10000h`−*n* increments. Or, thanks to the wonders of two's complement, just *T*= −*n*. Combined with a cascade timer (or interrupts) you can build timers of any frequency, which is what you want from a timer.
 
-<div class="note">
-<div class="nhcare">
-Writing to REG_TMxD is weird
-</div>
+:::warning Writing to REG_TMxD is weird
 
 Writing into REG_TMxD may not do what you think it does. It does *not* set the timer value. Rather, it sets the *initial* value for the next timer run.
-</div>
+
+:::
 
 ## Timer demo : like clockwork {#sec-demo}
 

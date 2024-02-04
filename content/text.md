@@ -4,10 +4,11 @@
 
 
 
-> **Deprecation notice**
->
-> This chapter has been superceded by [TTE](tte.html). Information from this chapter can still be useful, but for serious work, TTE should be preferred.
+:::note Deprecation notice
 
+This chapter has been superceded by [TTE](tte.html). Information from this chapter can still be useful, but for serious work, TTE should be preferred.
+
+:::
 
 ## Introduction {#sec-intro}
 
@@ -44,20 +45,17 @@ The point of this chapter is to show how to build and use a set of simple, light
 
 This arrangement allows for the most basic cases and allows for some variations in set-up, but very little on the side. However, those extras would probably be very game specific anyway, and might be ill suited for a general text system. If you want extras, it shouldn't be too hard to write them yourself.
 
-<!-- This should be styled as WARNING --> 
+:::note No printf(). O rly?
 
+I said that there is no `printf()` on the GBA, but this isn't quite true; not anymore, anyway. It is possible to hook your own IO-system to the standard IO-routines, which is done in `libgba`.
 
-> **No printf(). O rly?**
->
-> I said that there is no `printf()` on the GBA, but this isn't quite true; not anymore, anyway. It is possible to hook your own IO-system to the standard IO-routines, which is done in `libgba`.
+:::
 
-<!-- This should be styled as WARNING --> 
+:::note Semi-obsolete
 
+I have another text system here that is much more powerful (as in, really working on every video mode and has a printf too) than what's described in this page. However, it's rather large, not completely finished and it would take some time to write the description page and alter the text to fit the demos again. A libtonc version that has the relevant changes can be found at [http://www.coranac.com/files/misc/tonclib-1.3b.rar](http://www.coranac.com/files/misc/tonclib-1.3b.rar).
 
-> **Semi-obsolete**
-> 
-> I have another text system here that is much more powerful (as in, really working on every video mode and has a printf too) than what's described in this page. However, it's rather large, not completely finished and it would take some time to write the description page and alter the text to fit the demos again. A libtonc version that has the relevant changes can be found at [http://www.coranac.com/files/misc/tonclib-1.3b.rar](http://www.coranac.com/files/misc/tonclib-1.3b.rar).
-
+:::
 
 ## Text system internals {#sec-in}
 
@@ -1389,14 +1387,11 @@ About the numbers themselves. The spread is about a factor 9, which is quite a l
 
 Most of the tutorial code and probably a lot of demo code you can find out there uses the u16-array method of copying; presumably because byte-copies are unavailable for certain sections. But as you can see, **u16 copies are more than twice as slow as u32 copies**! Granted, it is not the slowest method of copying data, but not by much (using u16 loop variables –also a common occurence– would be slower by about 20%; try it and you'll see). The GBA is a 32-bit machine. It _likes_ 32-bit data, and its instruction sets are better at dealing with 32-bit chunks. Let go of the u16 fetish you may have picked up elsewhere. Use word-sized data if you can, the others only if you have to. That said, do watch your [data alignment](bitmaps.html#ssec-data-align)! u8 or u16 arrays aren't always word-aligned, which will cause trouble with casting.
 
-<div class="note">
-<div class="nhcare">
-GCC and waitstates vs timing results
-</div>
+:::warning GCC and waitstates vs timing results
  
 Giving exact timing results is tricky due to a number of factors. First, on the hardware side there are different memory sections with different wait states that complicate things unless you sit down, read the assembly and add up the cycle-counts of the instructions. This is a horrible job, trust me. The second problem is that GCC hasn't reached the theoretical optimum for this code yet, so the results tend to vary with new releases. What you see above is a good indication, but your mileage may vary.
 
-</div>
+:::
 
 There are a number of fast ways of copying large chunks of data. Faster than writing your own simple loop that is. Common ones are the standard `memcpy()`, which is available for any platform, and two methods that are GBA specific: the `CpuFastSet()` BIOS call (or my own version `memcpy32()` and DMA. The first two _require_ word-alignment; DMA merely works better with it. The performance of `memcpy()` is actually not too shabby, and the fact that it's available everywhere means that it's a good place to start. The others are faster, but come at a cost: `memcpy32()` is hand written assembly; `CpuFastSet()` requires a word-count divisible by 8, and DMA locks up the CPU, which can interfere with interrupts. You would do well to remember these things when you find you need a little more speed.
 

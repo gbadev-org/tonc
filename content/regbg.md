@@ -84,36 +84,30 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
 </table>
 </div>
 
-<div class="note">
-<div class="nhcare">
-Tiles vs ‘tiles’
-</div>
+:::warning Tiles vs ‘tiles’
 
 Both the entries of the tilemap and the data in the tileset are often referred to as ‘tiles’, which can make conversation confusing. I reserve the term ‘tile’ for the graphics, and ‘screen(block) entry’ or ‘map entry’ for the map's contents.
-</div>
 
-<div class="note">
-<div class="nhcare">
-Charblocks vs screenblocks
-</div>
+:::
+
+:::warning Charblocks vs screenblocks
 
 Charblocks and screenblocks use the same addresses in memory. Each charblock overlaps eight screenblocks. When loading data, make sure the tiles themselves don't overwrite the map, or vice versa.
-</div>
+
+:::
 
 Size was one of the benefits of using tilemaps, speed was another. The rendering of tilemaps in done in hardware and if you've ever played PC games in hardware and software modes, you'll know that hardware is good. Another nice point is that scrolling is done in hardware too. Instead of redrawing the whole scene, you just have to enter some coordinates in the right registers.
 
 As I said in the overview, there are three stages to setting up a tiled background: control, mapping and image-data. I've already covered most of the image-data in the [overview](objbg.html), as well as some of the control and mapping parts that are shared by sprites and backgrounds alike; this chapter covers only things specific to backgrounds in general and regular backgrounds in particular. I'm assuming you've read the overview.
 
-<div class="note">
-<div class="nhgood">
-Essential tilemap steps
-</div>
+:::tip Essential tilemap steps
 
 -   Load the graphics: tiles into charblocks and colors in the background palette.
 -   Load a map into one or more screenblocks.
 -   Switch to the right mode in `REG_DISPCNT` and activate a background.
 -   Initialize that background's control register to use the right CBB, SBB and bitdepth.
-</div>
+
+:::
 
 ## Background control {#sec-ctrl}
 
@@ -320,21 +314,17 @@ So, if you increase the scrolling values, you move the screen to the right, whic
   </math>
 </table>
 
-<div class="note">
-<div class="nhcare">
-Direction of offset registers
-</div>
+:::warning Direction of offset registers
 
 The offset registers REG_BGxHOFS and REG_BGxVOFS indicate which map location is mapped to the top-left of the screen, meaning positive offsets scroll the map left and up. Watch your minus signs.
-</div>
 
-<div class="note">
-<div class="nhcare">
-Offset registers are write only
-</div>
+:::
+
+:::warning Offset registers are write only
 
 The offset registers are **write-only**! That means that direct arithmetic like `+=` will not work.
-</div>
+
+:::
 
 ### Useful types and #defines {#ssec-ctrl-types}
 
@@ -535,20 +525,15 @@ The answer is: yes. And <span class="ack">NO</span>!
 
 Emulators from the early 2000s allow you to do this. However, a real GBA doesn't. It does output *something*, though: the screen-entry will be used as tile-data itself, but in a manner that simply defies explanation. Trust me on this one, okay? Of the current tonc demos, this is one of the times that VBA gets it wrong.
 
-<div class="note">
-<div class="nh">
-Available tiles
-</div>
+:::note Available tiles
 
 For both 4bpp and 8bpp regular bgs, you can access 1024 tiles. The only caveat here is that you cannot access the tiles in the object charblocks even if the index would call for it.
-</div>
+
+:::
 
 Another thing you may be wondering is if you can use a particular screenblock that is within a currently used charblock. For example, is it allowed to have a background use charblock 0 and screenblock 1. Again, yes you can do this. This can be useful since you're not likely to fill an entire charblock, so using its later screenblocks for your map data is a good idea. (A sign of True Hackerdom would be if you manage to use the same data for both tiles and SEs and still get a meaningful image (this last part is important). If you have done this, please let me know.)
 
-<div class="note">
-<div class="nh">
-Tilemap data conversion via CLI
-</div>
+:::note Tilemap data conversion via CLI
 
 A converter that can tile images (for objects), can also create a tileset for tilemaps, although there will likely be many redundant tiles. A few converters can also reduce the tileset to only the unique tiles, and provide the tilemap that goes with it. The Brinstar bitmap from {@fig:map} is a 512×256 image, which could be tiled to a 64×32 map with a 4bpp tileset reduced for uniqueness in tiles, including palette info and mirroring.
 
@@ -566,7 +551,8 @@ A converter that can tile images (for objects), can also create a tileset for ti
 ```
 
 Two notes on gfx2gba: First, it merges the palette to a single 16-color array, rearranging it in the process. Second, while it lists metamapping options in the readme, it actually doesn't give a metamap and meta-tileset, it just formats the map into different blocks.
-</div>
+
+:::
 
 ## Tilemap demos {#sec-demo}
 
@@ -1040,12 +1026,7 @@ Of course, these archives can get pretty big if you dump a lot of stuff in there
 
 I intend to use libtonc in a number of later demos. In particular, the memory map, text and copy routines will be present often. Don't worry about what they do for the demo; just focus on the core content itself. Documentation of libtonc can be found in the *libtonc* folder (`tonc/code/libtonc`) and at [Tonclib's website](https://www.coranac.com/man/libtonc/).
 
-<div class="note">
-<div class="nhgood">
-
-Better copy and fill routines: memcpy16/32 and memset16/32
-
-</div>
+:::tip Better copy and fill routines: memcpy16/32 and memset16/32
 
 Now that I am using libtonc as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
 
@@ -1058,15 +1039,14 @@ void memcpy32(void *dest, const void *src, uint wcount) IWRAM_CODE;
 ```
 
 These routines are optimized assembly so they are [fast](text.html#ssec-demo-se2). They are also safer than the [dma routines](dma.html#sec-func), and the [BIOS routine](swi.html) `CpuFastSet()`. Basically, I highly recommend them, and I will use them wherever I can.
-</div>
 
-<div class="note">
-<div class="nhcare">
-Linker options: object files before libraries
-</div>
+:::
+
+:::warning Linker options: object files before libraries
 
 In most cases, you can change the order of the options and files freely, but in the linker's case it is important the object files of the projects are mentioned *before* the linked libraries. If not, the link will fail. Whether this is standard behaviour or if it is an oversight in the linker's workings I cannot say, but be aware of potential problems here.
-</div>
+
+:::
 
 ## In conclusion {#sec-conc}
 

@@ -16,21 +16,13 @@ By the way, I'm no expert at this stuff. I know a few tricks about makefiles and
 
 ## My standard makefile {#sec-make}
 
-<div class="note">
-
-<div class="nhcare">
-
-Update note
-
-</div>
+:::warning Update note
 
 As of 20060428, I'm using a different style of makefiles, which means that this section is now largely out-of-date. I'll update when it reaches the top of my priority stack (which may be a while).
 
-</div>
+:::
 
 What follows is the makefile for my int_demo demo. This is a moderately complex makefile, using the assembler, implicit rules and pattern substitution. The things you'll see here should be sufficient for most everyday makefiles. Two notes before we begin: this is a makefile for devkitARM. Instructions for getting it to work on DKA are indicated by comments.
-
-<div id="cd-make-full" markdown>
 
 ```makefile
 #
@@ -92,7 +84,6 @@ clean :
     @rm -fv $(PROJ).$(EXT) 
     @rm -fv $(PROJ).elf 
 ```
-</div>
 
 As you can see, I've divided the file into four sections: project details, tool settings, building and clean. I'll go through these in order of appearance.
 
