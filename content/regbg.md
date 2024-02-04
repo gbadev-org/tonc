@@ -162,7 +162,7 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
 <table class="reg" id="tbl-reg-bgxcnt"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_BGxCNT @ <code>0400:0008</code> + 2<i>x</i>
+  REG_BGxCNT @ 0400:0008 + 2<i>x</i>
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td> C B A 9 8

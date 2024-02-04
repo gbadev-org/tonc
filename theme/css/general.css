@@ -37,7 +37,7 @@
     color-scheme: var(--color-scheme);
     /* TODO: Why is important needed here? */
     --mono-font: "Fira Code" !important;
-    --mono-font-size: 1.6rem;
+    --mono-font-size: 1.4rem;
 }
 
 .sidebar {
@@ -381,11 +381,16 @@ td.fill, th.fill { width: 16px; }
 
 /* --- reg table --- */
 table.reg {
-  font: 90% var(--mono-font);
+  font: var(--mono-font-size) var(--mono-font);
   page-break-inside: avoid;
 }
-caption.reg   { caption-side:top; }
-
+caption.reg {
+  caption-side:top;
+  padding-bottom: 4px;
+}
+caption.reg, caption.reg * {
+  font-size: 1.2rem;
+}
 caption[align="bottom"], div.cblock caption[align="bottom"] {
   margin-top: 6px;
 }
@@ -396,9 +401,9 @@ caption.reg, tr.bits {
 
 tr.bits, tr.bf, col.bits, col.bf, col.def { text-align: center; }
 col.bits, col.bf, col.def { vertical-align: top; }
-tr.bits, col.bits { font: 90% var(--mono-font); }
+tr.bits, col.bits { font: var(--mono-font-size) var(--mono-font); }
 tr.bf, col.bf { font-weight: bold; }
-col.def { font: 90% var(--mono-font); }
+col.def { font: var(--mono-font-size) var(--mono-font); }
 
 /* read only, write only */
 .rof { text-decoration: overline;  color: #f22; }

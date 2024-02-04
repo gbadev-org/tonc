@@ -1569,7 +1569,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
 <div class="reg">
   <table class="reg" id="tbl:arm-add" border=1 frame=void cellpadding=2 cellspacing=0>
     <caption class="reg">
-      <b>{*@tbl:arm-add}</b>: The <code>add</code> instruction(s)
+      <b>{*@tbl:arm-add}</b>: The add instruction(s)
     </caption>
     <colgroup>
       <col style="width: 30%;">

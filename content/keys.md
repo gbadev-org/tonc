@@ -14,7 +14,7 @@ As said, the GBA has ten buttons, often referred to as keys. Their states can be
 
 <div class="reg">
   <table class="reg" id="tbl-reg-keys" border=1 frame=void cellpadding=4 cellspacing=0>
-    <caption class="reg">REG_KEYINPUT (REG_P1) @ <code>0400:0130h</code></caption>
+    <caption class="reg">REG_KEYINPUT @ 0400:0130h</caption>
     <tr class="bits rof">
       <td>F E D C B A</td>
       <td>9</td>
@@ -65,7 +65,7 @@ Just about everything you will ever need in terms of key-handling can be done wi
 <br>
 <div class="reg">
   <table class="reg" id="tbl-reg-keycnt" border=1 frame=void cellpadding=4 cellspacing=0>
-    <caption class="reg">REG_KEYCNT (REG_P1CNT) @ <code>0400:0132h</code></caption>
+    <caption class="reg">REG_KEYCNT @ 0400:0132h</caption>
     <tr class="bits">
       <td>F</td>
       <td>E</td>

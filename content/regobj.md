@@ -197,7 +197,7 @@ The first attribute controls a great deal, but the most important parts are for 
 <table class="reg" id="tbl-oe-attr0"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  <code>OBJ_ATTR.attr0</code>
+  OBJ_ATTR.attr0
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td>C<td>B A<td>9 8 <td>7 6 5 4 3 2 1 0
@@ -288,7 +288,7 @@ The primary parts of this attribute are the *x* coordinate and the size of the s
 <table class="reg" id="tbl-oe-attr1"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  <code>OBJ_ATTR.attr1</code>
+  OBJ_ATTR.attr1
 </caption>
 <tr class="bits">
 	<td>F E<td>D<td>C<td>B A 9<td>8 7 6 5 4 3 2 1 0
@@ -346,7 +346,7 @@ This attribute tells the GBA which tiles to display and its background priority.
 <table class="reg" id="tbl-oe-attr2"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  <code>OBJ_ATTR.attr2</code>
+  OBJ_ATTR.attr2
 </caption>
 <tr class="bits">
 	<td>F E D C<td>B A<td>9 8 7 6 5 4 3 2 1 0

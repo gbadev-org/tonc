@@ -621,7 +621,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 <table class="reg" 
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_SNDDMGCNT (SOUNDCNT_L / SGCNT0_L ) @ <code>0400:0080h</code>
+  REG_SNDDMGCNT (SOUNDCNT_L / SGCNT0_L ) @ 0400:0080h
 </caption>
 <tr class="bits">
   <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
@@ -685,7 +685,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 <table class="reg" 
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_SNDDSCNT (SOUNDCNT_H / SGCNT0_H) @ <code>0400:0082h</code>
+  REG_SNDDSCNT (SOUNDCNT_H / SGCNT0_H) @ 0400:0082h
 </caption>
 <tr class="bits">
   <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
@@ -761,7 +761,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
 <table class="reg" 
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_SNDSTAT (SOUNDCNT_X / SGCNT1) @ <code>0400:0084h</code>
+  REG_SNDSTAT (SOUNDCNT_X / SGCNT1) @ 0400:0084h
 </caption>
 <tr class="bits">
   <td>F E D C B A 9 8
@@ -892,10 +892,10 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
 <span class="nobr">
-  REG_SND1CNT (SOUND1CNT_H / SG10_H) @ <code>0400:0062h</code></span>
+  REG_SND1CNT (SOUND1CNT_H / SG10_H) @ 0400:0062h</span>
   <br> and <br>
 <span class="nobr">
-  REG_SND2CNT (SOUND2CNT_L / SG20_L) @ <code>0400:0068h</code></span>
+  REG_SND2CNT (SOUND2CNT_L / SG20_L) @ 0400:0068h</span>
 </caption>
 <tr class="bits">
   <td>F E D C<td>B<td>A 9 8<td>7 6<td class="wof">5 4 3 2 1 0
@@ -1011,10 +1011,10 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
 <span class="nobr">
-  REG_SND1FREQ (SOUND1CNT_X / SG11) @ <code>0400:0062h</code></span>
+  REG_SND1FREQ (SOUND1CNT_X / SG11) @ 0400:0062h</span>
   <br> and <br>
 <span class="nobr">
-  REG_SND2FREQ (SOUND2CNT_H / SG21) @ <code>0400:006Ch</code></span>
+  REG_SND2FREQ (SOUND2CNT_H / SG21) @ 0400:006Ch</span>
 </caption>
 <tr class="bits">
   <td class="wof">F<td>E<td>D C B
@@ -1064,7 +1064,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
 <table class="reg" id="tbl-reg-snd1sweep" width=420
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ <code>0400:0060h</code>
+  REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ 0400:0060h
 </caption>
 <tr class="bits">
   <td>F E D C B A 9 8 7<td>6 5 4<td>3<td>2 1 0

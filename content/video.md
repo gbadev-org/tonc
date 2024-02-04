@@ -92,7 +92,7 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
 <table class="reg" id="tbl:reg-dispcnt"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  REG_DISPCNT @ <code>0400:0000h</code>
+  REG_DISPCNT @ 0400:0000h
 </caption>
 <tr class="bits">
 	<td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
@@ -176,7 +176,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
 <table class="reg" id="tbl:reg-dispstat"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  REG_DISPSTAT @ <code>0400:0004h</code>
+  REG_DISPSTAT @ 0400:0004h
 </caption>
 <tr class="bits">
   <td>F E D C B A 9 8
@@ -239,7 +239,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
 <table class="reg" id="tbl:reg-vcount" width="320"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  REG_VCOUNT @ <code>0400:0006h</code> (read-only)
+  REG_VCOUNT @ 0400:0006h (read-only)
 </caption>
 <tr class="bits">
 	<td>F E D C B A 9 8
