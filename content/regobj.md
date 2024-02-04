@@ -179,14 +179,11 @@ There are a few interesting things about these structures. First, you see a lot 
 </table>
 </div>
 
-<div class="note">
-
-<div class="nhgood">
-Force alignment on OBJ_ATTRs
-</div>
+:::tip Force alignment on OBJ_ATTRs
 
 As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of `OBJ_ATTR` structs (and others), means that `struct` copies like the one in `oam_update()` later on, will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs with `ALIGN4`, which is a macro for `__attribute__((aligned(4)))`. For more on this, see the section on [data alignment](bitmaps.html#ssec-data-align).
-</div>
+
+:::
 
 ## Object attributes: OBJ_ATTR {#sec-oam-entry}
 
