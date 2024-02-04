@@ -21,7 +21,7 @@ To use mosaic you must do two things. First, you need to enable mosaic. For indi
 
 <div class="reg">
   <table class="reg" id="tbl:reg-mosaic" border=1 frame=void cellpadding=4 cellspacing=0>
-    <caption class="reg">REG_MOSAIC @ <code>0400:004Ch</code></caption>
+    <caption class="reg">REG_MOSAIC @ 0400:004Ch</caption>
     <tr class="bits">
       <td>F E D C</td>
       <td>B A 9 8</td>
@@ -237,7 +237,7 @@ Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ
 
 <div class="reg">
   <table class="reg reg-huge" id="tbl:reg-bldcnt" border=1 frame=void cellpadding=4 cellspacing=0>
-    <caption class="reg">REG_BLDCNT (REG_BLDMOD) @ <code>0400:0050h</code></caption>
+    <caption class="reg">REG_BLDCNT (REG_BLDMOD) @ 0400:0050h</caption>
     <tr class="bits">
       <td>F E</td>
       <td>D</td>
@@ -317,7 +317,7 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
 
 <div class="reg">
   <table class="reg" id="tbl:reg-bldalpha" border=1 frame=void cellPadding=4 cellSpacing=0>
-    <caption class="reg">REG_BLDALPHA (REG_COLEV) @ <code>0400:0052h</code></caption>
+    <caption class="reg">REG_BLDALPHA (REG_COLEV) @ 0400:0052h</caption>
     <tr class="bits">
       <td>F E D</td>
       <td>C B A 9 8</td>
@@ -360,7 +360,7 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
 <br>
 <div class="reg">
   <table class="reg" id="tbl:reg-bldy" border=1 frame=void cellpadding=4 cellspacing=0>
-    <caption class="reg">REG_BLDY (REG_COLEY) @ <code>0400:0054h</code></caption>
+    <caption class="reg">REG_BLDY (REG_COLEY) @ 0400:0054h</caption>
     <tr class="bits">
       <td>F E D C B A 9 8 7 6 5</td>
       <td>4 3 2 1 0</td>
@@ -598,7 +598,7 @@ Both win0 and win1 have 2 registers that define their boundaries. In order these
 
 <div class="reg">
   <table class="reg" id="tbl:reg-winxy" border=1 frame=void cellPadding=4 cellSpacing=0>
-    <caption class="reg">REG_WINxH and REG_WINxV @ <code>0400:0040-0400:0047h</code></caption>
+    <caption class="reg">REG_WINxH and REG_WINxV @ 0400:0040-0400:0047h</caption>
     <tr class="bits">
       <th>reg</th>
       <td>F E D C B A 9 8</td>

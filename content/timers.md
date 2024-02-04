@@ -52,7 +52,7 @@ The GBA has four timers, timers 0 to 3. Each of these has two registers: a data 
 <table class="reg" id="tbl:reg-tmxcnt"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_TMxCNT @ <code>0400:0102</code> + 4<i>x</i>
+  REG_TMxCNT @ 0400:0102 + 4<i>x</i>
 </caption>
 <tr class="bits">
 	<td>F E D C B A 9 8 <td>7 <td>6 <td>5 4 3 <td>2 <td>1 0

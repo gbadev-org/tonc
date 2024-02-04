@@ -20,7 +20,7 @@ Apart from setting the bits in `REG_IE`, you also need to set a bit in other reg
 <table class="reg" id="tbl:reg-ie"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
-  REG_IE @ <code>0400:0200</code> and REG_IF @ <code>0400:0202</code>
+  REG_IE @ 0400:0200 and REG_IF @ 0400:0202
 </caption>
 <tr class="bits">
   <td>F E<td>D<td>C<td>B A 9 8<td>7<td>6 5 4 3<td>2<td>1<td>0

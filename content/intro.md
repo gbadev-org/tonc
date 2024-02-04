@@ -132,7 +132,7 @@ Every time I introduce a register I will give an overview of the bits like this:
 <table class="reg"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  REG_DISPSTAT @ <code>0400:0004h</code>
+  REG_DISPSTAT @ 0400:0004h
 </caption>
 <tr class="bits">
   <td>F E D C B A 9 8

@@ -35,7 +35,7 @@ The use of the source and destination registers should be obvious. The control r
 <table class="reg reg-huge" id="tbl:reg-dmaxcnt"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
-  REG_DMAxCNT @ <code>0400:00B8</code>+12<i>x</i>
+  REG_DMAxCNT @ 0400:00B8+12<i>x</i>
 </caption>
 <tr class="bits">
 	<td>1F<td>1E<td>1D 1C<td>1B<td>1A<td>19<td>18 17
