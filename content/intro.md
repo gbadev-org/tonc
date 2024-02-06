@@ -198,7 +198,7 @@ OK that's it. Have fun.
 
 <div style="margin-left:1.2cm;">
 
--- _Jasper Vijn_ (cearn at coranac dot com) and the _gbadev.net_ community<br>
+-- _Jasper Vijn_ (jakvijn at gmail dot com) and the _gbadev.net_ community<br>
 
 <!--(Mar 24, 2013)-->
 <!-- TODO: figure out how to put the build date here? -->
