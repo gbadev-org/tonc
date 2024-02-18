@@ -29,6 +29,7 @@
 
     --table-border-color: #808080;
     --table-background-color: #e0e0e0;
+    --table-background-color-custom: #d0d0d0;
     --table-header-bg: unset;
     --table-alternate-bg: #B0B0B0;
 
@@ -418,6 +419,16 @@
     border: none;
     background-color: #c0c0c0;
     border-bottom: #e0e0e0 1px solid;
+}
+
+/* Special case table (in Regular tiled backgrounds) */
+.tonc #tbl\:cbb-sbb th,
+.tonc #tbl\:cbb-sbb td {
+    padding: 3px 3px;
+}
+
+.tonc table[rules=groups i] {
+  border-collapse: collapse;
 }
 
 /* Rules cols equivalent, only column borders not rows */

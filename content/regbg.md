@@ -60,11 +60,11 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
   <b>{*@tbl:cbb-sbb}</b>:
   charblock and screenblock overlap.
 </caption>
-<colgroup span=1 style="background-color:none;"></colgroup>
+<colgroup span=1 style="background-color:var(--table-background-color-custom);"></colgroup>
 <colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
-<colgroup span=3 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-background-color-custom);"></colgroup>
 <colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
-<colgroup span=3 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-background-color-custom);"></colgroup>
 
 <tbody align="left"><tr>
   <th>Memory
