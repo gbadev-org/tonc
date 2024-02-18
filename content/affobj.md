@@ -331,24 +331,20 @@ Note, by the way, that some older emulators (VBA and BoycottAdvance) both use in
 I have a really interesting demo for you this time called *obj_aff*. It features a normal (boxed) metroid, which can be scaled, rotated and scaled. Because these transformations are applied to the *current* state of the matrix, you can end up with every kind of affine matrix possible by concatenating the different matrices. The controls are as follows:
 
 <div class="lblock">
-
-- L and R Buttons  
-  Rotates the sprite counterclockwise and clockwise, respectively.
-- Control Pad  
-  Shears the sprite.
-- Control Pad + Select Button  
-  Moves sprite around.
-- A and B Buttons  
-  Expand horizontally or vertically, respectively.
-- A and B Buttons + Select Button  
-  Shrinks horizontally or vertically, respectively. (I ran out of buttons, so had to do it like this.)
-- Start Button  
-  Toggles double-size flag. Note that a) the corners of a rotated sprite are no longer clipped and b) the position shifts by 1/2 sprite size.
-- Start+Select Buttons  
-  Resets **P** to normal.
-- Select Button  
-  Modifier button (see A, B and Start).
-
+  <table cellspacing=0>
+    <col valign="top">
+    <tr><th>L,R<td>Rotates the sprite CCW and CW, respectively.
+    <tr><th>D-pad<td>Shears the sprite.
+    <tr><th>D-pad+Sel<td>Moves sprite around.
+    <tr><th>A,B<td>Expands horizontally or vertically, respectively.
+    <tr><th>A,B+Sel<td>Shrinks horizontally or vertically, respectively.
+      (I ran out of buttons, so had to do it like this).
+    <tr><th>Start<td>Toggles double-size flag. Note that a) the corners
+      of a rotated sprite are no longer clipped and b) the position shifts
+      by 1/2 sprite size.
+    <tr><th>Start+Sel<td>Resets <b>P</b> to normal.
+    <tr><th>Select<td>Control button (see A, B and Start).
+  </table>
 </div>
 
 The interesting point of seeing the transformations back to back is that you can actually see the difference between, for example, a scaling followed by a rotation (**A**=**S**·**R**), and a rotate-then-scale (**A**=**R**·**S**). {*@fig:obj-aff-rs} and {@fig:obj-aff-sr} show this difference for a 45° rotation and a 2× vertical scale. Also, note that the corners are cut off here: the clipping artifact at work – even though I've already set the double-size flag here.

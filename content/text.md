@@ -140,9 +140,8 @@ Yes, this is the _entire_ font, fitting nicely on one single page. This is what 
 
 #### Bitpacking
 
-<div class="cpt_fr" style="width:200px;">
-<table id="tbl:endian"
-  border=1 cellpadding=2 cellspacing=0>
+<div class="cpt_fr">
+<table id="tbl:endian" class="table-data">
 <caption align="bottom">
   <b>{@tbl:endian}</b>: Big endian vs little 
   endian interpretation of byte-sequence 01h, 02h, 03h, 04h
@@ -170,65 +169,25 @@ For bitpacking, you also have to deal with endianness at the bit level. The font
 
 In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed from 8x8 pixels into 2 words. All 64 pixels are numbered 0 to 63. These correspond to the bit-numbers. Each eight successive bits form a byte: 0-7 make up byte 0, 8-15 form byte 1, etc. Note how the bits seem to mirror horizontally, because we generally write numbers big-endian. So try to forget about that and think of bits in memory to walk through from 0 to 63. You can also view the bits as words, bits 0-31 for word 0 and 32-63 for word 1.
 
-<style>
-  #fig\:img-fontpack, #tbl\:bupshade {
-
-    & table {
-      width: 100%;
-      font-size: 90%;
-    }
-
-    & span.rarr {
-      font-size:200%;
-      position: relative;
-      top: 25px;
-    }
-
-    & td {
-      padding: 3px 0;
-    }
-
-    & tr td, tr th {
-      background-color: var(--table-alternate-bg);
-      border: none;
-      text-align: center;
-    }
-
-    & .bdrT, .bdrTL, .bdrTR, .bdrLL, .bdrRR {
-      border-top: 1px var(--fg) solid;
-    }
-
-    & .bdrL, .bdrTL, .bdrBL, .bdrLL {
-      border-left: 1px var(--fg) solid;
-    }
-    & .bdrB, .bdrBL, .bdrBR, .bdrLL, .bdrRR {
-      border-bottom: 1px var(--fg) solid;
-    }
-
-    & .bdrR, .bdrTR, .bdrBR, .bdrRR {
-      border-right: 1px var(--fg) solid;
-    }
-  }
-</style>
-
 <div class="cblock">
-<div style="width:750px;">
-<table id="fig:img-fontpack"
-  border=0 cellpadding=4 cellspacing=0 style="table-layout:fixed; width:100%; page-break-inside: avoid;">
+<div class="cpt">
+<div style="width:700px;">
+<table id="fig:img-fontpack" style="width:100%;">
   <tbody align="center">
   <tr>
     <th style="width:150px;">pixels
-    <td valign="middle" rowspan=2 style="width:40px;"><span class="rarr">&rarr;</span>
+    <th>
     <th style="width: 150px;">bits
-    <td valign="middle" rowspan=2 style="width:40px;"><span class="rarr">&rarr;</span>
+    <th>
     <th style="width: 75px;">bytes
-    <td valign="middle" rowspan=2 style="width:40px;"><span class="rarr">&rarr;</span>
+    <th>
     <th style="width: 75px;">words
   <tr>
     <td>
-    <img src="img/font_pack.png" alt="pixels" style="width: 160px;">
+    <img src="img/font_pack.png" alt="pixels" style="width: 160px; margin-top: 24px;">
+    <td><span class="rarr">&rarr;</span>
     <td> <!-- bits -->
-    <table cellpadding=1 cellspacing=0>
+    <table cellpadding=1 cellspacing=0 class="reg">
       <tr>
         <td class="bdrLL">&nbsp;
         <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
@@ -252,6 +211,7 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
       <tr>
         <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0
     </table>
+    <td><span class="rarr">&rarr;</span>
     <td> <!-- bytes -->
     <table cellpadding=1 cellspacing=0>
       <tr>
@@ -271,6 +231,7 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
       <tr><td> 0x06
       <tr><td> 0x00
     </table>
+    <td><span class="rarr">&rarr;</span>
     <td> <!-- words -->
     <table cellpadding=1 cellspacing=0 style="display: block;">
       <tr>
@@ -289,6 +250,7 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
   <b>@fig:img-fontpack</b>: 
   &lsquo;F&rsquo;, from 8x8 tile to 1bpp bit-little, byte-little 
   words.
+</div>
 </div>
 </div>
 
@@ -1121,57 +1083,54 @@ for(ii=0; ii<96*8; ii++)
 
 These six statements set up the three fonts, complete with shading and opacity. The first one sets up the standard font, in charblock 0, screenblock 31, pal-bank 1 and using `0x0E` for the bit-unpacking offset, so that the text color is at `0x1F`. We've seen the same thing with the object text.
 
-<div class="cpt_fr" style="width:340px; margin: 0px auto;">
-<center>
-<table id="tbl:bupshade"
-    cellpadding=2 cellspacing=0 bgcolor=#E0E0E0 style="table-layout: fixed; width: 100%;">
+<div class="cpt_fr">
+<table id="tbl:bupshade">
 <caption align="bottom">
   <b>*@tbl:bupshade</b>: 
   bit-unpacking with with base <code>0xEE</code>.
 </caption>
 <tbody align="center">
   <tr>
-    <td rowspan=9>&nbsp;
+    <td class="bdrLL" rowspan=9>
     <th>bit 
-    <th>val
-    <td rowspan=9>&nbsp;
-    <td>&nbsp;
+    <th class="bdrL">val
+    <td class="bdrRR" rowspan=9>
+    <td class="bdrLL">
     <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
-    <td>&nbsp;
+    <td class="bdrRR">
   <tr>
-    <th>0	<td> 0
-    <td rowspan=8>&nbsp;
+    <th>0	<td class="bdrL"> 0
+    <td class="bdrLL" rowspan=8>
     <td> . <td> . <td> . <td> . <td> . <td> . <td> . <td> 0
-    <td rowspan=8>&nbsp;
+    <td class="bdrRR" rowspan=8>
   <tr>
-    <th> 1	<td> 1
+    <th> 1	<td class="bdrL"> 1
     <td> . <td> . <td> . <td> . <td> . <td> E <td> F <td> .
   <tr>
-    <th> 2	<td> 1
+    <th> 2	<td class="bdrL"> 1
     <td> . <td> . <td> . <td> . <td> E <td> F <td> . <td> .
   <tr>
-    <th> 3	<td> 1
+    <th> 3	<td class="bdrL"> 1
     <td> . <td> . <td> . <td> E <td> F <td> . <td> . <td> .
   <tr>
-    <th> 4	<td> 0
+    <th> 4	<td class="bdrL"> 0
     <td> . <td> . <td> . <td> 0 <td> . <td> . <td> . <td> .
   <tr>
-    <th> 5	<td> 0
+    <th> 5	<td class="bdrL"> 0
     <td> . <td> . <td> 0 <td> . <td> . <td> . <td> . <td> .
   <tr>
-    <th> 6	<td> 1
+    <th> 6	<td class="bdrL"> 1
     <td> E <td> F <td> . <td> . <td> . <td> . <td> . <td> .
   <tr>
-    <th> 7	<td> 0
+    <th> 7	<td class="bdrL"> 0
     <td> 0 <td> . <td> . <td> . <td> . <td> . <td> . <td> .
 <tr>
   <td colspan=4> OR: 
-    <td>&nbsp;
+    <td class="bdrLL">
     <th> E <th> F <th> 0 <th> E <th> F <th> F <th> F <th> 0
-    <td>&nbsp;
+    <td class="bdrRR">
 </tbody>
 </table>
-</center>
 </div>
 
 The second call to `txt_se_init()` sets up the second font set, the one with shading. `se0` indicates the use of pal-bank 15 and to start at 128, but the important stuff happens in the `clrs` and `base` parameters. There are now two colors in `clrs`, yellow and magenta. The lower halfword will be the text color, and the upper halfword the shading color.

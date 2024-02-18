@@ -20,7 +20,7 @@ The best description of mosaic is that it makes sprites or tiles look blocky. A 
 To use mosaic you must do two things. First, you need to enable mosaic. For individual sprites, set `OBJ_ATTR.attr0`\{C\}. For backgrounds, set `REG_BGxCNT`\{7\}. The set the mosaic levels through `REG_MOSAIC`, which looks like this:
 
 <div class="reg">
-  <table class="reg" id="tbl:reg-mosaic" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg" id="tbl:reg-mosaic">
     <caption class="reg">REG_MOSAIC @ 0400:004Ch</caption>
     <tr class="bits">
       <td>F E D C</td>
@@ -36,7 +36,7 @@ To use mosaic you must do two things. First, you need to enable mosaic. For indi
     </tr>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">
@@ -238,7 +238,7 @@ Note that in these examples the sum of the weights is 1, so that the final color
 Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ_ATTR.attr0`\{a\}. There are three registers that control blending, which unfortunately go by many different names. The ones I use are `REG_BLDCNT`, `REG_BLDALPHA` and `REG_BLDY`. Other names are `REG_BLDMOD`, `REG_COLEV` and `REG_COLEY`, and sometimes the ‘E’ in the last two is removed. Be warned. Anyway, the first says how and on which layers the blend should be performed, the last two contain the weights. Oh, since the GBA doesn't do floating point, the weights are [fixed-point](fixed.html) numbers in 1.4 format. Still limited by 0 and 1, of course, so there are 17 blend levels.
 
 <div class="reg">
-  <table class="reg reg-huge" id="tbl:reg-bldcnt" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg reg-huge" id="tbl:reg-bldcnt">
     <caption class="reg">REG_BLDCNT (REG_BLDMOD) @ 0400:0050h</caption>
     <tr class="bits">
       <td>F E</td>
@@ -274,7 +274,7 @@ Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ
     </tr>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">
@@ -318,7 +318,7 @@ Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ
 The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the form of <span class="rclr0"><b>eva</b></span>, <span class="rclr1"><b>evb</b></span> and <span class="rclr2"><b>ey</b></span>, all in 1.4 fixed-point format. And no, I do not know why they are called that; they just are.
 
 <div class="reg">
-  <table class="reg" id="tbl:reg-bldalpha" border=1 frame=void cellPadding=4 cellSpacing=0>
+  <table class="table-reg" id="tbl:reg-bldalpha">
     <caption class="reg">REG_BLDALPHA (REG_COLEV) @ 0400:0052h</caption>
     <tr class="bits">
       <td>F E D</td>
@@ -333,7 +333,7 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
       <td class="rclr0">eva</td>
     </tr>
   </table>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">
@@ -361,7 +361,7 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
 </div>
 <br>
 <div class="reg">
-  <table class="reg" id="tbl:reg-bldy" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg" id="tbl:reg-bldy">
     <caption class="reg">REG_BLDY (REG_COLEY) @ 0400:0054h</caption>
     <tr class="bits">
       <td>F E D C B A 9 8 7 6 5</td>
@@ -372,7 +372,7 @@ The `REG_BLDALPHA` and `REG_BLDY` registers hold the blending weights in the for
       <td class="rclr2">ey</td>
     </tr>
   </table>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">
@@ -599,7 +599,7 @@ A rectangular window is defined by its <dfn>left</dfn>, <dfn>right</dfn>, <dfn>t
 Both win0 and win1 have 2 registers that define their boundaries. In order these are `REG_WIN0H` (`0400:0040h`), `REG_WIN1H` (`0400:0042h`), `REG_WIN0V` (`0400:0044h`) and `REG_WIN1V` (`0400:0046h`), which have the following layout:
 
 <div class="reg">
-  <table class="reg" id="tbl:reg-winxy" border=1 frame=void cellPadding=4 cellSpacing=0>
+  <table class="table-reg" id="tbl:reg-winxy">
     <caption class="reg">REG_WINxH and REG_WINxV @ 0400:0040-0400:0047h</caption>
     <tr class="bits">
       <th>reg</th>
@@ -618,7 +618,7 @@ Both win0 and win1 have 2 registers that define their boundaries. In order these
     </tr>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width=40>
     <col class="def">
@@ -667,7 +667,7 @@ So you have one byte for each value. That's bytes as in *unsigned* chars. The co
 The possible content for the windows are backgrounds 0-3 and objects. No suprise there, right? In total, we have regions: win0, win1, winOut and winObj. `REG_WININ` (`0400:0048h`) controls win0 and win1, `REG_WINOUT` (`0400:004ah`) takes care of winOut and winObj. There's one bit for each content-type, plus one for blending, which you will need if you intend to use blending on the contents of that particular window.
 
 <div class="reg">
-  <table class="reg reg-huge" id="tbl:reg-winio" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg reg-huge" id="tbl:reg-winio">
     <tr class="bits">
       <th>register</th>
       <td>F E</td>
@@ -718,7 +718,7 @@ The possible content for the windows are backgrounds 0-3 and objects. No suprise
     </tr>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">

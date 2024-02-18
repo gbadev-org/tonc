@@ -69,24 +69,24 @@ In short, Tonc is *not* “GBA Programming for Dummies”, never was, never will
 I'm a physicist by training which means that I know my math and its notational conventions. I use both quite often in Tonc, as well as a number of html-tag conventions. To make sure we're all on the same page here's a list:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
-<tr><th>Type	<th>notation	<th>example
-<tr><td>bit n in a <code>foo</code>		<td><code>foo</code>{n}	
-  <td><code>REG_DISPCNT{4}</code> (active page bit)
-<tr><td>code	<td>&lt;code&gt; tag	<td> <code>sx</code>
-<tr><td>command/file <td>&lt;tt&gt; tag <td> <tt>vid.h</tt>
-<tr><td>matrix	<td>bold, uppercase		<td> <b>P</b>
-<tr><td>memory  <td>hex + code			<td> <code>0400:002eh</code>
-<tr><td>new term <td>bold, italic		<td> <dfn>charblock</dfn>
-<tr><td>variable <td>italics			<td> <i>x</i>
-<tr><td>vector	<td>bold, lowercase		<td> <b>v</b>
-</table>
+  <table class="table-data">
+    <tr><th>Type	<th>notation	<th>example
+    <tr><td>bit n in a <code>foo</code>		<td><code>foo</code>{n}	
+    <td><code>REG_DISPCNT{4}</code> (active page bit)
+    <tr><td>code	<td>&lt;code&gt; tag	<td> <code>sx</code>
+    <tr><td>command/file <td>&lt;tt&gt; tag <td> <tt>vid.h</tt>
+    <tr><td>matrix	<td>bold, uppercase		<td> <b>P</b>
+    <tr><td>memory  <td>hex + code			<td> <code>0400:002eh</code>
+    <tr><td>new term <td>bold, italic		<td> <dfn>charblock</dfn>
+    <tr><td>variable <td>italics			<td> <i>x</i>
+    <tr><td>vector	<td>bold, lowercase		<td> <b>v</b>
+  </table>
 </div>
 
 I also use some non-ASCII symbols that may not show up properly depending on how old your browser is. These are:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
+<table class="table-data">
 <tr><th>symbol<th>description
 <tr><td>&alpha;, &beta;, &gamma;	<td>Greek letters
 <tr><td>&asymp;		<td>approximately
@@ -106,7 +106,7 @@ I also use some non-ASCII symbols that may not show up properly depending on how
 I also make liberal use of shorthand for primitive C types like `char` and `int` and such. These are typedefs that better indicate the size of the variable that's used. Since this is very important in console programming, they're quite common. Anyway, here's a list.
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
+<table class="table-data">
 <tr><th>base type	<th>alt name <th>unsigned	<th>signed	<th>volatile
 <tr><th>char		<td>byte	 <td>u8			<td>s8		<td>vu8 / vs8
 <tr><th>short		<td>halfword <td>u16		<td>s16		<td>vu16 / vs16
@@ -129,7 +129,7 @@ Each register (or register-like address) is mapped to a dereferenced pointer, us
 Every time I introduce a register I will give an overview of the bits like this:
 
 <div class="reg">
-<table class="reg"
+<table class="table-reg"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
   REG_DISPSTAT @ 0400:0004h
@@ -152,7 +152,7 @@ Every time I introduce a register I will give an overview of the bits like this:
 The table lists the register's name (`REG_DISPSTAT`, its address (0400:0000h) and the individual bits or bitfields. Sometimes, bits or entire registers are read- or write-only. **Read-only** is indicated with a red overbar (as used here). **Write-only** uses a blue underbar. After it will be a list that describes the various bits, and also gives the #define or #defines I use for that bit:
 
 <div class="reg">
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="15%">

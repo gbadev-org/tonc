@@ -171,8 +171,7 @@ Because of 16-color mode and the transparency issue, it is *essential* that your
 This is a short list of various attributes of sprites and backgrounds. It's alright if you don't understand it right away; I'll explain in more detail in the following pages.
 
 <div class="cblock">
-<table id="tbl:sum"
-  border=1 cellspacing=0 cellpadding=2 width="70%">
+<table id="tbl:sum" class="table-data" width="70%">
 <col span=3 valign="top">
 <tr><th width="30%">Subject		<th>Backgrounds		<th>Sprites
 <tr><td>Number		<td>4 (2 affine)	<td>128	(32 affine)
@@ -217,8 +216,7 @@ This is a short list of various attributes of sprites and backgrounds. It's alri
 Well, since you are a programmer you should know the answer: plenty. If you disagree, visit the [How To Write Unmaintanable Code](https://www.mindprod.com/jgloss/unmain.html) website and look at a number of their entries. My naming scheme is a bit different from that of the GBA community. I don't do this just because I feel like being contrary. I find some of the conventional names are incomplete, misleading and ambiguous. I feel little need, at least at present, to follow tradition simply because everyone else does. But you still need to know the traditional names, simply because everyone else does. So here's a list of differences in names.
 
 <div class="cblock">
-<table id="tbl:name" 
-  border=1 cellspacing=0 cellpadding=2 width="70%">
+<table id="tbl:name" class="table-data" width="70%">
 <col span=3 valign="top">
 <tr><th>Subject		<th>Traditional		<th>Tonc
 <tr>

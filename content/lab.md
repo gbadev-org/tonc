@@ -147,8 +147,7 @@ You can see a schematic representation of the whole thing in {@fig:prio-demo}b; 
 </tbody>
 </table>
 
-<table id="tbl:prio-demo-x"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:prio-demo-x" class="table-data">
 <caption align="bottom">
   <b>*@tbl:prio-demo-x</b>: legend for 
   {!@fig:prio-demo}b.
@@ -369,8 +368,7 @@ void spr_update()
 The big loop here updates the OAM shadow, *not the real OAM*! It updates the object's position using the sprites *x* and *y* (corrected for fixed point, of course), and uses *z* to set the priority: 1 if it's on the near side (before the central pillar), and 2 if it's on the far side (behind the pillar). It *also* does something funky with the palette, which is the first hack in the function, shortly followed by the second one.
 
 <div class="cpt_fr"  style="width:120px;">
-<table id="tbl:prio-hack1"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:prio-hack1" class="table-data">
 <caption align="bottom">
   <b>*@tbl:prio-hack1</b>: object palette banks.
 </caption>

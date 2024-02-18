@@ -1,0 +1,502 @@
+/* Tonc Classic theme */
+
+.tonc {
+    --bg: #c0f0f0;
+    --fg: hsl(0, 0%, 0%);
+
+    --sidebar-bg: #c0f0f0;
+    --sidebar-fg: hsl(0, 0%, 0%);
+    --sidebar-non-existant: #aaaaaa;
+    --sidebar-active: #1f1fff;
+    --sidebar-spacer: #a3e4e5;
+
+    --scrollbar: #8F8F8F;
+
+    --icons: #000060;
+    --icons-hover: #000000;
+
+    --links: blue;
+
+    --inline-code-color: #301900;
+
+    --theme-popup-bg: #c0f0f0;
+    --theme-popup-border: #80d6d7;
+    --theme-hover: #a3e4e5;
+
+    --quote-bg: hsl(197, 37%, 96%);
+    --quote-border: hsl(197, 37%, 91%);
+
+
+    --table-border-color: #808080;
+    --table-background-color: #e0e0e0;
+    --table-header-bg: unset;
+    --table-alternate-bg: #B0B0B0;
+
+    --searchbar-border-color: #aaa;
+    --searchbar-bg: #fafafa;
+    --searchbar-fg: #000;
+    --searchbar-shadow-color: #aaa;
+    --searchresults-header-fg: #000060;
+    --searchresults-border-color: #888;
+    --searchresults-li-bg: #e4f2fe;
+    --search-mark-bg: #a2cff5;
+
+    --color-scheme: light;
+
+    /* Extra */
+    --font: Verdana, Geneva, Tahoma, sans-serif;
+    --font-size: 13px;
+    --warning-border: #ffe00;
+    --h2-color: green;
+    --h3-color: #000060;
+}
+
+.tonc {
+    background-color: #c0f0f0;
+    font-family: var(--font);
+    letter-spacing: 0px;
+}
+
+.tonc .content {
+    background-image: url(../../img/main/tonc_bg.png);
+}
+
+.tonc .content p,
+.tonc .content ul {
+    line-height: normal;
+}
+
+.tonc #menu-bar.bordered {
+    border-block-end-color: gray;
+    border-width: 2px;
+    border-bottom: groove;
+}
+
+.tonc .box,
+.tonc .note {
+    width: 92%;
+    margin: 0.7em auto;
+    padding: 8px;
+    background-color: #E0E0E0;
+    border: 2px solid #FF0000;
+    page-break-inside: avoid;
+    border-radius: 8px;
+    box-shadow: 2px 2px 4px #808080;
+}
+
+.tonc blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+    background-color: unset;
+    border: none;
+}
+
+.tonc body .page .content {
+    font-size: var(--font-size);
+}
+
+/* Link text */
+.tonc .sidebar a:visited {
+    color: #551a8b;
+}
+
+.tonc .sidebar a, .tonc ul a {
+    color: blue;
+    text-decoration: underline;
+    line-height: normal;
+}
+
+.tonc .sidebar a:active {
+    color: red;
+}
+
+.tonc .sidebar {
+    font-size: var(--font-size) !important;
+}
+
+.tonc .content a:active {
+    color: red;
+}
+
+.tonc .box > .box-title {
+    margin-top: 0;
+    font-size: 115%;
+    font-weight: bold;
+    margin: 0.1em 0.5em 0.2em;
+    text-transform: none;
+}
+
+.tonc .box > p {
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    color: var(--fg);
+}
+
+.tonc .box.note > .box-title  {
+    color: var(--fg);
+}
+
+.tonc .chapter li.part-title,
+.tonc .box.tip > .box-title  {
+    color: green;
+}
+
+.tonc .box.warning > .box-title  {
+    color: #c06000;
+}
+
+.tonc .box.danger > .box-title  {
+    color: #ff0000;
+}
+
+/* Headers */
+.tonc h2::before {
+    color: var(--h2-color);
+}
+
+.tonc h3::before {
+    color: var(--h3-color);
+}
+
+.tonc h2, h3 {
+    margin-block-start: 1em;
+    margin-block-end: 0em;
+}
+
+.tonc .content h1 .header {
+    color: blue; 
+}
+
+.tonc .content h2 .header {
+    margin: 1em 1em 0.2em;
+    font-size: 90%;
+    color: var(--h2-color);
+}
+
+.tonc .content h3 .header {
+    margin: 1em 1em 0.2em;
+    font-size: 90%;
+    color: #000060;
+}
+
+/* Code block style */
+.tonc pre code {
+    border: #C0C0C0 solid 1px;
+    width: 92%;
+    margin: 0.6em auto;
+    padding: 8px;
+    background: #E0E0E0 !important;
+    border-radius: 4px;
+    box-shadow: 2px 2px 4px #C0C0C0;
+    font: 500 100% "Courier New", monospace !important;
+}
+
+/* Clipboard icon on code */
+.tonc pre > .buttons :hover {
+    color: var(--searchresults-header-fg);
+    border-color: var(--searchresults-header-fg);
+    background-color: #c0c0c0;
+}
+
+.tonc pre > .buttons button {
+    border-color: var(--scrollbar);
+    background-color: #e0e0e0;
+    transition: 100ms;
+    transition-property: color,border-color,background-color;
+    color: var(--scrollbar);
+}
+
+/* Syntax highlighting on code */
+.tonc .hljs {
+    color: #202040;
+    font-family: monospace;
+    background: none;
+}
+
+.tonc .hljs span.rem,
+.tonc .hljs span.rem * {
+    color: red;
+}
+
+.tonc .hljs-comment,
+.tonc .hljs-quote {
+    color: green;
+}
+
+.tonc .hljs-keyword,
+.tonc .hljs-meta,
+.tonc .hljs-meta-keyword {
+    color: #0000D0;
+}
+
+.tonc .hljs-number {
+    color: #C000C0;
+}
+
+.tonc .hljs-title,
+.tonc .hljs-params {
+    color: #000000;
+}
+
+.tonc pre .buttons {
+    margin-right: 21px;
+}
+
+/* Register colors */
+.tonc .rclr0	{ color:red; }
+.tonc .rclr1	{ color:blue; }
+.tonc .rclr2	{ color:#006000; }
+.tonc .rclr3	{ color:magenta; }
+.tonc .rclr4	{ color:brown; }
+.tonc .rclr5	{ color:olive; }
+.tonc .rclr6	{ color:purple; }
+.tonc .rclr7	{ color:#C06000; }
+.tonc .rclr8	{ color:teal; }
+.tonc .rclr9	{ color:gray; }
+
+/* Override default table style */
+.tonc table,
+.tonc table th,
+.tonc table td {
+    border: none;
+    margin-left: 0px;
+    font-size: var(--font-size);
+}
+
+.tonc td {
+    padding: 2px;
+}
+
+.tonc table {
+    border-collapse: separate;
+    text-indent: initial;
+    line-height: normal;
+    font-weight: normal;
+    font-size: unset;
+    font-style: normal;
+    text-align: start;
+    border-spacing: 0px;
+    white-space: normal;
+    font-variant: normal;
+}
+
+/* Disable default alternate background colors for rows */
+.tonc table tbody tr:nth-child(2n) {
+    background: none;
+}
+
+/* Figures, captions, blocks */
+.tonc .cpt,
+.tonc .cpt_fl,
+.tonc .cpt_fr {
+    padding: 0.4em;
+    border: 1px var(--fg) solid;
+    background-color: unset;
+}
+
+.tonc .cpt .table-data,
+.tonc .cpt_fl .table-data,
+.tonc .cpt_fr .table-data {
+    font-size: var(--font-size);
+}
+
+.tonc caption {
+    font-size: 80%;
+    text-align:left;
+    margin-left: 1em; }
+
+.tonc div.lblock   { margin: 6px 3em; }
+.tonc div.lblock table { margin: 2px 0;  }
+
+/* Special case table overrides (in Text systems) */
+.tonc #fig\:img-fontpack {
+
+    & table {
+        font-family: var(--font);
+    }
+    & tr td, tr th {
+        background-color: unset;
+      }
+
+    & .table-reg th, .table-reg td {
+        padding: 1px 3px;
+        font-family: var(--font);
+    }
+}
+
+.tonc #tbl\:bupshade {
+    width: unset;
+    font-family: var(--font);
+    font-size: 120%;
+    margin: 0px 10px;
+
+    & tr td, tr th {
+        background-color: var(--table-background-color);
+        padding: 2px 4px;
+      }
+}
+
+.tonc #fig\:img-m7-ex {
+    border: 1px var(--fg) solid;
+}
+
+.tonc #tbl\:culltest mtable,
+.tonc #tbl\:culltest mtr,
+.tonc #tbl\:culltest mtd {
+     padding: 0px 0px;
+}
+
+/* Equations */
+.tonc .eqnrcell {
+    font-weight: bold;
+}
+
+.tonc .eqcell {
+    padding-left: 1em;
+}
+
+
+/* Normal data tables */
+.tonc table.table-data {
+    border: 1px outset var(--table-border-color);
+}
+
+.tonc table.table-data th,
+.tonc table.table-data tr,
+.tonc table.table-data td {
+    border: 1px inset var(--table-border-color);
+}
+
+/* Regular register tables */
+.tonc .table-reg tbody {
+    background-color: #e0e0e0;
+}
+
+.tonc .table-reg {
+    font: 90% "Courier New", monospace;
+    background: #E0E0E0;
+    border: solid #C0C0C0 1px;
+    page-break-inside: avoid;
+}
+
+.tonc .table-reg th,
+.tonc .table-reg td {
+    border: 1px inset #c0c0c0;
+    padding: 4px 4px;
+}
+
+/* Tall register tables  */
+.tonc table.table-reg-vert {
+    border-collapse: separate;
+    text-indent: initial;
+    line-height: normal;
+    font-weight: normal;
+    font-size: medium;
+    font-style: normal;
+    text-align: start;
+    border-spacing: 2px;
+    border: none;
+    white-space: normal;
+    font-variant: normal;
+}
+
+.tonc table.table-reg-vert th {
+    border: none;
+    background-color: none;
+}
+
+.tonc table.table-reg-vert tr:nth-child(1n) td{
+    border: none;
+    background-color: #e0e0e0;
+    border-bottom: #c0c0c0 1px solid;
+}
+
+.tonc table.table-reg-vert tr:nth-child(2n) td{
+    border: none;
+    background-color: #c0c0c0;
+    border-bottom: #e0e0e0 1px solid;
+}
+
+/* Rules cols equivalent, only column borders not rows */
+.tonc table.rules-cols td,
+.tonc table.rules-cols th {
+    border-top: none;
+    border-left: none;
+    border-bottom:none;
+  }
+
+.tonc table.rules-cols tr th:last-child,
+.tonc table.rules-cols tr td:last-child {
+    border-right: none;
+}
+
+/* Frame void and rules groups equivalent */
+.tonc table.rules-groups th {
+    border-top: none;
+    border-left: none;
+    border-right: 1px solid var(--fg);
+}
+
+.tonc table.rules-groups td {
+    border-top: none;
+    border-left: none;
+    border-bottom:none;
+    border-right: 1px solid var(--fg);
+  }
+
+  .tonc table.rules-groups {
+    border: none;
+  }
+
+.tonc table.rules-groups tr th:last-child,
+.tonc table.rules-groups tr td:last-child {
+    border-right: none;
+}
+
+.tonc table.rules-groups tbody tr th {
+    border-bottom: none;
+}
+
+/* Misc */
+.tonc table.border-none {
+    border: none;
+}
+
+.tonc table.border-none th,
+.tonc table.border-none td {
+    border: none;
+}
+
+.tonc tr.bits, tr.bf, col.bits, col.bf, col.def { text-align:center; }
+
+.tonc col.bits, col.bf, col.def { vertical-align:top; }
+.tonc tr.bits, col.bits         { font: 90% "Courier New"; }
+.tonc tr.bf, col.bf             { font-weight:bold; }
+.tonc col.def                   { font: 90% "Courier New"; }
+ 
+.tonc .center {
+    margin: auto;
+}
+
+.tonc tt {
+    color: #400080;
+}
+
+.tonc kbd {
+    color: #202040;
+    font-family: monospace;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.tonc .bdr {
+    border: 1px var(--fg) solid;
+}
+
+.tonc .bdrB, .bdrBL, .bdrBR, .bdrLL, .bdrRR {
+    border-bottom: 1px black solid;
+}

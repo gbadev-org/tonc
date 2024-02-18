@@ -199,7 +199,7 @@ For those who aren't as familiar with pointers as you should (boy, are you gonna
 ```
 
 <div class="cblock">
-<table border=1 cellpadding=2 cellspacing=0 width="90%">
+<table class="table-data" width="90%">
 <col align="right">
 <tr>
   <th width=130>code	<th>type	<th>description

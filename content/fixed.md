@@ -106,8 +106,7 @@ If you're not new to programming, you will undoubtedly be aware of the problem o
 And then there are negative numbers. Frankly, division on negative integers is always a bitch. The basic problem here is that they are always rounded towards zero: both +3/4 and −3/4 give 0. In some ways this makes sense, but in one way it doesn't: it breaks up the sequence of outputs around zero. This is annoying on its own, but what's worse is that right-shifting *doesn't* follow this behaviour; it always shifts towards negative infinity. In other words, for negative integer division, the division and right-shift operators are *not* the same. Which method you choose is a design consideration on your part. Personally, I'm inclined to go with shifts because they give a more consistent result.
 
 <div class="cblock">
-<table id="tbl:neg-div"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:neg-div" class="table-data">
 <caption align="bottom">
   <b>*@tbl:neg-div</b>:
   Division and right-shifts around zero.
@@ -602,8 +601,7 @@ This is probably a good time for a little example. Consider the case of *A* = 
 An alternative way of looking at it is to go to hexadecimal floating point and taking the first *F* bits. This is not as hard as you might think. The way you find a floating-point number of a fraction is to multiply by the base, write down the integral part, multiply the remainder by the base, write down the integral part and so forth. The table below has the hex version of 1/7 (I'm not using 1/3 because that's rather monotonous). As you can see 1/7 in hex is 0.249249…h. Do this for one third and you'll find 0.5555…h.
 
 <div class="lblock">
-<table id="tbl:hexfloat"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:hexfloat" class="table-data">
 <caption align="bottom">
   <b>*@tbl:hexfloat</b>: 
   Floating-point representation of 1/7 in base <i>B</i>=16
@@ -622,8 +620,7 @@ An alternative way of looking at it is to go to hexadecimal floating point and t
 So 1/3 in hex is zero, followed by a string of fives, or just *m*=0x55 in truncated .8 fixed-point notation. Now look what happens when you do the multiplication by reciprocal thing. I'm using hex floats here, and *y*=&#x230A;(*x·m*)/*n*&#x230B;, as per @eq:div-aprx. The result you actually get is just the integer part, ignore the (hexi)decimals
 
 <div class="cblock">
-<table id="tbl:rmdiv-bad"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:rmdiv-bad" class="table-data">
 <caption align="bottom">
   <b>*@tbl:rmdiv-bad</b>: 
   <i>x</i>/3, using <i>m</i>= &#x230A;256/3&#x230B; = 0x55. Bad at 3, 6, &hellip;
@@ -684,8 +681,7 @@ m = \left\lfloor (n+A-1)/A \right\rfloor
 </table>
 
 <div class="cblock">
-<table id="tbl:rmdiv-good"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:rmdiv-good" class="table-data">
 <caption align="bottom">
   <b>*@tbl:rmdiv-good</b>: 
   <i>x</i>/3, using <i>m</i>= &#x230A;(256+2)/3&#x230B; = 0x56. Still good at 3, 6, &hellip;

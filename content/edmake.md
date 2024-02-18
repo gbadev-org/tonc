@@ -59,19 +59,19 @@ To add commands for makefiles, go to Tools-\>Options-\>Tools (@fig:pn-make), and
 
 F9 : make build
 
-:   -   **Name:** mk build
-    -   **Command:** “E:\\dev\\devkitPro\\msys\\bin\\make.exe”
-    -   **Folder:** ‘%d’ (the makefile's directory)
-    -   **Parameters:** “-f %f build”
-    -   **Shortcut:** F9
+  -   **Name:** `mk build`
+  -   **Command:** `E:\dev\devkitPro\msys\bin\make.exe`
+  -   **Folder:** `%d` (the makefile's directory)
+  -   **Parameters:** `-f %f build`
+  -   **Shortcut:** F9
 
 F10 : make clean
 
-:   -   **Name:** mk clean
-    -   **Command:** “E:\\dev\\devkitPro\\msys\\bin\\make.exe”
-    -   **Folder:** ‘%d’ (the makefile's directory)
-    -   **Parameters:** “-f %f clean”
-    -   **Shortcut:** F10
+  -   **Name:** `mk clean`
+  -   **Command:** `E:\dev\devkitPro\msys\bin\make.exe`
+  -   **Folder:** `%d` (the makefile's directory)
+  -   **Parameters:** `-f %f clean`
+  -   **Shortcut:** F10
 
 The name and shortcut can be different, of course; the rest should be as above. It is possible that you have to make sure the .mak extension is tied to the ‘Make’ scheme.
 

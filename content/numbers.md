@@ -89,8 +89,7 @@ As an example, let's look at the binary (base-2) system. This system is kinda sp
 As said, you only have two symbols (BInary digiTs, or bits) here: 0 and 1. In the decimal system, you have ten symbols before you have to add a new numeral to the string: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10. But in a binary system you'll already need a second numeral for two: 0, 1, 10 (with two represented by ‘10’). This means that you get large strings fairly quickly. For example, let's look the number 1025 again. To write this down in binary we have to find the multipliers for the powers of two that will add up to 1025. First, of course, we need the powers of two themselves. The first 11 are:
 
 <div class="lblock">
-<table id="tbl:pot"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:pot" class="table-data">
 <caption align="bottom"><b>{*@tbl:pot}</b>: powers of two</caption>
 <col span=3 align="right">
 <tr align="center"><th>exponent<th>binary<th>decimal
@@ -134,8 +133,7 @@ For this reason, in 1999, the IEC began to recommend a separate set of binary pr
 **{*@tbl:count}**: counting to twenty in decimal, binary, hex and octal. Note the alternating sequences in the binary column.
 
 <div class="cblock">
-<table id="tbl:count"
-  border=1 cellpadding=2 cellspacing=0 rules=cols>
+<table id="tbl:count" class="table-data rules-cols">
 <col span=4 align="right">
 <tr><th> dec	<th> bin	<th> hex	<th> oct
 <tr><td>   0	<td>    0	<td>   0    <td>   0
@@ -190,7 +188,7 @@ Using a base-*N* positional system has a number of advantages over the other num
 Where it really comes into its own is arithmetic. The positions in a number-string are equivalent, so the steps for adding ‘3+4’ are the same for ‘30+40’. This will allow you to break up large calculations into smaller, easier ones. If you can do calculations for single-symbol numbers, you can do them all. What's more, the steps themselves are the same, regardless of which base you use. I won't show you how to do addition in binary or hex, as that's rather trivial, but I will demonstrate multiplication. Here's an example of calculating ‘123 × 456’, in decimal and hexadecimal. I've also given the multiplication tables for convenience.
 
 <div class="cblock" id="tbl:multiply">
-  <table border=1 cellpadding=2 cellspacing=0>
+  <table class="table-data">
   <caption><b>{*@tbl:multiply}a</b>: decimal multiplication table</caption>
   <col span=11 align="right">
   <tr><th> x
@@ -228,7 +226,7 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
 	<td> 60 <td> 70 <td> 80 <td> 90 <td>100
   </table>
 
-  <table border=1 cellpadding=2 cellspacing=0>
+  <table class="table-data">
   <caption><b>{*@tbl:multiply}b</b>: hex multiplication table</caption>
   <col span=17 align="right">
   <tr><th> x
@@ -289,7 +287,7 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
 <table>
 <tr>
   <td>
-  <table border=1 cellpadding=2 cellspacing=0>
+  <table class="table-data">
   <caption>123 &times; 456, base ten</caption>
   <col span=5 align="right">
   <tr><td>&times; <th> 100  <th>   20 <th>    3	<th> sum
@@ -301,7 +299,7 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
 
   <td width=32>
   <td>
-  <table border=1 cellpadding=2 cellspacing=0>
+  <table class="table-data">
   <caption>123 &times; 456, base 16</caption>
   <col span=5 align="right">
   <tr><td>&times; <th> 100  <th>   20 <th>    3	<th> sum
@@ -322,7 +320,7 @@ I should point out that 4EDC2<sub>sixteen</sub> is actually 323010<sub>ten</sub>
 Something that is only possible in a positional system is the use of a floating point. Each numeral in a number-string represents a multiplier for a power of *N*, but why use only positive powers? Negative powers of *x* are successive multiplications of 1/*x*: *x*<sup>−n</sup> = (1/*x*)<sup>n</sup>. For example, π can be broken down like this:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
+<table class="table-data">
 <col span=9 width=32>
 <tr align="center">
   <th>exp
@@ -344,7 +342,7 @@ You can't simply use a number-string for this; you need to know where the negati
 Since each base-*N* system is equivalent, you can do this just as well in binary. π in binary is:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
+<table class="table-data">
 <col span=9 width=16>
 <tr align="center">
   <th>exp
@@ -368,7 +366,7 @@ So π in binary is 11.0010<sub>two</sub>. Well, yes and no. Unfortunately, 11.00
 You might wonder how I got these conversions. It's actually not that hard: all you have to do is divide by the base number and strip off the remainders until you have nothing left; the string of the remainders is the converted number. Converting decimal 1110 to hex, for example, would go like this:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0 rules=cols>
+<table class="table-data rules-cols">
 <tr><th> num  <th> / 16 <th> %16
 <tr><td> 1110 <td> 69   <td> 6
 <tr><td>   69 <td> 4    <td> 5
@@ -410,8 +408,7 @@ That you have *n* bits to represent a number does not necessarily mean that you 
 Let's bring out our odometers again. In an three-digit odometer, you could go from 0 to 999. Forget what a three-digit odometer says about the quality of the car, just focus on the numbers. At 999, *every* digit will roll over and you'll be back at 0 again. You could also argue that the number *before* 0 is 999. In other words, '999' would be the representation of −1. You could split the full one thousand range into one half for the first positive five hundred (0 to 499), and the other for the first negative five hundred (−500 to −1), as counting backward from 0, using the roll-over. This type of numbering is called be <dfn>ten's complement</dfn>. The table below shows how this works for 3 digits.
 
 <div class="lblock">
-<table id="tbl:10cmpl"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:10cmpl" class="table-data">
 <caption align="bottom">
   <b>*@tbl:10cmpl</b>: ten's complement for 3 digits
 </caption>
@@ -574,7 +571,7 @@ Here are a few guidelines for choosing signed or unsigned types. Intrinsically s
 Unsigned and signed types can behave differently under type casting, comparison and bit-operations. A byte *x* containing FFh could mean a signed −1 or an unsigned 255. In that case:
 
 <div class="lblock">
-<table border=1 cellspacing=0 cellpadding=2>
+<table class="table-data">
 <tr><td>FFh	<th>signed 		<th>unsigned
 <tr><th>comparison x&lt;0
   <td>true <td> false
@@ -604,13 +601,12 @@ The ASCII set also has an upper 128 characters, but these can be different for d
 The C type for the character is called <dfn>char</dfn>. A **char** is actually a *signed* 8bit integer. I mention this because I distinctly remember being sent on a long bughunt long ago because of this little fact. To be perfectly honest, I think that the default signing of the char-type is actually platform dependent, so consider yourself warned.
 
 <div class="cblock">
-<table id="tbl:ascii"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:ascii" class="table-data">
 <caption align="bottom">
   <b>*@tbl:ascii</b>: ASCII 0-127
 </caption>
 <tr><td>
-  <table><tr><th>dec <th>hex <th>Char
+  <table class="border-none"><tr><th>dec <th>hex <th>Char
     <tr><td> 0 <td>00h <th>NUL
     <tr><td> 1 <td>01h <th>
     <tr><td> 2 <td>02h <th>    <tr><td> 3 <td>03h <th>
@@ -631,7 +627,7 @@ The C type for the character is called <dfn>char</dfn>. A **char** is actually a
     <tr><td>30 <td>1Eh <th>    <tr><td>31 <td>1Fh <th>
   </table>
 <td>
-  <table><tr><th>dec <th>hex <th>Char
+  <table class="border-none"><tr><th>dec <th>hex <th>Char
     <tr><td>32 <td>20h <th>sp   <tr><td>33 <td>21h <th>!
     <tr><td>34 <td>22h <th>"    <tr><td>35 <td>23h <th>#
     <tr><td>36 <td>24h <th>$    <tr><td>37 <td>25h <th>%
@@ -650,7 +646,7 @@ The C type for the character is called <dfn>char</dfn>. A **char** is actually a
     <tr><td>62 <td>3Eh <th>&gt; <tr><td>63 <td>3Fh <th>?
   </table>
 <td>
-  <table><tr><th>dec <th>hex <th>Char
+  <table class="border-none"><tr><th>dec <th>hex <th>Char
     <tr><td>64 <td>40h <th>@    <tr><td>65 <td>41h <th>A
     <tr><td>66 <td>42h <th>B    <tr><td>67 <td>43h <th>C
     <tr><td>68 <td>44h <th>D    <tr><td>69 <td>45h <th>E
@@ -669,7 +665,7 @@ The C type for the character is called <dfn>char</dfn>. A **char** is actually a
     <tr><td>94 <td>5Eh <th>^    <tr><td>95 <td>5Fh <th>_
   </table>
 <td>
-  <table><tr><th>dec <th>hex <th>Char
+  <table class="border-none"><tr><th>dec <th>hex <th>Char
     <tr><td>96 <td>60h <th>`    <tr><td>97 <td>61h <th>a
     <tr><td>98 <td>62h <th>b    <tr><td>99 <td>63h <th>c
     <tr><td>100 <td>64h <th>d    <tr><td>101 <td>65h <th>e
@@ -697,7 +693,7 @@ The last of the most common types is the floating point. Having, say, 32bits for
 Describing floating-point numbers on a computer is done according to the <dfn>IEEE/ANSI</dfn> standard (Institute of Electrical and Electronic Engineers / American National Standards Institute). The floating-point format consists of 3 parts, a sign bit *s*, an exponent *e* and a fractional part *f*. The following table and equation is the formatting and meaning of a normal, 32bit float
 
 <div class="reg">
-<table class="reg" id="tbl-float-fmt"
+<table class="table-reg" id="tbl-float-fmt"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
   IEEE format for 32bit float
@@ -712,7 +708,7 @@ Describing floating-point numbers on a computer is done according to the <dfn>IE
 </table>
 <br>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def">
@@ -781,7 +777,7 @@ x=(-1)^s \cdot 1.f \cdot 2^{e-127}
 Note that unlike signed integers, there *is* a real sign bit this time. Furthermore, the number always starts with 1, and the fractional part *f* really is the fractional part of the number. This makes sense, because sense, since if it weren't, you can always move the point around until you get a single 1 before the point. The exponent is subtracted by 127 to allow for negative powers (similar, but not exactly like you'd get in a 2s' complement number). Two examples:
 
 <div class="lblock">
-<table border=1 cellpadding=2 cellspacing=0>
+<table class="table-data">
 <tr align="center"><th>x <th>s <th> e <th> f
 <tr><th>1.0  <td>0 <td>01111111 <td> 000 0000 0000 0000 0000 0000
 <tr><th>&minus;1.0 <td>1 <td>01111111 <td> 000 0000 0000 0000 0000 0000
@@ -808,8 +804,7 @@ There is one convention I have completely overlooked throughout this chapter: <d
 Computer endianness plays a part in two areas: bit-order in a byte and byte-order in a multi-byte type such as an int. Since the byte is usually the smallest chunk you can handle, the bit-order is usually of little concern. As a simple example, look at the int 0x11223344. This will be stored differently on different systems, see the table below. Try to think of what would happen if you save this in a file and then transfer that to a computer with a different endian-scheme.
 
 <div class="lblock">
-<table id="tbl:endian"
-  border=1 cellpadding=2 cellspacing=0 width=30%>
+<table id="tbl:endian" class="table-data" width=30%>
 <caption align="bottom">
   <b>*@tbl:endian</b>: storing 0x11223344
 </caption>
@@ -856,7 +851,7 @@ What these four operations do is usually written down in truth tables, which lis
   <b>*@tbl:bitops-truth</b>: bit operations
 </caption>
   <tr valign="top"><td>
-    <table border=1 cellpadding=2 cellspacing=0 frame=void rules=groups>
+    <table class="table-data rules-groups">
     <colgroup align="center">
     <colgroup align="center">
     <colgroup align="center">
@@ -871,7 +866,7 @@ What these four operations do is usually written down in truth tables, which lis
     </table>
   <td width=32>
   <td>
-    <table border=1 cellpadding=2 cellspacing=0 frame=void rules=groups>
+    <table class="table-data rules-groups">
     <colgroup align="center">
     <colgroup align="center">
     <thead>
@@ -1031,8 +1026,7 @@ If you look at the truth tables and the examples, you may already see how this c
 And then there are the shift and rotate operations. In contrast to the earlier operations, these act on a variable as a whole. Each variable is a string of bits and with the shift and rotate operations you can move the bits around. Both have left and right variants and are binary operations, the first operand is the source number, and the second is the amount of bits to move. I'll refer to shift left/right as SHL and SHR and rotate left/right as ROL and ROR for now. These sound like assembly instructions, but they're not. At least, not ARM assembly. Shift left/right have C operators ‘\<\<’ and ‘\>\>’, but there are no C operators for a bit-rotate, although you can construct the effect using shifts. As said, shift and rotate move bits around a variable, in pretty much the way you'd expect:
 
 <div class="lblock">
-<table id="tbl:shift"
-  cellpadding=4 cellspacing=0 frame=void rules=groups>
+<table id="tbl:shift" class="table-data rules-groups">
 <caption align="bottom"><b>*@tbl:shift</b>: shift / rotate operations on
   byte 35h (<code>00110101</code>)</caption>
 <colgroup>
@@ -1073,8 +1067,7 @@ What does matter is a few nasty things about shifting. Shift-left isn't much of 
 Take the interesting case of the 8bits 80h, which is both the unsigned 128 as the signed −128. A right-shift by 3 should result in 16 and −16, respectively. This would be 10h for the unsigned and F0h for the signed case, and lo and behold, that is exactly what you'd get by sign-bit extension or not.
 
 <div class="lblock">
-<table id="tbl:sign"
-  border=1 cellspacing=0 cellpadding=2>
+<table id="tbl:sign" class="table-data">
 <caption align="bottom">
   <b>*@tbl:sign</b>: signed and unsigned <code>80h&gt;&gt;3</code>
 </caption>
@@ -1119,8 +1112,7 @@ for(ii=0; ii<8; ii++)
 OR and XOR are only very rarely used in their arithmetic form, but the shifts and AND can be seen with some regularity. This is especially true on a system with no hardware division (like the GBA), in which case division and modulo are expensive operations. That is why powers of two are preferred for sizes and such, the faster bit operations can then be used instead. Fortunately, the compiler is smart enough to optimize, say, division by 8 to a right-shift by 3, so you don't have to write down the bit-op version yourself if you don't want to. Mind you, this will only work if a) the second operand is a constant and b) that constant is a power of two.
 
 <div class="lblock">
-<table id="tbl:bitops-arith"
-  cellpadding=4 cellspacing=0 frame=void rules=groups>
+<table id="tbl:bitops-arith" class="table-data rules-groups">
 <caption align="bottom">
   <b>*@tbl:bitops-arith</b> Arithmetic bit-ops summary
 </caption>
@@ -1152,8 +1144,7 @@ OR and XOR are only very rarely used in their arithmetic form, but the shifts an
 And now for my final trick of the day, let's take a closer look at the most basic of arithmetic operations, addition. The addition of 2 bits to be precise, and the truthtable of that can be found in table 12 below. If you've paid attention so far (well done! I didn't think anyone would make it this far <span class="kbd">:P</span>), there should be something familiar about the two columns that make up the result. The right column is just *a* XOR *b* and the left column is *a* AND *b*. This means that you can create a 1-bit adder with just an AND and a XOR port, electric components that can be found in any Radio Shack, or its local equivalent. String 8 of these together for an 8-bit adder, and you'll have yourself the foundation of an 8bit computer, cool huh?
 
 <div class="lblock">
-<table id="tbl:adder"
-  border=1 cellspacing=0 cellpadding=2 frame=void rules=groups width=10%>
+<table id="tbl:adder" class="table-data rules-groups" width=20%>
 <caption align="bottom">
   <b>*@tbl:adder</b>: 1&minus;bit adder
 </caption>

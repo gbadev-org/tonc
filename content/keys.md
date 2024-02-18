@@ -13,7 +13,7 @@ As you no doubt already know, the GBA has one 4-way directional pad (D-pad); two
 As said, the GBA has ten buttons, often referred to as keys. Their states can be found in the first 10 bits of the `REG_KEYINPUT` register at location `0400:0130h` (a.k.a. `REG_P1`). The exact layout is shown below. I will refrain from giving a bit-by-bit description because it should be quite obvious. The names of the defined constants I use are "`KEY_`*x*", where *x* is the name of the button, in caps.
 
 <div class="reg">
-  <table class="reg" id="tbl-reg-keys" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg" id="tbl-reg-keys">
     <caption class="reg">REG_KEYINPUT @ 0400:0130h</caption>
     <tr class="bits rof">
       <td>F E D C B A</td>
@@ -64,7 +64,7 @@ Just about everything you will ever need in terms of key-handling can be done wi
 
 <br>
 <div class="reg">
-  <table class="reg" id="tbl-reg-keycnt" border=1 frame=void cellpadding=4 cellspacing=0>
+  <table class="table-reg" id="tbl-reg-keycnt">
     <caption class="reg">REG_KEYCNT @ 0400:0132h</caption>
     <tr class="bits">
       <td>F</td>
@@ -98,7 +98,7 @@ Just about everything you will ever need in terms of key-handling can be done wi
     </tr>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <col class="bits" width=40>
     <col class="bf" width="8%">
     <col class="def" width="12%">

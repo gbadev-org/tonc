@@ -355,7 +355,7 @@ The GBA processor's full name is [ARM7TDMI](https://en.wikipedia.org/wiki/ARM7TD
 ARM processors have 16 32bit registers named r0-r15, of which the last three are usually reserved for special purposes: **r13** is used as the stack pointer (SP); **r14** is the <dfn>link register</dfn> (LR), indicating where to return to from a function, and **r15** is the program counter (PC).. The rest are free, but there are a few conventions. The first four, **r0-r3**, are <dfn>argument</dfn> and/or <dfn>scratch registers</dfn>; function parameters go here (or onto the stack), and these registers are expected to be clobbered by the called function. **r12** falls into this category too. The rest, **r4-r11**, are also known as <dfn>variable registers</dfn>.
 
 <div class="lblock">
-  <table id="tbl:regnames" border=1 cellpadding=1 cellspacing=0>
+  <table id="tbl:regnames" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:regnames}</b>. Standard and alternative register names.
     </caption>
@@ -550,7 +550,7 @@ Like all instructions, data instructions can be executed conditionally by adding
     </caption>
     <tr>
       <td>
-        <table  border=1 cellpadding=2 cellspacing=0>
+        <table class="table-data">
           <tr align="center"><th>opcode		<th>operands	<th> function</tr>
           <tr><th colspan=3 align="center">Arithmetic				</tr>
           <tr><td>adc		<td>Rd, Rn, Op2 <td>Rd = Rn + Op2 + C	</tr>
@@ -570,7 +570,7 @@ Like all instructions, data instructions can be executed conditionally by adding
       </td>
       <td width=10%>&nbsp;</td>
       <td>
-        <table  border=1 cellpadding=2 cellspacing=0>
+        <table class="table-data">
           <tr align="center"><th>opcode		<th>operands	<th> function
           <tr><th colspan=3 align="center">Status ops			</tr>
           <tr><td>cmp		<td>Rn, Op2		<td>Rn - Op2		</tr>
@@ -793,7 +793,7 @@ words:
 The block transfers are also used for stack-work. There are four types of stacks, depending on whether the address that `sp` points to already has a stacked value or not (Full or Empty), and whether the stack grows down or up in memory (Descending/Ascending). These have special affixes (`-FD`, `-FA`, `-ED` and `-EA`) because using the standard affixes would be awkward. For example, the GBA uses an FD-type stack, which means that pushing is done with `stmdb` because decrementing after the store would overwrite an already stacked value (full stack), but popping requires `ldmia` for similar reasons. A `stmfd/ldmfd` pair is much easier to deal with. Or you could just use `push` and `pop`, which expand to ‘`stmfd sp!,`’ and ‘`ldmfd sp!,`’, respectively.
 
 <div class="lblock">
-  <table id="tbl:block" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:block" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:block}</b>: Block transfer instructions.
     </caption>
@@ -851,7 +851,7 @@ Each of the data instructions can set the status flags by appending `-s` to the 
 {\*@tbl:cnd-afx} lists 16 affixes that can be added to the basic branch instruction. For example, `bne Label` would jump to `Label` if the status is non-zero, and continue with the next instruction if it isn't.
 
 <div class="lblock">
-  <table id="tbl:cnd-afx" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:cnd-afx" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:cnd-afx}</b>: conditional affixes.
     </caption>
@@ -1403,7 +1403,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
   <table width=80% align="center">
     <tr>
       <td style="border: 1px solid var(--bg);">
-        <table id="tbl:cycles" border=1 cellpadding=2 cellspacing=0>
+        <table id="tbl:cycles" class="table-data">
           <caption align="bottom">
             <b>{*@tbl:cycles}</b>: Cycle times for the most important instructions.
           </caption>
@@ -1454,7 +1454,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
         </table>
       </td>
       <td style="border: 1px solid var(--bg);">
-        <table id="tbl:waits" border=1 cellpadding=2 cellspacing=0>
+        <table id="tbl:waits"class="table-data">
           <caption align="bottom">
             <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#gbamemorymap">GBATEK memory map</a>.
           </caption>
@@ -1567,7 +1567,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
   }
 </style>
 <div class="reg">
-  <table class="reg" id="tbl:arm-add" border=1 frame=void cellpadding=2 cellspacing=0>
+  <table class="table-reg" id="tbl:arm-add" border=1 frame=void cellpadding=2 cellspacing=0>
     <caption class="reg">
       <b>{*@tbl:arm-add}</b>: The add instruction(s)
     </caption>
@@ -1617,7 +1617,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
     </tbody>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <caption>
       Top 20 bits for <code>add</code>; denote instruction type, status/conditional flags and destination and first operand registers.
     </caption>
@@ -1668,7 +1668,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
     </tbody>
   </table>
   <br>
-  <table>
+  <table class="table-reg-vert">
     <caption>
       Lower 12 bits for <code>add</code>; these form the second operand.
     </caption>
@@ -1770,7 +1770,7 @@ In short, writing efficient Thumb code is much more challenging. It's not exactl
 
 - **Memory operations are tricky**. Well, they are! ARM memory opcodes were identical in what they could do, but here you have to be on your toes. Some features are completely gone (write-back and shifted register offsets), and the others aren't always available to all types. Register-offset addressing is always available, but immediate offsets do not work for the signed loads (`ldrsh`, `ldrsb`). Remember that the registers can only be `r0-r7`, except for `ldr/str`: there you can also use PC and SP-relative stuff (with immediate offsets). {\*@tbl:thumb-mem} gives an overview.
   <div style="margin:0.5em;">
-    <table id="tbl:thumb-mem" border=1 cellpadding=2 cellspacing=0>
+    <table id="tbl:thumb-mem" class="table-data">
       <caption align="bottom">
         <b>{*@tbl:thumb-mem}</b>. Thumb addressing mode availability.
       </caption>

@@ -17,8 +17,7 @@ There are three registers specifically for interrupts: `REG_IE` (`0400:0200h`), 
 Apart from setting the bits in `REG_IE`, you also need to set a bit in other registers that deal with the subject. For example, the HBlank interrupt also requires a bit in `REG_DISPSTAT`. I think (but please correct me if I'm wrong) that you need both a sender and receiver of interrupts; `REG_IE` controls the receiver and registers like `REG_DISPSTAT` control the sender. With that in mind, let's check out the bit layout for `REG_IE` and `REG_IF`.
 
 <div class="reg">
-<table class="reg" id="tbl:reg-ie"
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl:reg-ie">
 <caption class="reg">
   REG_IE @ 0400:0200 and REG_IF @ 0400:0202
 </caption>
@@ -37,7 +36,7 @@ Apart from setting the bits in `REG_IE`, you also need to set a bit in other reg
 </table>
 <br>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">

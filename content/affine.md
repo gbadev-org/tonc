@@ -192,7 +192,7 @@ As I said, there are three basic 2d transformations, though you can always descr
 </math>
 
 {*@tbl:transformation_matrices_and_their_inverses}: transformation matrices and their inverses.
-<table id="tbl:transformation_matrices_and_their_inverses">
+<table id="tbl:transformation_matrices_and_their_inverses" class="table-data">
     <thead>
         <tr>
             <th>Identity</th>
@@ -640,7 +640,7 @@ When flagging a background or object as affine, you *must* enter at least some v
 
 Tonclib contains a number of functions for manipulating the affine parameters of objects and backgrounds, as used by the `OBJ_AFFINE` and `BG_AFFINE` structs. Because the affine matrix is stored differently in both structs you can't set them with the same function, but the functionality is the same. In {@tbl:affine_functions} you can find the basic formats and descriptions; just replace *foo* with `obj_aff` or `bg_aff` and *FOO* with `OBJ` or `BG` for objects and backgrounds, respectively. The functions themselves can be found in <i>tonc_obj_affine.c</i> for objects, <i>tonc_bg_affine.c</i> for backgrounds, and inlines for both in `tonc_video.h` … somewhere.
 
-<table class="cblock" id="tbl:affine_functions">
+<table class="cblock table-data" id="tbl:affine_functions">
     <thead>
         <tr>
             <th>Function</th>

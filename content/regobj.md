@@ -44,8 +44,7 @@ It may seem that calculating those tile addresses can be annoying, and it would 
 Also, don't forget that the sprites have their own palette which starts at `0500:0200h` (right after the background palette). If you are certain you've loaded your tiles correctly but nothing shows up, it's possible you filled the wrong palette.
 
 <div class="lblock">
-<table id="tbl:obj-tids"
-  border=1 cellspacing=0 cellpadding=1>
+<table id="tbl:obj-tids" class="table-data">
 <caption align="bottom">
   <b>{*@tbl:obj-tids}</b>: tile counting for sprites, 
   always per 32 bytes. (You can use odd numbers for 8bpp tiles, but 
@@ -194,7 +193,7 @@ The basic control for every sprite is the `OBJ_ATTR` structure. It consists of t
 The first attribute controls a great deal, but the most important parts are for the *y* coordinate, and the shape of the sprite. Also important are whether or not the sprite is transformable (an affine sprite), and whether the tiles are considered to have a bit depth of 4 (16 colors, 16 sub-palettes) or 8 (256 colors / 1 palette).
 
 <div class="reg">
-<table class="reg" id="tbl-oe-attr0"
+<table class="table-reg" id="tbl-oe-attr0"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
   OBJ_ATTR.attr0
@@ -210,7 +209,7 @@ The first attribute controls a great deal, but the most important parts are for 
 	<td class="rclr0">Y
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -285,8 +284,7 @@ Two extra notes on attribute 0. First, `attr0` contains the ***y*** coordinate; 
 The primary parts of this attribute are the *x* coordinate and the size of the sprite. The role of bits 9 to 13 depend on whether or not this is a affine sprite (determined by `attr0{8}`). If it is, these bits specify which of the 32 `OBJ_AFFINE`s should be used. If not, they hold flipping flags.
 
 <div class="reg">
-<table class="reg" id="tbl-oe-attr1"
-  border=1 frame=void cellPadding=4 cellSpacing=0>
+<table class="table-reg" id="tbl-oe-attr1">
 <caption class="reg">
   OBJ_ATTR.attr1
 </caption>
@@ -304,7 +302,7 @@ The primary parts of this attribute are the *x* coordinate and the size of the s
     <td>-
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -343,8 +341,7 @@ I'll say it here too: `attr0` contains *y*, `attr1` contains *x*. Note that bits
 This attribute tells the GBA which tiles to display and its background priority. If it's a 4bpp sprite, this is also the place to say what sub-palette should be used.
 
 <div class="reg">
-<table class="reg" id="tbl-oe-attr2"
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl-oe-attr2">
 <caption class="reg">
   OBJ_ATTR.attr2
 </caption>
@@ -356,7 +353,7 @@ This attribute tells the GBA which tiles to display and its background priority.
 	<td class="rclr0">TID
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def">

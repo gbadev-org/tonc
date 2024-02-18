@@ -14,7 +14,7 @@ Of the four backgrounds the GBA has, only the last two can be used as affine bac
   <table>
     <tr>
       <td>
-        <table id="tbl:bg-types" border=1 cellpadding=2 cellspacing=0 width=128>
+        <table id="tbl:bg-types" border=1 cellpadding=2 cellspacing=0 width=128 class="table-data">
           <caption align="bottom"><b>{*@tbl:bg-types}</b>: video modes and background type</caption>
           <tbody align="center">
             <tr>
@@ -51,8 +51,8 @@ Of the four backgrounds the GBA has, only the last two can be used as affine bac
         </table>
       </td>
       <td width="10%"></td>
-      <td>
-        <table id="tbl:bga-size" border=1 cellpadding=2 cellspacing=0 width=144>
+      <td style="vertical-align: top;">
+        <table id="tbl:bga-size" border=1 cellpadding=2 cellspacing=0 width=144 class="table-data">
           <caption align="bottom"><b>{*@tbl:bga-size}</b>: affine bg sizes</caption>
           <col>
           <col class="def">
@@ -99,7 +99,7 @@ Of the four backgrounds the GBA has, only the last two can be used as affine bac
 Like their regular counterparts, the primary control for affine backgrounds is `REG_BGxCNT`. If you've forgotten what it does, you can read a description [here](regbg.html#tbl-reg-bgxcnt). The differences with regular backgrounds are the sizes, and that `BG_WRAP` actually does something now. The other important registers are the <dfn>displacement vector</dfn> **dx** (`REG_BGxX` and `REG_BGxY`), and the <dfn>affine matrix</dfn> **P** (`REG_BGxPA`-`REG_BGxPD`). You can find their addresses in {@tbl:aff-regs}.
 
 <div class="lblock">
-  <table id="tbl:aff-regs" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:aff-regs" class="table-data">
     <caption align="bottom"><b>{*@tbl:aff-regs}</b>: Affine background register addresses. Note that <i>x</i> is 2 or 3 only!</caption>
     <col span=2 align="right">
     <tr>
@@ -335,7 +335,7 @@ Both the map layout and screen entries for affine backgrounds are very different
 
 <table id="eq:aff-sid">
   <tr>
-    <td class="eqnrcell">{!@eq:aff-sid}</td>
+    <td class="eqnrcell">({!@eq:aff-sid})</td>
     <td class="eqcell"><i>n</i> = <i>tx</i> + <i>ty</i>·<i>tw</i></td>
   </tr>
 </table>
