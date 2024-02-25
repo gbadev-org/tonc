@@ -71,7 +71,7 @@ For more information on the CPU, go to [www.arm.com](http://www.arm.com) or to t
 This section lists the various memory areas. It's basically a summary of the [GBATEK](https://problemkaputt.de/gbatek.htm) section on memory.
 
 <div class="cblock">
-  <table border=1 cellspacing=0 cellpadding=2>
+  <table class="table-data">
     <col span=8 valign="top">
     <thead>
       <tr>

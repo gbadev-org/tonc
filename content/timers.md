@@ -15,8 +15,7 @@ All conceivable timers work in pretty much the same way. You have something that
 The basic frequency of the GBA timers is the CPU frequency, which is 2<sup>24</sup> ≈ 16.78 Mhz. In other words, one <dfn>clock cycle</dfn> of the CPU takes 2<sup>−24</sup> ≈ 59.6 ns. Since this is a very lousy timescale for us humans, the GBA allows for 4 different frequencies (or, rather periods): 1, 64, 256 and 1024 cycles. Some details of these frequencies are shown in {@tbl:tmr-freq}. By clever use of the timer registers, you can actually create timers of any frequency, but more on that later. It should be noted that the screen refreshes every 280,896 cycles, exactly.
 
 <div class="lblock">
-<table id="tbl:tmr-freq"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:tmr-freq" class="table-data">
 <caption align="bottom">
   <b>{*@tbl:tmr-freq}</b>: Timer frequencies
 </caption>
@@ -49,8 +48,7 @@ The GBA has four timers, timers 0 to 3. Each of these has two registers: a data 
 ### REG_TMxCNT {#ssec-reg-tmxcnt}
 
 <div class="reg">
-<table class="reg" id="tbl:reg-tmxcnt"
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl:reg-tmxcnt">
 <caption class="reg">
   REG_TMxCNT @ 0400:0102 + 4<i>x</i>
 </caption>
@@ -65,7 +63,7 @@ The GBA has four timers, timers 0 to 3. Each of these has two registers: a data 
   <td class="rclr2">Fr
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">

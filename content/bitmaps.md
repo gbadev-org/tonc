@@ -56,8 +56,7 @@ Video modes 3, 4 and 5 are the bitmap modes. To use them, put 3, 4 or 5 in the l
 The bitmap modes have the following characteristics:
 
 <div class="lblock">
-<table id="tbl-bm-types"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl-bm-types" class="table-data">
 <caption align="bottom">
   <b>Table 5.1</b>: Bitmap mode 
   characteristics
@@ -602,9 +601,8 @@ There are many command-line interfaces available for graphics conversion, but to
 
 :::
 
-<div class="cpt_fr" style="width:222px;">
-<table id="tbl-endian"
-  border=1 cellpadding=2 cellspacing=0>
+<div class="cpt_fr">
+<table id="tbl-endian" class="table-data">
 <caption align="bottom">
   <b>Table 5.2</b>: Big endian vs little 
   endian interpretation of byte-sequence 01h, 02h, 03h, 04h

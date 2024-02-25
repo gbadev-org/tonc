@@ -634,7 +634,7 @@ All three versions do the following things: calculate the zoom-factor λ, using 
 2.  **Calculation order of the affine offset** The affine displacement **dx** is a combination of 3 parts: scale, rotation and offsets. Type A and B use **dx** = (offset\*scale)\*rotation, while C uses **dx** = offset\*(scale\*rotation). Because type C does the offsets last, it can also use different fixed-points for the offsets.
 
 <div class="cpt_fr">
-<table id="tbl:divs" border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:divs" class="table-data">
   <caption align= bottom>
       <b>*@tbl:divs</b>: division tables and zoom factors. <i>a</i><sub>y</sub>=32
   </caption>

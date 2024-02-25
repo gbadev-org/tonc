@@ -25,8 +25,7 @@ Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#G
   </div>
 
   <td>
-	<table id="tbl:disp-timing" 
-	  border=1 cellspacing=0 cellpadding=2>
+	<table id="tbl:disp-timing" class="table-data">
 	<caption align="bottom">
 	  <b>{*@tbl:disp-timing}</b>: Display timing details
 	</caption>
@@ -89,8 +88,7 @@ There are three I/O registers that you will encounter when doing anything graphi
 The REG_DISPCNT register is the primary control of the screen. The bit-layout of this register and their meanings can be found in the following table. This is the general format I will use for registers or register-like sections. The details of the format have already been explained in the [preface](intro.html#ssec-note-reg).
 
 <div class="reg">
-<table class="reg" id="tbl:reg-dispcnt"
-  border=1 frame=void cellPadding=4 cellSpacing=0>
+<table class="table-reg" id="tbl:reg-dispcnt">
 <caption class="reg">
   REG_DISPCNT @ 0400:0000h
 </caption>
@@ -114,7 +112,7 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
 	<td class="rclr0">Mode
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -173,8 +171,7 @@ Setting the display control is probably the first thing you'll be doing. For sim
 Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The latter tells you the scanline that is currently being worked on. Note that this counter keeps going into the VBlank as well, so it counts to 227 before starting at 0 again. The former gives you information about the Draw/Blank status and is used to set display [interrupts](interrupts.html). You can also do some really cool stuff with the interrupts that you can enable here. For one thing, the HBlank interrupt is used in creating [Mode 7](mode7.html) graphics, and you want to know how that works, don't you?
 
 <div class="reg">
-<table class="reg" id="tbl:reg-dispstat"
-  border=1 frame=void cellPadding=4 cellSpacing=0>
+<table class="table-reg" id="tbl:reg-dispstat">
 <caption class="reg">
   REG_DISPSTAT @ 0400:0004h
 </caption>
@@ -192,7 +189,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
   <td class="rclr0">VbS
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="15%">
@@ -236,8 +233,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
 </div><br>
 
 <div class="reg">
-<table class="reg" id="tbl:reg-vcount" width="320"
-  border=1 frame=void cellPadding=4 cellSpacing=0>
+<table class="table-reg" id="tbl:reg-vcount" width="320">
 <caption class="reg">
   REG_VCOUNT @ 0400:0006h (read-only)
 </caption>
@@ -249,7 +245,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
   <td class="rclr0">Vc
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
 <tr align="left"><th>bits<th>name<th>description

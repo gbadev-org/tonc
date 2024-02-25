@@ -55,17 +55,16 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
 64 KiB of VRAM is set aside for tilemaps (`0600:0000h`-`0600:FFFFh`). This is used for both screenblocks *and* charblocks. You can choose which ones to use freely through the control registers, but be careful that they can overlap (see {@tbl:cbb-sbb}). Each screenblock is 2048 (`800h`) bytes long, giving 32 screenblocks in total. All but the smallest backgrounds use multiple screenblocks for the full tilemap. Each charblock is 16 KiB (`4000h` bytes) long, giving four blocks overall.
 
 <div class="cblock">
-<table id="tbl:cbb-sbb"
-  border=1 cellpadding=3 cellspacing=0 rules=groups>
+<table id="tbl:cbb-sbb" rules=groups>
 <caption align="bottom">
   <b>{*@tbl:cbb-sbb}</b>:
   charblock and screenblock overlap.
 </caption>
-<colgroup span=1 style="background-color:none;"></colgroup>
+<colgroup span=1 style="background-color:var(--table-background-color-custom);"></colgroup>
 <colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
-<colgroup span=3 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-background-color-custom);"></colgroup>
 <colgroup span=3 style="background-color:var(--table-alternate-bg);"></colgroup>
-<colgroup span=3 style="background-color:none;"></colgroup>
+<colgroup span=3 style="background-color:var(--table-background-color-custom);"></colgroup>
 
 <tbody align="left"><tr>
   <th>Memory
@@ -116,8 +115,7 @@ As I said in the overview, there are three stages to setting up a tiled backgrou
 Just like sprites, there are two types of tiled backgrounds: regular and affine; these are also known as text and rotation backgrounds, respectively. The type of the background depends of the video mode (see {@tbl:bg-types}). At their cores, both regular and affine backgrounds work the same way: you have tiles, a tile-map and a few control registers. But that's where the similarity ends. Affine backgrounds use more and different registers than regular ones, and even the maps are formatted differently. This page only covers the regular backgrounds. I'll leave the [affine ones](affbg.html) till after the page on the [affine matrix](affine.html).
 
 <div class="lblock">
-<table id="tbl:bg-types"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:bg-types" class="table-data">
 <caption align="bottom">
   <b>{*@tbl:bg-types}</b>: video modes and 
   background type
@@ -142,8 +140,7 @@ All backgrounds have 3 primary control registers. The primary control register i
 Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, with the other controls right behind it. The offsets are paired by background, forming coordinate pairs. These start at `0400:0010`
 
 <div class="lblock">
-<table id="tbl:ctrl-ofs"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:ctrl-ofs" class="table-data">
 <caption align= bottom>
   <b>{*@tbl:ctrl-ofs}</b>: Background register 
     addresses
@@ -159,8 +156,7 @@ Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, wi
 The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right `#define`s.
 
 <div class="reg">
-<table class="reg" id="tbl-reg-bgxcnt"
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl-reg-bgxcnt">
 <caption class="reg">
   REG_BGxCNT @ 0400:0008 + 2<i>x</i>
 </caption>
@@ -178,7 +174,7 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
 	<td class="rclr4">Pr
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -225,7 +221,7 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
 
 <div class="cblock" id="tbl:bg-size">
 <div style="display: inline-block">
-  <table id="tbl-reg-size" border=1 cellpadding=2  cellspacing=0>
+  <table id="tbl-reg-size" class="table-data">
   <caption align="bottom">
     <b>{*@tbl:bg-size}a</b>: regular bg sizes
   </caption>
@@ -240,7 +236,7 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
   </table>
 </div>
 <div style="display: inline-block">
-  <table id="tbl-aff-size" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl-aff-size" class="table-data">
   <caption align="bottom">
     <b>{*@tbl:bg-size}b</b>: affine bg sizes
   </caption>
@@ -380,7 +376,7 @@ The screenblocks form a matrix of screen entries that describe the full image on
 For regular tilemaps, each screen entry is 16-bits long. Besides the tile index, it contains flipping flags and a palette bank index for 4bpp / 16-color tiles. The exact layout can be found in "Screen entry format" below. The affine screen entries are only 8 bits wide and just contain an 8-bit tile index.
 
 <div class="reg">
-<table class="reg" id="tbl-se"
+<table class="table-reg" id="tbl-se"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption class="reg">
   Screen entry format for regular backgrounds
@@ -394,7 +390,7 @@ For regular tilemaps, each screen entry is 16-bits long. Besides the tile index,
 	<td class="rclr0">TID
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=12%>
@@ -426,7 +422,7 @@ Now, suppose you have a tilemap that's *tw*×*th* tiles/SEs in size. You might e
 Within each screenblock the equation works, but the bigger backgrounds don't simply *use* multiple screenblocks, they're actually accessed as four separate maps. How this works can be seen in {@tbl:reg-layout}: each numbered block is a contingent block in memory. This means that to get the SE-index you have to find out which screenblock you are in and then find the SE-number inside that screenblock.
 
 <div class="lblock">
-<table class="reg" id="tbl:reg-layout"
+<table class="table-reg" id="tbl:reg-layout"
   border=1 frame=void cellpadding=4 cellspacing=0>
 <caption align="bottom">
   <b>{*@tbl:reg-layout}</b>: screenblock layout of 
@@ -502,8 +498,7 @@ I would like to remind you that *n* here is the SE-number, not the address. Sinc
 There are two additional things you need to be aware of when using tiles for tile-maps. The first concerns tile-numbering. For sprites, numbering went according to 4-bit tiles (s-tiles); for 8-bit tiles (d-tiles) you'd have use multiples of 2 (a bit like u16 addresses are always multiples of 2 in memory). In tile-maps, however, d-tiles are numbered by the d-tile. To put it in other words, for sprites, using index *id* indicates the same tile for both 4 and 8-bit tiles, namely the one that starts at *id*·20h. For tile-maps, however, it starts at *id*·20h for 4-bit tiles, but at *id*·40h for 8-bit tiles.
 
 <div class="lblock">
-<table id="tbl:bg-tids"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:bg-tids" class="table-data">
 <caption align="bottom">
   {*@tbl:bg-tids}: tile counting 
   for backgrounds, sticks to its bit-depth.

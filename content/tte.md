@@ -260,7 +260,7 @@ Some terms I use in TTE have a very specific meaning. Because the differences be
   Because I really don't like names that span a whole line, I will use abbreviations in the renderer's name to indicate what it does; see {@tbl:tte-drawg} for what they mean. For the most part, the renderers will be for fonts with arbitrary width and height, with a 1bpp tile-stripped glyphs, with they will draw them transparently and re-coloring of pixels. This is indicated by `*_b1cts`.
 
 <div class="lblock">
-  <table id="tbl:tte-family" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:tte-family" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:tte-family}</b>: TTE render family indicators and initializers. 4bpp Tiles can be row or column major (<code>crh4r</code> or <code>chr4c</code>).
     </caption>
@@ -313,7 +313,7 @@ Some terms I use in TTE have a very specific meaning. Because the differences be
 </div>
 <br>
 <div class="lblock">
-  <table id="tbl:tte-drawg" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:tte-drawg" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:tte-drawg}</b>: Render type summary.
     </caption>
@@ -353,9 +353,9 @@ Some terms I use in TTE have a very specific meaning. Because the differences be
 Lastly, a note on some of the abbreviations I use in the rendering code. A number of terms come up again and again, and I've taken to use a shorthand notation for these items. The basic format is `fooX` where `foo` is the relevant bitmap/surface and `X` is a one-letter code for things like width, height, data and others. Yes, the use of single-letter names is frowned upon and I don't advocate their use in general, but I've found that in this particular case, if used judiciously, they have helped me read my own code.
 
 <div class="lblock">
-  <table id="tbl:tte-brevs" border=1 cellpadding=4 cellspacing=0>
+  <table id="tbl:tte-brevs" class="table-data">
     <caption align="bottom">
-      {*@tbl:tte-brevs}. Abbreviations used in rendering code.
+       <b>{*@tbl:tte-brevs}</b>: Abbreviations used in rendering code.
     </caption>
     <tr> 
       <th>Term</th>
@@ -774,29 +774,29 @@ When I say glyph formats, what I really mean is the order in which pixels are ac
 
 The next routine takes 1-bpp tile-strip glyphs and turns them into output suitable for 16-bpp bitmap backgrounds. The output will use the ink attribute for color and it will only draw a pixel if the bit was 1 in the source data, giving us transparency. The three macros at the top declare and define the basic variables, comparable to step 1a in `bmp16_drawg()`.
 
-```c {#cd-bmp16-drawg-b1cts .proglist}
+<pre><code class="language-c hljs">
 void bmp16_drawg_b1cts(uint gid)
 {
     // (1) Basic variables
     TTE_BASE_VARS(tc, font);
-    TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
-    TTE_DST_VARS(tc, u16, dstD, dstL, dstP, x0, y0);
-    uint srcP= font->cellH;
+    TTE_CHAR_VARS(font, gid, <span class="bold">u8</span>, srcD, srcL, charW, charH);
+    TTE_DST_VARS(tc, <span class="bold">u16</span>, dstD, dstL, dstP, x0, y0);
+    uint srcP= font-&gt;cellH;
 
     dstD += x0;
 
-    u32 ink= tc->cattr[TTE_INK], raw;
+    u32 ink= tc-&gt;cattr[TTE_INK], raw;
 
     // (2) Rendering loops.
     uint ix, iy, iw;
-    for(iw=0; iw<charW; iw += 8)            // loop over tile-strips
+    for(iw=0; iw&lt;charW; iw += 8)            // loop over tile-strips
     {
-        dstL= &dstD[iw];
-        for(iy=0; iy<charH; iy++)           // loop over tile-lines
+        dstL= &amp;dstD[iw];
+        for(iy=0; iy&lt;charH; iy++)           // loop over tile-lines
         {
             raw= srcL[iy];
-            for(ix=0; raw>0; raw>>=1, ix++) // loop over tile-scanline (8 pixels)
-                if(raw&1)
+            for(ix=0; raw&gt;0; raw&gt;&gt;=1, ix++) // loop over tile-scanline (8 pixels)
+                if(raw&amp;1)
                     dstL[ix]= ink;
 
             dstL += dstP/2;
@@ -804,7 +804,7 @@ void bmp16_drawg_b1cts(uint gid)
         srcL += srcP;
     }
 }
-```
+</code></pre>
 
 The routine starts by calls to three macros: `TTE_CHAR_VARS()`, `TTE_CHAR_VARS` and `TTE_DST_VARS()`. These declare and define most of the relevant local variables, similar to step 1a in `bmp16_drawg()`. Note that two of the arguments here are datatype identifiers for the source and destination pointers, respectively. `srcD` and `srcL` will initially point to the start of the source data. The other pointers, `dstD` and `dstL`, point to the start _of the scanline_ in the destination area. They haven't been corrected for the _x_-position just yet; that's done right after it.
 
@@ -816,44 +816,43 @@ The tile-strip portion of {@fig:img-src-loops} illustrates how the routine moves
 
 The 8 bpp counterpart of the previous function is called `bmp8_drawg_b1cts()`, and is given below. The code is very similar to the 16 bpp function, but because the pixels are now bytes there are a few differences in the details.
 
-```c {#cd-bmp8-drawg-b1cts .proglist}
-void bmp8_drawg_b1cts(uint gid)
+<pre><code class="language-c hljs">void bmp8_drawg_b1cts(uint gid)
 {
-    // (1) Basic variables
+    // <span class="bold">(1)</span> Basic variables
     TTE_BASE_VARS(tc, font);
     TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
     TTE_DST_VARS(tc, u16, dstD, dstL, dstP, x0, y0);
-    uint srcP= font->cellH;
+    uint srcP= font-&gt;cellH;
 
     dstD += x0/2;
 
-    u32 ink= tc->cattr[TTE_INK], raw, px;
-    uint odd= x0&1;                         // (2) Source offset.
+    u32 ink= tc-&gt;cattr[TTE_INK], raw, px;
+    uint odd= x0&amp;1;                         // <span class="bold">(2)</span> Source offset.
 
     uint ix, iy, iw;
-    for(iw=0; iw<charW; iw += 8)            // Loop over strips.
+    for(iw=0; iw&lt;charW; iw += 8)            // Loop over strips.
     {
-        dstL= &dstD[iw/2];
-        for(iy=0; iy<charH; iy++)           // Loop over lines.
+        dstL= &amp;dstD[iw/2];
+        for(iy=0; iy&lt;charH; iy++)           // Loop over lines.
         {
-            raw= srcL[iy]<<odd;             // (3) Apply source offset.
-            for(ix=0; raw>0; raw>>=2, ix++) // Loop over pixels.
+            raw= srcL[iy]&lt;&lt;odd;             // <span class="bold">(3)</span> Apply source offset.
+            for(ix=0; raw&gt;0; raw&gt;&gt;=2, ix++) // Loop over pixels.
             {
-                // (4) 2-bit -> 2-byte unpack, then used as masks.
-                px= ( (raw&3)<<7 | (raw&3) ) &~ 0xFE;
-                dstL[ix]= (dstL[ix]&~(px*255)) + ink*px;
+                // <span class="bold">(4)</span> 2-bit -> 2-byte unpack, then used as masks.
+                px= ( (raw&amp;3)&lt;&lt;7 | (raw&amp;3) ) &amp;~ 0xFE;
+                dstL[ix]= (dstL[ix]&amp;~(px*255)) + ink*px;
             }
             dstL += dstP/2;
         }
         srcL += srcP;
     }
 }
-```
+
+</code></pre>
 
 The only real difference with `bmp16_drawg_b1cts` is in the inner-most loop. The no-byte-write issue for VRAM means that we need to write two pixels in one pass. To do this, I retrieve and unpack two bits into two bytes and use them to create the new pixels and the pixel masks. The first line in the inner loop does the unpacking. It transforms the bit-pattern _`ab`_ into `0000 000`_`a`_` 0000 000`_`b`_. Both bytes in this halfword are now 0 or 1, depending on whether _a_ and _b_ were on or off. By multiplying with `ink` and 255, you can get the colored pixels and the appropriate mask for insertion.
 
-<pre><code class="language-sh hljs">
-# 2-bit to 2-byte unpacking.
+<pre><code class="language-sh hljs"># 2-bit to 2-byte unpacking.
 0000 0000  hgfe dcb<b>a</b>    p  = raw (start)
 0000 0000  0000 00<span class="rem">b<b>a</b></span>    p &amp;= 3
 0000 000<span class="rem"><b>b</b>  a</span>000 00b<b>a</b>    p |= p&lt;&lt;7;
@@ -1212,60 +1211,59 @@ Normally, the bitunpack is done in a loop, but sometimes it's faster to do it in
 
 Step 4 distributes the word with the pixels over two tiles if necessary. In step 1, left and right shifts were prepared to supply the bit offsets for this procedure. Now, for larger glyphs this will mean that certain destination words are used twice, but this can't be helped (actually it can, but the procedure is ugly and possibly not worth it). An alternative to this is using the destination once and read (and unpack/color) the source twice; however, as VRAM is considerably faster than ROM I doubt this would be beneficial.
 
-```c {#cd-chr4c-drawg-b1cts .proglist}
-//! Render 1bpp fonts to 4bpp tiles; col-major order.
+<pre><code class="language-c hljs">//! Render 1bpp fonts to 4bpp tiles; col-major order.
 void chr4c_drawg_b1cts(uint gid)
 {
     // Base variables.
     TTE_BASE_VARS(tc, font);
     TTE_CHAR_VARS(font, gid, u8, srcD, srcL, charW, charH);
-    uint x= tc->cursorX, y= tc->cursorY, dstP= tc->dst.pitch/4;
-    uint srcP= font->cellH;
+    uint x= tc-&gt;cursorX, y= tc-&gt;cursorY, dstP= tc-&gt;dst.pitch/4;
+    uint srcP= font-&gt;cellH;
 
-    // (1) Prepare dst pointers and shifts.
-    u32 *dstD= (u32*)(tc->dst.data + (y + x/8*dstP)*4), *dstL;
+    // <span class="bold">(1)</span> Prepare dst pointers and shifts.
+    u32 *dstD= (u32*)(tc-&gt;dst.data + (y + x/8*dstP)*4), *dstL;
     x %= 8;
     uint lsl= 4*x, lsr= 32-4*x, right= x+charW;
 
     // Inner loop vars.
     u32 px, pxmask, raw;
-    u32 ink= tc->cattr[TTE_INK];
+    u32 ink= tc-&gt;cattr[TTE_INK];
     const u32 mask= 0x01010101;
 
     uint iy, iw;
-    for(iw=0; iw<charW; iw += 8)    // Loop over strips
+    for(iw=0; iw&lt;charW; iw += 8)    // Loop over strips
     {
-        // (2) Update and increment main data pointers.
+        // <span class="bold">(2)</span> Update and increment main data pointers.
         srcL= srcD;     srcD += srcP;
         dstL= dstD;     dstD += dstP;
 
-        for(iy=0; iy<charH; iy++)   // Loop over scanlines
+        for(iy=0; iy&lt;charH; iy++)   // Loop over scanlines
         {
             raw= *srcL++;
             if(raw)
             {
-                // (3) Unpack 8 bits into 8 nybbles and create the mask
-                raw |= raw<<12;
-                raw |= raw<< 6;
-                px   = raw & mask<<1;
-                raw &= mask;
-                px   = raw | px<<3;
+                // <span class="bold">(3)</span> Unpack 8 bits into 8 nybbles and create the mask
+                raw |= raw&lt;&lt;12;
+                raw |= raw&lt;&lt;6;
+                px   = raw &amp; mask&lt;&lt;1;
+                raw &amp;= mask;
+                px   = raw | px&lt;&lt;3;
 
                 pxmask= px*15;
                 px   *= ink;
 
-                // (4a) Write left tile:
-                dstL[0] = (dstL[0] &~ (pxmask<<lsl) ) | (px<<lsl);
+                // <span class="bold">(4a)</span> Write left tile:
+                dstL[0] = (dstL[0] &amp;~ (pxmask&lt;&lt;lsl) ) | (px&lt;&lt;lsl);
 
-                // (4b) Write right tile (if any)
-                if(right > 8)
-                    dstL[dstP]= (dstL[dstP] &~ (pxmask>>lsr) ) | (px>>lsr);
+                // <span class="bold">(4b)</span> Write right tile (if any)
+                if(right &gt; 8)
+                    dstL[dstP]= (dstL[dstP] &amp;~ (pxmask&gt;&gt;lsr) ) | (px&gt;&gt;lsr);
             }
             dstL++;
         }
     }
 }
-```
+</code></pre>
 
 `chr4c_drawg_b1cts()` is pretty fast. It certainly is faster than the earlier version by about 33%. It's actually even faster than the bmp8 renderer, but only by a slim margin.
 
@@ -1450,58 +1448,57 @@ px     += raw* shadow;          // Add shadow pixels
 
 The `chr4c_drawg_b4cts()` renderer uses this method to color both the ink and shadow pixels. It's essentially `chr4c_drawg_b4cts()` except for the things in bold and the removal of the bit unpacking. Also note the ‘no-pixel’ condition here. If `pxmask` is zero, there's nothing to do; and so we won't.
 
-```c {.proglist}
-//! 4bpp font, tilestrips with ink/shadow coloring.
+<pre><code class="language-c hljs">//! 4bpp font, tilestrips with ink/shadow coloring.
 void chr4c_drawg_b4cts(uint gid)
 {
     TTE_BASE_VARS(tc, font);
     TTE_CHAR_VARS(font, gid, u32, srcD, srcL, charW, charH);
-    uint x= tc->cursorX, y= tc->cursorY;
-    uint srcP= font->cellH, dstP= tc->dst.pitch/4;
+    uint x= tc-&gt;cursorX, y= tc-&gt;cursorY;
+    uint srcP= font-&gt;cellH, dstP= tc-&gt;dst.pitch/4;
 
-    // (1) Prepare dst pointers and shifts.
-    u32 *dstD= (u32*)(tc->dst.data + (y+x/8*dstP)*4), *dstL;
+    // <span class="bold">(1)</span> Prepare dst pointers and shifts.
+    <span class="bold">u32 *dstD= (u32*)(tc-&gt;dst.data + (y+x/8*dstP)*4), *dstL</span>;
     x %= 8;
     uint lsl= 4*x, lsr= 32-4*x, right= x+charW;
 
     // Inner loop vars
     u32 amask= 0x11111111;
     u32 px, pxmask, raw;
-    u32 ink=   tc->cattr[TTE_INK];
-    u32 shade= tc->cattr[TTE_SHADOW];
+    u32 ink=   tc-&gt;cattr[TTE_INK];
+    <span class="bold">u32 shade= tc-&gt;cattr[TTE_SHADOW]</span>;
 
     uint iy, iw;
-    for(iw=0; iw<charW; iw += 8)    // Loop over strips
+    for(iw=0; iw&lt;charW; iw += 8)    // Loop over strips
     {
         srcL= srcD;     srcD += srcP;
         dstL= dstD;     dstD += dstP;
 
-        for(iy=0; iy<charH; iy++)   // Loop over scanlines
+        for(iy=0; iy&lt;charH; iy++)   // Loop over scanlines
         {
             raw= *srcL++;
 
-            // (3a) Prepare pixel mask
-            px    = (raw    & amask);
-            raw   = (raw>>1 & amask);
+            // <span class="bold">(3a)</span> Prepare pixel mask
+            px    = (raw    &amp; amask);
+            raw   = (raw&gt;&gt;1 &amp; amask);
             pxmask= px | raw;
             if(pxmask)
             {
-                px *= ink;          // (3b) Color ink pixels
-                px += raw*shade;    // (3c) Color shadow pixels
-                pxmask *= 15;       // (3d) Create mask
+                px *= ink;          // <span class="bold">(3b)</span> Color ink pixels
+                px += raw*shade;    // <span class="bold">(3c)</span> Color shadow pixels
+                pxmask *= 15;       // <span class="bold">(3d)</span> Create mask
 
-                // (4a) Write left tile:
-                dstL[0] = (dstL[0] &~ (pxmask<<lsl) ) | (px<<lsl);
+                // <span class="bold">(4a)</span> Write left tile:
+                dstL[0] = (dstL[0] &amp;~ (pxmask&lt;&lt;lsl) ) | (px&lt;&lt;lsl);
 
-                // (4b) Write right tile (if any)
-                if(right > 8)
-                    dstL[dstP]= (dstL[dstP] &~ (pxmask>>lsr) ) | (px>>lsr);
+                // <span class="bold">(4b)</span> Write right tile (if any)
+                if(right &gt; 8)
+                    dstL[dstP]= (dstL[dstP] &amp;~ (pxmask&gt;&gt;lsr) ) | (px&gt;&gt;lsr);
             }
             dstL++;
         }
     }
 }
-```
+</code></pre>
 
 ### Tips for fast tile rendering {#ssec-chr4-tips}
 
@@ -1534,16 +1531,15 @@ Step 2 loads the background map and the dialog box. Note that the dialog box is 
 
 The dialog text is drawn in step 3. The `ci` and `cs` tags set the ink and shadow color attributes, respectively. This makes the string “arrows” use colors 1 and 2 (well, 0xF1 and 0xF2), and so forth.
 
-```c {.proglist}
-//! Set up a rectangle for text, with the non-text layers darkened for contrast.
+<pre><code class="language-c hljs">//! Set up a rectangle for text, with the non-text layers darkened for contrast.
 void win_textbox(uint bgnr, int left, int top, int right, int bottom, uint bldy)
 {
-    REG_WIN0H= left<<8 | right;
-    REG_WIN0V=  top<<8 | bottom;
+    REG_WIN0H= left&lt;&lt;8 | right;
+    REG_WIN0V=  top&lt;&lt;8 | bottom;
     REG_WIN0CNT= WIN_ALL | WIN_BLD;
     REG_WINOUTCNT= WIN_ALL;
-
-    REG_BLDCNT= (BLD_ALL&~BIT(bgnr)) | BLD_BLACK;
+    
+    REG_BLDCNT= (BLD_ALL&amp;~BIT(bgnr)) | BLD_BLACK;
     REG_BLDY= bldy;
 
     REG_DISPCNT |= DCNT_WIN0;
@@ -1558,26 +1554,26 @@ void test_tte_chr4()
     irq_add(II_VBLANK, NULL);
     REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG2;
 
-    // (1) Init for text
+    // <span class="bold">(1)</span> Init for text
     tte_init_chr4c(
         0,                              // BG number.
         BG_CBB(0)|BG_SBB(10),           // BG control.
-        0xF000,                         // Screen-entry base
-        bytes2word(13,15,0,0),          // Color attributes.
+        <span class="bold">0xF000,                         // Screen-entry base
+        bytes2word(13,15,0,0),          // Color attributes.</span>
         CLR_BLACK,                      // Ink color
-        &verdana9_b4Font,               // Verdana 9, with shade.
+        &amp;verdana9_b4Font,               // Verdana 9, with shade.
         (fnDrawg)chr4c_drawg_b4cts_fast);    // b4cts renderer, asm version
     tte_init_con();                     // Initialize console I/O
 
-    // (2) Load graphics
+    // <span class="bold">(2)</span> Load graphics
     LZ77UnCompVram(dungeon01Map, se_mem[12]);
     LZ77UnCompVram(dungeon01Tiles, tile_mem[2]);
     LZ77UnCompVram(dungeon01Pal, pal_bg_mem);
 
-    GRIT_CPY(&tile_mem[0][16*30], dlgboxTiles);
+    GRIT_CPY(&amp;tile_mem[0][16*30], dlgboxTiles);
     GRIT_CPY(pal_bg_bank[15], dlgboxPal);
 
-    // (3) Create and print to a text box.
+    // <span class="bold">(3)</span> Create and print to a text box.
     win_textbox(0, 8, 160-32+4, 232, 160-4, 8);
     CSTR text=
         "#{P}Scroll with #{ci:1;cs:2}arrows#{ci:13;cs:15}, "
@@ -1588,7 +1584,7 @@ void test_tte_chr4()
     // Reset margins for coord-printing
     tte_set_margins(8, 8, 232, 20);
 
-    int x=128, y= 32, ey=8<<3;
+    int x=128, y= 32, ey=8&lt;&lt;3;
 
     REG_BG2HOFS= x;
     REG_BG2VOFS= y;
@@ -1601,24 +1597,24 @@ void test_tte_chr4()
     {
         VBlankIntrWait();
         key_poll();
-
-        // (4) Scroll and blend
+        
+        // <span class="bold">(4)</span> Scroll and blend
         x = clamp(x + key_tri_horz(), 0, 512+1-SCREEN_WIDTH);
         y = clamp(y + key_tri_vert(), 0, 512+1-SCREEN_HEIGHT);
         ey= clamp(ey+ key_tri_shoulder(), 0, 0x81);
 
         REG_BG2HOFS= x;
         REG_BG2VOFS= y;
-        REG_BLDY= ey>>3;
+        REG_BLDY= ey&gt;&gt;3;
 
         // (5) Erase and print new position.
         tte_printf("#{es;P}%d, %d", x, y);
-
+        
         if(key_hit(KEY_START))
-            break;
-    }
+            break;      
+    }   
 }
-```
+</code></pre>
 
 I'll close off this section with a word on the text box. If you look carefully, you'll see that it's semi-transparent. Or, to be precise, the text and the box itself are at normal intensity, but the background that it covers is darker than usual. Two things are necessary for this nice, little effect.
 
@@ -1643,8 +1639,7 @@ The code itself is starts with \``#{`' and ends with \``}`'. Each command consis
 
 Now, I could show you how to parse this, but the parser currently in use for this is, well, let's just say it's long and very ugly. Essentially, it's a massive switch-block (sometimes a _double_ switch-block) with stuff like this:
 
-```c {#cd-tte-cmd-default .proglist}
-char *tte_cmd_default(const char *str)
+<pre><code class="language-c hljs">char *tte_cmd_default(const char *str)
 {
     int ch, val;
     char *curr= (char*)str, *next;
@@ -1656,19 +1651,19 @@ char *tte_cmd_default(const char *str)
         ch= *curr;
         next= curr+1;
 
-        // (1) Check first character
+        // <span class="bold">(1)</span> Check first character
         switch(ch)
         {
-        // (2) --- Absolute Positions ---
+        // <span class="bold">(2)</span> --- Absolute Positions ---
         case 'X':
-            tc->cursorX= curr[1]==':'           // If there's an argument ...
-                ? strtol(curr+2, &next, 0)     // set cursor X to arg
-                : tc->marginLeft;               // else move to start of line.
+            tc-&gt;cursorX= curr[1]==':'           // If there's an argument ...
+                ? strtol(curr+2, &amp;next, 0)     // set cursor X to arg
+                : tc-&gt;marginLeft;               // else move to start of line.
             break;
 
-        ... more cases ...
+        // ... more cases ...
 
-        // (3) Find EOS/EOC/token and act on it
+        // <span class="bold">(3)</span> Find EOS/EOC/token and act on it
         curr= tte_cmd_next(next);
 
         if(curr[0] == '\0')
@@ -1677,7 +1672,7 @@ char *tte_cmd_default(const char *str)
             return curr+1;
     }
 }
-```
+</code></pre>
 
 Like I said, ugly; but it'll have to do for now. The incoming pointer points to the first character past the '`#{`'. The command tags are all single or double-lettered; the switch looks for a recognized letter and acts accordingly.
 
@@ -1688,7 +1683,7 @@ After handling a tag, it'll look for more tags, or exit if the end delimiter or 
 {\*@tbl:tte-cmd} shows the available tags. Note that they are case-sensitive and some items can do more than one thing, depending on the number of parameters.
 
 <div class="cblock">
-  <table id="tbl:tte-cmd" border=1 cellpadding=2 cellspacing=0 width= 70%>
+  <table id="tbl:tte-cmd" class="table-data" width= 70%>
     <caption align="bottom">
       <b>{*@tbl:tte-cmd}</b>: Available TTE formatting tags.
     </caption>
@@ -1814,8 +1809,7 @@ To put it in other way: you're in a cave; it's pitch black and there are [grues]
 
 Now that that's done, let's continue. The first step is creating our replacement writer. In TTE's case, this is `tte_con_write()`. It is almost identical to `tte_write()`, but has to fit in the format given by `devoptab_t.write_r`. It comes down to this:
 
-```c {#cd-tte-con-write .proglist}
-//! internal output routine used by printf.
+<pre><code class="language-c hljs">//! internal output routine used by printf.
 /*! \param r    Reentrancy parameter.
     \param fd   File handle (?).
     \param text Text buffer containing the string prepared by printf.
@@ -1825,33 +1819,34 @@ Now that that's done, let's continue. The first step is creating our replacement
 */
 int tte_con_write(struct _reent *r, int fd, const char *text, int len)
 {
-    // (1) Safety checks
-    if(!sConInitialized || !text || len<=0)
+    // <span class="bold">(1)</span> Safety checks
+    if(!sConInitialized || !text || len&lt;=0)
         return -1;
 
     int ch, gid, charW;
     const char *str= text, *end= text+len;
 
-    // (2) check for end of text
-    while( (ch= *str) != 0 && str < end)
+    // <span class="bold">(2)</span> check for end of text
+    while( (ch= *str) != 0 &amp;&amp; str &lt; end)
     {
         str++;
         switch(ch)
         {
 
-        // (3) --- VT100 sequence ( ESC[foo; ) ---
+        // <span class="bold">(3)</span> --- VT100 sequence ( ESC[foo; ) ---
         case 0x1B:
             if(str[0] == '[')
                 str += tte_cmd_vt100(str);
             break;
 
-        //# (4) Other character cases. See tte_write()
+        //# <span class="bold">(4)</span> Other character cases. See tte_write()
         }
     }
 
     return str - text;
 }
-```
+
+</code></pre>
 
 While I've added documentation for the arguments here, it's mostly based on guesswork. The `r` parameter contains [re-entrancy](https://en.wikipedia.org/wiki/Reentrancy_(computing)) information, useful if you have multiple threads. Since the GBA is a single-thread system, this should not concern us. I believe `fd` is a file handle of some sort, but since we're not writing to files this again does not concern us.
 
@@ -1948,7 +1943,7 @@ CSI n1;n2 ... letter
 _CSI_ here is the ASCII code for the <dfn>command sequence indicator</dfn>, which in this case is the escape character (27, 0x1B or 033) followed by '\['. The letter at the end denotes the kind of formatting code, and _n1_, _n2_ … are the formatting parameters. Wikipedia has a nice overview of the standard set [here](https://en.wikipedia.org/wiki/ANSI_escape_code) and there's another one here: [VT100 commands and control sequences](https://web.archive.org/web/20080813073220/http://local.wasp.uwa.edu.au/~pbourke/dataformats/vt100/). Note that not all of the codes are supported in the devkitPro libraries. The ones you'll encounter most are the following:
 
 <div class="lblock">
-  <table id="tbl:vt100" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:vt100" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:vt100}</b>: Common VT100 sequences
     </caption>
@@ -2018,7 +2013,7 @@ An intermediate between this is [UTF-8](https://en.wikipedia.org/wiki/UTF-8). Th
 UTF-8 is a nice way of having your cake and eating it too: you can still use normal characters for Latin characters, meaning it'll still work with ASCII programs, but you also have a method of representing bigger numbers.
 
 <div class="cblock">
-  <table id="tbl:utf8" border=1 cellpadding=4 cellspacing=0>
+  <table id="tbl:utf8" class="table-data">
     <caption align="bottom">
       {*@tbl:utf8}. UTF-8 to u32 conversion table.
     </caption>
@@ -2128,7 +2123,7 @@ It's always a good idea to see how fast the things you make are. This is particu
 > “Please note that we have added a consequence for failure. Any contact with the chamber floor will result in an 'unsatisfactory' mark on your official testing record followed by death. Good luck!”
 
 <div class="lblock">
-  <table id="tbl:tte-profile" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:tte-profile" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:tte-profile}</b>: Renderer times. Conditions: 194 chars, verdana 9, ROM code, default waits, -O2.
     </caption>

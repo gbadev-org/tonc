@@ -215,8 +215,7 @@ Sound is also a wave. In fact, it is a longitudinal pressure wave in matter and 
 While the full range between 20 Hz and 20 kHz is audible, only a discrete set of frequencies are used for music, which brings us to the notion of the <dfn>musical scale</dfn>. Central to these are <dfn>octaves</dfn>, representing a frequency doubling. Each octave is divided into a number of different notes; 12 in Western systems, ranging from A to G, although octave numbering starts at C for some reason. Octave 0 starts at the <dfn>central C</dfn>, which has a frequency of about 262 Hz (see also {@tbl:oct0}. And yes, I know there are only 7 letters between A and G, the other notes are flats and sharps that lie between these notes. The ‘12’ refers to the number of half-notes in an octave. The musical scale is **logarithmic**; each half-note being 2<sup>1/12</sup> apart. Well, almost anyway: for some reason, some notes don't *quite* fit in exactly.
 
 <div class="cblock">
-<table id="tbl:oct0"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:oct0" class="table-data">
 <caption align="bottom">
   <b>{*@tbl:oct0}</b>: notes &amp; frequencies of 
   octave 0
@@ -556,8 +555,7 @@ For graphics, you only had to deal with two registers (`REG_DISPCNT` and `REG_BG
 The register nomenclature seems particularly vexed when it comes to sound. There are basically two sets of names that you can find: one consisting of `REG_SOUNDxCNT` followed by `_L`, `_H` and `_X` in a rather haphazard manner; the other one uses a `REG_SGxy` and `REG_SGCNTy` structure (*x*=1, 2, 3 or 4 and *y*=0 or 1). I think the former is the newer version, which is funny because the older is more consistent. Oh well. In any case, I find neither of them very descriptive and keep forgetting which of the L/H/X or 0/1 versions does what, so I use a *third* set of names based on the ones found in [tepples'](https://pineight.com/gba/) pin8gba.h, which IMHO makes more sense than the other two.
 
 <div class="cblock">
-<table id="tbl:snd-names"
-  border=1 cellpadding=2 cellspacing=0>
+<table id="tbl:snd-names" class="table-data">
 <caption align="bottom">
   <b>{*@tbl:snd-names}</b>: Sound register nomenclature.
 </caption>
@@ -618,8 +616,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 `REG_SNDDMGCNT`, `REG_SNDDSCNT` and `REG_SNDSTAT` are the master sound controls; you have to set at least some bits on each of these to get anything to work.
 
 <div class="reg">
-<table class="reg" 
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg">
 <caption class="reg">
   REG_SNDDMGCNT (SOUNDCNT_L / SGCNT0_L ) @ 0400:0080h
 </caption>
@@ -641,7 +638,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
   <td class="rclr2">LV
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
@@ -682,8 +679,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 ```
 
 <div class="reg">
-<table class="reg" 
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg">
 <caption class="reg">
   REG_SNDDSCNT (SOUNDCNT_H / SGCNT0_H) @ 0400:0082h
 </caption>
@@ -705,7 +701,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
   <td class="rclr0">DMGV
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
@@ -758,8 +754,7 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
 Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, but also has some DMG sound bits for some reason. `REG_SNDSTAT` shows the status of the DMG channels *and* enables all sound. If you want to have any sound at all, you need to set bit 7 there.
 
 <div class="reg">
-<table class="reg" 
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg">
 <caption class="reg">
   REG_SNDSTAT (SOUNDCNT_X / SGCNT1) @ 0400:0084h
 </caption>
@@ -777,7 +772,7 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
   <td class="rclr1">1A
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
@@ -888,8 +883,7 @@ R(f) = 2048 - \frac{2^{17}}{f}
 Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/duty control and `REG_SNDxFREQ` for frequency control. Sound 1 also has sweep control in the form of `REG_SND1SWEEP`. Look in {@tbl:snd-names} for the traditional names; note that in traditional nomenclature the suffixes for control and frequency are *different* for channels 1 and 2, even though they have exactly the same function.
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1cnt" width=420
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl-reg-snd1cnt" width=420>
 <caption class="reg">
 <span class="nobr">
   REG_SND1CNT (SOUND1CNT_H / SG10_H) @ 0400:0062h</span>
@@ -907,7 +901,7 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
   <td class="rclr4">L
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -1007,8 +1001,7 @@ A_m = \frac{2}{\pi} \cdot \frac{sin({\pi}Dm)}{m}
 Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {@fig:sqrf}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1freq" width=420
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl-reg-snd1freq" width=420>
 <caption class="reg">
 <span class="nobr">
   REG_SND1FREQ (SOUND1CNT_X / SG11) @ 0400:0062h</span>
@@ -1026,7 +1019,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   <td class="rclr0">R
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -1061,8 +1054,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
 </div><br>
 
 <div class="reg">
-<table class="reg" id="tbl-reg-snd1sweep" width=420
-  border=1 frame=void cellpadding=4 cellspacing=0>
+<table class="table-reg" id="tbl-reg-snd1sweep" width=420>
 <caption class="reg">
   REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ 0400:0060h
 </caption>
@@ -1075,7 +1067,7 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   <td class="rclr0">N
 </table>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -1654,11 +1646,8 @@ I think I've done about enough theory for today, don't you dear reader?
 
 I'll take that as a yes. The demo in question demonstrates the use of the various macros of this chapter, most notably `SND_RATE`. It also shows how you can play a little song – and I use the term lightly – with the square wave generator. I hope you can recognize which one.
 
-<div id="cd-snddemo1">
-
-```c
-#include <stdio.h>
-#include <tonc.h>
+<pre><code class="language-c hljs">#include &lt;stdio.h&gt;
+#include &lt;tonc.h&gt;
 
 u8 txt_scrolly= 8;
 
@@ -1693,7 +1682,7 @@ void note_play(int note, int octave)
     REG_BG0VOFS= txt_scrolly-8;
 
     // Play the actual note
-    REG_SND1FREQ = SFREQ_RESET | SND_RATE(note, octave);
+    <span class="bold">REG_SND1FREQ = SFREQ_RESET | SND_RATE(note, octave);</span>
 }
 
 
@@ -1703,9 +1692,9 @@ void sos()
     const u8 lens[6]= { 1,1,4, 1,1,4 };
     const u8 notes[6]= { 0x02, 0x05, 0x12,  0x02, 0x05, 0x12 };
     int ii;
-    for(ii=0; ii<6; ii++)
+    for(ii=0; ii&lt;6; ii++)
     {
-        note_play(notes[ii]&15, notes[ii]>>4);
+        note_play(notes[ii]&15, notes[ii]&gt;&gt;4);
         VBlankIntrDelay(8*lens[ii]);
     }
 }
@@ -1724,16 +1713,16 @@ int main()
     int octave= 0;
 
     // turn sound on
-    REG_SNDSTAT= SSTAT_ENABLE;
+    <span class="bold">REG_SNDSTAT= SSTAT_ENABLE;</span>
     // snd1 on left/right ; both full volume
-    REG_SNDDMGCNT = SDMG_BUILD_LR(SDMG_SQR1, 7);
+    <span class="bold">REG_SNDDMGCNT = SDMG_BUILD_LR(SDMG_SQR1, 7);</span>
     // DMG ratio to 100%
-    REG_SNDDSCNT= SDS_DMG100;
+    <span class="bold">REG_SNDDSCNT= SDS_DMG100;</span>
 
     // no sweep
-    REG_SND1SWEEP= SSW_OFF;
+    <span class="bold">REG_SND1SWEEP= SSW_OFF;</span>
     // envelope: vol=12, decay, max step time (7) ; 50% duty
-    REG_SND1CNT= SSQR_ENV_BUILD(12, 0, 7) | SSQR_DUTY1_2;
+    <span class="bold">REG_SND1CNT= SSQR_ENV_BUILD(12, 0, 7) | SSQR_DUTY1_2;</span>
     REG_SND1FREQ= 0;
 
     sos();
@@ -1769,26 +1758,29 @@ int main()
     }
     return 0;
 }
-```
-</div>
+</code></pre>
 
 The bolded code in `main()` initializes the sound register; nothing fancy, but it has to be done before you hear anything at all. It is important to start with `REG_SNDSTAT` bit 7 (`SSTAT_ENABLE`), i.e., the master sound enable. Without it, you cannot even access the other registers. Setting volume to something non-zero is a good idea too, of course. Then we turn off the sweep function and set sound 1 to use a fading envelope with a 50% duty. And that's where the fun starts.
 
 I'll explain what `sos()` in a little while, first something about the controls of the demo. You can play notes with the D-pad and A (hmm, there's something familiar about that arrangement). The octave *c* you're working in can be changed with L and R; the background color changes with it. B plays `sos()` again.
 
 <div class="lblock">
-
-- A Button, Control Pad  
-  Play a note
-    - Up: Play D (next octave)
-    - Left: Play B
-    - Right: Play A
-    - Down: Play F
-    - A Button: Play D
-- L and R Buttons  
-  Decrease / Increase current octave (\[-2, 5\], wraps around)
-- B Button  
-  Play a little tune.
+  <table>
+    <tbody valign="top">
+      <tr>
+        <th>A / D-pad <td>Play a note
+          <tr><td><td>&uarr; : D (next octave)
+          <tr><td><td>&larr; : B 
+          <tr><td><td>&rarr; : A 
+          <tr><td><td>&darr; : F 
+          <tr><td><td> A     : D 
+      <tr>
+        <th>L / R <td> Decrease / Increase current octave ([-2, 5], 
+        wraps around)
+      <tr>
+        <th> B    <td>Play a little tune.
+    </tbody>
+  </table>
 </div>
 
 The D-pad and A select a note to play, which is handled by `note_play()`. The bolded line there plays the actual note, the rest is extra stuff that writes the note just played to the screen and scrolls along so you can see the history of what's been played. The code for this is kinda ugly, but is not exactly central to the story so that's fine.

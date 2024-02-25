@@ -32,7 +32,7 @@ Every kind of transfer routine needs 3 things: a source, a destination and the a
 The use of the source and destination registers should be obvious. The control register needs some explaining. Although the `REG_DMAxCNT` registers themselves are 32bits, they are often split into two separate registers: one for the count, and one for the actual control bits.
 
 <div class="reg">
-<table class="reg reg-huge" id="tbl:reg-dmaxcnt"
+<table class="table-reg reg-huge" id="tbl:reg-dmaxcnt"
   border=1 frame=void cellPadding=4 cellSpacing=0>
 <caption class="reg">
   REG_DMAxCNT @ 0400:00B8+12<i>x</i>
@@ -55,7 +55,7 @@ The use of the source and destination registers should be obvious. The control r
 </table>
 <br>
 
-<table>
+<table class="table-reg-vert">
   <col class="bits" width=56>
   <col class="bf" width="8%">
   <col class="def" width="12%">
@@ -267,7 +267,7 @@ It doesn't really matter what you use actually, as long as you can find the edge
 <br>  
 The end result will show something like {@fig:dma-demo}. It's the Brinstar background (again) inside the window, and a striped bg outside. The text indicates the position and radius of the window, which can be moved with the D-pad and scaled by A and B.
 
-```c
+<pre><code class="language-c hljs">
 #include <stdio.h>
 #include <tonc.h>
 
@@ -278,7 +278,7 @@ The end result will show something like {@fig:dma-demo}. It's the Brinstar backg
 
 
 // The source array
-u16 g_winh[SCREEN_HEIGHT+1];
+<span class="bold">u16 g_winh[SCREEN_HEIGHT+1];</span>
 
 //! Create an array of horizontal offsets for a circular window.
 /*! The offsets are to be copied to REG_WINxH each HBlank, either 
@@ -330,7 +330,7 @@ void win_circle(u16 winh[], int x0, int y0, int rr)
 void init_main()
 {
     // Init BG 2 (basic bg)
-    dma3_cpy(pal_bg_mem, brinPal, brinPalLen);
+    <span class="bold">dma3_cpy(pal_bg_mem, brinPal, brinPalLen);</span>
     dma3_cpy(tile_mem[0], brinTiles, brinTilesLen);
     dma3_cpy(se_mem[30], brinMap, brinMapLen);
 
@@ -383,17 +383,17 @@ int main()
             rr= 0;
 
         // Fill circle array
-        win_circle(g_winh, x0, y0, rr);
+        <span class="bold">win_circle(g_winh, x0, y0, rr);</span>
     
         // Init win-circle HDMA
-        DMA_TRANSFER(&REG_WIN0H, &g_winh[1], 1, 3, DMA_HDMA);
+        <span class="bold">DMA_TRANSFER(&REG_WIN0H, &g_winh[1], 1, 3, DMA_HDMA);</span>
 
         tte_printf("#{es;P}(%d,%d) | %d", x0, y0, rr);
     }
     
     return 0;
 } 
-```
+</code></pre>
 
 The initialization function is mostly just fluff. Mostly, because there is one thing of interest: the calls to `dma_cpy` to copy the Brinstar palette, tiles and map. Aside from that, nothing to see here.
 

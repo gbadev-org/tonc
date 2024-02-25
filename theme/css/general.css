@@ -323,6 +323,10 @@ div.nhcare {
   text-decoration: underline wavy;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 /* --- picture+caption frames --- */
 div.cpt, div.cpt_fl, div.cpt_fr {
   margin: .5em;  padding: 4px;
@@ -367,11 +371,13 @@ table, table th {
 }
 
 /* Gotta make register diagram table cells smaller so they fit on the page. */
-table.reg th, table.reg td {
+.table-reg th,
+.table-reg td {
   padding: 3px 13px;
 }
 /* But some are too big even still. */
-table.reg-huge th, table.reg-huge td {
+table.reg-huge th,
+table.reg-huge td {
   padding: 3px 7px;
 }
 
@@ -380,7 +386,7 @@ table.reg-huge th, table.reg-huge td {
 td.fill, th.fill { width: 16px; }
 
 /* --- reg table --- */
-table.reg {
+.table-reg {
   font: var(--mono-font-size) var(--mono-font);
   page-break-inside: avoid;
 }
@@ -425,8 +431,58 @@ font[color="blue"] { color: #43a8e6; }
 font[color="green"] { color: #45e774; }
 font[color="red"] { color: #ef0d4b; }
 
+/* Special case table overrides (in Text systems) */
+#fig\:img-fontpack, #tbl\:bupshade {
 
+  & table {
+    width: 100%;
+    font-size: 90%;
+    page-break-inside: avoid;
+  }
 
+  & span.rarr {
+    font-size:200%;
+    position: relative;
+    top: 0.26em;
+  }
+
+  & td, th {
+    padding: 1px 0;
+  }
+
+  & tr td, tr th {
+    background-color: var(--table-alternate-bg);
+    border: none;
+    text-align: center;
+  }
+
+  & .table-reg th, .table-reg td {
+    padding: 1px 3px;
+    font-family: 'SourceSans3';
+  }
+
+  & .bdrT, .bdrTL, .bdrTR, .bdrLL, .bdrRR {
+    border-top: 1px var(--fg) solid;
+  }
+
+  & .bdrL, .bdrTL, .bdrBL, .bdrLL {
+    border-left: 1px var(--fg) solid;
+  }
+  & .bdrB, .bdrBL, .bdrBR, .bdrLL, .bdrRR {
+    border-bottom: 1px var(--fg) solid;
+  }
+
+  & .bdrR, .bdrTR, .bdrBR, .bdrRR {
+    border-right: 1px var(--fg) solid;
+  }
+}
+
+#tbl\:bupshade {
+  width: 300px;
+  margin: 0px 10px;
+}
+
+/* --- */
 
 .menu-title {
   font-weight: 400;

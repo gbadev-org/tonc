@@ -21,7 +21,7 @@ Here's a list containing the names of each BIOS call. I am not going to say what
 ### Full list {#ssec-funs-list}
 
 <center>
-<table width="70%">
+<table class="center" width="70%">
 <col span=5 align="left">
 <tr><th>id		<th width="30%">Name  <th width="10%">	<th>id		<th>Name
 <tr><td>0x00	<td>SoftReset		<td><td>0x08	<td>Sqrt
@@ -190,13 +190,12 @@ The source data is kept in `ObjAffineSource` (i.e., `AFF_SRC`) structs. Now, as 
 
 Two other things need to be said here as well. First, once again we have a bit of a misnomer: ObjAffineSet doesn't really have much to do with objects per se, but can be used in that capacity by setting `r3` to 8 instead of 2. The second is that the routine can also be used to set up multiple arrays via `r2`. However, *be careful* when you do this with devkitPro 19. `ObjAffineSet()` expects its source structs to be [word-aligned](bitmaps.html#ssec-data-align), which they won't be unless you add the alignment attributes yourself.
 
-```c
-// Source struct. Note the alignment!
+<pre><code class="language-c hljs">// Source struct. Note the alignment!
 typedef struct AFF_SRC
 {
     s16 sx, sy;
     u16 alpha;
-} ALIGN4 AFF_SRC, ObjAffineSource;
+} <span class="bold">ALIGN4</span> AFF_SRC, ObjAffineSource;
 
 // Dst struct for background matrices
 typedef struct Aff_DST
@@ -209,12 +208,12 @@ typedef struct Aff_DST
 // the address of pa, not the start of the struct
 typedef struct OBJ_AFFINE
 {
-    u16 fill0[3];    s16 pa;
+    u16 fill0[3];    <span class="bold">s16 pa</span>;
     u16 fill1[3];    s16 pb;
     u16 fill2[3];    s16 pc;
     u16 fill3[3];    s16 pd;
 } ALIGN4 OBJ_AFFINE;
-```
+</code></pre>
 
 ## Using BIOS calls {#sec-usage}
 

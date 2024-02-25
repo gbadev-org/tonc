@@ -15,19 +15,19 @@ The theory part of the chapter is going to be very math-heavy, as 3D theory alwa
 This chapter touches on almost all of the topics covered so far. It uses [affine objects](affobj.html), backgrounds (both [regular](regbg.html) and [affine](affbg.html)), [interrupts](interrupts.html), [color effects](gfx.html#blend) and a few more. If your understanding of any of these is lacking, you could be in for a rough time here.
 
 <div class="cblock">
-  <table class="bdr" id="fig:img-m7-ex" cellpadding=2 cellspacing=0>
-    <tbody align="center">
-      <tr>
-        <td><img src="img/mode7/m7_ex_00.png" alt="full mode 7"></td>
-        <td><img src="img/mode7/m7_ex_01.png" alt="full mode 7"></td>
-      </tr>
-      <tr>
-        <td colspan=2>
-          <b>*@fig:img-m7-ex</b>: <tt>m7_ex</tt>; with horizon, sprites, variable pitch angle and distance fogging.
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <table id="fig:img-m7-ex">
+      <tbody align="center">
+        <tr>
+          <td><img src="img/mode7/m7_ex_00.png" alt="full mode 7"></td>
+          <td><img src="img/mode7/m7_ex_01.png" alt="full mode 7"></td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <b>*@fig:img-m7-ex</b>: <tt>m7_ex</tt>; with horizon, sprites, variable pitch angle and distance fogging.
+          </td>
+        </tr>
+      </tbody>
+    </table>
 </div>
 
 What we're going to try to do is re-create a scene from the SNES Mario Kart (see {@fig:img-m7-ex}; apologies to Nintendo for using the graphics, but I don't have a lot of options here <kbd>:\\</kbd>). This is just a freeze-frame of the game, not actual game play is involved, but this should present a nice target to aim for. The code is distributed over a number of files: `mode7.c` for the simple mode 7 functions and `mode7.iwram.c` for the less simple mode 7 functions and interrupt routines. The code of demo-specific code can be found in `m7_ex.c`, which does the set-up, interaction and main loop. The basic controls are as follows:
@@ -2073,7 +2073,7 @@ The first thing to do would be a distance check: if the object is too far away, 
 It's actually easier to do the view volume checks in 3D camera space instead of 2D projection space. The object rectangle can easily be calculated from **x**<sub>c</sub> = **C**<sup>T</sup>·**r**, the anchor **p**<sub>0</sub> and the size **s**. The viewport will have to be scaled by λ, and this gives us the following rests to perform:
 
 <div class="lblock">
-  <table id="tbl:culltest" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:culltest" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:culltest}</b>: Object rect and culling tests in camera space. Note the signs!
     </caption>
@@ -3052,7 +3052,7 @@ In my case, I construct vector **r** in `input()`, based on various buttons. At 
 The ‘level’ (that is, level to the ground) is probably the most common for camera systems for ground-based objects, though using the local system might make sense for flying objects. Experiment with them and see what you like.
 
 <div class="cblock">
-  <table id="tbl:motion" border=1 cellpadding=2 cellspacing=0>
+  <table id="tbl:motion" class="table-data">
     <caption align="bottom">
       <b>{*@tbl:motion}</b>: Movement methods and their associated transformations to world-space. New position of an object is given by <b>x</b><sub>w</sub> += <b>v</b><sub>w</sub>.
     </caption>
