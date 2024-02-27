@@ -6,7 +6,7 @@ You are reading a new, revamped version of it, powered by mdbook and now maintai
 
 :::warning Work In Progress notice
 
-We're currently in the process of finishing the port, so some sections may be incomplete, broken or unavailable. The original version can be found [here](https://www.coranac.com/tonc/text/).
+We recently finished the porting of this book. Improvements ongoing, if you spot any problems please feel free to ask for help or get involved!
 
 :::
 
