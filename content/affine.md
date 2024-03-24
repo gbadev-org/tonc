@@ -81,7 +81,7 @@ It's true. Pretty much every document I've seen that deals with this subject is 
 
 ### General 2D texture mapping
 
-What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:metroid_texture}a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>s</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
+What the GBA does to get sprites and tiled backgrounds on screen is very much like texture mapping. So forget about the GBA right now and look at how texture mapping is done. In {@fig:metroid_texture}a, we see a metroid texture. For convenience I am using the standard Cartesian 2D coordinate system (y-axis points up) and have normalised the texture, which means that the right and top side of the texture correspond precisely with the unit-vectors <math><msub><mi>e</mi><mi>x</mi></msub></math> and <math><msub><mi>e</mi><mi>y</mi></msub></math> (which are of length 1). The texture mapping brings **p** (in texture space) to a point **q** (in screen space). The actual mapping is done by a 2×2 matrix **A**:
 
 <math class="block">
     <mi>𝗾</mi>
@@ -104,7 +104,7 @@ So how do you find **A**? Well, that's actually not that hard. The matrix is for
                 <mtd><msub><mi>v</mi><mi>x</mi></msub></mtd>
             </mtr>
             <mtr>
-                <mtd><msub><mi>u</mi><mi>x</mi></msub></mtd>
+                <mtd><msub><mi>u</mi><mi>y</mi></msub></mtd>
                 <mtd><msub><mi>v</mi><mi>y</mi></msub></mtd>
             </mtr>
         </mtable>
