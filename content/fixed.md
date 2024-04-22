@@ -372,7 +372,7 @@ This is actually a subset of the scaling problems of multiplication and division
 
 One way of covering for the extra scale is not to correct after the multiplication, but before it; though you will lose some accuracy in the process. A good compromise would be to right-shift both operands by half the full shift.
 
-Fixed divisions have a similar problem called underflow. As a simple example of this, consider what happens in integers division *a*/*b* if *b*\>*a*. That's right: the result would be zero, even though a fraction would be what you would like. To remedy this behaviour, the numerator is scaled up by *M* first (which may or may not lead to an overflow problem <span class="kbd">:P</span>).
+Fixed divisions have a similar problem called underflow. As a simple example of this, consider what happens in integers division *a*/*b* if *b*\>*a*. That's right: the result would be zero, even though a fraction would be what you would like. To remedy this behaviour, the numerator is scaled up by *M* first (which may or may not lead to an overflow problem <kbd>:P</kbd>).
 
 As you can see, the principles of fixed-point math aren't that difficult or magical. But you do have to keep your head: a missed or misplaced shift and the whole thing crumbles. If you're working on a new algorithm, consider doing it with floats first (preferably on a PC), and convert to fixed-point only when you're sure the algorithm itself works.
 

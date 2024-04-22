@@ -1456,7 +1456,7 @@ This is the simplest case of an inverse. And, yup, that's a determinant as the d
 
 ### Algebraic properties of matrices {#ssec-mat-props}
 
-**A** and **B** are M×N matrices; **C** is N×P; **D** and **E** are N×N. **e**~i~ are the column vectors of **E**. _c_ is a scalar.
+**A** and **B** are M×N matrices; **C** is N×P; **D** and **E** are N×N. **e**<sub>i</sub> are the column vectors of **E**. _c_ is a scalar.
 
 <div class="lblock">
 <table cellpadding=2 cellspacing=0>

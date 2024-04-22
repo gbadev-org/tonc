@@ -630,7 +630,7 @@ INLINE s32 lu_cos(uint theta)
 {   return sin_lut[((theta>>7)+128)&0x1FF];     }
 ```
 
-Now, note the angle range: 0-10000h. Remember you don't *have* to use 360 degrees for a circle; in fact, on computers it's better to divide the circle in a power of two instead. In this case, the angle is in 2^16^ parts for compatibility with BIOS functions, which is brought down to a 512 range inside the look-up functions.
+Now, note the angle range: 0-10000h. Remember you don't *have* to use 360 degrees for a circle; in fact, on computers it's better to divide the circle in a power of two instead. In this case, the angle is in 2<sup>16</sup> parts for compatibility with BIOS functions, which is brought down to a 512 range inside the look-up functions.
 
 ### Initialization
 
