@@ -358,7 +358,7 @@ And yes, the minus sign is correct for a counter-clockwise rotation (**R** is de
       </math>
 </table>
 
-that is, <span class="underline">one</span> translation and <span class="underline">one</span> transformation. We have to combine the pre- and post-translations to make it work. We've seen this before in eq 4 in the [affine background page](affbg.html#sec-aff-ofs), only with different names. Anyway, what you need is:
+that is, <u>one</u> translation and <u>one</u> transformation. We have to combine the pre- and post-translations to make it work. We've seen this before in eq 4 in the [affine background page](affbg.html#sec-aff-ofs), only with different names. Anyway, what you need is:
 
 <table id="eq-aff-ofs">
 <tr>

@@ -67,7 +67,7 @@ I think that'll be all then.
 
 ### Feb 2007 (v1.3b)
 
-As every programmer knows, you're supposed to write down the changes you make while making them. As every programmer also knows, this has a tendency to be forgotten <span class="kbd">\^\_\^;;</span>. I probably missed a few things here.
+As every programmer knows, you're supposed to write down the changes you make while making them. As every programmer also knows, this has a tendency to be forgotten <kbd>\^\_\^;;</kbd>. I probably missed a few things here.
 
 Text:
 
@@ -106,7 +106,7 @@ Code:
 
 - ![new](./img/log/bul_new.png) libtonc: yet another Great Renaming. Among other things: The leading underscore for zero-#defines are gone. I thought it was a good way if guarding against potential unsafe operations, but they just look too weird to use. And there was much rejoicing. Some macros have lots their `_ON` prefix when it's obvious that that's what they do. OAM structs are now `OBJ_ATTR` and `OBJ_AFFINE` and supporting functions are now prefixed `obj_` and `obj_aff_`. `BGAFF_EX` is now `BG_AFFINE` and used in most affine BG functions. A complete list can be found in `tonc_legacy.h`, which you can #include to keep compatibility with older code.
 
-- ![new](./img/log/bul_new.png) projects: the structure of the projects hierarchy has been altered. The demos have been categorized as basic, extended or advanced, which correspond with the tonc-text parts. Basic demos are simpler, with simple makefiles. They are completely self-sufficient, which should help learning the ropes. The extended demos have more complete makefiles and make use of libtonc. The advanced demos have devkitPro-like makefiles. As much as I'd like to, the actual DKP templates don't quite suit my purposes (sorry, Dave <span class="kbd">:P</span>) so I rolled my own. The advanced demos also make use of assembly files for data.
+- ![new](./img/log/bul_new.png) projects: the structure of the projects hierarchy has been altered. The demos have been categorized as basic, extended or advanced, which correspond with the tonc-text parts. Basic demos are simpler, with simple makefiles. They are completely self-sufficient, which should help learning the ropes. The extended demos have more complete makefiles and make use of libtonc. The advanced demos have devkitPro-like makefiles. As much as I'd like to, the actual DKP templates don't quite suit my purposes (sorry, Dave <kbd>:P</kbd>) so I rolled my own. The advanced demos also make use of assembly files for data.
 
   The project folders also contain `.pnproj` files, which can be opened and run from Programmer's Notepad.
 
@@ -117,7 +117,7 @@ Code:
 ### Jul 23, 2006 (v1.2.4)
 
 - ![new](./img/log/bul_new.png) Added a rather long chapter on [ARM/Thumb assembly](asm.html). This is still a draft version, though. Most of the content is there, but I still need to reshuffle sections and spell/grammer check the whole thing.
-- And yet more spell fixes <span class="kbd">\>\_\<</span>.
+- And yet more spell fixes <kbd>\>\_\<</kbd>.
 
 ### Jun 3, 2006 (v1.2.3)
 
@@ -178,10 +178,10 @@ More non-final updates. Quite a lot actually.
 
 ### Jan 27, 2006 (v1.1)
 
-Heh, so that wasn't not the final update after all <span class="kbd">:P</span>.
+Heh, so that wasn't not the final update after all <kbd>:P</kbd>.
 
 - Added a little note to [setup](setup.html) on how to get rid of them useless directories that MSVC 6.0 insists on creating all the time.
-- ![fix](./img/log/bul_excl.png) Fixed devkitARM URL and revision. (don't know why I bother with that, though, as there will be a new version the second I post this. Gawddammit, Dave, quit it! <span class="kbd">\>\_\<</span>)
+- ![fix](./img/log/bul_excl.png) Fixed devkitARM URL and revision. (don't know why I bother with that, though, as there will be a new version the second I post this. Gawddammit, Dave, quit it! <kbd>\>\_\<</kbd>)
 - ![upgrade](./img/log/bul_upgr.png) More code in the text. At least for the earlier pages.
 - Two new chapters: one on [Text system fundamentals](text.html) and [producing beeps](sndsqr.html). The latter isn't quite finished yet, but should be enough to get you going. There are 5 new demos that go with these: 4 for text, one for sound.
 - ![swap](./img/log/bul_swap.png) More name changes. This time in demo-names only, though, so don't worry there.
@@ -243,13 +243,13 @@ I'm sorry if any of these changes causes you any inconvenience, but I think it's
 - ![fix](./img/log/bul_excl.png) Fixed a window control macros (forgot some shifts). Should work properly now. Should.
 - Added `geom.h|.c` to the library, as I intend to use points and rectangles more often. Also added `ABS`, `SGN` and `SWAP` macros.
 - All multiboot demos (i.e., all of them) now have the extension `mb.gba` to indicate them as such.
-- Renamed `key_pressed()` to `key_hit()`, which should cause less confusion about what the function actually does (thank's\^H\^Hs for the name Dark Angel (see? The apostrophe occurs almost automatically <span class="kbd">:(</span> ).
+- Renamed `key_pressed()` to `key_hit()`, which should cause less confusion about what the function actually does (thank's\^H\^Hs for the name Dark Angel (see? The apostrophe occurs almost automatically <kbd>:(</kbd> ).
 
 I'm working on a nice text system right now. If anyone has any requests I'll see what I can do.
 
 ### June 27, 2004 (v0.99.3)
 
-Ahhh, home at last, where I have a proper computer and Kink-FM blasting through my stereo, excccellent! <span class="kbd">=)</span>
+Ahhh, home at last, where I have a proper computer and Kink-FM blasting through my stereo, excccellent! <kbd>=)</kbd>
 
 - ![upgrade](./img/log/bul_upgr.png) Added `-Map` and `-Wl` command-line options to the [flags list](makefile.html#sec-flags).
 - ![swap](./img/log/bul_swap.png) Moved the graphics data that is only used once into the demo-folder where they are used; the gfx directory now only has shared graphics in it.
@@ -261,7 +261,7 @@ Ahhh, home at last, where I have a proper computer and Kink-FM blasting through 
 
 - ![upgrade](./img/log/bul_upgr.png) I made a lot of changes to `mode7d`; all the real mode 7 code is now in separate files so using it in other projects is easier now. Though mode7ex.htm still needs a lot of work, you can find most of the text in draft-form in [m7theory.zip](../files/m7theory.zip). Yes, it's a Word document; yes, I know that sucks; yes, I will convert it to html when I the text is stable and understandable (please tell me what I need to change in this respect); and yes, I will do this conversion manually, since Word should be allowed to approach HTML to within 500 yards. Perhaps more.
 - ![fix](./img/log/bul_excl.png) Made some minor fixes to the [matrix](matrix.html) page. Silly me, I got the cross-product definition all wrong.
-- ![upgrade](./img/log/bul_upgr.png) Added info on `REG_P1CNT` to the [keypad](keys.html) page. Yet another thing which only this site covers <span class="kbd">:)</span>.
+- ![upgrade](./img/log/bul_upgr.png) Added info on `REG_P1CNT` to the [keypad](keys.html) page. Yet another thing which only this site covers <kbd>:)</kbd>.
 
 Devving on a P2-300 with 24MB RAM: VBA runs at 50% (and 23% for mode7d) and minimizing a window takes a few seconds. Man, this sucks.
 

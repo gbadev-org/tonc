@@ -53,7 +53,7 @@ Be sure that the devkitARM and msys bin directories are in the system path, or c
 
 I never really knew about PN until it started coming with devkitARM, but it looks really good. I haven't used it that much myself, but only because I am still content with context. That said, PN is probably the better editor, and as it may come with the toolchain, chances are you'll have it already.
 
-For all its benefits, I should say this though: by default, it seems to ignore the desktop color scheme. This may not sound like a big deal, but because the background color defaulted to a hard white, I literally couldn't even look at the thing for more than a minute. When I first tried to fix this in the options, it seemed that you could only change this on a type-by-type basis instead of globally. Took me a while to figure out I'd been looking in the wrong place <span class="kbd">:P</span> all along. Look under Tools-\>Options-\>Styles, not under Tools-\>Options-\>Schemes.
+For all its benefits, I should say this though: by default, it seems to ignore the desktop color scheme. This may not sound like a big deal, but because the background color defaulted to a hard white, I literally couldn't even look at the thing for more than a minute. When I first tried to fix this in the options, it seemed that you could only change this on a type-by-type basis instead of globally. Took me a while to figure out I'd been looking in the wrong place <kbd>:P</kbd> all along. Look under Tools-\>Options-\>Styles, not under Tools-\>Options-\>Schemes.
 
 To add commands for makefiles, go to Tools-\>Options-\>Tools (@fig:pn-make), and select the ‘Make’. Then add 2 commands for ‘make build’ and ‘make clean’
 

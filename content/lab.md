@@ -98,9 +98,9 @@ void foo()
 
 Note that I intend the routine to be in IWRAM (and compiled as ARM code) because it's so **very f%#\$@\*g slow**! Or perhaps I shouldn't say slow, just costly.
 
-Think of how a basic sort works. You have *N* elements to sort. In principle, each of these has to be checked with every other element, so that the routine's speed is proportional to *N*^2^, usually expressed as *O*(*N*^2^), where the *O* stands for order of magnitude. For sorting, *O*(*N*^2^) is bad. For example, when *N*=128, you would be looking at 16k checks. Times the number of cycles that the actual checks and updates would take. Not pleasant.
+Think of how a basic sort works. You have *N* elements to sort. In principle, each of these has to be checked with every other element, so that the routine's speed is proportional to *N*<sup>2</sup>, usually expressed as *O*(*N*<sup>2</sup>), where the *O* stands for order of magnitude. For sorting, *O*(*N*<sup>2</sup>) is bad. For example, when *N*=128, you would be looking at 16k checks. Times the number of cycles that the actual checks and updates would take. Not pleasant.
 
-Fortunately, there are faster methods, you'd want at least an *O*(*N*·log~2~(*N*)) for sorting algorithms, and as you can see from the aforementioned wiki, there are plenty of those and shellsort is one of them. Unfortunately, even this can be quite expensive. Again, with *N*=128 this is still about 900, and you can be sure the multiplier can be high, as in 80+. With ARM+IWRAM, I can manage to bring that down to 20-30, and a simple exercise in assembly gives me an acceptable 13 to 22 × *N*·log~2~(*N*).
+Fortunately, there are faster methods, you'd want at least an *O*(*N*·log<sub>2</sub>(*N*)) for sorting algorithms, and as you can see from the aforementioned wiki, there are plenty of those and shellsort is one of them. Unfortunately, even this can be quite expensive. Again, with *N*=128 this is still about 900, and you can be sure the multiplier can be high, as in 80+. With ARM+IWRAM, I can manage to bring that down to 20-30, and a simple exercise in assembly gives me an acceptable 13 to 22 × *N*·log<sub>2</sub>(*N*).
 
 :::note The Big O Notation
 
