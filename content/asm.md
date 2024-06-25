@@ -1297,7 +1297,7 @@ Anyway, loops in assembly. Making a loop is the easiest thing in the world: just
     ldr     r3, [r1, r2, lsl #2]
     str     r3, [r0, r2, lsl #2]
     add     r2, r2, #1
-    cmp     r2, r2, #16
+    cmp     r2, #16
     blt .LabelF
 
 @ --- Decrementing while-loop ---
