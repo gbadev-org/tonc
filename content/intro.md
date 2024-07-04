@@ -17,7 +17,7 @@ Previously these were all distributed as zip files, but times have changed and n
 
 ### Tonc text {#ssec-org-text}
 
-The text section, which you're reading now, covers the principles of GBA programming in detail. The focus here is not so much on how to get something done, but how things actually *work*, and why it's done the way it's done. After that the *how* often comes naturally. Every chapter has one of more demonstrations of the covered theory, and a brief discussion of the demo itself.
+The text section, which you're reading now, covers the principles of GBA programming in detail. The focus here is not so much on how to get something done, but how things actually *work*, and why it's done the way it's done. After that the *how* often comes naturally. Every chapter has one or more demonstrations of the covered theory, and a brief discussion of the demo itself.
 
 Please, do not make the mistake of only reading the demo discussion: to properly understand how things work you need to read the text in full. While there are optional parts, and whole pages of boring text that seem to have little to do with actual GBA coding, they are there for a reason, usually there's extra conceptual information or gotchas.
 
