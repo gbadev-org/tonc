@@ -315,7 +315,7 @@ For some reason, there are a lot of bad programming practices among the GBA deve
 
 -   **Don't believe everything you read**. Bottom line: people make mistakes. Sometimes, the information that is given is incorrect or incomplete. Sometimes the code doesn't work; sometimes it does, but it's inefficient or inconsistent or just contains practices that will come back to bite you later on. This is true for most (if not all) older tutorials. Don't automatically assume you're doing it wrong: there is a chance it's the source material.
 
-    Unfortunately, if you're new to programming you might not recognize the bad and adopt the standards exhibited by some sources. *Do not learn C programming from GBA tutorials!* I'd almost extent that suggestion to on-line tutorials in general, especially short ones. Books are usually more accurate and provide a better insight into the material. (But again, [not always.](http://www.coranac.com/documents/taptngba/))
+    Unfortunately, if you're new to programming you might not recognize the bad and adopt the standards exhibited by some sources. *Do not learn C programming from GBA tutorials!* I'd almost extend that suggestion to on-line tutorials in general, especially short ones. Books are usually more accurate and provide a better insight into the material. (But again, [not always.](http://www.coranac.com/documents/taptngba/))
 
 -   **RTFAQ / RTFR**. Read the [gbadev forum FAQ](https://gbadev.net/forum-archive/thread/14/418.html). Should go without saying. It covers a lot of common problems. Additionally, read the fuckin reference, by which I mean [GBATEK](https://problemkaputt.de/gbatek.htm), which covers just about everything.
 
