@@ -153,7 +153,7 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
   <td>DCNT_BLANK
   <td>Force a screen blank.
 <tr class="bg0">
-  <td>8-B  <td class="rclr1">BG0-BG3, Obj
+  <td>8-C  <td class="rclr1">BG0-BG3, Obj
   <td>DCNT_BGx, DCNT_OBJ. <i>DCNT_LAYER#</i>
   <td>Enables rendering of the corresponding background and sprites.
 <tr class="bg1">
