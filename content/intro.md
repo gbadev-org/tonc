@@ -149,7 +149,7 @@ Every time I introduce a register I will give an overview of the bits like this:
 </table>
 </div>
 
-The table lists the register's name (`REG_DISPSTAT`, its address (0400:0000h) and the individual bits or bitfields. Sometimes, bits or entire registers are read- or write-only. **Read-only** is indicated with a red overbar (as used here). **Write-only** uses a blue underbar. After it will be a list that describes the various bits, and also gives the #define or #defines I use for that bit:
+The table lists the register's name (`REG_DISPSTAT`, its address (0400:0004h) and the individual bits or bitfields. Sometimes, bits or entire registers are read- or write-only. **Read-only** is indicated with a red overbar (as used here). **Write-only** uses a blue underbar. After it will be a list that describes the various bits, and also gives the #define or #defines I use for that bit:
 
 <div class="reg">
 <table class="table-reg-vert">
