@@ -195,7 +195,7 @@ For the IO registers I'm using the official names, which are recognized by all p
 For those who aren't as familiar with pointers as you should (boy, are you gonna be in trouble <kbd>:P</kbd>), here is the structure of the REG_DISPCNT #define. I'm using `vu32` as a typedef for ‘volatile u32’ here.
 
 ```c
-#define REG_DISPCNT *((volatile u32*)(MEM_IO+0x0000)) 
+#define REG_DISPCNT *(vu32*)(MEM_IO+0x0000)
 ```
 
 <div class="cblock">
