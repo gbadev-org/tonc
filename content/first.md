@@ -190,7 +190,7 @@ I've also added a <dfn>conceptual typedef</dfn>. While it's true that, in princi
 
 To be able to work directly specific addresses in memory, you'll have to cast them to pointers or arrays and work with those. In this demo's case, the addresses we're interested in are `0600:0000` (VRAM) and `0400:0000` (the display control register). In the first demo I did the casts manually, but it's better to use names for them so that you don't have to remember all the numbers and also because nobody else would have any clue to what's going on.
 
-For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in libtonc's *regs.h*.
+For the IO registers I'm using the official names, which are recognized by all parties. The display control is known as REG_DISPCNT, and is defined as the word at `0400:0000`. Note that neither the name nor the type are set in stone: you could as easily have called it “BOO” and even used a halfword pointer. The full list of register #defines can be found in libtonc's *tonc_memmap.h*.
 
 For those who aren't as familiar with pointers as you should (boy, are you gonna be in trouble <kbd>:P</kbd>), here is the structure of the REG_DISPCNT #define. I'm using `vu32` as a typedef for ‘volatile u32’ here.
 
