@@ -83,7 +83,7 @@ So, let's start over again and do it *right* this time. Or at least more right t
 -   First and foremost is the use of **named literals**, that is to say #defined names for the constants. The numbers that went into the display control will get proper names, as will the colors that we plotted.
 -   We'll also use #define for the **memory mapping**: the display control and VRAM will then work more like normal variables.
 -   We'll also create some **typedefs**, both for ease of use and to indicate conceptual types. For instance, a 16-bit color is essentially a halfword like any other, but if you typedef it as, say, `COLOR`, everyone will know that it's not a normal halfword, but has something to do with colors.
--   Finally, instead of plotting pixels with an array access, which could still mean anything, well use a **subroutine** for it instead.
+-   Finally, instead of plotting pixels with an array access, which could still mean anything, we'll use a **subroutine** for it instead.
 
 Naturally, this will expand the total lines of code a bit. Quite a bit, in fact. But it is well worth it. The code is actually a two-parter. The actual code, the thing that has all the functionality of the first demo, can be found in *second.c*. All the items discussed above, the typedefs, #defines and inlines, are put in *toolbox.h*.
 
