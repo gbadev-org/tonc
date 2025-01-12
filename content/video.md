@@ -259,7 +259,7 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
 
 ## Vsyncing part I, the busy-wait loop {#sec-vsync1}
 
-As said, use the VBlank as a timing mechanism and to update the game data. This is called <dfn>vsync</dfn> (**v**ertical **sync**ronisation). There are a number of ways to vsync. The two most common methods use a while loop and check `REG_VCOUNT` or `REG_DISPSTAT`. For example, since the VBlank starts at scanline 160, you could see when `REG_VCOUNT` goes beyond this value.
+As said, use the VBlank as a timing mechanism and to update the game data. This is called <dfn>vsync</dfn> (**v**ertical **sync**hronisation). There are a number of ways to vsync. The two most common methods use a while loop and check `REG_VCOUNT` or `REG_DISPSTAT`. For example, since the VBlank starts at scanline 160, you could see when `REG_VCOUNT` goes beyond this value.
 
 ```c
 #define REG_VCOUNT *(u16*)0x04000006
