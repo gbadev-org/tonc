@@ -55,7 +55,7 @@ jobs:
         npx sscli --no-clean --base https://gbadev.net/tonc
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: tonc/output
 
