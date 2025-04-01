@@ -35,7 +35,7 @@ jobs:
       run: npm install static-sitemap-cli
 
     - name: Cache build dir
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: tonc/target/
         key: ${{ runner.os }}-build-${{ hashFiles('tonc/Cargo.lock') }}
