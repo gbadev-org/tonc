@@ -209,7 +209,7 @@ This rule is separate from the others and is used to remove the output and inter
 
 There's a lot more fun to be had with makefiles. You can use makefiles that run other makefiles (which is actually how tonc.mak is set up) or include them in other makefiles. This last one can make your life a lot easier. For example, by proper use of variables, steps 3 and 4 will rarely change between projects. This means that you could put them into a master makefile and include them in all your project-makefiles, in which you will only have to write down the things that are really specific to the current project (for an example of this, see [HAM](http://www.ngine.de)). Abstraction wants to have your babies.
 
-With the pattern substitution and wildcard rules you can practically make makefiles that write themselves! (see the [devkitARM](https://www.devkitpro.org) sample code). The full extent of makefile capabilities it beyond the scope of this tutorial, but trust me, there's a lot more cool stuff here.
+With the pattern substitution and wildcard rules you can practically make makefiles that write themselves! (see the [devkitARM](https://www.devkitpro.org) sample code). The full extent of makefile capabilities is beyond the scope of this tutorial, but trust me, there's a lot more cool stuff here.
 
 ## Common compiler flags {#sec-flags}
 
