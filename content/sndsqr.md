@@ -1762,7 +1762,7 @@ int main()
 
 The bolded code in `main()` initializes the sound register; nothing fancy, but it has to be done before you hear anything at all. It is important to start with `REG_SNDSTAT` bit 7 (`SSTAT_ENABLE`), i.e., the master sound enable. Without it, you cannot even access the other registers. Setting volume to something non-zero is a good idea too, of course. Then we turn off the sweep function and set sound 1 to use a fading envelope with a 50% duty. And that's where the fun starts.
 
-I'll explain what `sos()` is in a little while, first something about the controls of the demo. You can play notes with the D-pad and A (hmm, there's something familiar about that arrangement). The octave *c* you're working in can be changed with L and R; the background color changes with it. B plays `sos()` again.
+I'll explain what `sos()` is in a little while; but first, something about the controls of the demo. You can play notes with the D-pad and A (hmm, there's something familiar about that arrangement). The octave *c* you're working in can be changed with L and R; the background color changes with it. B plays `sos()` again.
 
 <div class="lblock">
   <table>
