@@ -16,7 +16,7 @@ Note that PCs have floating-point units (FPU) since the mid-1990s. This makes fl
 
 ### GBA fixed-point usage {#ssec-fix-gba}
 
-Because computers use the [binary system](numbers.html#ssec-num-basen), using decimals would be silly as a basis for fixed-points would be silly. Fortunately, you can do fixed-point math in any base, including binary. The basic format is *i*.*f*, where *i* is number of integer bits, and *f* the number of fractional bits. Often, only the fractional is important to know, so you'll also come across just the indication ‘.*f*’.
+Because computers use the [binary system](numbers.html#ssec-num-basen), using decimals as a basis for fixed-points would be silly. Fortunately, you can do fixed-point math in any base, including binary. The basic format is *i*.*f*, where *i* is number of integer bits, and *f* the number of fractional bits. Often, only the fractional is important to know, so you'll also come across just the indication ‘.*f*’.
 
 The GBA uses fixed-point math in a number of cases. The [affine parameters](affine.html), for example, are all .8 fixed-point numbers (“<dfn>fixeds</dfn>”, for short). Effectively, this means you're counting in 1/2<sup>8</sup> = 1/256ths, giving you a 0.004 accuracy. So when you write 256 to a register like REG_BG2PA, this is actually interpreted as 256/256=1.00. REG_BG2PA=512 would be 2.00, 640 is 2.50, et cetera. Of course, it is a little hard to see in the decimal system, but grab a calculator and you'll see that it's true. For this reason, it is often more convenient to write them down as hex numbers: 256=0x100→1.00, 512=0x200→2.00, 640=0x280→2.50 (remember that 8 is 16/2, or one half).
 
