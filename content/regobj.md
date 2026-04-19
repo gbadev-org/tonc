@@ -432,7 +432,7 @@ Well, I did warn you. The `name` argument here is the *foo* from before. The pre
 
 ```c
 // Create bitfield:
-attr2 |= BF_PREP(id, ATTR0_SHAPE);
+attr2 |= BF_PREP(id, ATTR2_ID);
 // becomes:
 attr2 |= (id<<ATTR2_ID_SHIFT) & ATTR2_ID_MASK;
 
