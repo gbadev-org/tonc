@@ -52,7 +52,7 @@ In the tiled video-modes (0, 1 and 2) you can have up to four backgrounds that d
 
 Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charblocks</dfn> and <dfn>screenblocks</dfn>. The tileset is stored in the charblocks and the tilemap goes into the screenblocks. In the common vernacular, the word “tile” is used for both the graphical tiles and the entries of the tilemaps. Because this is somewhat confusing, I'll use the term <dfn>screen entry</dfn> (<dfn>SE</dfn> for short) as the items in the screenblocks (i.e., the map entries) and restrict tiles to the tileset.
 
-64 KiB of VRAM is set aside for tilemaps (`0600:0000h`-`0600:FFFFh`). This is used for both screenblocks *and* charblocks. You can choose which ones to use freely through the control registers, but be careful that they can overlap (see {@tbl:cbb-sbb}). Each screenblock is 2048 (`800h`) bytes long, giving 32 screenblocks in total. All but the smallest backgrounds use multiple screenblocks for the full tilemap. Each charblock is 16 KiB (`4000h` bytes) long, giving four blocks overall.
+64 KiB of VRAM is set aside for tilemaps (`0600:0000h`-`0600:FFFFh`). This is used for both screenblocks *and* charblocks. You can choose which ones to use freely through the control registers, but be careful that they don't overlap (see {@tbl:cbb-sbb}). Each screenblock is 2048 (`800h`) bytes long, giving 32 screenblocks in total. All but the smallest backgrounds use multiple screenblocks for the full tilemap. Each charblock is 16 KiB (`4000h` bytes) long, giving four blocks overall.
 
 <div class="cblock">
 <table id="tbl:cbb-sbb" rules=groups>
@@ -112,7 +112,7 @@ As I said in the overview, there are three stages to setting up a tiled backgrou
 
 ### Background types {#ssec-ctrl-bgs}
 
-Just like sprites, there are two types of tiled backgrounds: regular and affine; these are also known as text and rotation backgrounds, respectively. The type of the background depends of the video mode (see {@tbl:bg-types}). At their cores, both regular and affine backgrounds work the same way: you have tiles, a tile-map and a few control registers. But that's where the similarity ends. Affine backgrounds use more and different registers than regular ones, and even the maps are formatted differently. This page only covers the regular backgrounds. I'll leave the [affine ones](affbg.html) till after the page on the [affine matrix](affine.html).
+Just like sprites, there are two types of tiled backgrounds: regular and affine; these are also known as text and rotation backgrounds, respectively. The type of the background depends on the video mode (see {@tbl:bg-types}). At their cores, both regular and affine backgrounds work the same way: you have tiles, a tile-map and a few control registers. But that's where the similarity ends. Affine backgrounds use more and different registers than regular ones, and even the maps are formatted differently. This page only covers the regular backgrounds. I'll leave the [affine ones](affbg.html) till after the page on the [affine matrix](affine.html).
 
 <div class="lblock">
 <table id="tbl:bg-types" class="table-data">
@@ -153,7 +153,7 @@ Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, wi
 </table>
 </div>
 
-The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. The both use the same bits you may have to be careful that you're using the right `#define`s.
+The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. They both use the same bits you may have to be careful that you're using the right `#define`s.
 
 <div class="reg">
 <table class="table-reg" id="tbl-reg-bgxcnt">
@@ -367,7 +367,7 @@ typedef SCR_ENTRY   SCREENBLOCK[1024];
 
 Strictly speaking, making a `SCREEN_ENTRY` `typedef` is not necessary, but makes its use clearer. `se_mem` works much like `tile_mem`: it maps out VRAM into screenblocks screen-entries, making finding a specific entry easier. The other typedefs are used to map out arrays for the background registers. For example, `REG_BGCNT` is an array that maps out all `REG_BGxCNT` registers. `REG_BGCNT[0]` is `REG_BG0CNT`, etc. The `BG_POINT` and `BG_AFFINE` types are used in similar fashions. Note that `REG_BG_OFS` still covers the same registers as `REG_BGxHOFS` and `REG_BGxVOFS` do, and the write-only-ness of them has not magically disappeared. The same goes for `REG_BG_AFFINE`, but that discussion will be saved for another time.
 
-In theory, it is also useful create a sort of background API, with a struct with the temporaries for map positioning and functions for initializing and updating the registers and maps. However, most of tonc's demos are not complex enough to warrant these things. With the types above, manipulating the necessary items is already simplified enough for now.
+In theory, it's also useful to create a sort of background API, with a struct with the temporaries for map positioning and functions for initializing and updating the registers and maps. However, most of tonc's demos are not complex enough to warrant these things. With the types above, manipulating the necessary items is already simplified enough for now.
 
 ## Regular background tile-maps {#sec-map}
 
