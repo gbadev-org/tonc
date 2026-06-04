@@ -104,7 +104,7 @@ As I said in the overview, there are three stages to setting up a tiled backgrou
 -   Load the graphics: tiles into charblocks and colors in the background palette.
 -   Load a map into one or more screenblocks.
 -   Switch to the right mode in `REG_DISPCNT` and activate a background.
--   Initialize that background's control register to use the right CBB, SBB and bitdepth.
+-   Initialize the background's control register to use the right CBB, SBB and bitdepth.
 
 :::
 
@@ -137,7 +137,7 @@ Just like sprites, there are two types of tiled backgrounds: regular and affine;
 
 All backgrounds have 3 primary control registers. The primary control register is `REG_BGxCNT`, where *x* indicates the backgrounds 0 through 3. This register is where you say what the size of the tilemap is, and which charblock and screenblock it uses. The other two are the scrolling registers, `REG_BGxHOFS` and `REG_BGxVOFS`.
 
-Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, with the other controls right behind it. The offsets are paired by background, forming coordinate pairs. These start at `0400:0010`
+Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, with the other controls right after it. The offsets are paired by background, forming coordinate pairs. These start at `0400:0010`
 
 <div class="lblock">
 <table id="tbl:ctrl-ofs" class="table-data">
@@ -153,7 +153,7 @@ Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, wi
 </table>
 </div>
 
-The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. They both use the same bits you may have to be careful that you're using the right `#define`s.
+The description of `REG_BGxCNT` can be found below. Most of it is pretty standard, except for the size: there are actually *two* lists of possible sizes; one for regular maps and one for affine maps. They both use the same bits, you may have to be careful that you're using the right `#define`s.
 
 <div class="reg">
 <table class="table-reg" id="tbl-reg-bgxcnt">
@@ -608,7 +608,7 @@ Now on to using these data. Remember the essential steps here:
 -   Load the graphics: tiles into charblocks and colors in the background palette.
 -   Load a map into one or more screenblocks.
 -   Switch to the right mode in `REG_DISPCNT` and activate a background.
--   Initialize that background's control register to use the right CBB, SBB and bitdepth.
+-   Initialize the background's control register to use the right CBB, SBB and bitdepth.
 
 If you do it correctly, you should have something showing on screen. If not, go to the tile/map/memory viewers of your emulator; they'll usually give you a good idea where the problem is. A common one is having a mismatch between the CBB and SBB in `REG_BGxCNT` and where you put the data, which most likely would leave you with an empty map or empty tileset.
 
