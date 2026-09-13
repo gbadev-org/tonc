@@ -662,7 +662,7 @@ To make the comparison to C a little easier, I will sometimes indicate what happ
 ```armasm
 @ Basic load/store examples. Assume r1 contains a word-aligned address
 ldr     r0, [r1]    @ r0= *(u32*)r1; //or r0= r1_w[0];
-str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[1]= r0;
+str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[0]= r0;
 ```
 
 :::
