@@ -1080,7 +1080,7 @@ Let's start with the most basic of branches, `b`. This is the most used branch, 
     @ more code B
 ```
 
-First, you have a data processing instruction that sets the status flags, usually a `subs` or `cmp`, but it can be any one of them. Then a `b`_cond_ diverts the flow to `.Llabel` if the conditions are met. A simple example of this would be a division routine which checks if the denominator is zero first. For example, the `Div()` routine that uses [BIOS Call](bios.html) #6 could be safeguarded against division by 0 like this:
+First, you have a data processing instruction that sets the status flags, usually a `subs` or `cmp`, but it can be any one of them. Then a `b`_cond_ diverts the flow to `.Llabel` if the conditions are met. A simple example of this would be a division routine which checks if the denominator is zero first. For example, the `Div()` routine that uses [BIOS Call](swi.html) #6 could be safeguarded against division by 0 like this:
 
 ```armasm
 @ int DivSafe(int num, int den);
