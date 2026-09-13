@@ -662,7 +662,7 @@ To make the comparison to C a little easier, I will sometimes indicate what happ
 ```armasm
 @ Basic load/store examples. Assume r1 contains a word-aligned address
 ldr     r0, [r1]    @ r0= *(u32*)r1; //or r0= r1_w[0];
-str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[1]= r0;
+str     r0, [r1]    @ *(u32*)r1= r0; //or r1_w[0]= r0;
 ```
 
 :::
@@ -734,7 +734,7 @@ Note that I'm not actually creating `far_var` here; just storage room for its ad
 
 #### Data types
 
-It is also possible to load/store bytes and halfwords. The opcodes for loads are `ldrb` and `ldrh` for unsigned, and `ldrsb` and `ldrsh` for signed bytes and halfwords, respectively. The ‘r’ in the signed versions is actually optional, so you'll also see `ldsb` and `ldsh` now and then. As stores can cast away the more significant bytes anyway, `strb` and `strh` will work for both signed and unsigned stores..
+It is also possible to load/store bytes and halfwords. The opcodes for loads are `ldrb` and `ldrh` for unsigned, and `ldrsb` and `ldrsh` for signed bytes and halfwords, respectively. The ‘r’ in the signed versions is actually optional, so you'll also see `ldsb` and `ldsh` now and then. As stores can cast away the more significant bytes anyway, `strb` and `strh` will work for both signed and unsigned stores.
 
 All the things you can do with `ldr/str`, you can do with the byte and halfword versions as well: PC-relative, indirect, pre/post-indexing it's all there … with one exception. The signed-byte load (`ldsb`) and _all_ of the halfword loads and stores cannot do shifted register-loads. Only `ldrb` has the complete functionality of the word instructions. The consequence is that signed-byte or halfword arrays may require extra instructions to keep the offset and index in check.
 
@@ -1030,7 +1030,7 @@ For the carry bit it can get a little harder. The best way to see it is as an ex
 
 Bit-operations like `orr` or `and` don't affect it because they operate purely on the lower 32bits. Shifts, however do.
 
-You may find it odd that `-cc` is the code for unsigned higher than. As mentioned, a comparison is essentially a subtraction, but when you subtract, say 7−1, there doesn't really seem to be a carry here. The key here is that subtractions are infact forms of additions: 7−1 is actually 7+0xFFFFFFFF, which would cause an overflow into the carry bit. You can also thing of subtractions as starting out with the carry bit set.
+You may find it odd that `-cc` is the code for unsigned higher than. As mentioned, a comparison is essentially a subtraction, but when you subtract, say 7−1, there doesn't really seem to be a carry here. The key here is that subtractions are infact forms of additions: 7−1 is actually 7+0xFFFFFFFF, which would cause an overflow into the carry bit. You can also think of subtractions as starting out with the carry bit set.
 
 The overflow flag indicates _signed_ overflow (the carry bit would be unsigned overflow). Note, this is _not_ merely a sign change, but a sign change the wrong way. For example, an addition of two positive numbers _should_ always be positive, but if the numbers are big enough (say, 2<sup>30</sup>, see {@tbl:overflow}) then the results of the lower 30 bits may overflow into bit 31, therefore changing the sign and you'll have an incorrect addition. For subtraction, there can be a similar problem. Short of doing the full operation and checking whether the signs are correct, there isn't a simple way of figuring out what counts as overflow, but fortunately you don't have to. Usually overflow is only important for signed comparisons, and the condition mnemonics themselves should provide you with enough information to pick the right one.
 
@@ -1080,7 +1080,7 @@ Let's start with the most basic of branches, `b`. This is the most used branch, 
     @ more code B
 ```
 
-First, you have a data processing instruction that sets the status flags, usually a `subs` or `cmp`, but it can be any one of them. Then a `b`_cond_ diverts the flow to `.Llabel` if the conditions are met. A simple example of this would be a division routine which checks if the denominator is zero first. For example, the `Div()` routine that uses [BIOS Call](bios.html) #6 could be safeguarded against division by 0 like this:
+First, you have a data processing instruction that sets the status flags, usually a `subs` or `cmp`, but it can be any one of them. Then a `b`_cond_ diverts the flow to `.Llabel` if the conditions are met. A simple example of this would be a division routine which checks if the denominator is zero first. For example, the `Div()` routine that uses [BIOS Call](swi.html) #6 could be safeguarded against division by 0 like this:
 
 ```armasm
 @ int DivSafe(int num, int den);
