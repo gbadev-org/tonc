@@ -210,7 +210,7 @@ INLINE u32 key_held(u32 key)
 INLINE u32 key_hit(u32 key)
 {   return ( __key_curr &~ __key_prev) & key;  }
 
-Key is being released (up now but down before)
+// Key is being released (up now but down before)
 INLINE u32 key_released(u32 key)
 {   return (~__key_curr &  __key_prev) & key;  }
 ```
