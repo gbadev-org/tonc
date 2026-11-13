@@ -32,7 +32,7 @@ jobs:
         mdbook-version: 0.4.33
     
     - name: Install static-sitemap-cli
-      run: npm install static-sitemap-cli
+      run: npm install static-sitemap-cli@3
 
     - name: Cache build dir
       uses: actions/cache@v4
@@ -52,7 +52,7 @@ jobs:
     - name: Generate sitemap
       run: |
         cd tonc/output
-        npx sscli --no-clean --base https://gbadev.net/tonc
+        npx sscli --urls raw --base https://gbadev.net/tonc
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

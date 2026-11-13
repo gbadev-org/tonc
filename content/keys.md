@@ -210,7 +210,7 @@ INLINE u32 key_held(u32 key)
 INLINE u32 key_hit(u32 key)
 {   return ( __key_curr &~ __key_prev) & key;  }
 
-Key is being released (up now but down before)
+// Key is being released (up now but down before)
 INLINE u32 key_released(u32 key)
 {   return (~__key_curr &  __key_prev) & key;  }
 ```
@@ -269,7 +269,7 @@ INLINE int key_tri_fire()       // B/A : -/+
 {   return bit_tribool(__key_curr, KI_A, KI_B);         }
 ```
 
-The inline function `bit_tribool()` creates a tribool value from any two bits in a number (register or otherwise). The rest of the functions listed here use the current keystate and the key-bits to create tribools for horizontal, vertical, shoulder and fire buttons; others can be creates with relative ease. These functions make the code look cleaner and are faster to boot. You will be seeing them quite often.
+The inline function `bit_tribool()` creates a tribool value from any two bits in a number (register or otherwise). The rest of the functions listed here use the current keystate and the key-bits to create tribools for horizontal, vertical, shoulder and fire buttons; others can be created with relative ease. These functions make the code look cleaner and are faster to boot. You will be seeing them quite often.
 
 While the functions mentioned above only use `__key_curr`, it is easy to write code that uses other key-state types. For example, a right-left `key_hit` variant might look something like this:
 

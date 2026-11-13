@@ -106,7 +106,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td><code>0300:7FFFh</code></td>
         <td>32 KB</td>
         <td>32 bit</td>
-        <td>This is also available for code and data. The 32-bit bus and the fact it's embedded in the CPU make this the fastest memory section. The 32-bit bus means that ARM instructions can be loded at once, so put your ARM code here.</td>
+        <td>This is also available for code and data. The 32-bit bus and the fact it's embedded in the CPU make this the fastest memory section. The 32-bit bus means that ARM instructions can be loaded at once, so put your ARM code here.</td>
       </tr>
       <tr>
         <th>IO RAM</th>
@@ -160,4 +160,4 @@ This section lists the various memory areas. It's basically a summary of the [GB
   </table>
 </div>
 
-The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The areas you will deal with them most are IO, PAL, VRAM and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start and use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like [GBATEK](https://problemkaputt.de/gbatek.htm) and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.
+The various RAM sections (apart from Cart RAM) are zeroed at start-up by BIOS. The ones you will most frequently deal with are IO, PAL, VRAM, and OAM. For simple games and demos it will usually suffice to load your graphics data into PAL and VRAM at the start and use IO and OAM to take care of the actual interaction. The layout of these two sections is quite complex and almost impossible to figure out on your own (almost, because emulator builders obviously have done just that). With this in mind, reference sheets like [GBATEK](https://problemkaputt.de/gbatek.htm) and the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm) are unmissable documents. In theory this is all you need to get you started, but in practice using one or more tutorials (such as this one) with example code will save a lot of headaches.

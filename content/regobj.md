@@ -432,7 +432,7 @@ Well, I did warn you. The `name` argument here is the *foo* from before. The pre
 
 ```c
 // Create bitfield:
-attr2 |= BF_PREP(id, ATTR0_SHAPE);
+attr2 |= BF_PREP(id, ATTR2_ID);
 // becomes:
 attr2 |= (id<<ATTR2_ID_SHIFT) & ATTR2_ID_MASK;
 
@@ -444,7 +444,7 @@ id= (attr2 & ATTR2_ID_MASK)>>ATTR2_ID_SHIFT;
 // Insert bitfield:
 BF_SET(attr2, id, ATTR2_ID);
 // becomes:
-attr2= (attr&~ATTR2_ID_MASK) | ((id<<ATTR2_ID_SHIFT) & ATTR2_ID_MASK);
+attr2= (attr2&~ATTR2_ID_MASK) | ((id<<ATTR2_ID_SHIFT) & ATTR2_ID_MASK);
 ```
 
 `BF_PREP()` can be used to prepare a bitfield for later insertion or comparison. `BF_GET()` gets a bitfield from a value, and `BF_SET()` sets a bitfield in a variable, without disturbing the rest of the bits. This is basically how bitfields normally work, except that true bitfields cannot be combined with OR and such.
