@@ -26,12 +26,12 @@ exelotl, avivace, PinoBatch, copyrat90, LunarLambda, gwilymk, mtthgn, and djeddi
 
 In the top navigation bar, you will find a series of icons.
 
-By clicking on the <i class="fa fa-bars"></i> icon you will toggle an interactive table of contents to navigate the document. You can also use <kbd>→</kbd> and <kbd>←</kbd> keys on your keyboard to go to the following and previous page.
+By clicking on the <i class="fa-solid fa-bars"></i> icon you will toggle an interactive table of contents to navigate the document. You can also use <kbd>→</kbd> and <kbd>←</kbd> keys on your keyboard to go to the following and previous page.
 
-The <i class="fa fa-paint-brush"></i> lets you choose among 6 different themes and color schemes to please your reading experience, including the classic Tonc theme.
+The <i class="fa-solid fa-paintbrush"></i> lets you choose among 6 different themes and color schemes to please your reading experience, including the classic Tonc theme.
 
-You can search anywhere by pressing <kbd>s</kbd> on your keyboard or clicking the <i class="fa fa-search"></i> icon.
+You can search anywhere by pressing <kbd>s</kbd> on your keyboard or clicking the <i class="fa-solid fa-magnifying-glass"></i> icon.
 
-The <i class="fa fa-edit"></i> icon allows you to suggest an edit on the current page by directly opening the source file in the git repository.
+The <i class="fa-solid fa-pencil"></i> icon allows you to suggest an edit on the current page by directly opening the source file in the git repository.
 
 <br>
