@@ -10,6 +10,9 @@ create-missing = false
 
 [preprocessor.pandocs]
 command = "cargo run -p pandocs-preproc --locked --release --"
+# Must run before external-links: it parses with definition lists enabled,
+# which would turn `:::tip` admonition markers into `: ::tip` definitions.
+before = ["external-links"]
 
 [output.html]
 git-repository-url = "https://github.com/gbadev-org/tonc"
@@ -26,7 +29,7 @@ command = "cargo run -p mdbook-toc --locked --release --"
 # Default marker is <!-- toc -->
 # marker = "[TOC]"
 renderer = ["html"]
-max-level = 2
+max_level = 2  # mdbook-toc >=0.15 reads `max_level`, despite its README saying `max-level`
 
 [preprocessor.external-links]
 command = "cargo run -p mdbook-external-links2 --locked --release --"
