@@ -551,39 +551,39 @@ Like all instructions, data instructions can be executed conditionally by adding
     <tr>
       <td>
         <table class="table-data">
-          <tr align="center"><th>opcode		<th>operands	<th> function</tr>
-          <tr><th colspan=3 align="center">Arithmetic				</tr>
-          <tr><td>adc		<td>Rd, Rn, Op2 <td>Rd = Rn + Op2 + C	</tr>
-          <tr><td>add		<td>Rd, Rn, Op2 <td>Rd = Rn + Op2		</tr>
-          <tr><td>rsb		<td>Rd, Rn, Op2 <td>Rd = Op2 - Rn		</tr>
-          <tr><td>rsc		<td>Rd, Rn, Op2 <td>Rd = Op2 - Rn - !C	</tr>
-          <tr><td>sbc		<td>Rd, Rn, Op2 <td>Rd = Rn - Op2 -!C	</tr>
-          <tr><td>sub		<td>Rd, Rn, Op2 <td>Rd = Rn - Op2		</tr>
-          <tr><th colspan=3 align="center">Logical ops				</tr>
-          <tr><td>and		<td>Rd, Rn, Op2 <td>Rd = Rn &amp; Op2	</tr>
-          <tr><td>bic		<td>Rd, Rn, Op2 <td>Rd = Rn &amp;~ Op2	</tr>
-          <tr><td>eor		<td>Rd, Rn, Op2 <td>Rd = Rn ^ Op2		</tr>
-          <tr><td>mov		<td>Rd, Op2		<td>Rd = Op2			</tr>
-          <tr><td>mvn		<td>Rd, Op2		<td>Rd = ~Op2			</tr>
-          <tr><td>orr		<td>Rd, Rn, Op2 <td>Rd = Rn | Op2		</tr>
+          <tr align="center"><th>opcode</th>		<th>operands</th>	<th> function</th></tr>
+          <tr><th colspan=3 align="center">Arithmetic</th>				</tr>
+          <tr><td>adc</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn + Op2 + C</td>	</tr>
+          <tr><td>add</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn + Op2</td>		</tr>
+          <tr><td>rsb</td>		<td>Rd, Rn, Op2</td> <td>Rd = Op2 - Rn</td>		</tr>
+          <tr><td>rsc</td>		<td>Rd, Rn, Op2</td> <td>Rd = Op2 - Rn - !C</td>	</tr>
+          <tr><td>sbc</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn - Op2 -!C</td>	</tr>
+          <tr><td>sub</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn - Op2</td>		</tr>
+          <tr><th colspan=3 align="center">Logical ops</th>				</tr>
+          <tr><td>and</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn &amp; Op2</td>	</tr>
+          <tr><td>bic</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn &amp;~ Op2</td>	</tr>
+          <tr><td>eor</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn ^ Op2</td>		</tr>
+          <tr><td>mov</td>		<td>Rd, Op2</td>		<td>Rd = Op2</td>			</tr>
+          <tr><td>mvn</td>		<td>Rd, Op2</td>		<td>Rd = ~Op2</td>			</tr>
+          <tr><td>orr</td>		<td>Rd, Rn, Op2</td> <td>Rd = Rn | Op2</td>		</tr>
         </table>
       </td>
       <td width=10%>&nbsp;</td>
       <td>
         <table class="table-data">
-          <tr align="center"><th>opcode		<th>operands	<th> function
-          <tr><th colspan=3 align="center">Status ops			</tr>
-          <tr><td>cmp		<td>Rn, Op2		<td>Rn - Op2		</tr>
-          <tr><td>cmn		<td>Rn, Op2		<td>Rn + Op2		</tr>
-          <tr><td>teq		<td>Rn, Op2		<td>Rn &amp; Op2	</tr>
-          <tr><td>tst		<td>Rn, Op2		<td>Rn ^ Op2		</tr>
-          <tr><th colspan=3 align="center">Multiplies			</tr>
-          <tr><td>mla		<td>Rd, Rm, Rs, Rn		<td>Rd = Rm * Rs + Rn	</tr>
-          <tr><td>mul		<td>Rd, Rm, Rs			<td>Rd = Rm * Rs		</tr>
-          <tr><td>smlal	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo += Rm * Rs	</tr>
-          <tr><td>smull	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo = Rm * Rs	</tr>
-          <tr><td>umlal	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo += Rm * Rs	</tr>
-          <tr><td>umull	<td>RdLo, RdHi, Rm, Rs	<td>RdHiLo = Rm * Rs	</tr>
+          <tr align="center"><th>opcode</th>		<th>operands</th>	<th> function</th></tr>
+          <tr><th colspan=3 align="center">Status ops</th>			</tr>
+          <tr><td>cmp</td>		<td>Rn, Op2</td>		<td>Rn - Op2</td>		</tr>
+          <tr><td>cmn</td>		<td>Rn, Op2</td>		<td>Rn + Op2</td>		</tr>
+          <tr><td>teq</td>		<td>Rn, Op2</td>		<td>Rn &amp; Op2</td>	</tr>
+          <tr><td>tst</td>		<td>Rn, Op2</td>		<td>Rn ^ Op2</td>		</tr>
+          <tr><th colspan=3 align="center">Multiplies</th>			</tr>
+          <tr><td>mla</td>		<td>Rd, Rm, Rs, Rn</td>		<td>Rd = Rm * Rs + Rn</td>	</tr>
+          <tr><td>mul</td>		<td>Rd, Rm, Rs</td>			<td>Rd = Rm * Rs</td>		</tr>
+          <tr><td>smlal</td>	<td>RdLo, RdHi, Rm, Rs</td>	<td>RdHiLo += Rm * Rs</td>	</tr>
+          <tr><td>smull</td>	<td>RdLo, RdHi, Rm, Rs</td>	<td>RdHiLo = Rm * Rs</td>	</tr>
+          <tr><td>umlal</td>	<td>RdLo, RdHi, Rm, Rs</td>	<td>RdHiLo += Rm * Rs</td>	</tr>
+          <tr><td>umull</td>	<td>RdLo, RdHi, Rm, Rs</td>	<td>RdHiLo = Rm * Rs</td>	</tr>
         </table>
       </td>
     </tr>
@@ -648,7 +648,7 @@ The basic instructions for that are `ldr` (LoaD Register) and `str` (STore Regis
     <td class="eqnrcell"></td>
     <td class="eqcell">
       <i>op</i>{cond}{type} Rd, [Rn, <i>Op2</i>]
-    </td>
+    </td></tr>
 </table>
 
 Here _op_ is either `ldr` or `str`. Because they're so similar in appearance, I will just use `ldr` for the remainder of the discussion on syntax, except when things are different. The condition flag again goes directly behind the base opcode. The _type_ refers to the datatype to load (or store), which can be words, halfwords or bytes. The word forms do not use any extension, halfwords use `-h` or `-sh`, and bytes use `-b` and `-sb`. The extra `s` is to indicate a signed byte or halfword. Because the registers are 32bit, the top bits need to be sign-extended or zero-extended, depending on the desired datatype.
@@ -770,7 +770,7 @@ Block transfers allow you to load or store multiple successive words into regist
     <td class="eqnrcell"></td>
     <td class="eqcell">
       <i>op</i>{cond}{mode} Rd{!}, {<i>Rlist</i>}
-    </td>
+    </td></tr>
 </table>
 
 This register list can be comma separated, or hyphenated to indicate a range. For example, `{r4-r7, lr}` means registers r4, r5, r6, r7 and r14. The order in which the registers are actually loaded or stored are **not** based on the order in which they are specified in this list! Rather, the list indicates the number of words used (in this case 5), and the order of addresses follows the index of the registers: the lowest register uses the lowest address in the block, etc.
@@ -941,7 +941,6 @@ Each of the data instructions can set the status flags by appending `-s` to the 
         <td> - </td> 
         <td>NeVer</td>
       </tr>
-    </col>
   </table>
 </div>
 
@@ -1024,7 +1023,6 @@ For the carry bit it can get a little harder. The best way to see it is as an ex
           </table>
         </td>
       </tr>
-    </col>
   </table>
 </div>
 
@@ -1054,12 +1052,11 @@ The overflow flag indicates _signed_ overflow (the carry bit would be unsigned o
             </tr>
             <tr>
 	            <th><b>&minus;</b>2<sup>31</sup></th>
-	            <td><code>8000 0000</code>
+	            <td><code>8000 0000</code></td>
             </tr>
           </table>
         </td>
       </tr>
-    </col>
   </table>
 </div>
 
@@ -1454,7 +1451,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
         </table>
       </td>
       <td style="border: 1px solid var(--bg);">
-        <table id="tbl:waits"class="table-data">
+        <table id="tbl:waits" class="table-data">
           <caption align="bottom">
             <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#gbamemorymap">GBATEK memory map</a>.
           </caption>
@@ -1516,8 +1513,6 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
                   <td>5/5/8</td>
                 </tr>
               </tbody>
-            </col>
-          </col>
         </table>
       </td>
     </tr>
@@ -1591,28 +1586,28 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
         <td>3&nbsp;-&nbsp;0</td>
       </tr>
       <tr class="bf">
-        <td style="font:100%,Arial,normal;">add Rd, Rn, #
-        <td class="rclr0" rowspan=3>cnd
-        <td class="rclr1" rowspan=3>TA
-        <td class="rclr2" rowspan=3>IF
-        <td class="rclr1" rowspan=3>TB
-        <td class="rclr2" rowspan=3>S
-        <td class="rclr3" rowspan=3>Rn
-        <td class="rclr4" rowspan=3>Rd
-        <td class="rclr5" colspan=1>IR
-        <td class="rclr6" colspan=6>IN
+        <td style="font:100%,Arial,normal;">add Rd, Rn, #</td>
+        <td class="rclr0" rowspan=3>cnd</td>
+        <td class="rclr1" rowspan=3>TA</td>
+        <td class="rclr2" rowspan=3>IF</td>
+        <td class="rclr1" rowspan=3>TB</td>
+        <td class="rclr2" rowspan=3>S</td>
+        <td class="rclr3" rowspan=3>Rn</td>
+        <td class="rclr4" rowspan=3>Rd</td>
+        <td class="rclr5" colspan=1>IR</td>
+        <td class="rclr6" colspan=6>IN</td>
       </tr>
       <tr class="bf">
-        <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op #
-        <td class="rclr5" colspan=2>IS
-        <td class="rclr8" rowspan=2>ST
-        <td class="rclr7" rowspan=2>SF
-        <td class="rclr6" rowspan=2>Rm
+        <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op #</td>
+        <td class="rclr5" colspan=2>IS</td>
+        <td class="rclr8" rowspan=2>ST</td>
+        <td class="rclr7" rowspan=2>SF</td>
+        <td class="rclr6" rowspan=2>Rm</td>
       </tr>
       <tr class="bf">
-        <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op Rs
-        <td class="rclr5">Rs
-        <td> 0
+        <td style="font:100%,Arial,normal;">add Rd, Rn, Rm Op Rs</td>
+        <td class="rclr5">Rs</td>
+        <td> 0</td>
       </tr>
     </tbody>
   </table>
@@ -1649,7 +1644,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
       <tr class="bg1">	
         <td>15-18</td>
         <td class="rclr1">TB</td>
-        <td><b>Instruction-type</b> field. Must be 4 for <code>add</code>.</td>
+        <td><b>Instruction-type</b> field. Must be 4 for <code>add</code>.</td></tr>
       <tr class="bg0">	
         <td>19</td>
         <td class="rclr2">IF</td>
@@ -1680,7 +1675,7 @@ Before I show the bits, I should point out that `add` (and in fact all data inst
       <tr align="left">
         <th>bits</th>
         <th>name</th>
-        <th>description</th>
+        <th>description</th></tr>
       <tr class="bg0">	
         <td>0&nbsp;-&nbsp;7</td>
         <td class="rclr6">IN</td>

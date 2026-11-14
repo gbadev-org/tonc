@@ -51,11 +51,11 @@ Also, don't forget that the sprites have their own palette which starts at `0500
   be sure you fill the VRAM accordingly.)
 </caption>
 <tr>
-  <th>memory 0601:<th>0000<th>0020 <th>0040<th>0060 <th>0080<th>0100 <th>...
+  <th>memory 0601:</th><th>0000</th><th>0020</th> <th>0040</th><th>0060</th> <th>0080</th><th>0100</th> <th>...</th></tr>
 <tr>
-  <th>4bpp tile <td>0      <td>1  <td>2    <td>3  <td>4    <td>5 <td>&nbsp;
+  <th>4bpp tile</th> <td>0</td>      <td>1</td>  <td>2</td>    <td>3</td>  <td>4</td>    <td>5</td> <td>&nbsp;</td></tr>
 <tr>
-  <th>8bpp tile <td colspan=2>0   <td colspan=2>2 <td colspan=2>4<td>&nbsp;
+  <th>8bpp tile</th> <td colspan=2>0</td>   <td colspan=2>2</td> <td colspan=2>4</td><td>&nbsp;</td></tr>
 </table>
 </div>
 
@@ -83,7 +83,7 @@ From a GBA-programming viewpoint, it is easier to use 1D mapping, as you don't h
   <b>{*@fig:obj-map}a</b>: zoomed out version of 
   {*@fig:metr}, divided into tiles; colored numbers 
     indicate mapping mode: red for 2D, cyan for 1D.
-  </div>
+  </div></td>
 <td>
   <div class="cpt" style="width:297px">
   <img src="./img/metr/tile_2d.png" alt="2d mapping">
@@ -97,7 +97,7 @@ From a GBA-programming viewpoint, it is easier to use 1D mapping, as you don't h
   <b>{*@fig:obj-map}c</b>: how 
     {@fig:obj-map}a should be stored in memory when using 
 	1D mapping.
-  </div>
+  </div></td></tr>
 </table>
 </div>
 
@@ -168,13 +168,13 @@ There are a few interesting things about these structures. First, you see a lot 
   memory interlace of OBJ_ATTR and 
   OBJ_AFFINE structures.
  </caption>
-<tr align="left"><th>mem (u16)<th>0<th>3<th>4<th>7<th>8<th>b<th>c<th>f
-<tr><th>OBJ_ATTR
-  <td>0 1 2<td>&nbsp;<td>0 1 2<td>&nbsp;
-  <td>0 1 2<td>&nbsp;<td>0 1 2<td>&nbsp;
-<tr><th>OBJ_AFFINE
-  <td>&nbsp;<td>pa<td>&nbsp;<td>pb
-  <td>&nbsp;<td>pc<td>&nbsp;<td>pd
+<tr align="left"><th>mem (u16)</th><th>0</th><th>3</th><th>4</th><th>7</th><th>8</th><th>b</th><th>c</th><th>f</th></tr>
+<tr><th>OBJ_ATTR</th>
+  <td>0 1 2</td><td>&nbsp;</td><td>0 1 2</td><td>&nbsp;</td>
+  <td>0 1 2</td><td>&nbsp;</td><td>0 1 2</td><td>&nbsp;</td></tr>
+<tr><th>OBJ_AFFINE</th>
+  <td>&nbsp;</td><td>pa</td><td>&nbsp;</td><td>pb</td>
+  <td>&nbsp;</td><td>pc</td><td>&nbsp;</td><td>pd</td></tr>
 </table>
 </div>
 
@@ -199,68 +199,68 @@ The first attribute controls a great deal, but the most important parts are for 
   OBJ_ATTR.attr0
 </caption>
 <tr class="bits">
-	<td>F E<td>D<td>C<td>B A<td>9 8 <td>7 6 5 4 3 2 1 0
+	<td>F E</td><td>D</td><td>C</td><td>B A</td><td>9 8</td> <td>7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-	<td class="rclr1">Sh
-	<td class="rclr2">CM
-	<td class="rclr5">Mos
-	<td class="rclr4">GM
-	<td class="rclr3">OM
-	<td class="rclr0">Y
+	<td class="rclr1">Sh</td>
+	<td class="rclr2">CM</td>
+	<td class="rclr5">Mos</td>
+	<td class="rclr4">GM</td>
+	<td class="rclr3">OM</td>
+	<td class="rclr0">Y</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-7<td class="rclr0">Y
-  <td><i>ATTR0_Y#</i>
-  <td><b>Y coordinate</b>. Marks the top of the sprite.
+  <td>0-7</td><td class="rclr0">Y</td>
+  <td><i>ATTR0_Y#</i></td>
+  <td><b>Y coordinate</b>. Marks the top of the sprite.</td></tr>
 <tr class="bg1">	
-  <td>8-9<td class="rclr3">OM
+  <td>8-9</td><td class="rclr3">OM</td>
   <td>ATTR0_REG, ATTR0_AFF, ATTR0_HIDE, ATTR0_AFF_DBL.
-    <i>ATTR0_MODE#</i>
+    <i>ATTR0_MODE#</i></td>
   <td><b>(Affine) object mode</b>. Use to hide the sprite or govern 
     affine mode.
     <ul>
-      <li><b>00</b>. Normal rendering.
+      <li><b>00</b>. Normal rendering.</li>
       <li><b>01</b>. Sprite is an affine sprite, using affine matrix
-        specified by <code>attr1{9-D}</code>
-      <li><b>10</b>. Disables rendering (hides the sprite)
+        specified by <code>attr1{9-D}</code></li>
+      <li><b>10</b>. Disables rendering (hides the sprite)</li>
       <li><b>11</b>. Affine sprite using double rendering area. See 
-        <a href="affobj.html">affine sprites</a> for more.
-    </ul>   
+        <a href="affobj.html">affine sprites</a> for more.</li>
+    </ul></td></tr>   
 <tr class="bg0">	
-  <td>A-B<td class="rclr4">GM
-  <td>ATTR0_BLEND, ATTR0_WIN. <i>ATTR0_GFX#</i>
+  <td>A-B</td><td class="rclr4">GM</td>
+  <td>ATTR0_BLEND, ATTR0_WIN. <i>ATTR0_GFX#</i></td>
   <td><b>Gfx mode</b>. Flags for special effects.
     <ul>
-      <li><b>00</b>. Normal rendering.
+      <li><b>00</b>. Normal rendering.</li>
       <li><b>01</b>. Enables alpha blending. Covered 
-        <a href="gfx.html#sec-blend">here</a>.
+        <a href="gfx.html#sec-blend">here</a>.</li>
       <li><b>10</b>. Object is part of the object window. The sprite 
         itself isn't rendered, but serves as a mask for bgs and other 
-        sprites. (I think, haven't used it yet)
-      <li><b>11</b>. Forbidden.
-    </ul>
+        sprites. (I think, haven't used it yet)</li>
+      <li><b>11</b>. Forbidden.</li>
+    </ul></td></tr>
 <tr class="bg1">	
-  <td>C<td class="rclr5">Mos
-  <td>ATTR0_MOSAIC
-  <td>Enables mosaic effect. Covered <a href="gfx.html#sec-mos">here</a>. 
+  <td>C</td><td class="rclr5">Mos</td>
+  <td>ATTR0_MOSAIC</td>
+  <td>Enables mosaic effect. Covered <a href="gfx.html#sec-mos">here</a>.</td></tr> 
 <tr class="bg0">	
-  <td>D<td class="rclr2">CM
-  <td>ATTR0_4BPP, ATTR0_8BPP
+  <td>D</td><td class="rclr2">CM</td>
+  <td>ATTR0_4BPP, ATTR0_8BPP</td>
   <td><b>Color mode</b>. 16 colors (4bpp) if cleared; 
-    256 colors (8bpp) if set.    
+    256 colors (8bpp) if set.</td></tr>    
 <tr class="bg1">	
-  <td>E-F<td class="rclr1">Sh
-  <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i>
+  <td>E-F</td><td class="rclr1">Sh</td>
+  <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i></td>
   <td><b>Sprite shape</b>. This and the sprite's size 
     (<code>attr1{E-F}</code>) determines the sprite's real size, see 
-    <a href="#tbl-obj-size">table 8.4</a>.
+    <a href="#tbl-obj-size">table 8.4</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -273,10 +273,10 @@ Two extra notes on attribute 0. First, `attr0` contains the ***y*** coordinate; 
 <caption align="bottom">
   <b>{*@tbl:obj-size}</b>: GBA sprite sizes
 </caption>
-<tr><td>shape\size <th>00    <th>01    <th>10    <th>11
-<tr><th>00<td>8×8  <td>16×16 <td>32×32 <td>64×64
-<tr><th>01<td>16×8 <td>32×8 <td>32×16 <td>64×32
-<tr><th>10<td>8×16 <td>8×32 <td>16×32 <td>32×64
+<tr><td>shape\size</td> <th>00</th>    <th>01</th>    <th>10</th>    <th>11</th></tr>
+<tr><th>00</th><td>8×8</td>  <td>16×16</td> <td>32×32</td> <td>64×64</td></tr>
+<tr><th>01</th><td>16×8</td> <td>32×8</td> <td>32×16</td> <td>64×32</td></tr>
+<tr><th>10</th><td>8×16</td> <td>8×32</td> <td>16×32</td> <td>32×64</td></tr>
 </table></div>
 
 ### Attribute 1 {#ssec-obj-attr1}
@@ -289,47 +289,47 @@ The primary parts of this attribute are the *x* coordinate and the size of the s
   OBJ_ATTR.attr1
 </caption>
 <tr class="bits">
-	<td>F E<td>D<td>C<td>B A 9<td>8 7 6 5 4 3 2 1 0
+	<td>F E</td><td>D</td><td>C</td><td>B A 9</td><td>8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-	<td class="rclr1">Sz
-	<td class="rclr2">VF
-	<td class="rclr2">HF
-	<td>-
-	<td class="rclr0">X
+	<td class="rclr1">Sz</td>
+	<td class="rclr2">VF</td>
+	<td class="rclr2">HF</td>
+	<td>-</td>
+	<td class="rclr0">X</td></tr>
 <tr class="bf">
-    <td>-
-	<td colspan=3 class="rclr3">AID
-    <td>-
+    <td>-</td>
+	<td colspan=3 class="rclr3">AID</td>
+    <td>-</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-8<td class="rclr0">X
-  <td><i>ATTR1_X#</i>
-  <td><b>X coordinate</b>. Marks left of the sprite.
+  <td>0-8</td><td class="rclr0">X</td>
+  <td><i>ATTR1_X#</i></td>
+  <td><b>X coordinate</b>. Marks left of the sprite.</td></tr>
 <tr class="bg1">	
-  <td>9-D<td class="rclr3">AID
-  <td><i>ATTR1_AFF#</i>
+  <td>9-D</td><td class="rclr3">AID</td>
+  <td><i>ATTR1_AFF#</i></td>
   <td><b>Affine index</b>. Specifies the <code>OAM_AFF_ENTY</code> this 
     sprite uses. Valid <i>only</i> if the affine flag 
-    (<code>attr0</code>{8}) is set.
+    (<code>attr0</code>{8}) is set.</td></tr>
 <tr class="bg0">	
-  <td>C-D<td class="rclr2">HF, VF
-  <td>ATTR1_HFLIP, ATTR1_VFLIP. <i>ATTR1_FLIP#</i>
+  <td>C-D</td><td class="rclr2">HF, VF</td>
+  <td>ATTR1_HFLIP, ATTR1_VFLIP. <i>ATTR1_FLIP#</i></td>
   <td><b>Horizontal/vertical flipping</b> flags. Used <i>only</i> if 
     the affine flag (<code>attr0</code>) is clear; otherwise they're 
-    part of the affine index.
+    part of the affine index.</td></tr>
 <tr class="bg1">	
-  <td>E-F<td class="rclr1">Sz
-  <td><i>ATTR1_SIZE#</i>
+  <td>E-F</td><td class="rclr1">Sz</td>
+  <td><i>ATTR1_SIZE#</i></td>
   <td><b>Sprite size</b>. Kinda. Together with the shape bits
     (<code>attr0</code>{E-F}) these determine the sprite's real size, 
-    see {@tbl:obj-size}.
+    see {@tbl:obj-size}.</td></tr>
 </tbody>
 </table>
 </div>
@@ -346,36 +346,36 @@ This attribute tells the GBA which tiles to display and its background priority.
   OBJ_ATTR.attr2
 </caption>
 <tr class="bits">
-	<td>F E D C<td>B A<td>9 8 7 6 5 4 3 2 1 0
+	<td>F E D C</td><td>B A</td><td>9 8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-	<td class="rclr1">PB
-	<td class="rclr2">Pr
-	<td class="rclr0">TID
+	<td class="rclr1">PB</td>
+	<td class="rclr2">Pr</td>
+	<td class="rclr0">TID</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def">
-<tr align="left"><th>bits<th>name<th>&nbsp;<th>description
+<tr align="left"><th>bits</th><th>name</th><th>&nbsp;</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-9<td class="rclr0">TID
-  <td>ATTR2_ID#
+  <td>0-9</td><td class="rclr0">TID</td>
+  <td>ATTR2_ID#</td>
   <td>Base <b>tile index</b> of sprite. Note that in bitmap modes,
-    this must be 512 or higher.
+    this must be 512 or higher.</td></tr>
 <tr class="bg1">	
-  <td>A-B<td class="rclr2">Pr
-  <td>ATTR2_PRIO#
+  <td>A-B</td><td class="rclr2">Pr</td>
+  <td>ATTR2_PRIO#</td>
   <td><b>Priority</b>. Higher priorities are drawn first (and therefore 
     can be covered by later sprites and backgrounds). Sprites cover 
     backgrounds of the same priority, and for sprites of the 
-    same priority, the higher <code>OBJ_ATTR</code>s are drawn first.
+    same priority, the higher <code>OBJ_ATTR</code>s are drawn first.</td></tr>
 <tr class="bg0">	
-  <td>C-F<td class="rclr1">PB
-  <td>ATTR2_PALBANK#
+  <td>C-F</td><td class="rclr1">PB</td>
+  <td>ATTR2_PALBANK#</td>
   <td><b>Palette bank</b> to use when in 16-color mode. Has no effect if
-	the color mode flag (<code>attr0</code>{C}) is set.
+	the color mode flag (<code>attr0</code>{C}) is set.</td></tr>
 </tbody>
 </table>
 </div>

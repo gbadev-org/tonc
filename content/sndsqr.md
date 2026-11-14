@@ -29,7 +29,7 @@ The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*)
 <table id="eq:wave">
 <tbody valign="middle">
 <tr>
-  <td class="eqnrcell">({!@eq:wave})
+  <td class="eqnrcell">({!@eq:wave})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -79,7 +79,7 @@ The canonical wave is the <dfn>harmonic wave</dfn>. This is any function ψ(*x*)
     </mrow>
   </mstyle>
 </math>
-</tbody>
+</td></tr></tbody>
 </table>
 
 General solution(s):
@@ -94,7 +94,7 @@ General solution(s):
 
 <table id="eq:wave-sols">
 <tr>
-  <td class="eqnrcell">({!@eq:wave-sols})
+  <td class="eqnrcell">({!@eq:wave-sols})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -193,7 +193,7 @@ General solution(s):
       </mtable>
     </mrow>
   </mstyle>
-</math>
+</math></td></tr>
 </table>
 
 <div class="cpt_fr" style="width:212px;">
@@ -222,20 +222,20 @@ While the full range between 20 Hz and 20 kHz is audible, only a discrete set of
 </caption>
 <tbody align="center">
 <tr>
-  <th> half-note
-  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5
-  <th> 6 <th> 7 <th> 8 <th> 9 <th>10 <th>11 
-  <th> (12) 
+  <th> half-note</th>
+  <th> 0</th> <th> 1</th> <th> 2</th> <th> 3</th> <th> 4</th> <th> 5</th>
+  <th> 6</th> <th> 7</th> <th> 8</th> <th> 9</th> <th>10</th> <th>11</th> 
+  <th> (12)</th></tr> 
 <tr>
-  <th> name
-  <td> C <td> C# <td> D <td> D# <td> E <td> F 
-  <td> F# <td> G <td> G# <td> A <td> A# <td> B 
-  <td> (C)
+  <th> name</th>
+  <td> C</td> <td> C#</td> <td> D</td> <td> D#</td> <td> E</td> <td> F</td> 
+  <td> F#</td> <td> G</td> <td> G#</td> <td> A</td> <td> A#</td> <td> B</td> 
+  <td> (C)</td></tr>
 <tr>
-  <th> freq (Hz)
-  <td> 261.7 <td> 277.2 <td> 293.7 <td> 311.2 <td> 329.7 <td> 349.3 
-  <td> 370.0 <td> 392.0 <td> 415.3 <td> 440.0 <td> 466.2 <td> 493.9
-  <td> (523.3)
+  <th> freq (Hz)</th>
+  <td> 261.7</td> <td> 277.2</td> <td> 293.7</td> <td> 311.2</td> <td> 329.7</td> <td> 349.3</td> 
+  <td> 370.0</td> <td> 392.0</td> <td> 415.3</td> <td> 440.0</td> <td> 466.2</td> <td> 493.9</td>
+  <td> (523.3)</td></tr>
 </tbody>
 </table>
 </div>
@@ -249,7 +249,7 @@ f(x) = \frac{1}{2}A_0 + \sum_{n>0}A_m\cos(m{\omega}t) + \sum_{n>0}B_m\sin(m{\ome
 -->
 <table id="eq:fser">
 <tr>
-  <td class="eqnrcell">({!@eq:fser})
+  <td class="eqnrcell">({!@eq:fser})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -324,7 +324,7 @@ f(x) = \frac{1}{2}A_0 + \sum_{n>0}A_m\cos(m{\omega}t) + \sum_{n>0}B_m\sin(m{\ome
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 Of course, the whole thing relies on being able to find the coefficients *A*<sub>m</sub> and *B*<sub>m</sub>. While it is fairly straightforward to derive the equations for them, I'll leave that as an exercise for the reader and just present the results in the form of {@eq:ftrans}. I should mention that there are actually a few ways of defining Fourier transforms. For example, there are versions that don't integrate over \[0,*T*\], but over \[−½*T*, ½*T*\]; or use the complex exponential instead of sines and cosines, but in the end they're all doing the same thing.
 
@@ -336,7 +336,7 @@ B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
 -->
 <table id="eq:ftrans">
 <tr>
-  <td class="eqnrcell">({!@eq:ftrans})
+  <td class="eqnrcell">({!@eq:ftrans})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -438,9 +438,7 @@ B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
     </mrow>
   </mstyle>
 </math>
-  </tbody>
-  </table>
-</table>
+</td></tr>  </table>
 
 <div class="cpt_fr" style="width:212px;">
 <img src="./img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
@@ -455,7 +453,7 @@ A_m = \frac{2}{\pi} \cdot \frac{\sin({\pi}mh/T)}{m} = \frac{2T}{h} \cdot \frac{\
 -->
 <table id="eq:fsqr">
 <tr>
-  <td class="eqnrcell">({!@eq:fsqr})
+  <td class="eqnrcell">({!@eq:fsqr})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -540,9 +538,7 @@ A_m = \frac{2}{\pi} \cdot \frac{\sin({\pi}mh/T)}{m} = \frac{2T}{h} \cdot \frac{\
     </mrow>
   </mstyle>
 </math>
-  </tbody>
-  </table>
-</table>
+</td></tr>  </table>
 
 *A*<sub>m</sub> is a <dfn>sinc</dfn> function: sin(*x*)/*x*. For high *m* it approaches zero (as it should, since higher terms should be relatively less important), but also interesting is that of the higher terms some will also *vanish* because of the sine. This will happen whenever *m* is a multiple of *T/h*.
 
@@ -560,50 +556,50 @@ The register nomenclature seems particularly vexed when it comes to sound. There
   <b>{*@tbl:snd-names}</b>: Sound register nomenclature.
 </caption>
 <tr align="center">
-  <th> offset	<th> function 
-  <th> old		<th> new			<th> tonc
+  <th> offset</th>	<th> function</th> 
+  <th> old</th>		<th> new</th>			<th> tonc</th></tr>
 <tr>
-  <th> 60h	<td> channel 1 (sqr) sweep
-  <td rowspan=2> REG_SG10	<td> SOUND1CNT_L	<td> REG_SND1SWEEP	
+  <th> 60h</th>	<td> channel 1 (sqr) sweep</td>
+  <td rowspan=2> REG_SG10</td>	<td> SOUND1CNT_L</td>	<td> REG_SND1SWEEP</td></tr>	
 <tr>
-  <th> 62h	<td> channel 1 (sqr) len, duty, env
-  <!-- -->		<td> SOUND1CNT_H	<td> REG_SND1CNT
+  <th> 62h</th>	<td> channel 1 (sqr) len, duty, env
+  <!-- --></td>		<td> SOUND1CNT_H</td>	<td> REG_SND1CNT</td></tr>
 <tr>
-  <th> 64h	<td> channel 1 (sqr) freq, on
-  <td> REG_SG11	<td> SOUND1CNT_X	<td> REG_SND1FREQ
+  <th> 64h</th>	<td> channel 1 (sqr) freq, on</td>
+  <td> REG_SG11</td>	<td> SOUND1CNT_X</td>	<td> REG_SND1FREQ</td></tr>
 <tr>
-  <th> 68h		<td> channel 2 (sqr) len, duty, env
-  <td> REG_SG20	<td> SOUND2CNT_L	<td> REG_SND2CNT
+  <th> 68h</th>		<td> channel 2 (sqr) len, duty, env</td>
+  <td> REG_SG20</td>	<td> SOUND2CNT_L</td>	<td> REG_SND2CNT</td></tr>
 <tr>
-  <th> 6Ch		<td> channel 2 (sqr) freq, on
-  <td> REG_SG21	<td> SOUND2CNT_H	<td> REG_SND2FREQ
+  <th> 6Ch</th>		<td> channel 2 (sqr) freq, on</td>
+  <td> REG_SG21</td>	<td> SOUND2CNT_H</td>	<td> REG_SND2FREQ</td></tr>
 <tr>
-  <th> 70h		<td> channel 3 (wave) mode
-  <td rowspan=2> REG_SG30	<td> SOUND3CNT_L	<td> REG_SND3SEL
+  <th> 70h</th>		<td> channel 3 (wave) mode</td>
+  <td rowspan=2> REG_SG30</td>	<td> SOUND3CNT_L</td>	<td> REG_SND3SEL</td></tr>
 <tr>
-  <th> 72h		<td> channel 3 (wave) len, vol
-  <!-- -->		<td> SOUND3CNT_H	<td> REG_SND3CNT
+  <th> 72h</th>		<td> channel 3 (wave) len, vol
+  <!-- --></td>		<td> SOUND3CNT_H</td>	<td> REG_SND3CNT</td></tr>
 <tr>
-  <th> 74h		<td> channel 3 (wave) freq, on
-  <td> REG_SG31	<td> SOUND3CNT_X	<td> REG_SND3FREQ
+  <th> 74h</th>		<td> channel 3 (wave) freq, on</td>
+  <td> REG_SG31</td>	<td> SOUND3CNT_X</td>	<td> REG_SND3FREQ</td></tr>
 <tr>
-  <th> 78h		<td> channel 4 (noise) len, vol, env
-  <td> REG_SG40	<td> SOUND4CNT_L	<td> REG_SND4CNT
+  <th> 78h</th>		<td> channel 4 (noise) len, vol, env</td>
+  <td> REG_SG40</td>	<td> SOUND4CNT_L</td>	<td> REG_SND4CNT</td></tr>
 <tr>
-  <th> 7Ch		<td> channel 4 (noise) freq, on
-  <td> REG_SG41	<td> SOUND4CNT_H	<td> REG_SND4FREQ	
+  <th> 7Ch</th>		<td> channel 4 (noise) freq, on</td>
+  <td> REG_SG41</td>	<td> SOUND4CNT_H</td>	<td> REG_SND4FREQ</td></tr>	
 <tr>
-  <th> 80h	<td> DMG master control
-  <td rowspan=2> REG_SGCNT0	<td> SOUNDCNT_L	<td> REG_SNDDMGCNT
+  <th> 80h</th>	<td> DMG master control</td>
+  <td rowspan=2> REG_SGCNT0</td>	<td> SOUNDCNT_L</td>	<td> REG_SNDDMGCNT</td></tr>
 <tr>
-  <th> 82h	<td> DSound master control	
-  <!-- -->		<td> SOUNDCNT_H	<td> REG_SNDDSCNT
+  <th> 82h</th>	<td> DSound master control	
+  <!-- --></td>		<td> SOUNDCNT_H</td>	<td> REG_SNDDSCNT</td></tr>
 <tr>
-  <th> 84h	<td> sound status	
-  <td> REG_SGCNT1	<td> SOUNDCNT_X	<td> REG_SNDSTAT
+  <th> 84h</th>	<td> sound status</td>	
+  <td> REG_SGCNT1</td>	<td> SOUNDCNT_X</td>	<td> REG_SNDSTAT</td></tr>
 <tr>
-  <th> 88h	<td> bias control
-  <td> REG_SGBIAS	<td> SOUNDBIAS	<td> REG_SNDBIAS
+  <th> 88h</th>	<td> bias control</td>
+  <td> REG_SGBIAS</td>	<td> SOUNDBIAS</td>	<td> REG_SNDBIAS</td></tr>
 </table>
 </div>
 
@@ -621,45 +617,45 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
   REG_SNDDMGCNT (SOUNDCNT_L / SGCNT0_L ) @ 0400:0080h
 </caption>
 <tr class="bits">
-  <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
-  <td>7<td>6 5 4<td>3<td>2 1 0
+  <td>F</td><td>E</td><td>D</td><td>C</td><td>B</td><td>A</td><td>9</td><td>8</td>
+  <td>7</td><td>6 5 4</td><td>3</td><td>2 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr1">R4
-  <td class="rclr1">R3
-  <td class="rclr1">R2
-  <td class="rclr1">R1
-  <td class="rclr0">L4
-  <td class="rclr0">L3
-  <td class="rclr0">L2
-  <td class="rclr0">L1
-  <td> -
-  <td class="rclr3">RV
-  <td> -
-  <td class="rclr2">LV
+  <td class="rclr1">R4</td>
+  <td class="rclr1">R3</td>
+  <td class="rclr1">R2</td>
+  <td class="rclr1">R1</td>
+  <td class="rclr0">L4</td>
+  <td class="rclr0">L3</td>
+  <td class="rclr0">L2</td>
+  <td class="rclr0">L1</td>
+  <td> -</td>
+  <td class="rclr3">RV</td>
+  <td> -</td>
+  <td class="rclr2">LV</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-2<td class="rclr2">LV
-  <td> &nbsp;
-  <td> Left volume
+  <td>0-2</td><td class="rclr2">LV</td>
+  <td> &nbsp;</td>
+  <td> Left volume</td></tr>
 <tr class="bg1">	
-  <td>4-6<td class="rclr3">RV
-  <td> &nbsp;
-  <td> Right volume
+  <td>4-6</td><td class="rclr3">RV</td>
+  <td> &nbsp;</td>
+  <td> Right volume</td></tr>
 <tr class="bg0">	
-  <td>8-B<td class="rclr0">L1-L4
-  <td>SDMG_LSQR1, SDMG_LSQR2, SDMG_LWAVE, SDMG_LNOISE
-  <td>Channels 1-4 on left
+  <td>8-B</td><td class="rclr0">L1-L4</td>
+  <td>SDMG_LSQR1, SDMG_LSQR2, SDMG_LWAVE, SDMG_LNOISE</td>
+  <td>Channels 1-4 on left</td></tr>
 <tr class="bg1">	
-  <td>C-F<td class="rclr1">R1-R4
-  <td>SDMG_RSQR1, SDMG_RSQR2, SDMG_RWAVE, SDMG_RNOISE
-  <td>Channels 1-4 on right
+  <td>C-F</td><td class="rclr1">R1-R4</td>
+  <td>SDMG_RSQR1, SDMG_RSQR2, SDMG_RWAVE, SDMG_RNOISE</td>
+  <td>Channels 1-4 on right</td></tr>
 </tbody>
 </table>
 </div>
@@ -684,69 +680,69 @@ No, I'll stick to these names. Probably. Hopefully. … To be honest, I really d
   REG_SNDDSCNT (SOUNDCNT_H / SGCNT0_H) @ 0400:0082h
 </caption>
 <tr class="bits">
-  <td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
-  <td>7 6 5 4<td>3<td>2<td> 1 0
+  <td>F</td><td>E</td><td>D</td><td>C</td><td>B</td><td>A</td><td>9</td><td>8</td>
+  <td>7 6 5 4</td><td>3</td><td>2</td><td> 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr4">BF
-  <td class="rclr3">BT
-  <td class="rclr2">BL
-  <td class="rclr2">BR
-  <td class="rclr4">AF
-  <td class="rclr3">AT
-  <td class="rclr2">AL
-  <td class="rclr2">AR
-  <td> - 
-  <td class="rclr1">BV
-  <td class="rclr1">AV
-  <td class="rclr0">DMGV
+  <td class="rclr4">BF</td>
+  <td class="rclr3">BT</td>
+  <td class="rclr2">BL</td>
+  <td class="rclr2">BR</td>
+  <td class="rclr4">AF</td>
+  <td class="rclr3">AT</td>
+  <td class="rclr2">AL</td>
+  <td class="rclr2">AR</td>
+  <td> -</td> 
+  <td class="rclr1">BV</td>
+  <td class="rclr1">AV</td>
+  <td class="rclr0">DMGV</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-1<td class="rclr0">DMGV
-  <td>SDS_DMG25, SDS_DMG50, SDS_DMG100
+  <td>0-1</td><td class="rclr0">DMGV</td>
+  <td>SDS_DMG25, SDS_DMG50, SDS_DMG100</td>
   <td>DMG Volume ratio. 
     <ul>
-      <li><b>00</b>: 25%
-      <li><b>01</b>: 50%
-      <li><b>10</b>: 100%
-      <li><b>11</b>: forbidden
-    </ul>
+      <li><b>00</b>: 25%</li>
+      <li><b>01</b>: 50%</li>
+      <li><b>10</b>: 100%</li>
+      <li><b>11</b>: forbidden</li>
+    </ul></td></tr>
 <tr class="bg1">	
-  <td> 2 <td class="rclr1">AV
-  <td>SDS_A50, SDS_A100
-  <td>DSound A volume ratio. 50% if clear; 100% of set
+  <td> 2</td> <td class="rclr1">AV</td>
+  <td>SDS_A50, SDS_A100</td>
+  <td>DSound A volume ratio. 50% if clear; 100% of set</td></tr>
 <tr class="bg0">	
-  <td> 3 <td class="rclr1">BV
-  <td>SDS_B50, SDS_B100
-  <td>DSound B volume ratio. 50% if clear; 100% of set
+  <td> 3</td> <td class="rclr1">BV</td>
+  <td>SDS_B50, SDS_B100</td>
+  <td>DSound B volume ratio. 50% if clear; 100% of set</td></tr>
 <tr class="bg1">	
-  <td>8-9<td class="rclr2">AR, AL
-  <td>SDS_AR, SDS_AL
-  <td><B>DSound A enable</b> Enable DS A on right and left speakers
+  <td>8-9</td><td class="rclr2">AR, AL</td>
+  <td>SDS_AR, SDS_AL</td>
+  <td><B>DSound A enable</b> Enable DS A on right and left speakers</td></tr>
 <tr class="bg0">	
-  <td> A <td class="rclr3">AT
-  <td>SDS_ATMR0, SDS_ATMR1
+  <td> A</td> <td class="rclr3">AT</td>
+  <td>SDS_ATMR0, SDS_ATMR1</td>
   <td><b>Dsound A timer</B>. Use timer 0 (if clear)  or 1 (if set) 
-    for DS A
+    for DS A</td></tr>
 <tr class="bg1">	
-  <td> B <td class="rclr4">AF
-  <td>SDS_ARESET
+  <td> B</td> <td class="rclr4">AF</td>
+  <td>SDS_ARESET</td>
   <td><b>FIFO reset for Dsound A</b>. When using DMA for Direct sound, 
-    this will cause DMA to reset the FIFO buffer after it's used.
+    this will cause DMA to reset the FIFO buffer after it's used.</td></tr>
 <tr class="bg0">	
-  <td>C-F
+  <td>C-F</td>
   <td>
     <span class="rclr2">BR, BL</span>, 
     <span class="rclr3">BT</span>, 
-    <span class="rclr4">BF</span>
-  <td>SDS_BR, SDS_BL, SDS_BTMR0, SDS_BTMR1, SDS_BRESET
-  <td>As bits 8-B, but for DSound B
+    <span class="rclr4">BF</span></td>
+  <td>SDS_BR, SDS_BL, SDS_BTMR0, SDS_BTMR1, SDS_BRESET</td>
+  <td>As bits 8-B, but for DSound B</td></tr>
 </tbody>
 </table>
 </div>
@@ -759,38 +755,38 @@ Don't know too much about `REG_SNDDSCNT`, apart from that it governs PCM sound, 
   REG_SNDSTAT (SOUNDCNT_X / SGCNT1) @ 0400:0084h
 </caption>
 <tr class="bits">
-  <td>F E D C B A 9 8
-  <td>7<td>6 5 4
-  <td class="rof">3<td class="rof">2<td class="rof">1<td class="rof">0
+  <td>F E D C B A 9 8</td>
+  <td>7</td><td>6 5 4</td>
+  <td class="rof">3</td><td class="rof">2</td><td class="rof">1</td><td class="rof">0</td></tr>
 <tr class="bf">
-  <td> -
-  <td class="rclr0">MSE
-  <td> -
-  <td class="rclr1">4A
-  <td class="rclr1">3A
-  <td class="rclr1">2A
-  <td class="rclr1">1A
+  <td> -</td>
+  <td class="rclr0">MSE</td>
+  <td> -</td>
+  <td class="rclr1">4A</td>
+  <td class="rclr1">3A</td>
+  <td class="rclr1">2A</td>
+  <td class="rclr1">1A</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=128>
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td class="rof">0-3<td class="rclr1">1A-4A
-  <td>SSTAT_SQR1, SSTAT_SQR2, SSTAT_WAVE, SSTAT_NOISE
+  <td class="rof">0-3</td><td class="rclr1">1A-4A</td>
+  <td>SSTAT_SQR1, SSTAT_SQR2, SSTAT_WAVE, SSTAT_NOISE</td>
   <td><b>Active channels</b>. Indicates which DMG channels are 
     currently playing. They do <i>not</i> enable the channels; 
-    that's what <code>REG_SNDDMGCNT</code> is for.
+    that's what <code>REG_SNDDMGCNT</code> is for.</td></tr>
 <tr class="bg1">	
-  <td> 7 <td class="rclr0">MSE
-  <td>SSTAT_DISABLE, SSTAT_ENABLE
+  <td> 7</td> <td class="rclr0">MSE</td>
+  <td>SSTAT_DISABLE, SSTAT_ENABLE</td>
   <td><b>Master Sound Enable</b>. Must be set if any sound is to 
     be heard at all. Set this <b>before</b> you do anything else: 
     the other registers can't be accessed otherwise, see GBATEK 
-    for details. 
+    for details.</td></tr> 
 </tbody>
 </table>
 </div>
@@ -814,7 +810,7 @@ R(f) = 2048 - \frac{2^{17}}{f}
 
 <table id="eq:fvsr">
 <tr>
-  <td class="eqnrcell">({!@eq:fvsr}a)
+  <td class="eqnrcell">({!@eq:fvsr}a)</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -845,8 +841,8 @@ R(f) = 2048 - \frac{2^{17}}{f}
       </mtable>
     </mrow>
   </mstyle>
-</math><tr>
-  <td class="eqnrcell">({!@eq:fvsr}b)
+</math></td></tr><tr>
+  <td class="eqnrcell">({!@eq:fvsr}b)</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -875,7 +871,7 @@ R(f) = 2048 - \frac{2^{17}}{f}
       </mtable>
     </mrow>
   </mstyle>
-</math>
+</math></td></tr>
 </table>
 
 ### Square sound registers {#ssec-snd-sqrreg}
@@ -892,56 +888,56 @@ Both square-wave generators have registers `REG_SNDxCNT` for envelope/length/dut
   REG_SND2CNT (SOUND2CNT_L / SG20_L) @ 0400:0068h</span>
 </caption>
 <tr class="bits">
-  <td>F E D C<td>B<td>A 9 8<td>7 6<td class="wof">5 4 3 2 1 0
+  <td>F E D C</td><td>B</td><td>A 9 8</td><td>7 6</td><td class="wof">5 4 3 2 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr0">EIV
-  <td class="rclr1">ED
-  <td class="rclr2">EST
-  <td class="rclr3">D
-  <td class="rclr4">L
+  <td class="rclr0">EIV</td>
+  <td class="rclr1">ED</td>
+  <td class="rclr2">EST</td>
+  <td class="rclr3">D</td>
+  <td class="rclr4">L</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td class="wof">0-5<td class="rclr4">L
-  <td>SSQR_LEN#
+  <td class="wof">0-5</td><td class="rclr4">L</td>
+  <td>SSQR_LEN#</td>
   <td>Sound <b>Length</b>. This is a <i>write-only</i> field and only 
     works if the channel is timed (<code>REG_SNDxFREQ{E}</code>). The 
     length itself is actually (64&minus;<i>L</i>)/256 seconds for a 
-    [3.9, 250] ms range.
+    [3.9, 250] ms range.</td></tr>
 <tr class="bg1">	
-  <td>6-7<td class="rclr3">D
+  <td>6-7</td><td class="rclr3">D</td>
   <td>SSQR_DUTY1_8, SSQR_DUTY1_4, SSQR_DUTY1_2, SSQR_DUTY3_4, 
-    SSQR_DUTY#
+    SSQR_DUTY#</td>
   <td>Wave <b>duty cycle</b>. Ratio between on and of times of the 
     square wave. Looking back at eq&nbsp;18.2, 
 	this comes down to <i>D=h/T</i>. The available cycles are 
 	12.5%, 25%, 50%, and 75% (one eighth, quarter, half and three 
-	quarters).
+	quarters).</td></tr>
 <tr class="bg0">	
-  <td>8-A<td class="rclr2">EST
-  <td>SSQR_TIME#
+  <td>8-A</td><td class="rclr2">EST</td>
+  <td>SSQR_TIME#</td>
   <td>Envelope <b>step-time</b>. Time between envelope changes: 
-    &Delta;t = <i>EST</i>/64 s.
+    &Delta;t = <i>EST</i>/64 s.</td></tr>
 <tr class="bg1">	
-  <td> B <td class="rclr1">ED
-  <td>SSQR_DEC, SSQR_INC
+  <td> B</td> <td class="rclr1">ED</td>
+  <td>SSQR_DEC, SSQR_INC</td>
   <td>Envelope <b>direction</b>. Indicates if the envelope 
-    decreases (default) or increases with each step. 
+    decreases (default) or increases with each step.</td></tr> 
 <tr class="bg0">	
-  <td>C-F<td class="rclr0">EIV
-  <td>SSQR_IVOL#
+  <td>C-F</td><td class="rclr0">EIV</td>
+  <td>SSQR_IVOL#</td>
   <td>Envelope <b>initial value</b>. Can be considered a <b>volume</b> 
     setting of sorts: 0 is silent and 15 is full volume. Combined 
     with the direction, you can have fade-in and fade-outs; to have a 
     sustaining sound, set initial volume to 15 and an increasing 
     direction. To vary the <i>real</i> volume, remember 
-    <code>REG_SNDDMGCNT</code>.
+    <code>REG_SNDDMGCNT</code>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -957,7 +953,7 @@ A_m = \frac{2}{\pi} \cdot \frac{sin({\pi}Dm)}{m}
 -->
 <table>
 <tr>
-  <td class="fill">&nbsp;
+  <td class="fill">&nbsp;</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -996,7 +992,7 @@ A_m = \frac{2}{\pi} \cdot \frac{sin({\pi}Dm)}{m}
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 Some more on the duty cycle. Remember we've done a Fourier analysis of the square wave so we could determine the frequencies in it. Apart from the **base frequency**, there are also **overtones** of frequencies *m·f*. The spectrum (see {@fig:sqrf}) gives the amplitudes of all these frequencies. Note that even though the figure has lines, only integral values of *m* are allowed. The base frequency at *m*=1 has the highest significance and the rest falls off with 1/*m*. The interesting part is when the sine comes into play: whenever *m·D* is an integer, that component vanishes! With a fractional duty number –like the ones we have– this happens every time *m* is equal to the denominator. For the 50% duty, every second overtone disappears, leaving a fairly smooth tone; for 12.5%, only every eighth vanishes and the result is indeed a noisier sound. Note that for *both* ¼ and ¾ duties every fourth vanishes so that they should be indistinguishable. I was a little surprised about this result, but sure enough, when I checked they really did sound the same to me.
 
@@ -1010,45 +1006,45 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   REG_SND2FREQ (SOUND2CNT_H / SG21) @ 0400:006Ch</span>
 </caption>
 <tr class="bits">
-  <td class="wof">F<td>E<td>D C B
-  <td class="wof">A 9 8 7 6 5 4 3 2 1 0
+  <td class="wof">F</td><td>E</td><td>D C B</td>
+  <td class="wof">A 9 8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr1">Re
-  <td class="rclr2">T
-  <td> - 
-  <td class="rclr0">R
+  <td class="rclr1">Re</td>
+  <td class="rclr2">T</td>
+  <td> -</td> 
+  <td class="rclr0">R</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td class="wof">0-A<td class="rclr0">R
-  <td>SFREQ_RATE#
+  <td class="wof">0-A</td><td class="rclr0">R</td>
+  <td>SFREQ_RATE#</td>
   <td>Sound <b>rate</b>. Well, initial rate. That's <i>rate</i>, not 
     frequency. Nor period. The relation between rate and frequency is 
     <span class="nobr"><i>f</i> = 
     2<sup>17</sup><big>/</big>(2048-<i>R</i>)</span>. Write-only 
-    field.
+    field.</td></tr>
 <tr class="bg1">	
-  <td> E <td class="rclr2">T
-  <td>SFREQ_HOLD, SFREQ_TIMED
+  <td> E</td> <td class="rclr2">T</td>
+  <td>SFREQ_HOLD, SFREQ_TIMED</td>
   <td><b>Timed</b> flag. If set, the sound plays for as long as 
     the length field (<code>REG_SNDxCNT</code>{0-5}) indicates. 
     If clear, the sound plays forever. Note that even if a decaying 
     envelope has reached 0, the sound itself would still be considered 
-    on, even if it's silent.
+    on, even if it's silent.</td></tr>
 <tr class="bg0">	
-  <td class="wof"> F <td class="rclr1">Re
-  <td>SFREQ_RESET
+  <td class="wof"> F</td> <td class="rclr1">Re</td>
+  <td>SFREQ_RESET</td>
   <td>Sound <b>reset</b>. Resets the sound to the initial volume (and 
     sweep) settings. Remember that the rate field is in this register 
     as well and due to its write-only nature a simple 
     &lsquo;<code>|= SFREQ_RESET</code>&rsquo; will <i>not</i> suffice
-    (even though it might on emulators).
+    (even though it might on emulators).</td></tr>
 </tbody>
 </table>
 </div><br>
@@ -1059,36 +1055,36 @@ Some more on the duty cycle. Remember we've done a Fourier analysis of the squar
   REG_SND1SWEEP (SOUND1CNT_L / SG10_L) @ 0400:0060h
 </caption>
 <tr class="bits">
-  <td>F E D C B A 9 8 7<td>6 5 4<td>3<td>2 1 0
+  <td>F E D C B A 9 8 7</td><td>6 5 4</td><td>3</td><td>2 1 0</td></tr>
 <tr class="bf">
-  <td> - 
-  <td class="rclr2">T
-  <td class="rclr1">M
-  <td class="rclr0">N
+  <td> -</td> 
+  <td class="rclr2">T</td>
+  <td class="rclr1">M</td>
+  <td class="rclr0">N</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-2<td class="rclr0">N
-  <td>SSW_SHIFT#
+  <td>0-2</td><td class="rclr0">N</td>
+  <td>SSW_SHIFT#</td>
   <td>Sweep <b>number</b>. <i>Not</i> the number of sweeps; see the 
-    discussion below.
+    discussion below.</td></tr>
 <tr class="bg1">	
-  <td> 3 <td class="rclr1">M
-  <td>SSW_INC, SSW_DEC
+  <td> 3</td> <td class="rclr1">M</td>
+  <td>SSW_INC, SSW_DEC</td>
   <td>Sweep <b>mode</b>. The sweep can take the rate either up 
-    (default) or down (if set).
+    (default) or down (if set).</td></tr>
 <tr class="bg0">	
-  <td>4-6<td class="rclr2">T
-  <td>SSW_TIME#
+  <td>4-6</td><td class="rclr2">T</td>
+  <td>SSW_TIME#</td>
   <td>Sweep <b>step-time</b>. The time between sweeps is measured in 
     128 Hz (not kHz!): &Delta;t = <i>T</i>/128 ms &asymp; 7.8<i>T</i> 
-    ms; if <i>T</i>=0, the sweep is disabled. 
+    ms; if <i>T</i>=0, the sweep is disabled.</td></tr> 
 </tbody>
 </table>
 </div>
@@ -1100,7 +1096,7 @@ T = T \pm T\cdot2^{-n}
 -->
 <table>
 <tr>
-  <td class="fill">
+  <td class="fill"></td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -1127,7 +1123,7 @@ T = T \pm T\cdot2^{-n}
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 That's what belogic gives and if you know what the terms are you'll be fine. Contrary to what you may read, the sweep does *not* apply to the frequency (*f*). It does *not* apply to the period (*T*, see above). It applies to the **rate** (*R*). If you look in emulators, you can actually *see* the rate-value change.
 
@@ -1140,7 +1136,7 @@ The formulas you may see do say that, but it's easy to misread them. I did. {*@e
 -->
 <table id="eq:sweep">
 <tr>
-  <td class="eqnrcell">({!@eq:sweep}a)
+  <td class="eqnrcell">({!@eq:sweep}a)</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -1168,7 +1164,7 @@ The formulas you may see do say that, but it's easy to misread them. I did. {*@e
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 <!--
 \begin{matrix}
@@ -1179,7 +1175,7 @@ R_j & = & R_{j-1} \pm R_{j-1} \cdot 2^{-n} \\
 -->
 <table>
 <tr>
-  <td class="eqnrcell">({!@eq:sweep}b)
+  <td class="eqnrcell">({!@eq:sweep}b)</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -1288,13 +1284,13 @@ R_j & = & R_{j-1} \pm R_{j-1} \cdot 2^{-n} \\
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 <table>
 <tr>
-  <td class="eqnrcell">({!@eq:sweep}c)
+  <td class="eqnrcell">({!@eq:sweep}c)</td>
   <td class="eqcell">
-    <code>R += R &gt;&gt; n;</code>
+    <code>R += R &gt;&gt; n;</code></td></tr>
 </table>
 
 ### Playing notes {#ssec-snd-notes}
@@ -1313,7 +1309,7 @@ R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)}
 -->
 <table>
 <tr>
-  <td class="fill">&nbsp;
+  <td class="fill">&nbsp;</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -1392,8 +1388,7 @@ R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)}
     </mrow>
   </mstyle>
 </math>
-  </table>
-</table>
+</td></tr>  </table>
 
 And now for the magic. And you *are* expected to understand this.
 
@@ -1408,7 +1403,7 @@ R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)} \\
 -->
 <table id="eq:noterate">
 <tr>
-  <td class="eqnrcell">({!@eq:noterate})
+  <td class="eqnrcell">({!@eq:noterate})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -1601,7 +1596,7 @@ R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)} \\
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 Right, and now for *why* this thing's useful. Remember that the GBA has no hardware division or floating-point support, so we're left with integers and (if possible) shifts. That's why the last term in the last step of {@eq:noterate} was separated. The term with *F* gives a rate offset for the base octave, which we need to divide (read: shift) by the octave offset term for the different octaves. Remember that integer division truncates, so we need a big numerator for the most accuracy. This can be done with a large *C* and by adding an extra term *m*. Basically, this makes it an *m*f fixed point division. The workable octave range is −2 to 5, so we take *C*=5. The value for *m* is *almost* arbitrary, but needs to be higher than two because of the minimum octave is −2, and a shift can never be negative. *m*=4 will suffice.
 
@@ -1768,17 +1763,17 @@ I'll explain what `sos()` is in a little while; but first, something about the c
   <table>
     <tbody valign="top">
       <tr>
-        <th>A / D-pad <td>Play a note
-          <tr><td><td>&uarr; : D (next octave)
-          <tr><td><td>&larr; : B 
-          <tr><td><td>&rarr; : A 
-          <tr><td><td>&darr; : F 
-          <tr><td><td> A     : D 
+        <th>A / D-pad</th> <td>Play a note</td></tr>
+          <tr><td></td><td>&uarr; : D (next octave)</td></tr>
+          <tr><td></td><td>&larr; : B</td></tr> 
+          <tr><td></td><td>&rarr; : A</td></tr> 
+          <tr><td></td><td>&darr; : F</td></tr> 
+          <tr><td></td><td> A     : D</td></tr> 
       <tr>
-        <th>L / R <td> Decrease / Increase current octave ([-2, 5], 
-        wraps around)
+        <th>L / R</th> <td> Decrease / Increase current octave ([-2, 5], 
+        wraps around)</td></tr>
       <tr>
-        <th> B    <td>Play a little tune.
+        <th> B</th>    <td>Play a little tune.</td></tr>
     </tbody>
   </table>
 </div>

@@ -70,16 +70,16 @@ I'm a physicist by training which means that I know my math and its notational c
 
 <div class="lblock">
   <table class="table-data">
-    <tr><th>Type	<th>notation	<th>example
-    <tr><td>bit n in a <code>foo</code>		<td><code>foo</code>{n}	
-    <td><code>REG_DISPCNT{4}</code> (active page bit)
-    <tr><td>code	<td>&lt;code&gt; tag	<td> <code>sx</code>
-    <tr><td>command/file <td>&lt;tt&gt; tag <td> <tt>vid.h</tt>
-    <tr><td>matrix	<td>bold, uppercase		<td> <b>P</b>
-    <tr><td>memory  <td>hex + code			<td> <code>0400:002eh</code>
-    <tr><td>new term <td>bold, italic		<td> <dfn>charblock</dfn>
-    <tr><td>variable <td>italics			<td> <i>x</i>
-    <tr><td>vector	<td>bold, lowercase		<td> <b>v</b>
+    <tr><th>Type</th>	<th>notation</th>	<th>example</th></tr>
+    <tr><td>bit n in a <code>foo</code></td>		<td><code>foo</code>{n}</td>	
+    <td><code>REG_DISPCNT{4}</code> (active page bit)</td></tr>
+    <tr><td>code</td>	<td>&lt;code&gt; tag</td>	<td> <code>sx</code></td></tr>
+    <tr><td>command/file</td> <td>&lt;tt&gt; tag</td> <td> <tt>vid.h</tt></td></tr>
+    <tr><td>matrix</td>	<td>bold, uppercase</td>		<td> <b>P</b></td></tr>
+    <tr><td>memory</td>  <td>hex + code</td>			<td> <code>0400:002eh</code></td></tr>
+    <tr><td>new term</td> <td>bold, italic</td>		<td> <dfn>charblock</dfn></td></tr>
+    <tr><td>variable</td> <td>italics</td>			<td> <i>x</i></td></tr>
+    <tr><td>vector</td>	<td>bold, lowercase</td>		<td> <b>v</b></td></tr>
   </table>
 </div>
 
@@ -87,19 +87,19 @@ I also use some non-ASCII symbols that may not show up properly depending on how
 
 <div class="lblock">
 <table class="table-data">
-<tr><th>symbol<th>description
-<tr><td>&alpha;, &beta;, &gamma;	<td>Greek letters
-<tr><td>&asymp;		<td>approximately
-<tr><td>&frac12;	<td>one half
-<tr><td>&frac14;	<td>one quarter
-<tr><td>&frac34;	<td>three quarters
-<tr><td>&ge;		<td>greater or equal
-<tr><td>&harr;		<td>double-sided arrow
-<tr><td>&isin;		<td>is in (an interval)
-<tr><td>&lang; &rang;		<td>&lsquo;bra&rsquo; &amp; &lsquo;ket&rsquo;
-<tr><td>&rarr;		<td>right arrow
-<tr><td>&sup2;		<td>superscript 2
-<tr><td>&times;		<td>times
+<tr><th>symbol</th><th>description</th></tr>
+<tr><td>&alpha;, &beta;, &gamma;</td>	<td>Greek letters</td></tr>
+<tr><td>&asymp;</td>		<td>approximately</td></tr>
+<tr><td>&frac12;</td>	<td>one half</td></tr>
+<tr><td>&frac14;</td>	<td>one quarter</td></tr>
+<tr><td>&frac34;</td>	<td>three quarters</td></tr>
+<tr><td>&ge;</td>		<td>greater or equal</td></tr>
+<tr><td>&harr;</td>		<td>double-sided arrow</td></tr>
+<tr><td>&isin;</td>		<td>is in (an interval)</td></tr>
+<tr><td>&lang; &rang;</td>		<td>&lsquo;bra&rsquo; &amp; &lsquo;ket&rsquo;</td></tr>
+<tr><td>&rarr;</td>		<td>right arrow</td></tr>
+<tr><td>&sup2;</td>		<td>superscript 2</td></tr>
+<tr><td>&times;</td>		<td>times</td></tr>
 </table>
 </div>
 
@@ -107,10 +107,10 @@ I also make liberal use of shorthand for primitive C types like `char` and `int`
 
 <div class="lblock">
 <table class="table-data">
-<tr><th>base type	<th>alt name <th>unsigned	<th>signed	<th>volatile
-<tr><th>char		<td>byte	 <td>u8			<td>s8		<td>vu8 / vs8
-<tr><th>short		<td>halfword <td>u16		<td>s16		<td>vu16 / vs16
-<tr><th>int			<td>word	 <td>u32		<td>s32		<td>vu32 / vs32
+<tr><th>base type</th>	<th>alt name</th> <th>unsigned</th>	<th>signed</th>	<th>volatile</th></tr>
+<tr><th>char</th>		<td>byte</td>	 <td>u8</td>			<td>s8</td>		<td>vu8 / vs8</td></tr>
+<tr><th>short</th>		<td>halfword</td> <td>u16</td>		<td>s16</td>		<td>vu16 / vs16</td></tr>
+<tr><th>int</th>			<td>word</td>	 <td>u32</td>		<td>s32</td>		<td>vu32 / vs32</td></tr>
 </table>
 </div>
 
@@ -135,17 +135,17 @@ Every time I introduce a register I will give an overview of the bits like this:
   REG_DISPSTAT @ 0400:0004h
 </caption>
 <tr class="bits">
-  <td>F E D C B A 9 8
-  <td>7 6<td>5<td>4<td>3<td class="rof">2<td class="rof">1<td class="rof">0
+  <td>F E D C B A 9 8</td>
+  <td>7 6</td><td>5</td><td>4</td><td>3</td><td class="rof">2</td><td class="rof">1</td><td class="rof">0</td></tr>
 <tr class="bf">
-  <td class="rclr3">VcT
-  <td>-
-  <td class="rclr2">VcI
-  <td class="rclr1">HbI
-  <td class="rclr0">VbI
-  <td class="rclr2">VcS
-  <td class="rclr1">HbS
-  <td class="rclr0">VbS
+  <td class="rclr3">VcT</td>
+  <td>-</td>
+  <td class="rclr2">VcI</td>
+  <td class="rclr1">HbI</td>
+  <td class="rclr0">VbI</td>
+  <td class="rclr2">VcS</td>
+  <td class="rclr1">HbS</td>
+  <td class="rclr0">VbS</td></tr>
 </table>
 </div>
 
@@ -156,19 +156,19 @@ The table lists the register's name (`REG_DISPSTAT`, its address (0400:0004h) an
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="15%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>0 <td class="rclr0">VbS
-  <td>DSTAT_IN_VBL
-  <td>VBlank status, read only. Will be set inside VBlank, clear in VDraw.
+  <td>0</td> <td class="rclr0">VbS</td>
+  <td>DSTAT_IN_VBL</td>
+  <td>VBlank status, read only. Will be set inside VBlank, clear in VDraw.</td></tr>
 <tr class="bg1">
-  <td colspan=4 align="center"><i>other fields</i>
+  <td colspan=4 align="center"><i>other fields</i></td></tr>
 <tr class="bg0">
-  <td>8-F <td class="rclr3">VcT
-  <td><i>DSTAT_VCT#</i>
+  <td>8-F</td> <td class="rclr3">VcT</td>
+  <td><i>DSTAT_VCT#</i></td>
   <td>VCount trigger value. If the current scanline is at this value, 
-    bit 2 is set and an interrupt is fired if requested.
+    bit 2 is set and an interrupt is fired if requested.</td></tr>
 </tbody>
 </table>
 </div>

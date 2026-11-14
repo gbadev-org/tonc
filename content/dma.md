@@ -17,13 +17,13 @@ Every kind of transfer routine needs 3 things: a source, a destination and the a
 <caption align="bottom">
   <b>{*@tbl:dma-regs}</b>: DMA register addresses
 </caption>
-<tr><th>reg<th>function<th>address
-<tr><td><code>REG_DMAxSAD</code><td>source
-	<td><code>0400:00B0h  + 0Ch</code>·x
-<tr><td><code>REG_DMAxDAD</code><td>destination
-	<td><code>0400:00B4h + 0Ch</code>·x
-<tr><td><code>REG_DMAxCNT</code><td>control
-	<td><code>0400:00B8h + 0Ch</code>·x
+<tr><th>reg</th><th>function</th><th>address</th></tr>
+<tr><td><code>REG_DMAxSAD</code></td><td>source</td>
+	<td><code>0400:00B0h  + 0Ch</code>·x</td></tr>
+<tr><td><code>REG_DMAxDAD</code></td><td>destination</td>
+	<td><code>0400:00B4h + 0Ch</code>·x</td></tr>
+<tr><td><code>REG_DMAxCNT</code></td><td>control</td>
+	<td><code>0400:00B8h + 0Ch</code>·x</td></tr>
 </table>
 </div>
 
@@ -38,20 +38,20 @@ The use of the source and destination registers should be obvious. The control r
   REG_DMAxCNT @ 0400:00B8+12<i>x</i>
 </caption>
 <tr class="bits">
-	<td>1F<td>1E<td>1D 1C<td>1B<td>1A<td>19<td>18 17
-	<td>16 15<td>14 13 12 11 10
-	<td>F E D C B A 9 8 7 6 5 4 3 2 1 0
+	<td>1F</td><td>1E</td><td>1D 1C</td><td>1B</td><td>1A</td><td>19</td><td>18 17</td>
+	<td>16 15</td><td>14 13 12 11 10</td>
+	<td>F E D C B A 9 8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr1">En
-  <td class="rclr6">I
-  <td class="rclr5">TM
-  <td>-
-  <td class="rclr2">CS
-  <td class="rclr7">R
-  <td class="rclr3">SA
-  <td class="rclr4">DA
-  <td>-
-  <td class="rclr0">N
+  <td class="rclr1">En</td>
+  <td class="rclr6">I</td>
+  <td class="rclr5">TM</td>
+  <td>-</td>
+  <td class="rclr2">CS</td>
+  <td class="rclr7">R</td>
+  <td class="rclr3">SA</td>
+  <td class="rclr4">DA</td>
+  <td>-</td>
+  <td class="rclr0">N</td></tr>
 </table>
 <br>
 
@@ -59,62 +59,62 @@ The use of the source and destination registers should be obvious. The control r
   <col class="bits" width=56>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>00-0F<td class="rclr0">N
-  <td> 
-  <td><b>Number</b> of transfers.
+  <td>00-0F</td><td class="rclr0">N</td>
+  <td></td> 
+  <td><b>Number</b> of transfers.</td></tr>
 <tr class="bg1">
-  <td>15-16<td class="rclr4">DA
-  <td>DMA_DST_INC, DMA_DST_DEC, DMA_DST_FIXED, DMA_DST_RELOAD
+  <td>15-16</td><td class="rclr4">DA</td>
+  <td>DMA_DST_INC, DMA_DST_DEC, DMA_DST_FIXED, DMA_DST_RELOAD</td>
   <td><b>Destination adjustment</b>.
     <ul>
-      <li><b>00</b>: increment after each transfer (default)
-      <li><b>01</b>: decrement after each transfer
-      <li><b>10</b>: none; address is fixed
+      <li><b>00</b>: increment after each transfer (default)</li>
+      <li><b>01</b>: decrement after each transfer</li>
+      <li><b>10</b>: none; address is fixed</li>
       <li><b>11</b>: increment the destination during the transfer, 
 	    and reset it so that repeat DMA will always start at the 
-		same destination.
-    </ul>
+		same destination.</li>
+    </ul></td></tr>
 <tr class="bg0">
-  <td>17-18<td class="rclr3">SA
-  <td>DMA_SRC_INC, DMA_SRC_DEC, DMA_SRC_FIXED,
+  <td>17-18</td><td class="rclr3">SA</td>
+  <td>DMA_SRC_INC, DMA_SRC_DEC, DMA_SRC_FIXED,</td>
   <td><b>Source Adjustment</b>. Works just like the two bits for the 
     destination. Note that there is no <code>DMA_SRC_RESET</code>; 
-    code 3 for source is forbidden.
+    code 3 for source is forbidden.</td></tr>
 <tr class="bg1">
-  <td> 19  <td class="rclr7">R
-  <td>DMA_REPEAT
+  <td> 19</td>  <td class="rclr7">R</td>
+  <td>DMA_REPEAT</td>
   <td>Repeats the copy at each VBlank or HBlank if the DMA timing 
-    has been set to those modes.
+    has been set to those modes.</td></tr>
 <tr class="bg0">
-  <td> 1A  <td class="rclr2">CS
-  <td>DMA_16, DMA_32
+  <td> 1A</td>  <td class="rclr2">CS</td>
+  <td>DMA_16, DMA_32</td>
   <td><b>Chunk Size</b>. Sets DMA to copy by halfword (if clear) 
-    or word (if set).
+    or word (if set).</td></tr>
 <tr class="bg1">
-  <td>1C-1D<td class="rclr5">TM
-  <td>DMA_NOW, DMA_AT_VBLANK, DMA_AT_HBLANK, DMA_AT_REFRESH
+  <td>1C-1D</td><td class="rclr5">TM</td>
+  <td>DMA_NOW, DMA_AT_VBLANK, DMA_AT_HBLANK, DMA_AT_REFRESH</td>
   <td><b>Timing Mode</b>. Specifies when the transfer should start.
       <ul>
-        <li><b>00</b>: start immediately.
-        <li><b>01</b>: start at VBlank.
-        <li><b>10</b>: start at HBlank. 
+        <li><b>00</b>: start immediately.</li>
+        <li><b>01</b>: start at VBlank.</li>
+        <li><b>10</b>: start at HBlank.</li> 
         <li><b>11</b>: Never used it so far, but here's how I gather it 
           works. For DMA1 and DMA2 it'll refill the FIFO when it has 
           been emptied. Count and size are forced to 1 and 32bit, 
           respectively. For DMA3 it will start the copy at the start of 
-          each rendering line, but with a 2 scanline delay.
-      </ul>
+          each rendering line, but with a 2 scanline delay.</li>
+      </ul></td></tr>
 <tr class="bg0">
-  <td> 1E  <td class="rclr6">I
-  <td>DMA_IRQ
-  <td><b>Interrupt request</b>. Raise an interrupt when finished.
+  <td> 1E</td>  <td class="rclr6">I</td>
+  <td>DMA_IRQ</td>
+  <td><b>Interrupt request</b>. Raise an interrupt when finished.</td></tr>
 <tr class="bg1">
-  <td> 1F  <td class="rclr1">En
-  <td>DMA_ENABLE
-  <td><b>Enable</b> the DMA transfer for this channel.
+  <td> 1F</td>  <td class="rclr1">En</td>
+  <td>DMA_ENABLE</td>
+  <td><b>Enable</b> the DMA transfer for this channel.</td></tr>
 </tbody>
 </table>
 </div>
@@ -268,13 +268,13 @@ It doesn't really matter what you use actually, as long as you can find the edge
 The end result will show something like {@fig:dma-demo}. It's the Brinstar background (again) inside the window, and a striped bg outside. The text indicates the position and radius of the window, which can be moved with the D-pad and scaled by A and B.
 
 <pre><code class="language-c hljs">
-#include <stdio.h>
-#include <tonc.h>
+#include &lt;stdio.h>
+#include &lt;tonc.h>
 
 #include "brin.h"
 
 // From tonc_math.h
-//#define IN_RANGE(x, min, max) ( (x) >= (min) && (x) < (max) )
+//#define IN_RANGE(x, min, max) ( (x) >= (min) &amp;&amp; (x) &lt; (max) )
 
 
 // The source array
@@ -302,7 +302,7 @@ void win_circle(u16 winh[], int x0, int y0, int rr)
     {
         // Side octs
         tmp  = clamp(x0+y, 0, SCREEN_WIDTH);
-        tmp += clamp(x0-y, 0, SCREEN_WIDTH)<<8;
+        tmp += clamp(x0-y, 0, SCREEN_WIDTH)&lt;&lt;8;
         
         if(IN_RANGE(y0-x, 0, SCREEN_HEIGHT))       // o4, o7
             winh[y0-x]= tmp;
@@ -313,7 +313,7 @@ void win_circle(u16 winh[], int x0, int y0, int rr)
         if(d >= 0)      
         {
             tmp  = clamp(x0+x, 0, SCREEN_WIDTH);
-            tmp += clamp(x0-x, 0, SCREEN_WIDTH)<<8;
+            tmp += clamp(x0-x, 0, SCREEN_WIDTH)&lt;&lt;8;
             
             if(IN_RANGE(y0-y, 0, SCREEN_HEIGHT))   // o5, o6
                 winh[y0-y]= tmp;
@@ -379,14 +379,14 @@ int main()
         x0 += key_tri_horz();       // move left/right
         y0 += key_tri_vert();       // move up/down
 
-        if(rr<0)
+        if(rr&lt;0)
             rr= 0;
 
         // Fill circle array
         <span class="bold">win_circle(g_winh, x0, y0, rr);</span>
     
         // Init win-circle HDMA
-        <span class="bold">DMA_TRANSFER(&REG_WIN0H, &g_winh[1], 1, 3, DMA_HDMA);</span>
+        <span class="bold">DMA_TRANSFER(&amp;REG_WIN0H, &amp;g_winh[1], 1, 3, DMA_HDMA);</span>
 
         tte_printf("#{es;P}(%d,%d) | %d", x0, y0, rr);
     }

@@ -136,14 +136,14 @@ You can see a schematic representation of the whole thing in {@fig:prio-demo}b; 
     alt="Priority demo"><br>
   <b>{*@fig:prio-demo}a</b> (left): 
     Priority and sprite order demo.
-  </div>
+  </div></td>
 <td>
   <div class="cpt_fr" style="width:240px;">
   <img src="img/demo/prio_demo_x.png"
     alt="Priority demo schematic"><br>
   <b>{*@fig:prio-demo}b</b>: 
     schematic of {!@fig:prio-demo}a.
-  </div>
+  </div></td></tr>
 </tbody>
 </table>
 
@@ -153,21 +153,21 @@ You can see a schematic representation of the whole thing in {@fig:prio-demo}b; 
   {!@fig:prio-demo}b.
 </caption>
 <tr>
-  <th>color	<th>description		<th>obj/bg	<th>prio
+  <th>color</th>	<th>description</th>		<th>obj/bg</th>	<th>prio</th></tr>
 <tr>
-  <th>yellow <td>cage near	<td>bg1	<td>prio0
+  <th>yellow</th> <td>cage near</td>	<td>bg1</td>	<td>prio0</td></tr>
 <tr>
-  <th>green	<td>cage center	<td>bg2	<td>prio1
+  <th>green</th>	<td>cage center</td>	<td>bg2</td>	<td>prio1</td></tr>
 <tr>
-  <th>blue	<td>cage far	<td>bg3	<td>prio2
+  <th>blue</th>	<td>cage far</td>	<td>bg3</td>	<td>prio2</td></tr>
 <tr>
-  <th>red	<td>strand 1	<td>obj_buffer[00..47]	<td>var
+  <th>red</th>	<td>strand 1</td>	<td>obj_buffer[00..47]</td>	<td>var</td></tr>
 <tr>
-  <th>cyan	<td>strand 2	<td>obj_buffer[48..95]	<td>var
+  <th>cyan</th>	<td>strand 2</td>	<td>obj_buffer[48..95]</td>	<td>var</td></tr>
 <tr>
-  <th>lt red/cyan	<td>near orbs	<td>OAM[0..47]	<td>prio 1
+  <th>lt red/cyan</th>	<td>near orbs</td>	<td>OAM[0..47]</td>	<td>prio 1</td></tr>
 <tr>
-  <th>dark red/cyan	<td>far orbs	<td>OAM[48..95]	<td>prio 2
+  <th>dark red/cyan</th>	<td>far orbs</td>	<td>OAM[48..95]</td>	<td>prio 2</td></tr>
 </table>
 </div>
 
@@ -204,7 +204,7 @@ A \cdot \sin(k\cdot y+\omega t)
 -->
 <table id="eq:helix">
 <tr>
-  <td class="eqnrcell">(!@eq:helix)
+  <td class="eqnrcell">(!@eq:helix)</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -372,11 +372,11 @@ The big loop here updates the OAM shadow, *not the real OAM*! It updates the obj
 <caption align="bottom">
   <b>*@tbl:prio-hack1</b>: object palette banks.
 </caption>
-<tr><th>bank	<th>color
-<tr><td>4		<td>light red
-<tr><td>5		<td> dark red
-<tr><td>6		<td>light cyan
-<tr><td>7		<td> dark cyan
+<tr><th>bank</th>	<th>color</th></tr>
+<tr><td>4</td>		<td>light red</td></tr>
+<tr><td>5</td>		<td> dark red</td></tr>
+<tr><td>6</td>		<td>light cyan</td></tr>
+<tr><td>7</td>		<td> dark cyan</td></tr>
 </table>
 </div>
 

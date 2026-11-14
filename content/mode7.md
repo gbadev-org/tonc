@@ -24,13 +24,13 @@ In this tutorial, I will use the 64x64t affine background from the [sbb_aff](aff
         <img src="img/mode7/m7_map.png" id="fig:img-m7-map" alt="This is your map.">
         <br>
         <b>*@fig:img-m7-map</b>: this is your map (well, kinda)
-      </div>
+      </div></td>
     <td>
       <div class="cpt" style="width:240px;">
         <img src="img/mode7/m7_persp.png" id="fig:img-m7-persp" alt="This is your map in mode7.">
         <br>
         <b>*@fig:img-m7-persp</b>: this is your map in mode7.
-      </div>
+      </div></td></tr>
   </table>
 </div>
 
@@ -47,7 +47,7 @@ Of course, you can't see everything: only the objects inside the <dfn>viewing vo
 
 <table id="eq:persp">
   <tr>
-    <td class="eqnrcell">(!@eq:persp)
+    <td class="eqnrcell">(!@eq:persp)</td>
     <td class="eqcell">
       <math display="block" class="tml-display" style="display:block math;">
         <mrow>
@@ -62,7 +62,7 @@ Of course, you can't see everything: only the objects inside the <dfn>viewing vo
           <mo lspace="0em" rspace="0em">⁄</mo>
           <mi>z</mi>
         </mrow>
-      </math>
+      </math></td></tr>
 </table>
 
 Basically, you divide by
@@ -77,7 +77,7 @@ Since it is so important a factor it has is own variable: the <dfn>zoom factor</
 
 <table id="eq:lambda">
   <tr>
-    <td class="eqnrcell">(!@eq:lambda)
+    <td class="eqnrcell">(!@eq:lambda)</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -108,7 +108,7 @@ Since it is so important a factor it has is own variable: the <dfn>zoom factor</
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 As a rule, everything in front the projection plane (λ\<1) will be enlarged, and everything behind it (λ\>1) is shrunk.
@@ -122,14 +122,14 @@ As a rule, everything in front the projection plane (λ\<1) will be enlarged, an
           <br>
           <b>*@fig:img-3dview</b>:
           3D coordinate system showing the viewing pyramid defined by the origin, and the screen rectangle (<i>W</i>&times;<i>H</i>) at <i>z</i>= &minus;<i>D</i>
-        </div>
+        </div></td>
       <td>
         <div class="cpt" style="width:320px;">
           <img src="img/mode7/m7_side1.png" id="fig:img-side1" alt="projection step, side view">
           <br>
           <b>*@fig:img-side1</b>:
           Side view; point (<i>y, z</i>) is projected onto the (<i>z</i> = &minus;<i>D</i> plane. The projected point is <i>y</i><sub>p</sub> =  <i>y·D/z</i>
-        </div>
+        </div></td></tr>
   </table>
 </div>
 
@@ -161,7 +161,7 @@ Conceptually, there are four steps to Mode 7, depicted in {@fig:img-steps}a-d. G
 
 <table id="eq:post-ofs">
 <tr>
-  <td class="eqnrcell">(!@eq:post-ofs)
+  <td class="eqnrcell">(!@eq:post-ofs)</td>
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <col align="right">
@@ -193,7 +193,7 @@ Conceptually, there are four steps to Mode 7, depicted in {@fig:img-steps}a-d. G
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></tr>
   <tr>
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -218,8 +218,8 @@ Conceptually, there are four steps to Mode 7, depicted in {@fig:img-steps}a-d. G
           </mtable>
         </mrow>
       </mstyle>
-    </math>
-  </table>
+    </math></tr>
+  </table></td></tr>
 </table>
 
 <div class="cblock">
@@ -228,15 +228,15 @@ Conceptually, there are four steps to Mode 7, depicted in {@fig:img-steps}a-d. G
       {*@fig:img-steps}a-d: The 4 steps of mode 7
     </caption>
     <tr>
-      <td><img src="img/mode7/m7_step1.png" alt="pre-translate">
-      <td><img src="img/mode7/m7_step2.png" alt="rotate">
-      <td><img src="img/mode7/m7_step3.png" alt="scale">
-      <td><img src="img/mode7/m7_step4.png" alt="post-translate">
+      <td><img src="img/mode7/m7_step1.png" alt="pre-translate"></td>
+      <td><img src="img/mode7/m7_step2.png" alt="rotate"></td>
+      <td><img src="img/mode7/m7_step3.png" alt="scale"></td>
+      <td><img src="img/mode7/m7_step4.png" alt="post-translate"></td></tr>
     <tr>
-      <td>{*@fig:img-steps}a: pre-translate by (<i>a</i><sub>x</sub>, <i>a</i><sub>z</sub>)
-      <td>{*@fig:img-steps}b: rotate by &alpha;
-      <td>{*@fig:img-steps}c: scale by 1/&lambda;
-      <td>{*@fig:img-steps}d: post-translate by (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>)
+      <td>{*@fig:img-steps}a: pre-translate by (<i>a</i><sub>x</sub>, <i>a</i><sub>z</sub>)</td>
+      <td>{*@fig:img-steps}b: rotate by &alpha;</td>
+      <td>{*@fig:img-steps}c: scale by 1/&lambda;</td>
+      <td>{*@fig:img-steps}d: post-translate by (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>)</td></tr>
   </table>
 </div>
 
@@ -246,7 +246,7 @@ While the steps described above are indeed the full procedure, there are still a
 
 <table id="eq:prs">
 <tr>
-  <td class="eqnrcell">(!@eq:prs)
+  <td class="eqnrcell">(!@eq:prs)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -326,15 +326,14 @@ While the steps described above are indeed the full procedure, there are still a
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
   </table>
-</table>
 
 And yes, the minus sign is correct for a counter-clockwise rotation (**R** is defined as a clockwise rotation). Also remember that the GBA uses the following relation between screen point **q** and background point **p**:
 
 <table id="eq-ofs-base">
   <tr>
-    <td class="eqnrcell">(20.5)
+    <td class="eqnrcell">(20.5)</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -355,14 +354,14 @@ And yes, the minus sign is correct for a counter-clockwise rotation (**R** is de
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 that is, <u>one</u> translation and <u>one</u> transformation. We have to combine the pre- and post-translations to make it work. We've seen this before in eq 4 in the [affine background page](affbg.html#sec-aff-ofs), only with different names. Anyway, what you need is:
 
 <table id="eq-aff-ofs">
 <tr>
-  <td class="eqnrcell">(20.6)
+  <td class="eqnrcell">(20.6)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -453,7 +452,7 @@ that is, <u>one</u> translation and <u>one</u> transformation. We have to combin
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 So for each scanline you do the calculations for the zoom, put the **P** matrix of @eq:prs into `REG_BGxPA-REG_BGxPD`, and **a−P·x**<sub>s</sub> into `REG_BGxX` and `REG_BGxY` and presto! Instant Mode 7.
@@ -462,7 +461,7 @@ Well, almost. [Remember](affbg.html#ssec-ao-refpts) what happens when writing to
 
 <table id="eq-yofs">
 <tr>
-  <td class="eqnrcell">(20.7)
+  <td class="eqnrcell">(20.7)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -493,7 +492,7 @@ Well, almost. [Remember](affbg.html#ssec-ao-refpts) what happens when writing to
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 Now, in theory you have everything you need. In practice, though, there are a number of things that can go wrong. Before I go into that, here's a nice, (not so) little demo.
@@ -504,11 +503,11 @@ As usual, there is a demo. Actually, I have several Mode 7 demos, but that's not
 
 <table>
   <col valign="top">
-  <tr><th>D-pad<td>Strafe.
-  <tr><th>L, R<td>turn left and right (i.e., rotate map right and left, respectively)
-  <tr><th>A, B<td>Move up and down, though I forget which is which.
-  <tr><th>Select<td>Switch between 3 different Mode7 types (A, B, C)
-  <tr><th>Start<td>Resets all values (<b>a</b>= (256, 32, 256), &alpha;= 0)
+  <tr><th>D-pad</th><td>Strafe.</td></tr>
+  <tr><th>L, R</th><td>turn left and right (i.e., rotate map right and left, respectively)</td></tr>
+  <tr><th>A, B</th><td>Move up and down, though I forget which is which.</td></tr>
+  <tr><th>Select</th><td>Switch between 3 different Mode7 types (A, B, C)</td></tr>
+  <tr><th>Start</th><td>Resets all values (<b>a</b>= (256, 32, 256), &alpha;= 0)</td></tr>
 </table>
 
 “Switch between 3 different Mode7 types”? That's what I said, yes. Make sure you move around in all three types. Please. There's a label in the top-left corner indicating the current type.
@@ -520,18 +519,18 @@ As usual, there is a demo. Actually, I have several Mode 7 demos, but that's not
         <div class="cpt" style="width:240px;">
           <img src="img/demo/m7_demo_a.png" alt="blocky"><br>
           <b>Fig 20.7a</b>: Type A: blocked.
-        </div>
+        </div></td>
       <td>
         <div class="cpt" style="width:240px;">
           <img src="img/demo/m7_demo_b.png" alt="sawtooth"><br>
           <b>Fig 20.7b</b>: Type B: sawtooth.
-        </div>
+        </div></td></tr>
     <tr>
       <td colspan=2 align="center">
         <div class="cpt" style="width:240px;">
           <img src="img/demo/m7_demo_c.png" alt="smooth"><br>
           <b>Fig 20.7c</b>: Type C: smooth.
-        </div>
+        </div></td></tr>
   </table>
 </div>
 
@@ -638,11 +637,11 @@ All three versions do the following things: calculate the zoom-factor λ, using 
   <caption align= bottom>
       <b>*@tbl:divs</b>: division tables and zoom factors. <i>a</i><sub>y</sub>=32
   </caption>
-  <tr><th>h	<th>1/h			<th>&lambda; (true)	<th>&lambda;(.8)
-  <tr><td>157	<td>0.01a16d..h	<td>0.342da7h	<td>0.34h
-  <tr><td>158	<td>0.019ec8..h	<td>0.33d91dh	<td>0.33h
-  <tr><td>159	<td>0.019c2d..h	<td>0.3385a2h	<td>0.33h
-  <tr><td>160	<td>0.019999..h	<td>0.333333h	<td>0.33h
+  <tr><th>h</th>	<th>1/h</th>			<th>&lambda; (true)</th>	<th>&lambda;(.8)</th></tr>
+  <tr><td>157</td>	<td>0.01a16d..h</td>	<td>0.342da7h</td>	<td>0.34h</td></tr>
+  <tr><td>158</td>	<td>0.019ec8..h</td>	<td>0.33d91dh</td>	<td>0.33h</td></tr>
+  <tr><td>159</td>	<td>0.019c2d..h</td>	<td>0.3385a2h</td>	<td>0.33h</td></tr>
+  <tr><td>160</td>	<td>0.019999..h</td>	<td>0.333333h</td>	<td>0.33h</td></tr>
 </table>
 </div>
 

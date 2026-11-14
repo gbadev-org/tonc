@@ -114,20 +114,20 @@ And then there are negative numbers. Frankly, division on negative integers is a
 <col span=19 width=20>
 <tbody align="center">
 <tr>
-  <th><i>x</i> 
-  <td> -8<td> -7<td> -6<td> -5<td> -4<td> -3<td> -2<td> -1<td>  0
-  <td>  1<td>  2<td>  3<td>  4<td>  5<td>  6<td>  7<td>  8<td>  9
+  <th><i>x</i></th> 
+  <td> -8</td><td> -7</td><td> -6</td><td> -5</td><td> -4</td><td> -3</td><td> -2</td><td> -1</td><td>  0</td>
+  <td>  1</td><td>  2</td><td>  3</td><td>  4</td><td>  5</td><td>  6</td><td>  7</td><td>  8</td><td>  9</td></tr>
 <tr>
-  <th><i>x</i>/4 
-  <td> -2<td> <b>-1</b><td> <b>-1</b><td> <b>-1</b><td> -1
-  <td>  <b>0</b><td>  <b>0</b><td>  <b>0</b><td>  0
-  <td>  0<td>  0<td>  0<td>  1<td>  1<td>  1<td>  1<td>  2<td>  2
+  <th><i>x</i>/4</th> 
+  <td> -2</td><td> <b>-1</b></td><td> <b>-1</b></td><td> <b>-1</b></td><td> -1</td>
+  <td>  <b>0</b></td><td>  <b>0</b></td><td>  <b>0</b></td><td>  0</td>
+  <td>  0</td><td>  0</td><td>  0</td><td>  1</td><td>  1</td><td>  1</td><td>  1</td><td>  2</td><td>  2</td></tr>
 
 <tr>
-  <th><i>x</i>&gt;&gt;2 
-  <td> -2<td> <b>-2</b><td> <b>-2</b><td> <b>-2</b><td> -1
-  <td> <b>-1</b><td> <b>-1</b><td> <b>-1</b><td>  0
-  <td>  0<td>  0<td>  0<td>  1<td>  1<td>  1<td>  1<td>  2<td>  2
+  <th><i>x</i>&gt;&gt;2</th> 
+  <td> -2</td><td> <b>-2</b></td><td> <b>-2</b></td><td> <b>-2</b></td><td> -1</td>
+  <td> <b>-1</b></td><td> <b>-1</b></td><td> <b>-1</b></td><td>  0</td>
+  <td>  0</td><td>  0</td><td>  0</td><td>  1</td><td>  1</td><td>  1</td><td>  1</td><td>  2</td><td>  2</td></tr>
 </tbody>
 </table>
 </div>
@@ -345,7 +345,7 @@ ff & = & fa / fb & = & a/b
     </mrow>
   </mstyle>
 </math>
-</tr>
+</td></tr>
 </table>
 
 ```c
@@ -607,12 +607,12 @@ An alternative way of looking at it is to go to hexadecimal floating point and t
   Floating-point representation of 1/7 in base <i>B</i>=16
 </caption>
 <tbody align="center">
-<tr><th> x <th> x&middot;B <th> x&middot;&#x230A;B/7&#x230B; <th> x&middot;B%7
-<tr><th width=16> 1 <td> 16  <td> 2     <td> 2
-<tr><th> 2 <td> 32  <td> 4     <td> 4
-<tr><th> 4 <td> 64  <td> 9     <td> 1
-<tr><th> 1 <td> 16  <td> 2     <td> 2
-<tr><th> 2 <td> 32  <td> 4     <td> 4
+<tr><th> x</th> <th> x&middot;B</th> <th> x&middot;&#x230A;B/7&#x230B;</th> <th> x&middot;B%7</th></tr>
+<tr><th width=16> 1</th> <td> 16</td>  <td> 2</td>     <td> 2</td></tr>
+<tr><th> 2</th> <td> 32</td>  <td> 4</td>     <td> 4</td></tr>
+<tr><th> 4</th> <td> 64</td>  <td> 9</td>     <td> 1</td></tr>
+<tr><th> 1</th> <td> 16</td>  <td> 2</td>     <td> 2</td></tr>
+<tr><th> 2</th> <td> 32</td>  <td> 4</td>     <td> 4</td></tr>
 </tbody>
 </table>
 </div>
@@ -626,14 +626,14 @@ So 1/3 in hex is zero, followed by a string of fives, or just *m*=0x55 in trunca
   <i>x</i>/3, using <i>m</i>= &#x230A;256/3&#x230B; = 0x55. Bad at 3, 6, &hellip;
 </caption>
 <tbody align="center">
-<tr><th>x
-  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7
-<tr><th>y=(x&middot;m)&gt;&gt;F
-  <td> 0.00h        <td> 0.55h <td> 0.AAh 
-  <td> <b>0.FFh</b> <td> 1.54h <td> 1.A9h
-  <td> <b>1.FEh</b> <td> 2.53h
-<tr><th>true <i>x</i>/3
-  <td> 0 <td> 0 <td> 0 <td> 1 <td> 1 <td> 1 <td> 2 <td> 2
+<tr><th>x</th>
+  <th> 0</th> <th> 1</th> <th> 2</th> <th> 3</th> <th> 4</th> <th> 5</th> <th> 6</th> <th> 7</th></tr>
+<tr><th>y=(x&middot;m)&gt;&gt;F</th>
+  <td> 0.00h</td>        <td> 0.55h</td> <td> 0.AAh</td> 
+  <td> <b>0.FFh</b></td> <td> 1.54h</td> <td> 1.A9h</td>
+  <td> <b>1.FEh</b></td> <td> 2.53h</td></tr>
+<tr><th>true <i>x</i>/3</th>
+  <td> 0</td> <td> 0</td> <td> 0</td> <td> 1</td> <td> 1</td> <td> 1</td> <td> 2</td> <td> 2</td></tr>
 </tbody>
 </table>
 </div>
@@ -687,14 +687,14 @@ m = \left\lfloor (n+A-1)/A \right\rfloor
   <i>x</i>/3, using <i>m</i>= &#x230A;(256+2)/3&#x230B; = 0x56. Still good at 3, 6, &hellip;
 </caption>
 <tbody align="center">
-<tr><th>x
-  <th> 0 <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7
-<tr><th>y=(x&middot;m)&gt;&gt;F
-  <td> 0.00h <td> 0.56h <td> 0.ACh 
-  <td> 1.02h <td> 1.58h <td> 1.AEh
-  <td> 2.04h <td> 2.5Ah
-<tr><th>true <i>x</i>/3
-  <td> 0 <td> 0 <td> 0 <td> 1 <td> 1 <td> 1 <td> 2 <td> 2
+<tr><th>x</th>
+  <th> 0</th> <th> 1</th> <th> 2</th> <th> 3</th> <th> 4</th> <th> 5</th> <th> 6</th> <th> 7</th></tr>
+<tr><th>y=(x&middot;m)&gt;&gt;F</th>
+  <td> 0.00h</td> <td> 0.56h</td> <td> 0.ACh</td> 
+  <td> 1.02h</td> <td> 1.58h</td> <td> 1.AEh</td>
+  <td> 2.04h</td> <td> 2.5Ah</td></tr>
+<tr><th>true <i>x</i>/3</th>
+  <td> 0</td> <td> 0</td> <td> 0</td> <td> 1</td> <td> 1</td> <td> 1</td> <td> 2</td> <td> 2</td></tr>
 </tbody>
 </table>
 </div>
@@ -899,17 +899,17 @@ From this result, we can easily calculate the maximum valid *x* for given *A* an
 
 <table id="eq:lim-x">
 <tr>
-  <td class="eqnrcell">(!@eq:lim-x)
+  <td class="eqnrcell">(!@eq:lim-x)</td>
   <td class="eqcell"><i>x</i> &lt; <i>n</i> / 
-    (<i>m&middot;A</i> &minus; <i>n</i>)
+    (<i>m&middot;A</i> &minus; <i>n</i>)</td></tr>
 </table>
 
 The lower-limit for *n* follows from the fact that, by (6), max(*m·A*) = *n*+*A*−1, so that:
 
 <table id="eq:lim-n">
 <tr>
-  <td class="eqnrcell">(!@eq:lim-n)
-  <td class="eqcell"><i>n</i> &gt; <i>x</i>(<i>A</i>&minus;1)
+  <td class="eqnrcell">(!@eq:lim-n)</td>
+  <td class="eqcell"><i>n</i> &gt; <i>x</i>(<i>A</i>&minus;1)</td></tr>
 </table>
 
 And that's basically it. There's a little more to it, of course. As you'll be multiplying, the product *m·A* must fit inside a variable. The practical limit of numbers will therefore be around 16 bits. You can sometimes ease this limitation a little bit by shifting out the lower zero-bits of *A*. For example, for *A*=10=5·2, you can right-shift *x* once before doing the whole calculation. Even 360 is 45·8, and you can save three bits this way. Also, note that even if you surpass the limits, there's a good chance that the thing is still correct or only off by a small amount (check @eq:aprx-fail). You should be able to find the true answer relatively quickly then.
@@ -1083,16 +1083,16 @@ A more accurate solution would be to use the surrounding points and interpolate 
 
 <table id="eq:lerp">
 <tr>
-  <td class="eqnrcell">(!@eq:lerp)
+  <td class="eqnrcell">(!@eq:lerp)</td>
   <td class="eqcell">
-    <i>y</i> = 
+    <i>y</i> =</td> 
   <td class="eqcell">
 	<table>
-	  <tr><td class="bdrB"><i>y</i><sub>b</sub> &minus; <i>y</i><sub>a</sub>
-	  <tr><td><i>x</i><sub>b</sub> &minus; <i>x</i><sub>a</sub>
-	</table>
+	  <tr><td class="bdrB"><i>y</i><sub>b</sub> &minus; <i>y</i><sub>a</sub></td></tr>
+	  <tr><td><i>x</i><sub>b</sub> &minus; <i>x</i><sub>a</sub></td></tr>
+	</table></td>
   <td class="eqcell">
-    (<i>x</i> &minus; <i>x</i><sub>a</sub>) + <i>y</i><sub>a</sub>
+    (<i>x</i> &minus; <i>x</i><sub>a</sub>) + <i>y</i><sub>a</sub></td></tr>
 </table>
 
 *@fig:lerp gives an example of the difference that linear interpolation can make. Here I have a sine function sampled at 16 points and at .12f precision. The blue line represents the actual sine function. The magenta like is the direct look-up using the preceding point, and the lerp is given by the yellow line. Note that the blue and yellow lines are almost the same, but the magenta line can be a good deal off. Consider *x* = 4.5, given in red. The LUT value is off by 8.5%, but the lerp value by only 0.5%: that's 16 times better! True, this is an exaggerated case, but lerping can make a huge difference.
