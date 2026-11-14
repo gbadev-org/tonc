@@ -13,8 +13,8 @@
 use std::{iter::Peekable, matches};
 
 use anyhow::Error;
-use mdbook::book::Chapter;
-use pulldown_cmark::{Event, Options, Parser, Tag};
+use mdbook_preprocessor::book::Chapter;
+use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
 
 use crate::Pandocs;
 
@@ -26,7 +26,7 @@ impl Pandocs {
 
         let events = AdmonitionsGenerator::new(Parser::new_ext(&chapter.content, extensions));
 
-        pulldown_cmark_to_cmark::cmark(events, &mut buf, None)
+        pulldown_cmark_to_cmark::cmark(events, &mut buf)
             .map_err(|err| Error::from(err).context("Markdown serialization failed"))?;
         chapter.content = buf;
 
@@ -63,7 +63,7 @@ impl<'a, Iter: Iterator<Item = Event<'a>>> Iterator for AdmonitionsGenerator<'a,
                 if let Some(params) = text.strip_prefix(":::") {
                     // Check that there is no more text in the paragraph; if there isn't, we'll consume the entire paragraph.
                     // Note that this intentionally rejects any formatting within the paragraph—serialisation would be too complex.
-                    if matches!(self.iter.peek(), Some(Event::End(Tag::Paragraph))) {
+                    if matches!(self.iter.peek(), Some(Event::End(TagEnd::Paragraph))) {
                         if params.is_empty() {
                             if self.nesting_level != 0 {
                                 // Ending an admonition.
