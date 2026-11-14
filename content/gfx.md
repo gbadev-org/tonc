@@ -292,9 +292,9 @@ Backgrounds are always enabled for blending. To enable sprite-blending, set `OBJ
         <td>The A (top) layers. <b>BD</b>, by the way, is the <dfn>back drop</dfn>, a solid plane of color 0. Set the bits to make that layer use the A-weights. Note that these layers must actually be in front of the B-layers, or the blend will fail.</td>
       </tr>
       <tr class="bg1">
-        <td>6-7
-        <td class="rclr2">BM
-        <td>BLD_OFF, BLD_STD, BLD_WHITE, BLD_BLACK, <i>BLD_MODE#</i>
+        <td>6-7</td>
+        <td class="rclr2">BM</td>
+        <td>BLD_OFF, BLD_STD, BLD_WHITE, BLD_BLACK, <i>BLD_MODE#</i></td>
         <td>
           <b>Blending mode</b>.
           <ul>

@@ -173,7 +173,7 @@ When it comes to addition and subtraction, both operands must be M-dimensional v
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 ### Scalar-vector multiplication {#ssec-vec-scale}
@@ -457,7 +457,7 @@ The cross product is a special kind of product that only works in 3D space. The 
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 In {@fig:img-vec-cross} you can see a picture of what the cross-product does; it's a 3D picture, so you have to use your imagination a bit. Vectors **u** and **v** define a parallelogram (in yellow). The cross-product vector **w** is perpendicular to both of these, a fact that follows from **u·w** and **v·w**. The length of **w** is the area of this parallelogram, _A_ and if you remember your area-calculations, you'll realize that
@@ -601,7 +601,7 @@ What follows is a list of algebraic properties of vectors. Most will seem obviou
       <td>Associativity</td>
     </tr>
     <tr>
-      <td>1·<b>u</b> = <b>u</b>
+      <td>1·<b>u</b> = <b>u</b></td>
     </tr>
   </table>
 </div>
@@ -615,7 +615,7 @@ And on the products:
       <td></td>
     </tr>
     <tr>
-      <td><b>u ·</b> (c·<b>v</b>) = (c·<b>u</b>)<b> · v</b> = c·(<b>u · v</b>)
+      <td><b>u ·</b> (c·<b>v</b>) = (c·<b>u</b>)<b> · v</b> = c·(<b>u · v</b>)</td>
       <td></td>
     </tr>
     <tr>
@@ -635,7 +635,7 @@ And on the products:
       <td></td>
     </tr>
     <tr>
-      <td><b>u</b> &times; (c·<b>v</b>) = c·<b>u &times; v</b> = (c·<b>u</b>) &times; <b>v</b>
+      <td><b>u</b> &times; (c·<b>v</b>) = c·<b>u &times; v</b> = (c·<b>u</b>) &times; <b>v</b></td>
       <td></td>
     </tr>
     <tr>
@@ -1216,7 +1216,7 @@ In other words, you take row _i_ of **A**, column _j_ of **B** and take their do
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 The value of this way of looking at it will become clear when I discuss coordinate transformations. Also, like I said, for matrix-multiplication you take the dot-product of a row of **A** and a column of **B**. Since a vector is basically an M×1 matrix, the normal dot-product is actually a special case of the matrix-multiplication. The only thing is that you have to take the transposed of the first vector:
@@ -1271,7 +1271,7 @@ The value of this way of looking at it will become clear when I discuss coordina
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 There's a wealth of other things you can do with matrix-multiplication, but I'll leave it with the following two notes. First, the operation is _not commutative_! What that means is that **A · B** ≠ **B · A**. you may have guessed that from the row-column requirement, but even if those do match up it is still not commutative. My [affine sprite demo](affobj.html#sec-demo) kind of shows this: a rotation-then-scale does not give the same results as scale-then-rotate (which is probably what you wanted). Only in very special cases is **A · B** equal to **B · A**.
@@ -1570,7 +1570,7 @@ Stating that there are other coordinate systems besides the Cartesian one is nic
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
   <tr>
     <td class="eqnrcell">({!@eq:coords}b)</td>
     <td class="eqcell">
@@ -1788,7 +1788,7 @@ Now, if you've paid attention, you should recognize the structure of these equat
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 Vectors **x** and **x**' contain the coordinates, just like they always have. What's new is that we have now defined the coordinate system in the form matrices **M** and **M'**. The vectors that the matrices are made of are the <dfn>base vectors</dfn> of the coordinate system. Of course, since the base vectors of system S are the standard unit vectors, the matrix that they form is the identity matrix **M == I**, which can be safely omitted (and usually is), but don't forget it's there behind the curtains. Actually, there's one more thing that's usually implicitly added to the equation, namely the origin _O_. The standard origin is the null vector, but it need not be.

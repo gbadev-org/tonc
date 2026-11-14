@@ -148,15 +148,15 @@ Yes, this is the _entire_ font, fitting nicely on one single page. This is what 
 </caption>
 <tbody align="center">
 <tr>
-  <th>big u32     <td colspan=4> 0x01020304
+  <th>big u32</th>     <td colspan=4> 0x01020304</td></tr>
 <tr>
-  <th>big u16     <td colspan=2> 0x0102 <td colspan=2> 0x0304
+  <th>big u16</th>     <td colspan=2> 0x0102</td> <td colspan=2> 0x0304</td></tr>
 <tr>
-  <th>u8          <th> 0x01 <th> 0x02   <th> 0x03 <th> 0x04
+  <th>u8</th>          <th> 0x01</th> <th> 0x02</th>   <th> 0x03</th> <th> 0x04</th></tr>
 <tr>
-  <th>little u16  <td colspan=2> 0x0201 <td colspan=2> 0x0403
+  <th>little u16</th>  <td colspan=2> 0x0201</td> <td colspan=2> 0x0403</td></tr>
 <tr>
-  <th>little u32  <td colspan=4> 0x04030201
+  <th>little u32</th>  <td colspan=4> 0x04030201</td></tr>
 </tbody>
 </table>
 </div>
@@ -175,76 +175,76 @@ In case it's still a bit hazy, @fig:img-fontpack shows how the ‘F’ is packed
 <table id="fig:img-fontpack" style="width:100%;">
   <tbody align="center">
   <tr>
-    <th style="width:150px;">pixels
-    <th>
-    <th style="width: 150px;">bits
-    <th>
-    <th style="width: 75px;">bytes
-    <th>
-    <th style="width: 75px;">words
+    <th style="width:150px;">pixels</th>
+    <th></th>
+    <th style="width: 150px;">bits</th>
+    <th></th>
+    <th style="width: 75px;">bytes</th>
+    <th></th>
+    <th style="width: 75px;">words</th></tr>
   <tr>
     <td>
-    <img src="img/font_pack.png" alt="pixels" style="width: 160px; margin-top: 24px;">
-    <td><span class="rarr">&rarr;</span>
+    <img src="img/font_pack.png" alt="pixels" style="width: 160px; margin-top: 24px;"></td>
+    <td><span class="rarr">&rarr;</span></td>
     <td> <!-- bits -->
     <table cellpadding=1 cellspacing=0 class="reg">
       <tr>
-        <td class="bdrLL">&nbsp;
-        <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
-        <td class="bdrRR">&nbsp;
+        <td class="bdrLL">&nbsp;</td>
+        <th> 7</th> <th> 6</th> <th> 5</th> <th> 4</th> <th> 3</th> <th> 2</th> <th> 1</th> <th> 0</th>
+        <td class="bdrRR">&nbsp;</td></tr>
       <tr>
-        <td class="bdrLL" rowspan=8>&nbsp;
-        <td> 0 <th> 1 <th> 1 <th> 1 <th> 1 <th> 1 <th> 1 <td> 0
-        <td class="bdrRR" rowspan=8>&nbsp;
+        <td class="bdrLL" rowspan=8>&nbsp;</td>
+        <td> 0</td> <th> 1</th> <th> 1</th> <th> 1</th> <th> 1</th> <th> 1</th> <th> 1</th> <td> 0</td>
+        <td class="bdrRR" rowspan=8>&nbsp;</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <th> 1 <th> 1 <td> 0
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <th> 1</th> <th> 1</th> <td> 0</td></tr>
       <tr>
-        <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0 <td> 0
-    </table>
-    <td><span class="rarr">&rarr;</span>
+        <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td> <td> 0</td></tr>
+    </table></td>
+    <td><span class="rarr">&rarr;</span></td>
     <td> <!-- bytes -->
     <table cellpadding=1 cellspacing=0>
       <tr>
-        <th colspan=3>&nbsp;
+        <th colspan=3>&nbsp;</th></tr>
       <tr>
-        <td class="bdrLL" rowspan=4>&nbsp;
-          <td> 0x7E
-        <td class="bdrRR" rowspan=4>&nbsp;
-      <tr><td> 0x06
-      <tr><td> 0x06
-      <tr><td> 0x1E
+        <td class="bdrLL" rowspan=4>&nbsp;</td>
+          <td> 0x7E</td>
+        <td class="bdrRR" rowspan=4>&nbsp;</td></tr>
+      <tr><td> 0x06</td></tr>
+      <tr><td> 0x06</td></tr>
+      <tr><td> 0x1E</td></tr>
       <tr>
-        <td class="bdrLL" rowspan=4>&nbsp;
-          <td> 0x06
-        <td class="bdrRR" rowspan=4>&nbsp;
-      <tr><td> 0x06
-      <tr><td> 0x06
-      <tr><td> 0x00
-    </table>
-    <td><span class="rarr">&rarr;</span>
+        <td class="bdrLL" rowspan=4>&nbsp;</td>
+          <td> 0x06</td>
+        <td class="bdrRR" rowspan=4>&nbsp;</td></tr>
+      <tr><td> 0x06</td></tr>
+      <tr><td> 0x06</td></tr>
+      <tr><td> 0x00</td></tr>
+    </table></td>
+    <td><span class="rarr">&rarr;</span></td>
     <td> <!-- words -->
     <table cellpadding=1 cellspacing=0 style="display: block;">
       <tr>
-        <th colspan=3>&nbsp;
+        <th colspan=3>&nbsp;</th></tr>
       <tr>
-        <td class="bdrLL">&nbsp;
-          <td> 0x1E06067E
-        <td class="bdrRR">&nbsp;
+        <td class="bdrLL">&nbsp;</td>
+          <td> 0x1E06067E</td>
+        <td class="bdrRR">&nbsp;</td></tr>
       <tr>
-        <td class="bdrLL">&nbsp;
-          <td> 0x00060606
-        <td class="bdrRR">&nbsp;
-    </table>
+        <td class="bdrLL">&nbsp;</td>
+          <td> 0x00060606</td>
+        <td class="bdrRR">&nbsp;</td></tr>
+    </table></td></tr>
    </tbody>
 </table>
   <b>@fig:img-fontpack</b>: 
@@ -713,9 +713,9 @@ Controls:
 
 <table>
 <tbody valign="top">
-<tr><th>D-pad<td>Moves cursor.
-<tr><th>Start<td>Toggles string clearing.
-<tr><th>L, R<td>Decrease or increase mode.
+<tr><th>D-pad</th><td>Moves cursor.</td></tr>
+<tr><th>Start</th><td>Toggles string clearing.</td></tr>
+<tr><th>L, R</th><td>Decrease or increase mode.</td></tr>
 </tbody>
 </table>
 
@@ -1030,12 +1030,12 @@ int main()
         <div class="cpt" style="width:240px">
           <img src="img/demo/txt_se1.png" alt="txt_se1 demo"><br>
           <b>{@fig:img-txt-se1}a</b>: First map text demo.
-        </div>
+        </div></td>
       <td>
         <div class="cpt" style="width:256px">
           <img src="img/demo/txt_se1_tiles.png" alt="txt_se1 tileset"><br>
           <b>{@fig:img-txt-se1}b</b>: accompanying tileset.
-        </div>
+        </div></td></tr>
   </table>
 </div>
 
@@ -1091,44 +1091,44 @@ These six statements set up the three fonts, complete with shading and opacity. 
 </caption>
 <tbody align="center">
   <tr>
-    <td class="bdrLL" rowspan=9>
-    <th>bit 
-    <th class="bdrL">val
-    <td class="bdrRR" rowspan=9>
-    <td class="bdrLL">
-    <th> 7 <th> 6 <th> 5 <th> 4 <th> 3 <th> 2 <th> 1 <th> 0
-    <td class="bdrRR">
+    <td class="bdrLL" rowspan=9></td>
+    <th>bit</th> 
+    <th class="bdrL">val</th>
+    <td class="bdrRR" rowspan=9></td>
+    <td class="bdrLL"></td>
+    <th> 7</th> <th> 6</th> <th> 5</th> <th> 4</th> <th> 3</th> <th> 2</th> <th> 1</th> <th> 0</th>
+    <td class="bdrRR"></td></tr>
   <tr>
-    <th>0	<td class="bdrL"> 0
-    <td class="bdrLL" rowspan=8>
-    <td> . <td> . <td> . <td> . <td> . <td> . <td> . <td> 0
-    <td class="bdrRR" rowspan=8>
+    <th>0</th>	<td class="bdrL"> 0</td>
+    <td class="bdrLL" rowspan=8></td>
+    <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> 0</td>
+    <td class="bdrRR" rowspan=8></td></tr>
   <tr>
-    <th> 1	<td class="bdrL"> 1
-    <td> . <td> . <td> . <td> . <td> . <td> E <td> F <td> .
+    <th> 1</th>	<td class="bdrL"> 1</td>
+    <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> E</td> <td> F</td> <td> .</td></tr>
   <tr>
-    <th> 2	<td class="bdrL"> 1
-    <td> . <td> . <td> . <td> . <td> E <td> F <td> . <td> .
+    <th> 2</th>	<td class="bdrL"> 1</td>
+    <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> E</td> <td> F</td> <td> .</td> <td> .</td></tr>
   <tr>
-    <th> 3	<td class="bdrL"> 1
-    <td> . <td> . <td> . <td> E <td> F <td> . <td> . <td> .
+    <th> 3</th>	<td class="bdrL"> 1</td>
+    <td> .</td> <td> .</td> <td> .</td> <td> E</td> <td> F</td> <td> .</td> <td> .</td> <td> .</td></tr>
   <tr>
-    <th> 4	<td class="bdrL"> 0
-    <td> . <td> . <td> . <td> 0 <td> . <td> . <td> . <td> .
+    <th> 4</th>	<td class="bdrL"> 0</td>
+    <td> .</td> <td> .</td> <td> .</td> <td> 0</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td></tr>
   <tr>
-    <th> 5	<td class="bdrL"> 0
-    <td> . <td> . <td> 0 <td> . <td> . <td> . <td> . <td> .
+    <th> 5</th>	<td class="bdrL"> 0</td>
+    <td> .</td> <td> .</td> <td> 0</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td></tr>
   <tr>
-    <th> 6	<td class="bdrL"> 1
-    <td> E <td> F <td> . <td> . <td> . <td> . <td> . <td> .
+    <th> 6</th>	<td class="bdrL"> 1</td>
+    <td> E</td> <td> F</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td></tr>
   <tr>
-    <th> 7	<td class="bdrL"> 0
-    <td> 0 <td> . <td> . <td> . <td> . <td> . <td> . <td> .
+    <th> 7</th>	<td class="bdrL"> 0</td>
+    <td> 0</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td> <td> .</td></tr>
 <tr>
-  <td colspan=4> OR: 
-    <td class="bdrLL">
-    <th> E <th> F <th> 0 <th> E <th> F <th> F <th> F <th> 0
-    <td class="bdrRR">
+  <td colspan=4> OR:</td> 
+    <td class="bdrLL"></td>
+    <th> E</th> <th> F</th> <th> 0</th> <th> E</th> <th> F</th> <th> F</th> <th> F</th> <th> 0</th>
+    <td class="bdrRR"></td></tr>
 </tbody>
 </table>
 </div>
@@ -1284,12 +1284,12 @@ INLINE u32 profile_stop()
   <div class="cpt" style="width:240px">
   <img src="img/demo/txt_se2_vba.png" alt="txt_se2 on vba"><br>
   <b>{@fig:img-txt-se2}a</b>: <tt>txt_se2</tt> on VBA.
-  </div>
+  </div></td>
 <td>
   <div class="cpt" style="width:240px">
   <img src="img/demo/txt_se2_nocash.png" alt="txt_se2 on no$gba"><br>
   <b>{@fig:img-txt-se2}b</b>: <tt>txt_se2</tt> on no$gba.
-  </div>
+  </div></td></tr>
 </table>
 </div>
 
@@ -1302,23 +1302,23 @@ INLINE u32 profile_stop()
 </caption>
 <tbody align="right">
 <tr>
-  <th>&nbsp;
-  <th> hardware	<th> vba	<th> no$gba		<th> vba err	<th> no$ err
+  <th>&nbsp;</th>
+  <th> hardware</th>	<th> vba</th>	<th> no$gba</th>		<th> vba err</th>	<th> no$ err</th></tr>
 <tr>
-  <th>u16 array
-  <td> 614571	<td> 499440	<td> 614571	<td> -18.73	<td> 0.00
+  <th>u16 array</th>
+  <td> 614571</td>	<td> 499440</td>	<td> 614571</td>	<td> -18.73</td>	<td> 0.00</td></tr>
 <tr>
-  <th>u32 array
-  <td> 289825	<td> 230383	<td> 288098	<td> -20.51	<td> -0.60
+  <th>u32 array</th>
+  <td> 289825</td>	<td> 230383</td>	<td> 288098</td>	<td> -20.51</td>	<td> -0.60</td></tr>
 <tr>
-  <th>memcpy
-  <td> 195156	<td> 161119	<td> 194519	<td> -17.44	<td> -0.33
+  <th>memcpy</th>
+  <td> 195156</td>	<td> 161119</td>	<td> 194519</td>	<td> -17.44</td>	<td> -0.33</td></tr>
 <tr>
-  <th>memcpy32
-  <td> 86816	<td> 79336	<td> 85329	<td> -8.62	<td> -1.71
+  <th>memcpy32</th>
+  <td> 86816</td>	<td> 79336</td>	<td> 85329</td>	<td> -8.62</td>	<td> -1.71</td></tr>
 <tr>
-  <th>DMA32
-  <td> 76889	<td> 250	<td> 76888	<td> -99.67	<td> 0.00
+  <th>DMA32</th>
+  <td> 76889</td>	<td> 250</td>	<td> 76888</td>	<td> -99.67</td>	<td> 0.00
 
 <!--<tr>
   <th>u16 array
@@ -1336,7 +1336,7 @@ INLINE u32 profile_stop()
   <th>DMA32
   <td> 76902	<td> 222	<td> 76901		<td> 99.7%		<td> 0.0%
 -->
-</tbody>
+</td></tr></tbody>
 </table>
 </div>
 

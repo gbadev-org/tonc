@@ -23,35 +23,35 @@ Here's a list containing the names of each BIOS call. I am not going to say what
 <center>
 <table class="center" width="70%">
 <col span=5 align="left">
-<tr><th>id		<th width="30%">Name  <th width="10%">	<th>id		<th>Name
-<tr><td>0x00	<td>SoftReset		<td><td>0x08	<td>Sqrt
-<tr><td>0x01	<td>RegisterRamReset<td><td>0x09	<td>ArcTan 
-<tr><td>0x02	<td>Halt			<td><td>0x0A	<td>ArcTan2
-<tr><td>0x03	<td>Stop			<td><td>0x0B	<td>CPUSet 
-<tr><td>0x04	<td>IntrWait		<td><td>0x0C	<td>CPUFastSet 
-<tr><td>0x05	<td>VBlankIntrWait	<td><td>0x0D	<td>BiosChecksum 
-<tr><td>0x06	<td>Div				<td><td>0x0E	<td>BgAffineSet 
-<tr><td>0x07	<td>DivArm			<td><td>0x0F	<td>ObjAffineSet 
+<tr><th>id</th>		<th width="30%">Name</th>  <th width="10%"></th>	<th>id</th>		<th>Name</th></tr>
+<tr><td>0x00</td>	<td>SoftReset</td>		<td></td><td>0x08</td>	<td>Sqrt</td></tr>
+<tr><td>0x01</td>	<td>RegisterRamReset</td><td></td><td>0x09</td>	<td>ArcTan</td></tr> 
+<tr><td>0x02</td>	<td>Halt</td>			<td></td><td>0x0A</td>	<td>ArcTan2</td></tr>
+<tr><td>0x03</td>	<td>Stop</td>			<td></td><td>0x0B</td>	<td>CPUSet</td></tr> 
+<tr><td>0x04</td>	<td>IntrWait</td>		<td></td><td>0x0C</td>	<td>CPUFastSet</td></tr> 
+<tr><td>0x05</td>	<td>VBlankIntrWait</td>	<td></td><td>0x0D</td>	<td>BiosChecksum</td></tr> 
+<tr><td>0x06</td>	<td>Div</td>				<td></td><td>0x0E</td>	<td>BgAffineSet</td></tr> 
+<tr><td>0x07</td>	<td>DivArm</td>			<td></td><td>0x0F</td>	<td>ObjAffineSet</td></tr> 
 
-<tr><td>&nbsp;
-<tr><td>0x10	<td>BitUnPack		<td><td>0x18	<td>Diff16bitUnFilter 
-<tr><td>0x11	<td>LZ77UnCompWRAM	<td><td>0x19	<td>SoundBiasChange 
-<tr><td>0x12	<td>LZ77UnCompVRAM	<td><td>0x1A	<td>SoundDriverInit 
-<tr><td>0x13	<td>HuffUnComp		<td><td>0x1B	<td>SoundDriverMode 
-<tr><td>0x14	<td>RLUnCompWRAM	<td><td>0x1C	<td>SoundDriverMain 
-<tr><td>0x15	<td>RLUnCompVRAM	<td><td>0x1D	<td>SoundDriverVSync 
-<tr><td>0x16	<td>Diff8bitUnFilterWRAM	<td><td>0x1E <td>SoundChannelClear 
-<tr><td>0x17	<td>Diff8bitUnFilterVRAM	<td><td>0x1F <td>MIDIKey2Freq
+<tr><td>&nbsp;</td></tr>
+<tr><td>0x10</td>	<td>BitUnPack</td>		<td></td><td>0x18</td>	<td>Diff16bitUnFilter</td></tr> 
+<tr><td>0x11</td>	<td>LZ77UnCompWRAM</td>	<td></td><td>0x19</td>	<td>SoundBiasChange</td></tr> 
+<tr><td>0x12</td>	<td>LZ77UnCompVRAM</td>	<td></td><td>0x1A</td>	<td>SoundDriverInit</td></tr> 
+<tr><td>0x13</td>	<td>HuffUnComp</td>		<td></td><td>0x1B</td>	<td>SoundDriverMode</td></tr> 
+<tr><td>0x14</td>	<td>RLUnCompWRAM</td>	<td></td><td>0x1C</td>	<td>SoundDriverMain</td></tr> 
+<tr><td>0x15</td>	<td>RLUnCompVRAM</td>	<td></td><td>0x1D</td>	<td>SoundDriverVSync</td></tr> 
+<tr><td>0x16</td>	<td>Diff8bitUnFilterWRAM</td>	<td></td><td>0x1E</td> <td>SoundChannelClear</td></tr> 
+<tr><td>0x17</td>	<td>Diff8bitUnFilterVRAM</td>	<td></td><td>0x1F</td> <td>MIDIKey2Freq</td></tr>
 
-<tr><td>&nbsp;
-<tr><td>0x20	<td>MusicPlayerOpen		<td><td>0x28 <td>SoundDriverVSyncOff
-<tr><td>0x21	<td>MusicPlayerStart	<td><td>0x29 <td>SoundDriverVSyncOn 
-<tr><td>0x22	<td>MusicPlayerStop		<td><td>0x2A <td>GetJumpList
-<tr><td>0x23	<td>MusicPlayerContinue
-<tr><td>0x24	<td>MusicPlayerFadeOut
-<tr><td>0x25	<td>MultiBoot
-<tr><td>0x26	<td>HardReset
-<tr><td>0x27	<td>CustomHalt
+<tr><td>&nbsp;</td></tr>
+<tr><td>0x20</td>	<td>MusicPlayerOpen</td>		<td></td><td>0x28</td> <td>SoundDriverVSyncOff</td></tr>
+<tr><td>0x21</td>	<td>MusicPlayerStart</td>	<td></td><td>0x29</td> <td>SoundDriverVSyncOn</td></tr> 
+<tr><td>0x22</td>	<td>MusicPlayerStop</td>		<td></td><td>0x2A</td> <td>GetJumpList</td></tr>
+<tr><td>0x23</td>	<td>MusicPlayerContinue</td></tr>
+<tr><td>0x24</td>	<td>MusicPlayerFadeOut</td></tr>
+<tr><td>0x25</td>	<td>MultiBoot</td></tr>
+<tr><td>0x26</td>	<td>HardReset</td></tr>
+<tr><td>0x27</td>	<td>CustomHalt</td></tr>
 </table>
 </center>
 
@@ -320,11 +320,11 @@ ASM_CMT("Hi, I'm here!");
 To illustrate the use of BIOS calls I am using Div, Sqrt, ArcTan and ObjAffineSet to create graphs if a hyperbole, square root, sine and cosine. I've scaled them in such a way so that they fit nicely on the 240x160 screen. The definitions are
 
 <table>
-<tr><td>division	<td><i>y</i>= 2560/<i>x</i>
-<tr><td>square root	<td><i>y</i>= 160*sqrt(<i>x</i>/240)
-<tr><td>arctan  	<td><i>y</i>= 80 + 64*(2/&pi;)*(arctan(<i>x</i>-120)/16))
-<tr><td>sine		<td><i>y</i>=  1*sy*sin(2&pi;·<i>x</i>/240)	<td>; sy= 80
-<tr><td>cosine		<td><i>y</i>= 80*sx*cos(2&pi;·<i>x</i>/240)	<td>; sx= 1
+<tr><td>division</td>	<td><i>y</i>= 2560/<i>x</i></td></tr>
+<tr><td>square root</td>	<td><i>y</i>= 160*sqrt(<i>x</i>/240)</td></tr>
+<tr><td>arctan</td>  	<td><i>y</i>= 80 + 64*(2/&pi;)*(arctan(<i>x</i>-120)/16))</td></tr>
+<tr><td>sine</td>		<td><i>y</i>=  1*sy*sin(2&pi;·<i>x</i>/240)</td>	<td>; sy= 80</td></tr>
+<tr><td>cosine</td>		<td><i>y</i>= 80*sx*cos(2&pi;·<i>x</i>/240)</td>	<td>; sx= 1</td></tr>
 </table>
 
 and these functions have been plotted in fig 1. If you're wondering how I got the sine and cosine values, as there are no calls for those, take a look at eq 1 again. The **P** matrix has them. I've used *p*<sub>a</sub> for the cosine and *p*<sub>c</sub> for the sine. Note that the graphs appear instantly; there is no sense of loading time while the graphs are plotted. An earlier version of the mode 7 demo (or PERNs mode 7 demo) used calls to the actual division, sine and cosine functions to build up the LUTs. Even with the symmetry rules of trigonometry, `sin()` and `cos()` are still noticeably slower than the BIOS equivalent.

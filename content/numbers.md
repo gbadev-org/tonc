@@ -27,7 +27,7 @@ S={\Sigma}a_iN^i
 -->
 <table id="eq:sum-aini">
 <tr>
-  <td class="eqnrcell">({!@eq:sum-aini})
+  <td class="eqnrcell">({!@eq:sum-aini})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -64,17 +64,17 @@ Here's an example using the familiar case of *N* is ten: the decimal system. Bas
 
 <div class="lblock">
 <table>
-<tr><td>1025<sub>ten</sub>
-  <td>=<td> 1·10<sup>3</sup><sub>ten</sub>
-  <td>+<td> 0·10<sup>2</sup><sub>ten</sub>
-  <td>+<td> 2·10<sup>1</sup><sub>ten</sub>
-  <td>+<td> 5·10<sup>0</sup><sub>ten</sub>
-<tr><td>
-  <td>=<td> 1·1000<sub>ten</sub>
-  <td>+<td> 0·100<sub>ten</sub>
-  <td>+<td> 2·10<sub>ten</sub>
-  <td>+<td>5·1
-<tr><td><td>=<td colspan=7> one thousand twenty five
+<tr><td>1025<sub>ten</sub></td>
+  <td>=</td><td> 1·10<sup>3</sup><sub>ten</sub></td>
+  <td>+</td><td> 0·10<sup>2</sup><sub>ten</sub></td>
+  <td>+</td><td> 2·10<sup>1</sup><sub>ten</sub></td>
+  <td>+</td><td> 5·10<sup>0</sup><sub>ten</sub></td></tr>
+<tr><td></td>
+  <td>=</td><td> 1·1000<sub>ten</sub></td>
+  <td>+</td><td> 0·100<sub>ten</sub></td>
+  <td>+</td><td> 2·10<sub>ten</sub></td>
+  <td>+</td><td>5·1</td></tr>
+<tr><td></td><td>=</td><td colspan=7> one thousand twenty five</td></tr>
 </table>
 </div>
 
@@ -92,20 +92,20 @@ As said, you only have two symbols (BInary digiTs, or bits) here: 0 and 1. In th
 <table id="tbl:pot" class="table-data">
 <caption align="bottom"><b>{*@tbl:pot}</b>: powers of two</caption>
 <col span=3 align="right">
-<tr align="center"><th>exponent<th>binary<th>decimal
-<tr><td> 0 <td>1			<td>1
-<tr><td> 1 <td>10			<td>2
-<tr><td> 2 <td>100			<td>4
-<tr><td> 3 <td>1000			<td>8
+<tr align="center"><th>exponent</th><th>binary</th><th>decimal</th></tr>
+<tr><td> 0</td> <td>1</td>			<td>1</td></tr>
+<tr><td> 1</td> <td>10</td>			<td>2</td></tr>
+<tr><td> 2</td> <td>100</td>			<td>4</td></tr>
+<tr><td> 3</td> <td>1000</td>			<td>8</td></tr>
 
-<tr><td> 4 <td>1,0000		<td>16
-<tr><td> 5 <td>10,0000		<td>32
-<tr><td> 6 <td>100,0000		<td>64
-<tr><td> 7 <td>1000,0000	<td>128
+<tr><td> 4</td> <td>1,0000</td>		<td>16</td></tr>
+<tr><td> 5</td> <td>10,0000</td>		<td>32</td></tr>
+<tr><td> 6</td> <td>100,0000</td>		<td>64</td></tr>
+<tr><td> 7</td> <td>1000,0000</td>	<td>128</td></tr>
 
-<tr><td> 8 <td>1,0000,0000	<td>256
-<tr><td> 9 <td>10,0000,0000	<td>512
-<tr><td>10 <td>100,0000,0000<td>1024
+<tr><td> 8</td> <td>1,0000,0000</td>	<td>256</td></tr>
+<tr><td> 9</td> <td>10,0000,0000</td>	<td>512</td></tr>
+<tr><td>10</td> <td>100,0000,0000</td><td>1024</td></tr>
 </table>
 </div>
 
@@ -113,12 +113,12 @@ As you can see, the length of binary numbers rises really quickly. With longer n
 
 <div class="lblock">
 <table>
-<tr><td>1025<sub>ten</sub>
-  <td>=<td> 1024 <td>+<td> 1
-<tr><td>
-  <td>=<td> 2<sup>10</sup> <td>+<td> 2<sup>0</sup>
-<tr><td>
-  <td>=<td colspan=4>100,0000,0001<sub>bin</sub>
+<tr><td>1025<sub>ten</sub></td>
+  <td>=</td><td> 1024</td> <td>+</td><td> 1</td></tr>
+<tr><td></td>
+  <td>=</td><td> 2<sup>10</sup></td> <td>+</td><td> 2<sup>0</sup></td></tr>
+<tr><td></td>
+  <td>=</td><td colspan=4>100,0000,0001<sub>bin</sub></td></tr>
 </table>
 </div>
 
@@ -135,28 +135,28 @@ For this reason, in 1999, the IEC began to recommend a separate set of binary pr
 <div class="cblock">
 <table id="tbl:count" class="table-data rules-cols">
 <col span=4 align="right">
-<tr><th> dec	<th> bin	<th> hex	<th> oct
-<tr><td>   0	<td>    0	<td>   0    <td>   0
-<tr><td>   1	<td>    1	<td>   1    <td>   1
-<tr><td>   2	<td>   10	<td>   2    <td>   2
-<tr><td>   3	<td>   11	<td>   3    <td>   3
-<tr><td>   4	<td>  100	<td>   4    <td>   4
-<tr><td>   5	<td>  101	<td>   5    <td>   5
-<tr><td>   6	<td>  110	<td>   6    <td>   6
-<tr><td>   7	<td>  111	<td>   7    <td>   7
-<tr><td>   8	<td> 1000	<td>   8    <td>  10
-<tr><td>   9	<td> 1001	<td>   9    <td>  11
-<tr><td>  10	<td> 1010	<td>   a    <td>  12
-<tr><td>  11	<td> 1011	<td>   b    <td>  13
-<tr><td>  12	<td> 1100	<td>   c    <td>  14
-<tr><td>  13	<td> 1101	<td>   d    <td>  15
-<tr><td>  14	<td> 1110	<td>   e    <td>  16
-<tr><td>  15	<td> 1111	<td>   f    <td>  17
-<tr><td>  16	<td>10000	<td>  10    <td>  20
-<tr><td>  17	<td>10001	<td>  11    <td>  21
-<tr><td>  18	<td>10010	<td>  12    <td>  22
-<tr><td>  19	<td>10011	<td>  13    <td>  23
-<tr><td>  20	<td>10100	<td>  14    <td>  24
+<tr><th> dec</th>	<th> bin</th>	<th> hex</th>	<th> oct</th></tr>
+<tr><td>   0</td>	<td>    0</td>	<td>   0</td>    <td>   0</td></tr>
+<tr><td>   1</td>	<td>    1</td>	<td>   1</td>    <td>   1</td></tr>
+<tr><td>   2</td>	<td>   10</td>	<td>   2</td>    <td>   2</td></tr>
+<tr><td>   3</td>	<td>   11</td>	<td>   3</td>    <td>   3</td></tr>
+<tr><td>   4</td>	<td>  100</td>	<td>   4</td>    <td>   4</td></tr>
+<tr><td>   5</td>	<td>  101</td>	<td>   5</td>    <td>   5</td></tr>
+<tr><td>   6</td>	<td>  110</td>	<td>   6</td>    <td>   6</td></tr>
+<tr><td>   7</td>	<td>  111</td>	<td>   7</td>    <td>   7</td></tr>
+<tr><td>   8</td>	<td> 1000</td>	<td>   8</td>    <td>  10</td></tr>
+<tr><td>   9</td>	<td> 1001</td>	<td>   9</td>    <td>  11</td></tr>
+<tr><td>  10</td>	<td> 1010</td>	<td>   a</td>    <td>  12</td></tr>
+<tr><td>  11</td>	<td> 1011</td>	<td>   b</td>    <td>  13</td></tr>
+<tr><td>  12</td>	<td> 1100</td>	<td>   c</td>    <td>  14</td></tr>
+<tr><td>  13</td>	<td> 1101</td>	<td>   d</td>    <td>  15</td></tr>
+<tr><td>  14</td>	<td> 1110</td>	<td>   e</td>    <td>  16</td></tr>
+<tr><td>  15</td>	<td> 1111</td>	<td>   f</td>    <td>  17</td></tr>
+<tr><td>  16</td>	<td>10000</td>	<td>  10</td>    <td>  20</td></tr>
+<tr><td>  17</td>	<td>10001</td>	<td>  11</td>    <td>  21</td></tr>
+<tr><td>  18</td>	<td>10010</td>	<td>  12</td>    <td>  22</td></tr>
+<tr><td>  19</td>	<td>10011</td>	<td>  13</td>    <td>  23</td></tr>
+<tr><td>  20</td>	<td>10100</td>	<td>  14</td>    <td>  24</td></tr>
 </table>
 </div>
 
@@ -168,12 +168,12 @@ Hexadecimal is the name for the base-16 system, also known as <dfn>hex</dfn>. Th
 
 <div class="lblock">
 <table>
-<tr><td>1025<sub>ten</sub>
-  <td>=<td colspan=4>100,0000,0001<sub>bin</sub>
-<tr><td>
-  <td>=<td>401<sub>bin</sub>·16<sup>2</sup> <td>+<td>1·16<sup>0</sup>
-<tr><td>
-  <td>=<td colspan=4>401<sub>hex</sub>
+<tr><td>1025<sub>ten</sub></td>
+  <td>=</td><td colspan=4>100,0000,0001<sub>bin</sub></td></tr>
+<tr><td></td>
+  <td>=</td><td>401<sub>bin</sub>·16<sup>2</sup></td> <td>+</td><td>1·16<sup>0</sup></td></tr>
+<tr><td></td>
+  <td>=</td><td colspan=4>401<sub>hex</sub></td></tr>
 </table>
 </div>
 
@@ -191,95 +191,95 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
   <table class="table-data">
   <caption><b>{*@tbl:multiply}a</b>: decimal multiplication table</caption>
   <col span=11 align="right">
-  <tr><th> x
-    <th> 1 <th> 2 <th> 3 <th> 4 <th> 5
-	<th> 6 <th> 7 <th> 8 <th> 9 <th>10
-  <tr><th> 1
-    <td> 1 <td> 2 <td> 3 <td> 4 <td> 5
-	<td> 6 <td> 7 <td> 8 <td> 9 <td>10
-  <tr><th> 2
-    <td> 2 <td> 4 <td> 6 <td> 8 <td>10
-	<td>12 <td>14 <td>16 <td>18 <td>20
-  <tr><th> 3
-    <td> 3 <td> 6 <td> 9 <td>12 <td>15
-	<td>18 <td>21 <td>24 <td>27 <td>30
-  <tr><th> 4
-    <td> 4 <td> 8 <td>12 <td>16 <td>20
-	<td>24 <td>28 <td>32 <td>36 <td>40
-  <tr><th> 5
-    <td> 5 <td>10 <td>15 <td>20 <td>25
-	<td>30 <td>35 <td>40 <td>45 <td>50
-  <tr><th> 6
-    <td> 6 <td>12 <td>18 <td>24 <td>30
-	<td>36 <td>42 <td>48 <td>54 <td>60
-  <tr><th> 7
-    <td> 7 <td>14 <td>21 <td>28 <td>35
-	<td>42 <td>49 <td>56 <td>63 <td>70
-  <tr><th> 8
-    <td> 8 <td>16 <td>24 <td>32 <td>40
-	<td>48 <td>56 <td>64 <td>72 <td>80
-  <tr><th> 9
-    <td> 9 <td>18 <td>27 <td>36 <td>45
-	<td>54 <td>63 <td>72 <td>81 <td>90
-  <tr><th>10
-    <td> 10 <td> 20 <td> 30 <td> 40 <td> 50
-	<td> 60 <td> 70 <td> 80 <td> 90 <td>100
+  <tr><th> x</th>
+    <th> 1</th> <th> 2</th> <th> 3</th> <th> 4</th> <th> 5</th>
+	<th> 6</th> <th> 7</th> <th> 8</th> <th> 9</th> <th>10</th></tr>
+  <tr><th> 1</th>
+    <td> 1</td> <td> 2</td> <td> 3</td> <td> 4</td> <td> 5</td>
+	<td> 6</td> <td> 7</td> <td> 8</td> <td> 9</td> <td>10</td></tr>
+  <tr><th> 2</th>
+    <td> 2</td> <td> 4</td> <td> 6</td> <td> 8</td> <td>10</td>
+	<td>12</td> <td>14</td> <td>16</td> <td>18</td> <td>20</td></tr>
+  <tr><th> 3</th>
+    <td> 3</td> <td> 6</td> <td> 9</td> <td>12</td> <td>15</td>
+	<td>18</td> <td>21</td> <td>24</td> <td>27</td> <td>30</td></tr>
+  <tr><th> 4</th>
+    <td> 4</td> <td> 8</td> <td>12</td> <td>16</td> <td>20</td>
+	<td>24</td> <td>28</td> <td>32</td> <td>36</td> <td>40</td></tr>
+  <tr><th> 5</th>
+    <td> 5</td> <td>10</td> <td>15</td> <td>20</td> <td>25</td>
+	<td>30</td> <td>35</td> <td>40</td> <td>45</td> <td>50</td></tr>
+  <tr><th> 6</th>
+    <td> 6</td> <td>12</td> <td>18</td> <td>24</td> <td>30</td>
+	<td>36</td> <td>42</td> <td>48</td> <td>54</td> <td>60</td></tr>
+  <tr><th> 7</th>
+    <td> 7</td> <td>14</td> <td>21</td> <td>28</td> <td>35</td>
+	<td>42</td> <td>49</td> <td>56</td> <td>63</td> <td>70</td></tr>
+  <tr><th> 8</th>
+    <td> 8</td> <td>16</td> <td>24</td> <td>32</td> <td>40</td>
+	<td>48</td> <td>56</td> <td>64</td> <td>72</td> <td>80</td></tr>
+  <tr><th> 9</th>
+    <td> 9</td> <td>18</td> <td>27</td> <td>36</td> <td>45</td>
+	<td>54</td> <td>63</td> <td>72</td> <td>81</td> <td>90</td></tr>
+  <tr><th>10</th>
+    <td> 10</td> <td> 20</td> <td> 30</td> <td> 40</td> <td> 50</td>
+	<td> 60</td> <td> 70</td> <td> 80</td> <td> 90</td> <td>100</td></tr>
   </table>
 
   <table class="table-data">
   <caption><b>{*@tbl:multiply}b</b>: hex multiplication table</caption>
   <col span=17 align="right">
-  <tr><th> x
-    <th> 1 <th> 2 <th> 3 <th> 4 <th> 5 <th> 6 <th> 7 <th> 8
-    <th> 9 <th> A <th> B <th> C <th> D <th> E <th> F <th>10
-  <tr><th> 1
-    <td> 1 <td> 2 <td> 3 <td> 4 <td> 5 <td> 6 <td> 7 <td> 8
-    <td> 9 <td> A <td> B <td> C <td> D <td> E <td> F <td>10
-  <tr><th> 2
-    <td> 2 <td> 4 <td> 6 <td> 8 <td> A <td> C <td> E <td>10
-    <td>12 <td>14 <td>16 <td>18 <td>1A <td>1C <td>1E <td>20
-  <tr><th> 3
-    <td> 3 <td> 6 <td> 9 <td> C <td> F <td>12 <td>15 <td>18
-    <td>1B <td>1E <td>21 <td>24 <td>27 <td>2A <td>2D <td>30
-  <tr><th> 4
-    <td> 4 <td> 8 <td> C <td>10 <td>14 <td>18 <td>1C <td>20
-    <td>24 <td>28 <td>2C <td>30 <td>34 <td>38 <td>3C <td>40
-  <tr><th> 5
-    <td> 5 <td> A <td> F <td>14 <td>19 <td>1E <td>23 <td>28
-    <td>2D <td>32 <td>37 <td>3C <td>41 <td>46 <td>4B <td>50
-  <tr><th> 6
-    <td> 6 <td> C <td>12 <td>18 <td>1E <td>24 <td>2A <td>30
-    <td>36 <td>3C <td>42 <td>48 <td>4E <td>54 <td>5F <td>60
-  <tr><th> 7
-    <td> 7 <td> E <td>15 <td>1C <td>23 <td>2A <td>31 <td>38
-    <td>3F <td>46 <td>4D <td>54 <td>5B <td>62 <td>69 <td>70
-  <tr><th> 8
-    <td> 8 <td>10 <td>18 <td>20 <td>28 <td>30 <td>38 <td>40
-    <td>48 <td>50 <td>58 <td>60 <td>68 <td>70 <td>78 <td>80
-  <tr><th> 9
-    <td> 9 <td>12 <td>1B <td>24 <td>2D <td>36 <td>3F <td>48
-    <td>51 <td>5A <td>63 <td>6C <td>75 <td>7D <td>87 <td>90
-  <tr><th> A
-    <td> A <td>14 <td>1E <td>28 <td>32 <td>3C <td>46 <td>50
-    <td>5A <td>64 <td>6E <td>78 <td>82 <td>8C <td>96 <td>A0
-  <tr><th> B
-    <td> B <td>16 <td>21 <td>2C <td>37 <td>42 <td>4D <td>58
-    <td>63 <td>6E <td>79 <td>84 <td>8F <td>9A <td>A5 <td>B0
-  <tr><th> C
-    <td> C <td>18 <td>24 <td>30 <td>3C <td>48 <td>54 <td>60
-    <td>6C <td>78 <td>84 <td>90 <td>9C <td>A8 <td>B4 <td>C0
-  <tr><th> D
-    <td> D <td>1A <td>27 <td>34 <td>41 <td>4E <td>5B <td>68
-    <td>75 <td>82 <td>8F <td>9C <td>A9 <td>B6 <td>C3 <td>D0
-  <tr><th> E
-    <td> E <td>1C <td>2A <td>38 <td>46 <td>54 <td>62 <td>70
-    <td>7E <td>8C <td>9A <td>A8 <td>B6 <td>C4 <td>D2 <td>E0
-  <tr><th> F
-    <td> F <td>1E <td>2D <td>3C <td>4B <td>5A <td>69 <td>78
-    <td>87 <td>96 <td>A5 <td>B4 <td>C3 <td>D2 <td>E1 <td>F0
-  <tr><th>10
-    <td>10 <td>20 <td>30 <td>40 <td>50 <td>60 <td>70 <td>80
-    <td>90 <td>A0 <td>B0 <td>C0 <td>D0 <td>E0 <td>F0 <td>100
+  <tr><th> x</th>
+    <th> 1</th> <th> 2</th> <th> 3</th> <th> 4</th> <th> 5</th> <th> 6</th> <th> 7</th> <th> 8</th>
+    <th> 9</th> <th> A</th> <th> B</th> <th> C</th> <th> D</th> <th> E</th> <th> F</th> <th>10</th></tr>
+  <tr><th> 1</th>
+    <td> 1</td> <td> 2</td> <td> 3</td> <td> 4</td> <td> 5</td> <td> 6</td> <td> 7</td> <td> 8</td>
+    <td> 9</td> <td> A</td> <td> B</td> <td> C</td> <td> D</td> <td> E</td> <td> F</td> <td>10</td></tr>
+  <tr><th> 2</th>
+    <td> 2</td> <td> 4</td> <td> 6</td> <td> 8</td> <td> A</td> <td> C</td> <td> E</td> <td>10</td>
+    <td>12</td> <td>14</td> <td>16</td> <td>18</td> <td>1A</td> <td>1C</td> <td>1E</td> <td>20</td></tr>
+  <tr><th> 3</th>
+    <td> 3</td> <td> 6</td> <td> 9</td> <td> C</td> <td> F</td> <td>12</td> <td>15</td> <td>18</td>
+    <td>1B</td> <td>1E</td> <td>21</td> <td>24</td> <td>27</td> <td>2A</td> <td>2D</td> <td>30</td></tr>
+  <tr><th> 4</th>
+    <td> 4</td> <td> 8</td> <td> C</td> <td>10</td> <td>14</td> <td>18</td> <td>1C</td> <td>20</td>
+    <td>24</td> <td>28</td> <td>2C</td> <td>30</td> <td>34</td> <td>38</td> <td>3C</td> <td>40</td></tr>
+  <tr><th> 5</th>
+    <td> 5</td> <td> A</td> <td> F</td> <td>14</td> <td>19</td> <td>1E</td> <td>23</td> <td>28</td>
+    <td>2D</td> <td>32</td> <td>37</td> <td>3C</td> <td>41</td> <td>46</td> <td>4B</td> <td>50</td></tr>
+  <tr><th> 6</th>
+    <td> 6</td> <td> C</td> <td>12</td> <td>18</td> <td>1E</td> <td>24</td> <td>2A</td> <td>30</td>
+    <td>36</td> <td>3C</td> <td>42</td> <td>48</td> <td>4E</td> <td>54</td> <td>5F</td> <td>60</td></tr>
+  <tr><th> 7</th>
+    <td> 7</td> <td> E</td> <td>15</td> <td>1C</td> <td>23</td> <td>2A</td> <td>31</td> <td>38</td>
+    <td>3F</td> <td>46</td> <td>4D</td> <td>54</td> <td>5B</td> <td>62</td> <td>69</td> <td>70</td></tr>
+  <tr><th> 8</th>
+    <td> 8</td> <td>10</td> <td>18</td> <td>20</td> <td>28</td> <td>30</td> <td>38</td> <td>40</td>
+    <td>48</td> <td>50</td> <td>58</td> <td>60</td> <td>68</td> <td>70</td> <td>78</td> <td>80</td></tr>
+  <tr><th> 9</th>
+    <td> 9</td> <td>12</td> <td>1B</td> <td>24</td> <td>2D</td> <td>36</td> <td>3F</td> <td>48</td>
+    <td>51</td> <td>5A</td> <td>63</td> <td>6C</td> <td>75</td> <td>7D</td> <td>87</td> <td>90</td></tr>
+  <tr><th> A</th>
+    <td> A</td> <td>14</td> <td>1E</td> <td>28</td> <td>32</td> <td>3C</td> <td>46</td> <td>50</td>
+    <td>5A</td> <td>64</td> <td>6E</td> <td>78</td> <td>82</td> <td>8C</td> <td>96</td> <td>A0</td></tr>
+  <tr><th> B</th>
+    <td> B</td> <td>16</td> <td>21</td> <td>2C</td> <td>37</td> <td>42</td> <td>4D</td> <td>58</td>
+    <td>63</td> <td>6E</td> <td>79</td> <td>84</td> <td>8F</td> <td>9A</td> <td>A5</td> <td>B0</td></tr>
+  <tr><th> C</th>
+    <td> C</td> <td>18</td> <td>24</td> <td>30</td> <td>3C</td> <td>48</td> <td>54</td> <td>60</td>
+    <td>6C</td> <td>78</td> <td>84</td> <td>90</td> <td>9C</td> <td>A8</td> <td>B4</td> <td>C0</td></tr>
+  <tr><th> D</th>
+    <td> D</td> <td>1A</td> <td>27</td> <td>34</td> <td>41</td> <td>4E</td> <td>5B</td> <td>68</td>
+    <td>75</td> <td>82</td> <td>8F</td> <td>9C</td> <td>A9</td> <td>B6</td> <td>C3</td> <td>D0</td></tr>
+  <tr><th> E</th>
+    <td> E</td> <td>1C</td> <td>2A</td> <td>38</td> <td>46</td> <td>54</td> <td>62</td> <td>70</td>
+    <td>7E</td> <td>8C</td> <td>9A</td> <td>A8</td> <td>B6</td> <td>C4</td> <td>D2</td> <td>E0</td></tr>
+  <tr><th> F</th>
+    <td> F</td> <td>1E</td> <td>2D</td> <td>3C</td> <td>4B</td> <td>5A</td> <td>69</td> <td>78</td>
+    <td>87</td> <td>96</td> <td>A5</td> <td>B4</td> <td>C3</td> <td>D2</td> <td>E1</td> <td>F0</td></tr>
+  <tr><th>10</th>
+    <td>10</td> <td>20</td> <td>30</td> <td>40</td> <td>50</td> <td>60</td> <td>70</td> <td>80</td>
+    <td>90</td> <td>A0</td> <td>B0</td> <td>C0</td> <td>D0</td> <td>E0</td> <td>F0</td> <td>100</td></tr>
   </table>
 </div>
 
@@ -290,24 +290,24 @@ Where it really comes into its own is arithmetic. The positions in a number-stri
   <table class="table-data">
   <caption>123 &times; 456, base ten</caption>
   <col span=5 align="right">
-  <tr><td>&times; <th> 100  <th>   20 <th>    3	<th> sum
-  <tr><th> 400    <td>40000 <td> 8000 <td> 1200 <td> 49200
-  <tr><th>  50    <td> 5000 <td> 1000 <td>  150 <td>  6150
-  <tr><th>   6    <td>  600 <td>  120 <td>   18 <td>   738
-  <tr><th colspan=4>Result                      <th> 56088
-  </table>
+  <tr><td>&times;</td> <th> 100</th>  <th>   20</th> <th>    3</th>	<th> sum</th></tr>
+  <tr><th> 400</th>    <td>40000</td> <td> 8000</td> <td> 1200</td> <td> 49200</td></tr>
+  <tr><th>  50</th>    <td> 5000</td> <td> 1000</td> <td>  150</td> <td>  6150</td></tr>
+  <tr><th>   6</th>    <td>  600</td> <td>  120</td> <td>   18</td> <td>   738</td></tr>
+  <tr><th colspan=4>Result</th>                      <th> 56088</th></tr>
+  </table></td>
 
-  <td width=32>
+  <td width=32></td>
   <td>
   <table class="table-data">
   <caption>123 &times; 456, base 16</caption>
   <col span=5 align="right">
-  <tr><td>&times; <th> 100  <th>   20 <th>    3	<th> sum
-  <tr><th> 400    <td>40000 <td> 8000 <td>  C00 <td> 48C00
-  <tr><th>  50    <td> 5000 <td>  A00 <td>   F0 <td>  5AF0
-  <tr><th>   6    <td>  600 <td>   c0 <td>   12 <td>   6D2
-  <tr><th colspan=4>Result                      <th> 4EDC2
-  </table>
+  <tr><td>&times;</td> <th> 100</th>  <th>   20</th> <th>    3</th>	<th> sum</th></tr>
+  <tr><th> 400</th>    <td>40000</td> <td> 8000</td> <td>  C00</td> <td> 48C00</td></tr>
+  <tr><th>  50</th>    <td> 5000</td> <td>  A00</td> <td>   F0</td> <td>  5AF0</td></tr>
+  <tr><th>   6</th>    <td>  600</td> <td>   c0</td> <td>   12</td> <td>   6D2</td></tr>
+  <tr><th colspan=4>Result</th>                      <th> 4EDC2</th></tr>
+  </table></td></tr>
 </table>
 </div>
 
@@ -323,17 +323,17 @@ Something that is only possible in a positional system is the use of a floating 
 <table class="table-data">
 <col span=9 width=32>
 <tr align="center">
-  <th>exp
-  <td> 3 <td> 2 <td> 1 <th> 0 <td> -1 <td> -2 <td> -3 <td> -4 <td>...
+  <th>exp</th>
+  <td> 3</td> <td> 2</td> <td> 1</td> <th> 0</th> <td> -1</td> <td> -2</td> <td> -3</td> <td> -4</td> <td>...</td></tr>
 <tr align="center">
-  <th>pow
-  <td> 1000 <td> 100 <td> 10 <th> 1
-  <td> <sup>1</sup>/<sub>10</sub>   <td> <sup>1</sup>/<sub>100</sub>
-  <td> <sup>1</sup>/<sub>1000</sub> <td> <sup>1</sup>/<sub>10000</sub>
-  <td> ...
+  <th>pow</th>
+  <td> 1000</td> <td> 100</td> <td> 10</td> <th> 1</th>
+  <td> <sup>1</sup>/<sub>10</sub></td>   <td> <sup>1</sup>/<sub>100</sub></td>
+  <td> <sup>1</sup>/<sub>1000</sub></td> <td> <sup>1</sup>/<sub>10000</sub></td>
+  <td> ...</td></tr>
 <tr align="center">
-  <th>&pi;
-  <td> 0 <td> 0 <td> 0 <th> 3 <td> 1 <td> 4 <td> 1 <td> 6 <td> ...
+  <th>&pi;</th>
+  <td> 0</td> <td> 0</td> <td> 0</td> <th> 3</th> <td> 1</td> <td> 4</td> <td> 1</td> <td> 6</td> <td> ...</td></tr>
 </table>
 </div>
 
@@ -345,17 +345,17 @@ Since each base-*N* system is equivalent, you can do this just as well in binary
 <table class="table-data">
 <col span=9 width=16>
 <tr align="center">
-  <th>exp
-  <td> 3 <td> 2 <td> 1 <th> 0 <td> -1 <td> -2 <td> -3 <td> -4 <td> ...
+  <th>exp</th>
+  <td> 3</td> <td> 2</td> <td> 1</td> <th> 0</th> <td> -1</td> <td> -2</td> <td> -3</td> <td> -4</td> <td> ...</td></tr>
 <tr align="center">
-  <th>pow
-  <td> 8 <td> 4 <td> 2 <th> 1
-  <td> <sup>1</sup>/<sub>2</sub>   <td> <sup>1</sup>/<sub>4</sub>
-  <td> <sup>1</sup>/<sub>8</sub> <td> <sup>1</sup>/<sub>16</sub>
-  <td> ...
+  <th>pow</th>
+  <td> 8</td> <td> 4</td> <td> 2</td> <th> 1</th>
+  <td> <sup>1</sup>/<sub>2</sub></td>   <td> <sup>1</sup>/<sub>4</sub></td>
+  <td> <sup>1</sup>/<sub>8</sub></td> <td> <sup>1</sup>/<sub>16</sub></td>
+  <td> ...</td></tr>
 <tr align="center">
-  <th>&pi;
-  <td> 0 <td> 0 <td> 1 <th> 1 <td> 0 <td> 0 <td> 1 <td> 0 <td> ...
+  <th>&pi;</th>
+  <td> 0</td> <td> 0</td> <td> 1</td> <th> 1</th> <td> 0</td> <td> 0</td> <td> 1</td> <td> 0</td> <td> ...</td></tr>
 </table>
 </div>
 
@@ -367,11 +367,11 @@ You might wonder how I got these conversions. It's actually not that hard: all y
 
 <div class="lblock">
 <table class="table-data rules-cols">
-<tr><th> num  <th> / 16 <th> %16
-<tr><td> 1110 <td> 69   <td> 6
-<tr><td>   69 <td> 4    <td> 5
-<tr><td>    4 <td> 0    <td> 4
-<tr><th>result:<td colspan=2>456h
+<tr><th> num</th>  <th> / 16</th> <th> %16</th></tr>
+<tr><td> 1110</td> <td> 69</td>   <td> 6</td></tr>
+<tr><td>   69</td> <td> 4</td>    <td> 5</td></tr>
+<tr><td>    4</td> <td> 0</td>    <td> 4</td></tr>
+<tr><th>result:</th><td colspan=2>456h</td></tr>
 </table>
 </div>
 
@@ -413,13 +413,13 @@ Let's bring out our odometers again. In an three-digit odometer, you could go fr
   <b>*@tbl:10cmpl</b>: ten's complement for 3 digits
 </caption>
 <tbody align="center">
-<tr><th>Number
-  <td>-500 <td>-499 <td>-498 <td> ...  <td>-2   <td>-1
-  <td>0    <td>1    <td> ... <td> 497  <td> 498 <td> 499
+<tr><th>Number</th>
+  <td>-500</td> <td>-499</td> <td>-498</td> <td> ...</td>  <td>-2</td>   <td>-1</td>
+  <td>0</td>    <td>1</td>    <td> ...</td> <td> 497</td>  <td> 498</td> <td> 499</td></tr>
 
-<tr><th>Representation
-  <td> 500 <td> 501  <td> 502 <td> ... <td> 998 <td> 999
-  <td> 0   <td> 1    <td> ... <td> 497 <td> 498 <td> 499
+<tr><th>Representation</th>
+  <td> 500</td> <td> 501</td>  <td> 502</td> <td> ...</td> <td> 998</td> <td> 999</td>
+  <td> 0</td>   <td> 1</td>    <td> ...</td> <td> 497</td> <td> 498</td> <td> 499</td></tr>
 </tbody>
 </table>
 </div>
@@ -428,7 +428,7 @@ That's the practice, now the theory behind it. Negative numbers are deeply tied 
 
 <table id="eq:sum-xeqmx">
 <tr>
-  <td class="eqnrcell">({!@eq:sum-xeqmx})
+  <td class="eqnrcell">({!@eq:sum-xeqmx})</td>
   <td class="eqcell">
 0 = *x* + (−*x*)
   </td>
@@ -540,22 +540,22 @@ The binary version of 10's complement is <dfn>two's complement</dfn>. Finding th
 
 <table>
 <tr>
-  <td class="fill">&nbsp;
+  <td class="fill">&nbsp;</td>
   <td class="eqcell">
   <table class="eqtbl" cellpadding=2 cellspacing=0>
   <col align="right">
   <col align="center">
   <col align="left">
   <tr>
-    <th>255: <td>1111 1111 <td>
+    <th>255:</th> <td>1111 1111</td> <td></td></tr>
   <tr>
-    <th class="bdrB">76:
-	<td class="bdrB">0100 1100 
-	<td class="bdrB">&minus;
+    <th class="bdrB">76:</th>
+	<td class="bdrB">0100 1100</td> 
+	<td class="bdrB">&minus;</td></tr>
   <tr>
-    <th>179:
-    <td>1011 0011
-  </table>
+    <th>179:</th>
+    <td>1011 0011</td></tr>
+  </table></td></tr>
 </table>
 
 The 8bit −76 would be 179+1=180 (10110100<sub>two</sub>) and you will indeed see that 180+76 = 256 = 2<sup>8</sup>, exactly as it should be.
@@ -572,13 +572,13 @@ Unsigned and signed types can behave differently under type casting, comparison 
 
 <div class="lblock">
 <table class="table-data">
-<tr><td>FFh	<th>signed 		<th>unsigned
-<tr><th>comparison x&lt;0
-  <td>true <td> false
-<tr><th>conversion to 16 bit
-  <td>FFFFh (-1) <td> 00FFh (255)
-<tr><th>shift right by 1
-  <td>FFh (-1) <td> 7Fh (127)
+<tr><td>FFh</td>	<th>signed</th> 		<th>unsigned</th></tr>
+<tr><th>comparison x&lt;0</th>
+  <td>true</td> <td> false</td></tr>
+<tr><th>conversion to 16 bit</th>
+  <td>FFFFh (-1)</td> <td> 00FFh (255)</td></tr>
+<tr><th>shift right by 1</th>
+  <td>FFh (-1)</td> <td> 7Fh (127)</td></tr>
 </table>
 </div>
 
@@ -606,83 +606,83 @@ The C type for the character is called <dfn>char</dfn>. A **char** is actually a
   <b>*@tbl:ascii</b>: ASCII 0-127
 </caption>
 <tr><td>
-  <table class="border-none"><tr><th>dec <th>hex <th>Char
-    <tr><td> 0 <td>00h <th>NUL
-    <tr><td> 1 <td>01h <th>
-    <tr><td> 2 <td>02h <th>    <tr><td> 3 <td>03h <th>
-    <tr><td> 4 <td>04h <th>    <tr><td> 5 <td>05h <th>
-    <tr><td> 6 <td>06h <th>ACK  <tr><td> 7 <td>07h <th>BELL
-    <tr><td> 8 <td>08h <th>BS   <tr><td> 9 <td>09h <th>HT
-    <tr><td>10 <td>0Ah <th>LF
-    <tr><td>11 <td>0Bh <th>
-    <tr><td>12 <td>0Ch <th>FF   <tr><td>13 <td>0Dh <th>CR
-    <tr><td>14 <td>0Eh <th>    <tr><td>15 <td>0Fh <th>
-    <tr><td>16 <td>10h <th>    <tr><td>17 <td>11h <th>
-    <tr><td>18 <td>12h <th>    <tr><td>19 <td>13h <th>
-    <tr><td>20 <td>14h <th>    <tr><td>21 <td>15h <th>
-    <tr><td>22 <td>16h <th>    <tr><td>23 <td>17h <th>
-    <tr><td>24 <td>18h <th>    <tr><td>25 <td>19h <th>
-    <tr><td>26 <td>1Ah <th>^Z   <tr><td>27 <td>1Bh <th>ESC
-    <tr><td>28 <td>1Ch <th>    <tr><td>29 <td>1Dh <th>
-    <tr><td>30 <td>1Eh <th>    <tr><td>31 <td>1Fh <th>
-  </table>
+  <table class="border-none"><tr><th>dec</th> <th>hex</th> <th>Char</th></tr>
+    <tr><td> 0</td> <td>00h</td> <th>NUL</th></tr>
+    <tr><td> 1</td> <td>01h</td> <th></th></tr>
+    <tr><td> 2</td> <td>02h</td> <th></th></tr>    <tr><td> 3</td> <td>03h</td> <th></th></tr>
+    <tr><td> 4</td> <td>04h</td> <th></th></tr>    <tr><td> 5</td> <td>05h</td> <th></th></tr>
+    <tr><td> 6</td> <td>06h</td> <th>ACK</th></tr>  <tr><td> 7</td> <td>07h</td> <th>BELL</th></tr>
+    <tr><td> 8</td> <td>08h</td> <th>BS</th></tr>   <tr><td> 9</td> <td>09h</td> <th>HT</th></tr>
+    <tr><td>10</td> <td>0Ah</td> <th>LF</th></tr>
+    <tr><td>11</td> <td>0Bh</td> <th></th></tr>
+    <tr><td>12</td> <td>0Ch</td> <th>FF</th></tr>   <tr><td>13</td> <td>0Dh</td> <th>CR</th></tr>
+    <tr><td>14</td> <td>0Eh</td> <th></th></tr>    <tr><td>15</td> <td>0Fh</td> <th></th></tr>
+    <tr><td>16</td> <td>10h</td> <th></th></tr>    <tr><td>17</td> <td>11h</td> <th></th></tr>
+    <tr><td>18</td> <td>12h</td> <th></th></tr>    <tr><td>19</td> <td>13h</td> <th></th></tr>
+    <tr><td>20</td> <td>14h</td> <th></th></tr>    <tr><td>21</td> <td>15h</td> <th></th></tr>
+    <tr><td>22</td> <td>16h</td> <th></th></tr>    <tr><td>23</td> <td>17h</td> <th></th></tr>
+    <tr><td>24</td> <td>18h</td> <th></th></tr>    <tr><td>25</td> <td>19h</td> <th></th></tr>
+    <tr><td>26</td> <td>1Ah</td> <th>^Z</th></tr>   <tr><td>27</td> <td>1Bh</td> <th>ESC</th></tr>
+    <tr><td>28</td> <td>1Ch</td> <th></th></tr>    <tr><td>29</td> <td>1Dh</td> <th></th></tr>
+    <tr><td>30</td> <td>1Eh</td> <th></th></tr>    <tr><td>31</td> <td>1Fh</td> <th></th></tr>
+  </table></td>
 <td>
-  <table class="border-none"><tr><th>dec <th>hex <th>Char
-    <tr><td>32 <td>20h <th>sp   <tr><td>33 <td>21h <th>!
-    <tr><td>34 <td>22h <th>"    <tr><td>35 <td>23h <th>#
-    <tr><td>36 <td>24h <th>$    <tr><td>37 <td>25h <th>%
-    <tr><td>38 <td>26h <th>&amp;<tr><td>39 <td>27h <th>'
-    <tr><td>40 <td>28h <th>(    <tr><td>41 <td>29h <th>)
-    <tr><td>42 <td>2Ah <th>*    <tr><td>43 <td>2Bh <th>+
-    <tr><td>44 <td>2Ch <th>,    <tr><td>45 <td>2Dh <th>-
-    <tr><td>46 <td>2Eh <th>.    <tr><td>47 <td>2Fh <th>/
-    <tr><td>48 <td>30h <th>0    <tr><td>49 <td>31h <th>1
-    <tr><td>50 <td>32h <th>2    <tr><td>51 <td>33h <th>3
-    <tr><td>52 <td>34h <th>4    <tr><td>53 <td>35h <th>5
-    <tr><td>54 <td>36h <th>6    <tr><td>55 <td>37h <th>7
-    <tr><td>56 <td>38h <th>8    <tr><td>57 <td>39h <th>9
-    <tr><td>58 <td>3Ah <th>:    <tr><td>59 <td>3Bh <th>;
-    <tr><td>60 <td>3Ch <th>&lt; <tr><td>61 <td>3Dh <th>=
-    <tr><td>62 <td>3Eh <th>&gt; <tr><td>63 <td>3Fh <th>?
-  </table>
+  <table class="border-none"><tr><th>dec</th> <th>hex</th> <th>Char</th></tr>
+    <tr><td>32</td> <td>20h</td> <th>sp</th></tr>   <tr><td>33</td> <td>21h</td> <th>!</th></tr>
+    <tr><td>34</td> <td>22h</td> <th>"</th></tr>    <tr><td>35</td> <td>23h</td> <th>#</th></tr>
+    <tr><td>36</td> <td>24h</td> <th>$</th></tr>    <tr><td>37</td> <td>25h</td> <th>%</th></tr>
+    <tr><td>38</td> <td>26h</td> <th>&amp;</th></tr><tr><td>39</td> <td>27h</td> <th>'</th></tr>
+    <tr><td>40</td> <td>28h</td> <th>(</th></tr>    <tr><td>41</td> <td>29h</td> <th>)</th></tr>
+    <tr><td>42</td> <td>2Ah</td> <th>*</th></tr>    <tr><td>43</td> <td>2Bh</td> <th>+</th></tr>
+    <tr><td>44</td> <td>2Ch</td> <th>,</th></tr>    <tr><td>45</td> <td>2Dh</td> <th>-</th></tr>
+    <tr><td>46</td> <td>2Eh</td> <th>.</th></tr>    <tr><td>47</td> <td>2Fh</td> <th>/</th></tr>
+    <tr><td>48</td> <td>30h</td> <th>0</th></tr>    <tr><td>49</td> <td>31h</td> <th>1</th></tr>
+    <tr><td>50</td> <td>32h</td> <th>2</th></tr>    <tr><td>51</td> <td>33h</td> <th>3</th></tr>
+    <tr><td>52</td> <td>34h</td> <th>4</th></tr>    <tr><td>53</td> <td>35h</td> <th>5</th></tr>
+    <tr><td>54</td> <td>36h</td> <th>6</th></tr>    <tr><td>55</td> <td>37h</td> <th>7</th></tr>
+    <tr><td>56</td> <td>38h</td> <th>8</th></tr>    <tr><td>57</td> <td>39h</td> <th>9</th></tr>
+    <tr><td>58</td> <td>3Ah</td> <th>:</th></tr>    <tr><td>59</td> <td>3Bh</td> <th>;</th></tr>
+    <tr><td>60</td> <td>3Ch</td> <th>&lt;</th></tr> <tr><td>61</td> <td>3Dh</td> <th>=</th></tr>
+    <tr><td>62</td> <td>3Eh</td> <th>&gt;</th></tr> <tr><td>63</td> <td>3Fh</td> <th>?</th></tr>
+  </table></td>
 <td>
-  <table class="border-none"><tr><th>dec <th>hex <th>Char
-    <tr><td>64 <td>40h <th>@    <tr><td>65 <td>41h <th>A
-    <tr><td>66 <td>42h <th>B    <tr><td>67 <td>43h <th>C
-    <tr><td>68 <td>44h <th>D    <tr><td>69 <td>45h <th>E
-    <tr><td>70 <td>46h <th>F    <tr><td>71 <td>47h <th>G
-    <tr><td>72 <td>48h <th>H    <tr><td>73 <td>49h <th>I
-    <tr><td>74 <td>4Ah <th>J    <tr><td>75 <td>4Bh <th>K
-    <tr><td>76 <td>4Ch <th>L    <tr><td>77 <td>4Dh <th>M
-    <tr><td>78 <td>4Eh <th>N    <tr><td>79 <td>4Fh <th>O
-    <tr><td>80 <td>50h <th>P    <tr><td>81 <td>51h <th>Q
-    <tr><td>82 <td>52h <th>R    <tr><td>83 <td>53h <th>S
-    <tr><td>84 <td>54h <th>T    <tr><td>85 <td>55h <th>U
-    <tr><td>86 <td>56h <th>V    <tr><td>87 <td>57h <th>W
-    <tr><td>88 <td>58h <th>X    <tr><td>89 <td>59h <th>Y
-    <tr><td>90 <td>5Ah <th>Z    <tr><td>91 <td>5Bh <th>[
-    <tr><td>92 <td>5Ch <th>\    <tr><td>93 <td>5Dh <th>]
-    <tr><td>94 <td>5Eh <th>^    <tr><td>95 <td>5Fh <th>_
-  </table>
+  <table class="border-none"><tr><th>dec</th> <th>hex</th> <th>Char</th></tr>
+    <tr><td>64</td> <td>40h</td> <th>@</th></tr>    <tr><td>65</td> <td>41h</td> <th>A</th></tr>
+    <tr><td>66</td> <td>42h</td> <th>B</th></tr>    <tr><td>67</td> <td>43h</td> <th>C</th></tr>
+    <tr><td>68</td> <td>44h</td> <th>D</th></tr>    <tr><td>69</td> <td>45h</td> <th>E</th></tr>
+    <tr><td>70</td> <td>46h</td> <th>F</th></tr>    <tr><td>71</td> <td>47h</td> <th>G</th></tr>
+    <tr><td>72</td> <td>48h</td> <th>H</th></tr>    <tr><td>73</td> <td>49h</td> <th>I</th></tr>
+    <tr><td>74</td> <td>4Ah</td> <th>J</th></tr>    <tr><td>75</td> <td>4Bh</td> <th>K</th></tr>
+    <tr><td>76</td> <td>4Ch</td> <th>L</th></tr>    <tr><td>77</td> <td>4Dh</td> <th>M</th></tr>
+    <tr><td>78</td> <td>4Eh</td> <th>N</th></tr>    <tr><td>79</td> <td>4Fh</td> <th>O</th></tr>
+    <tr><td>80</td> <td>50h</td> <th>P</th></tr>    <tr><td>81</td> <td>51h</td> <th>Q</th></tr>
+    <tr><td>82</td> <td>52h</td> <th>R</th></tr>    <tr><td>83</td> <td>53h</td> <th>S</th></tr>
+    <tr><td>84</td> <td>54h</td> <th>T</th></tr>    <tr><td>85</td> <td>55h</td> <th>U</th></tr>
+    <tr><td>86</td> <td>56h</td> <th>V</th></tr>    <tr><td>87</td> <td>57h</td> <th>W</th></tr>
+    <tr><td>88</td> <td>58h</td> <th>X</th></tr>    <tr><td>89</td> <td>59h</td> <th>Y</th></tr>
+    <tr><td>90</td> <td>5Ah</td> <th>Z</th></tr>    <tr><td>91</td> <td>5Bh</td> <th>[</th></tr>
+    <tr><td>92</td> <td>5Ch</td> <th>\</th></tr>    <tr><td>93</td> <td>5Dh</td> <th>]</th></tr>
+    <tr><td>94</td> <td>5Eh</td> <th>^</th></tr>    <tr><td>95</td> <td>5Fh</td> <th>_</th></tr>
+  </table></td>
 <td>
-  <table class="border-none"><tr><th>dec <th>hex <th>Char
-    <tr><td>96 <td>60h <th>`    <tr><td>97 <td>61h <th>a
-    <tr><td>98 <td>62h <th>b    <tr><td>99 <td>63h <th>c
-    <tr><td>100 <td>64h <th>d    <tr><td>101 <td>65h <th>e
-    <tr><td>102 <td>66h <th>f    <tr><td>103 <td>67h <th>g
-    <tr><td>104 <td>68h <th>h    <tr><td>105 <td>69h <th>i
-    <tr><td>106 <td>6Ah <th>j    <tr><td>107 <td>6Bh <th>k
-    <tr><td>108 <td>6Ch <th>l    <tr><td>109 <td>6Dh <th>m
-    <tr><td>110 <td>6Eh <th>n    <tr><td>111 <td>6Fh <th>o
-    <tr><td>112 <td>70h <th>p    <tr><td>113 <td>71h <th>q
-    <tr><td>114 <td>72h <th>r    <tr><td>115 <td>73h <th>s
-    <tr><td>116 <td>74h <th>t    <tr><td>117 <td>75h <th>u
-    <tr><td>118 <td>76h <th>v    <tr><td>119 <td>77h <th>w
-    <tr><td>120 <td>78h <th>x    <tr><td>121 <td>79h <th>y
-    <tr><td>122 <td>7Ah <th>z    <tr><td>123 <td>7Bh <th>{
-    <tr><td>124 <td>7Ch <th>|    <tr><td>125 <td>7Dh <th>}
-    <tr><td>126 <td>7Eh <th>~    <tr><td>127 <td>7Fh <th>DEL
-  </table>
+  <table class="border-none"><tr><th>dec</th> <th>hex</th> <th>Char</th></tr>
+    <tr><td>96</td> <td>60h</td> <th>`</th></tr>    <tr><td>97</td> <td>61h</td> <th>a</th></tr>
+    <tr><td>98</td> <td>62h</td> <th>b</th></tr>    <tr><td>99</td> <td>63h</td> <th>c</th></tr>
+    <tr><td>100</td> <td>64h</td> <th>d</th></tr>    <tr><td>101</td> <td>65h</td> <th>e</th></tr>
+    <tr><td>102</td> <td>66h</td> <th>f</th></tr>    <tr><td>103</td> <td>67h</td> <th>g</th></tr>
+    <tr><td>104</td> <td>68h</td> <th>h</th></tr>    <tr><td>105</td> <td>69h</td> <th>i</th></tr>
+    <tr><td>106</td> <td>6Ah</td> <th>j</th></tr>    <tr><td>107</td> <td>6Bh</td> <th>k</th></tr>
+    <tr><td>108</td> <td>6Ch</td> <th>l</th></tr>    <tr><td>109</td> <td>6Dh</td> <th>m</th></tr>
+    <tr><td>110</td> <td>6Eh</td> <th>n</th></tr>    <tr><td>111</td> <td>6Fh</td> <th>o</th></tr>
+    <tr><td>112</td> <td>70h</td> <th>p</th></tr>    <tr><td>113</td> <td>71h</td> <th>q</th></tr>
+    <tr><td>114</td> <td>72h</td> <th>r</th></tr>    <tr><td>115</td> <td>73h</td> <th>s</th></tr>
+    <tr><td>116</td> <td>74h</td> <th>t</th></tr>    <tr><td>117</td> <td>75h</td> <th>u</th></tr>
+    <tr><td>118</td> <td>76h</td> <th>v</th></tr>    <tr><td>119</td> <td>77h</td> <th>w</th></tr>
+    <tr><td>120</td> <td>78h</td> <th>x</th></tr>    <tr><td>121</td> <td>79h</td> <th>y</th></tr>
+    <tr><td>122</td> <td>7Ah</td> <th>z</th></tr>    <tr><td>123</td> <td>7Bh</td> <th>{</th></tr>
+    <tr><td>124</td> <td>7Ch</td> <th>|</th></tr>    <tr><td>125</td> <td>7Dh</td> <th>}</th></tr>
+    <tr><td>126</td> <td>7Eh</td> <th>~</th></tr>    <tr><td>127</td> <td>7Fh</td> <th>DEL</th></tr>
+  </table></td></tr>
 </table>
 </div>
 
@@ -699,12 +699,12 @@ Describing floating-point numbers on a computer is done according to the <dfn>IE
   IEEE format for 32bit float
 </caption>
 <tr class="bits">
-	<td>1F<td>1E 1D 1C 1B 1A 19 18 17
-	<td>16 15 14 13 12 11 10 F E D C B A 9 8 7 6 5 4 3 2 1 0
+	<td>1F</td><td>1E 1D 1C 1B 1A 19 18 17</td>
+	<td>16 15 14 13 12 11 10 F E D C B A 9 8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-  <td class="rclr2">s
-  <td class="rclr1">e
-  <td class="rclr0">f
+  <td class="rclr2">s</td>
+  <td class="rclr1">e</td>
+  <td class="rclr0">f</td></tr>
 </table>
 <br>
 
@@ -712,20 +712,20 @@ Describing floating-point numbers on a computer is done according to the <dfn>IE
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def">
-<tr align="left"><th>bits<th>name<th>&nbsp;<th>description
+<tr align="left"><th>bits</th><th>name</th><th>&nbsp;</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>00-16<td class="rclr0">f
-  <td>&nbsp;
-  <td><b>Fractional</b> part (23 bits)
+  <td>00-16</td><td class="rclr0">f</td>
+  <td>&nbsp;</td>
+  <td><b>Fractional</b> part (23 bits)</td></tr>
 <tr class="bg1">	
-  <td>17-1E<td class="rclr1">e
-  <td>&nbsp;
-  <td><b>Exponent</b> (8 bits)
+  <td>17-1E</td><td class="rclr1">e</td>
+  <td>&nbsp;</td>
+  <td><b>Exponent</b> (8 bits)</td></tr>
 <tr class="bg0">	
-  <td>1F<td class="rclr2">s
-  <td>&nbsp;
-  <td><b>Sign</b> bit.
+  <td>1F</td><td class="rclr2">s</td>
+  <td>&nbsp;</td>
+  <td><b>Sign</b> bit.</td></tr>
 </tbody>
 </table>
 </div>
@@ -778,9 +778,9 @@ Note that unlike signed integers, there *is* a real sign bit this time. Furtherm
 
 <div class="lblock">
 <table class="table-data">
-<tr align="center"><th>x <th>s <th> e <th> f
-<tr><th>1.0  <td>0 <td>01111111 <td> 000 0000 0000 0000 0000 0000
-<tr><th>&minus;1.0 <td>1 <td>01111111 <td> 000 0000 0000 0000 0000 0000
+<tr align="center"><th>x</th> <th>s</th> <th> e</th> <th> f</th></tr>
+<tr><th>1.0</th>  <td>0</td> <td>01111111</td> <td> 000 0000 0000 0000 0000 0000</td></tr>
+<tr><th>&minus;1.0</th> <td>1</td> <td>01111111</td> <td> 000 0000 0000 0000 0000 0000</td></tr>
 </table>
 </div>
 
@@ -809,9 +809,9 @@ Computer endianness plays a part in two areas: bit-order in a byte and byte-orde
   <b>*@tbl:endian</b>: storing 0x11223344
 </caption>
 <col span=5 align="center">
-<tr><th>memory <th> 00 <th> 01 <th> 02 <th> 03
-<tr><th>big    <td> 11 <td> 22 <td> 33 <td> 44
-<tr><th>little <td> 44 <td> 33 <td> 22 <td> 11
+<tr><th>memory</th> <th> 00</th> <th> 01</th> <th> 02</th> <th> 03</th></tr>
+<tr><th>big</th>    <td> 11</td> <td> 22</td> <td> 33</td> <td> 44</td></tr>
+<tr><th>little</th> <td> 44</td> <td> 33</td> <td> 22</td> <td> 11</td></tr>
 </table>
 </div>
 
@@ -852,29 +852,29 @@ What these four operations do is usually written down in truth tables, which lis
 </caption>
   <tr valign="top"><td>
     <table class="table-data rules-groups">
-    <colgroup align="center">
-    <colgroup align="center">
-    <colgroup align="center">
-    <colgroup align="center">
+    <colgroup align="center"></colgroup>
+    <colgroup align="center"></colgroup>
+    <colgroup align="center"></colgroup>
+    <colgroup align="center"></colgroup>
     <thead>
-      <tr><th>a b <th> a&amp;b <th> a|b <th> a^b
+      <tr><th>a b</th> <th> a&amp;b</th> <th> a|b</th> <th> a^b</th></tr></thead>
     <tbody>
-      <tr><td>0 0 <td> 0 <td> 0 <td> 0
-      <tr><td>0 1 <td> 0 <td> 1 <td> 1
-      <tr><td>1 0 <td> 0 <td> 1 <td> 1
-      <tr><td>1 1 <td> 1 <td> 1 <td> 0
-    </table>
-  <td width=32>
+      <tr><td>0 0</td> <td> 0</td> <td> 0</td> <td> 0</td></tr>
+      <tr><td>0 1</td> <td> 0</td> <td> 1</td> <td> 1</td></tr>
+      <tr><td>1 0</td> <td> 0</td> <td> 1</td> <td> 1</td></tr>
+      <tr><td>1 1</td> <td> 1</td> <td> 1</td> <td> 0</td></tr></tbody>
+    </table></td>
+  <td width=32></td>
   <td>
     <table class="table-data rules-groups">
-    <colgroup align="center">
-    <colgroup align="center">
+    <colgroup align="center"></colgroup>
+    <colgroup align="center"></colgroup>
     <thead>
-	  <tr><th> a <th> ~a
+	  <tr><th> a</th> <th> ~a</th></tr></thead>
     <tbody>
-      <tr><td> 0 <td> 1
-      <tr><td> 1 <td> 0
-    </table>
+      <tr><td> 0</td> <td> 1</td></tr>
+      <tr><td> 1</td> <td> 0</td></tr></tbody>
+    </table></td></tr>
 </table> <!-- /frame -->
 </div>
 
@@ -888,58 +888,58 @@ What these four operations do is usually written down in truth tables, which lis
   <col span=4 width=144>
   <tr valign="bottom"><td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
-    <tr><th align="center" colspan=3>AND
+    <tr><th align="center" colspan=3>AND</th></tr>
     <tr>
-	  <th><code>0Fh</code>
-	  <td><code>0000<font color=blue><b>1111</b></font></code>
+	  <th><code>0Fh</code></th>
+	  <td><code>0000<font color=blue><b>1111</b></font></code></td></tr>
     <tr>
-	  <th class="bdrB"><code>35h</code>&nbsp;
-	  <td class="bdrB"><code>00110101</code>&nbsp;
-	  <td class="bdrB"> &amp;
+	  <th class="bdrB"><code>35h</code>&nbsp;</th>
+	  <td class="bdrB"><code>00110101</code>&nbsp;</td>
+	  <td class="bdrB"> &amp;</td></tr>
     <tr>
-	  <th><code>05h</code>
-	  <td><code><font color=red><b>0000</b></font>0101</code>
-  </table>
+	  <th><code>05h</code></th>
+	  <td><code><font color=red><b>0000</b></font>0101</code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
-    <tr><th align="center" colspan=3>OR
+    <tr><th align="center" colspan=3>OR</th></tr>
     <tr>
-	  <th><code>0Fh</code>
-	  <td><code>0000<font color=blue><b>1111</b></font></code>
+	  <th><code>0Fh</code></th>
+	  <td><code>0000<font color=blue><b>1111</b></font></code></td></tr>
     <tr>
-	  <th class="bdrB"><code>35h</code>&nbsp;
-	  <td class="bdrB"><code>00110101</code>&nbsp;
-	  <td class="bdrB"> |
+	  <th class="bdrB"><code>35h</code>&nbsp;</th>
+	  <td class="bdrB"><code>00110101</code>&nbsp;</td>
+	  <td class="bdrB"> |</td></tr>
     <tr>
-	  <th><code>3Fh</code>
-	  <td><code>0011<font color=red><b>1111</b></font></code>
-  </table>
+	  <th><code>3Fh</code></th>
+	  <td><code>0011<font color=red><b>1111</b></font></code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
-    <tr><th align="center" colspan=3>XOR
+    <tr><th align="center" colspan=3>XOR</th></tr>
     <tr>
-	  <th><code>0Fh</code>
-	  <td><code>0000<font color=blue><b>1111</b></font></code>
+	  <th><code>0Fh</code></th>
+	  <td><code>0000<font color=blue><b>1111</b></font></code></td></tr>
     <tr>
-	  <th class="bdrB"><code>35h</code>&nbsp;
-	  <td class="bdrB"><code>00110101</code>&nbsp;
-	  <td class="bdrB"> ^
+	  <th class="bdrB"><code>35h</code>&nbsp;</th>
+	  <td class="bdrB"><code>00110101</code>&nbsp;</td>
+	  <td class="bdrB"> ^</td></tr>
     <tr>
-	  <th><code>3Ah</code>
-	  <td><code>0011<font color=red><b>1010</b></font></code>
-  </table>
+	  <th><code>3Ah</code></th>
+	  <td><code>0011<font color=red><b>1010</b></font></code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
-    <tr><th align="center" colspan=3>NOT
-    <tr><td>&nbsp;
+    <tr><th align="center" colspan=3>NOT</th></tr>
+    <tr><td>&nbsp;</td></tr>
     <tr>
-	  <th class="bdrB"><code>0Fh</code>&nbsp;
-	  <td class="bdrB"><code>00001111</code>&nbsp;
-	  <td class="bdrB"> ~
+	  <th class="bdrB"><code>0Fh</code>&nbsp;</th>
+	  <td class="bdrB"><code>00001111</code>&nbsp;</td>
+	  <td class="bdrB"> ~</td></tr>
     <tr>
-	  <th><code>F0h</code>
-	  <td><code><font color=red><b>11110000</b></font></code>
-  </table>
+	  <th><code>F0h</code></th>
+	  <td><code><font color=red><b>11110000</b></font></code></td></tr>
+  </table></td></tr>
 </table>  <!-- /frame for masked results -->
 </div>
 
@@ -966,58 +966,58 @@ If you look at the truth tables and the examples, you may already see how this c
   <table class="eqtbl" cellpadding=2 cellspacing=0>
     <caption><b>AND (keep bits)</b><br> <i>s &amp; m</i></caption>
     <tr>
-	  <th><code>35h</code>&nbsp;
-	  <td><code>00110101</code>&nbsp;
+	  <th><code>35h</code>&nbsp;</th>
+	  <td><code>00110101</code>&nbsp;</td></tr>
     <tr>
-	  <th class="bdrB"><code>0Fh</code>
-	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code>
-	  <td class="bdrB"> &amp;
+	  <th class="bdrB"><code>0Fh</code></th>
+	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code></td>
+	  <td class="bdrB"> &amp;</td></tr>
     <tr>
-	  <th><code>05h</code>
-	  <td><code><font color=red><b>0000</b></font>0101</code>
-  </table>
+	  <th><code>05h</code></th>
+	  <td><code><font color=red><b>0000</b></font>0101</code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
     <caption><b>OR (set bits)</b> <br> <i>s | m</i></caption>
     <tr>
-	  <th><code>35h</code>&nbsp;
-	  <td><code>00110101</code>&nbsp;
+	  <th><code>35h</code>&nbsp;</th>
+	  <td><code>00110101</code>&nbsp;</td></tr>
     <tr>
-	  <th class="bdrB"><code>0Fh</code>
-	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code>
-	  <td class="bdrB"> |
+	  <th class="bdrB"><code>0Fh</code></th>
+	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code></td>
+	  <td class="bdrB"> |</td></tr>
     <tr>
-	  <th><code>3Fh</code>
-	  <td><code>0011<font color=red><b>1111</b></font></code>
-  </table>
+	  <th><code>3Fh</code></th>
+	  <td><code>0011<font color=red><b>1111</b></font></code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
     <caption><b>XOR (flip bits)</b> <br> <i>s ^ m</i></caption>
     <tr>
-	  <th><code>35h</code>&nbsp;
-	  <td><code>00110101</code>&nbsp;
+	  <th><code>35h</code>&nbsp;</th>
+	  <td><code>00110101</code>&nbsp;</td></tr>
     <tr>
-	  <th class="bdrB"><code>0Fh</code>
-	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code>
-	  <td class="bdrB"> ^
+	  <th class="bdrB"><code>0Fh</code></th>
+	  <td class="bdrB"><code>0000<font color=blue><b>1111</b></font></code></td>
+	  <td class="bdrB"> ^</td></tr>
     <tr>
-	  <th><code>3Ah</code>
-	  <td><code>0011<font color=red><b>1010</b></font></code>
-  </table>
+	  <th><code>3Ah</code></th>
+	  <td><code>0011<font color=red><b>1010</b></font></code></td></tr>
+  </table></td>
   <td>
   <table class="eqtbl" cellpadding=2 cellspacing=0>
     <caption><b>AND NOT (clear bits)</b> <br> <i>s &amp;~ m</i></caption>
     <tr>
-	  <th><code>&nbsp;35h</code>&nbsp;
-	  <td><code>00110101</code>&nbsp;
+	  <th><code>&nbsp;35h</code>&nbsp;</th>
+	  <td><code>00110101</code>&nbsp;</td></tr>
     <tr>
-	  <th class="bdrB"><code>~0Fh</code>
-	  <td class="bdrB"><code>1111<font color=blue><b>0000</b></font></code>
-	  <td class="bdrB"> &amp;
+	  <th class="bdrB"><code>~0Fh</code></th>
+	  <td class="bdrB"><code>1111<font color=blue><b>0000</b></font></code></td>
+	  <td class="bdrB"> &amp;</td></tr>
     <tr>
-	  <th><code>&nbsp;30h</code>
-	  <td><code>0011<font color=red><b>0000</b></font></code>
-  </table>
+	  <th><code>&nbsp;30h</code></th>
+	  <td><code>0011<font color=red><b>0000</b></font></code></td></tr>
+  </table></td></tr>
 </table>  <!-- /frame for masked results -->
 </div>
 
@@ -1029,32 +1029,32 @@ And then there are the shift and rotate operations. In contrast to the earlier o
 <table id="tbl:shift" class="table-data rules-groups">
 <caption align="bottom"><b>*@tbl:shift</b>: shift / rotate operations on
   byte 35h (<code>00110101</code>)</caption>
-<colgroup>
-<colgroup>
-<colgroup>
-<colgroup>
+<colgroup></colgroup>
+<colgroup></colgroup>
+<colgroup></colgroup>
+<colgroup></colgroup>
 <thead>
 <tr align="center">
-  <th>name <th> symbol <th>example <th> result
+  <th>name</th> <th> symbol</th> <th>example</th> <th> result</th></tr></thead>
 <tbody>
 <tr>
-  <th>shift left <td> SL, &lt;&lt;
-  <td> <code>00<font color=red><b>110101</b></font></code> &lt;&lt; 2
-  <td> <code><font color=red><b>110101</b></font>00</code>, D4h
+  <th>shift left</th> <td> SL, &lt;&lt;</td>
+  <td> <code>00<font color=red><b>110101</b></font></code> &lt;&lt; 2</td>
+  <td> <code><font color=red><b>110101</b></font>00</code>, D4h</td></tr>
 <tr>
-  <th>shift right <td> SR, &gt;&gt;
-  <td> <code>00<font color=red><b>110101</b></font></code> &gt;&gt; 2
-  <td> <code>0000<font color=red><b>1101</b></font></code>, 0Dh
+  <th>shift right</th> <td> SR, &gt;&gt;</td>
+  <td> <code>00<font color=red><b>110101</b></font></code> &gt;&gt; 2</td>
+  <td> <code>0000<font color=red><b>1101</b></font></code>, 0Dh</td></tr>
 <tr>
-  <th>rotate left <td> ROL
-  <td> <code>00<font color=blue><b>110101</b></font></code> ROL 3
+  <th>rotate left</th> <td> ROL</td>
+  <td> <code>00<font color=blue><b>110101</b></font></code> ROL 3</td>
   <td> <code><font color=blue><b>10101</b></font>00<font
-    color=blue><b>1</b></font></code>, A9h
+    color=blue><b>1</b></font></code>, A9h</td></tr>
 <tr>
-  <th>rotate right <td> ROR
-  <td> <code>00<font color=blue><b>110101</b></font></code> ROR 3
+  <th>rotate right</th> <td> ROR</td>
+  <td> <code>00<font color=blue><b>110101</b></font></code> ROR 3</td>
   <td> <code><font color=blue><b>101</b></font>00<font
-    color=blue><b>110</b></font></code>, A6h
+    color=blue><b>110</b></font></code>, A6h</td></tr></tbody>
 </table>
 </div>
 
@@ -1072,16 +1072,16 @@ Take the interesting case of the 8bits 80h, which is both the unsigned 128 as th
   <b>*@tbl:sign</b>: signed and unsigned <code>80h&gt;&gt;3</code>
 </caption>
 <col span=3 align="center">
-<tr><th>type <b>char</b><th> unsigned <th> signed
+<tr><th>type <b>char</b></th><th> unsigned</th> <th> signed</th></tr>
 <tr>
-  <td><code><font color=blue><b>1</b></font>000 0000</code>
-  <td>&nbsp;128 <td> &minus;128
+  <td><code><font color=blue><b>1</b></font>000 0000</code></td>
+  <td>&nbsp;128</td> <td> &minus;128</td></tr>
 <tr>
-  <td><code>80h&gt;&gt;3</code>
-  <td> <code>000<font color=red><b>1</b></font> 0000</code>
-  <td> <code><font color=red><b>1111</b></font> 0000</code>
+  <td><code>80h&gt;&gt;3</code></td>
+  <td> <code>000<font color=red><b>1</b></font> 0000</code></td>
+  <td> <code><font color=red><b>1111</b></font> 0000</code></td></tr>
 <tr>
-  <td>&nbsp;<td> 16 <td> &minus;16
+  <td>&nbsp;</td><td> 16</td> <td> &minus;16</td></tr>
 </table>
 </div>
 
@@ -1116,28 +1116,28 @@ OR and XOR are only very rarely used in their arithmetic form, but the shifts an
 <caption align="bottom">
   <b>*@tbl:bitops-arith</b> Arithmetic bit-ops summary
 </caption>
-<colgroup valign="bottom">
-<colgroup align="center" valign="bottom">
-<colgroup align="center" valign="bottom">
+<colgroup valign="bottom"></colgroup>
+<colgroup align="center" valign="bottom"></colgroup>
+<colgroup align="center" valign="bottom"></colgroup>
 <thead>
 <tr>
-  <th>bit-op <th>arithmetic function <th>example
+  <th>bit-op</th> <th>arithmetic function</th> <th>example</th></tr></thead>
 <tbody>
 <tr>
-  <td>SHL
+  <td>SHL</td>
   <td><i>x</i>&lt;&lt;<i>n</i> 
-    = <i>x</i> * 2<sup><i>n</i></sup>
-  <td><i>x</i>&lt;&lt;3 = <i>x</i> * 8
+    = <i>x</i> * 2<sup><i>n</i></sup></td>
+  <td><i>x</i>&lt;&lt;3 = <i>x</i> * 8</td></tr>
 <tr>
-  <td>SHR
+  <td>SHR</td>
   <td><i>x</i>&gt;&gt;<i>n</i> 
-    = <i>x</i> / 2<sup><i>n</i></sup>
-  <td><i>x</i>&gt;&gt;3 = <i>x</i> / 8
+    = <i>x</i> / 2<sup><i>n</i></sup></td>
+  <td><i>x</i>&gt;&gt;3 = <i>x</i> / 8</td></tr>
 <tr>
-  <td>AND
+  <td>AND</td>
   <td><i>x</i>&amp;(2<sup><i>n</i></sup>&minus;1) 
-    = <i>x</i> % 2<sup><i>n</i></sup>
-  <td><i>x</i>&amp;7 = <i>x</i> % 8
+    = <i>x</i> % 2<sup><i>n</i></sup></td>
+  <td><i>x</i>&amp;7 = <i>x</i> % 8</td></tr></tbody>
 </table>
 </div>
 
@@ -1148,16 +1148,16 @@ And now for my final trick of the day, let's take a closer look at the most basi
 <caption align="bottom">
   <b>*@tbl:adder</b>: 1&minus;bit adder
 </caption>
-<colgroup align="center">
-<colgroup align="center">
-<colgroup align="center">
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
 <thead>
-  <tr><th>a b <th> a+b
+  <tr><th>a b</th> <th> a+b</th></tr></thead>
 <tbody>
-  <tr><td>0 0 <td> 00
-  <tr><td>0 1 <td> 01
-  <tr><td>1 0 <td> 01
-  <tr><td>1 1 <td> 10
+  <tr><td>0 0</td> <td> 00</td></tr>
+  <tr><td>0 1</td> <td> 01</td></tr>
+  <tr><td>1 0</td> <td> 01</td></tr>
+  <tr><td>1 1</td> <td> 10</td></tr></tbody>
 </table>
 </div>
 

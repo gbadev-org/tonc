@@ -20,11 +20,11 @@ The basic frequency of the GBA timers is the CPU frequency, which is 2<sup>24</s
   <b>{*@tbl:tmr-freq}</b>: Timer frequencies
 </caption>
 <col span=4 align="right">
-<tr><th>#cycles<th>frequency<th>period
-<tr><td>  1 <td>16.78 MHz<td>59.59 ns
-<tr><td>  64 <td>262.21 kHz<td>3.815 &mu;s
-<tr><td> 256 <td>65.536 kHz<td>15.26 &mu;s
-<tr><td>1024 <td>16.384 kHz<td>61.04 &mu;s
+<tr><th>#cycles</th><th>frequency</th><th>period</th></tr>
+<tr><td>  1</td> <td>16.78 MHz</td><td>59.59 ns</td></tr>
+<tr><td>  64</td> <td>262.21 kHz</td><td>3.815 &mu;s</td></tr>
+<tr><td> 256</td> <td>65.536 kHz</td><td>15.26 &mu;s</td></tr>
+<tr><td>1024</td> <td>16.384 kHz</td><td>61.04 &mu;s</td></tr>
 </table>
 </div>
 
@@ -37,11 +37,11 @@ The GBA has four timers, timers 0 to 3. Each of these has two registers: a data 
 <caption align="bottom">
   <b>{*@tbl:tmr-reg}</b>: Timer register addresses
 </caption>
-<tr><th>reg<th>function<th>address
-<tr><td><code>REG_TMxD</code><td>data
-	<td><code>0400:0100h  + 04h</code>·x
-<tr><td><code>REG_TMxCNT</code><td>control
-	<td><code>0400:0102h + 04h</code>·x
+<tr><th>reg</th><th>function</th><th>address</th></tr>
+<tr><td><code>REG_TMxD</code></td><td>data</td>
+	<td><code>0400:0100h  + 04h</code>·x</td></tr>
+<tr><td><code>REG_TMxCNT</code></td><td>control</td>
+	<td><code>0400:0102h + 04h</code>·x</td></tr>
 </table>
 </div>
 
@@ -53,46 +53,46 @@ The GBA has four timers, timers 0 to 3. Each of these has two registers: a data 
   REG_TMxCNT @ 0400:0102 + 4<i>x</i>
 </caption>
 <tr class="bits">
-	<td>F E D C B A 9 8 <td>7 <td>6 <td>5 4 3 <td>2 <td>1 0
+	<td>F E D C B A 9 8</td> <td>7</td> <td>6</td> <td>5 4 3</td> <td>2</td> <td>1 0</td></tr>
 <tr class="bf">
-  <td>-
-  <td class="rclr0">En
-  <td class="rclr1">I
-  <td>-
-  <td class="rclr3">CM
-  <td class="rclr2">Fr
+  <td>-</td>
+  <td class="rclr0">En</td>
+  <td class="rclr1">I</td>
+  <td>-</td>
+  <td class="rclr3">CM</td>
+  <td class="rclr2">Fr</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>0-1<td class="rclr2">Fr
-  <td>TM_FREQ_y
+  <td>0-1</td><td class="rclr2">Fr</td>
+  <td>TM_FREQ_y</td>
   <td>Timer <b>frequency</b>. 0-3 for 1, 64, 256, or 1024 cycles, 
     respectively. <code>y</code> in the define is the number of 
-    cycles.
+    cycles.</td></tr>
 <tr class="bg1">
-  <td> 2 <td class="rclr3">CM
-  <td>TM_CASCADE
+  <td> 2</td> <td class="rclr3">CM</td>
+  <td>TM_CASCADE</td>
   <td><b>Cascade mode</b>. When the counter of the <i>preceding</i> 
     (<code>x</code>&minus;1) timer overflows (<code>REG_TM(x-1)D= 
     0xffff</code>), this one will be incremented too. A timer that 
     has this bit set does <i>not</i> count on its own, though you 
     still have to enable it. Obviously, this won't work for timer 0.
     If you plan on using it make sure you understand exactly what I 
-    just said; this place is a death-trap for the unwary.
+    just said; this place is a death-trap for the unwary.</td></tr>
 <tr class="bg0">
-  <td> 6 <td class="rclr1">I
-  <td>TM_IRQ
-  <td>Raise an interrupt on overflow.
+  <td> 6</td> <td class="rclr1">I</td>
+  <td>TM_IRQ</td>
+  <td>Raise an interrupt on overflow.</td></tr>
 <tr class="bg1">
-  <td> 7 <td class="rclr0">En
-  <td>TM_ENABLE
-  <td>Enable the timer.
+  <td> 7</td> <td class="rclr0">En</td>
+  <td>TM_ENABLE</td>
+  <td>Enable the timer.</td></tr>
 </tbody>
 </table>
 </div>

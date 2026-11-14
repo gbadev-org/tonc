@@ -203,7 +203,7 @@ The procedure that the GBA uses for drawing sprites is as follows: the sprite fo
 -->
 <table id="eq:aff-ofs">
 <tr>
-  <td class="eqnrcell">({!@eq:aff-ofs})
+  <td class="eqnrcell">({!@eq:aff-ofs})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -236,7 +236,7 @@ The procedure that the GBA uses for drawing sprites is as follows: the sprite fo
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 where **p**<sub>0</sub> and **q**<sub>0</sub> are the centers of the sprite in texture and screen space, respectively. The code below is essentially what the hardware does; it scans the screen-rectangle between plus and minus the half-width and half-height (half-sizes because the center is the reference point), calculates the texture-pixel and plots that color.
 
@@ -333,17 +333,17 @@ I have a really interesting demo for you this time called *obj_aff*. It features
 <div class="lblock">
   <table cellspacing=0>
     <col valign="top">
-    <tr><th>L,R<td>Rotates the sprite CCW and CW, respectively.
-    <tr><th>D-pad<td>Shears the sprite.
-    <tr><th>D-pad+Sel<td>Moves sprite around.
-    <tr><th>A,B<td>Expands horizontally or vertically, respectively.
-    <tr><th>A,B+Sel<td>Shrinks horizontally or vertically, respectively.
-      (I ran out of buttons, so had to do it like this).
-    <tr><th>Start<td>Toggles double-size flag. Note that a) the corners
+    <tr><th>L,R</th><td>Rotates the sprite CCW and CW, respectively.</td></tr>
+    <tr><th>D-pad</th><td>Shears the sprite.</td></tr>
+    <tr><th>D-pad+Sel</th><td>Moves sprite around.</td></tr>
+    <tr><th>A,B</th><td>Expands horizontally or vertically, respectively.</td></tr>
+    <tr><th>A,B+Sel</th><td>Shrinks horizontally or vertically, respectively.
+      (I ran out of buttons, so had to do it like this).</td></tr>
+    <tr><th>Start</th><td>Toggles double-size flag. Note that a) the corners
       of a rotated sprite are no longer clipped and b) the position shifts
-      by 1/2 sprite size.
-    <tr><th>Start+Sel<td>Resets <b>P</b> to normal.
-    <tr><th>Select<td>Control button (see A, B and Start).
+      by 1/2 sprite size.</td></tr>
+    <tr><th>Start+Sel</th><td>Resets <b>P</b> to normal.</td></tr>
+    <tr><th>Select</th><td>Control button (see A, B and Start).</td></tr>
   </table>
 </div>
 
@@ -358,14 +358,14 @@ The interesting point of seeing the transformations back to back is that you can
   alt="R*S affine object."><br>
 <b>{*@fig:obj-aff-rs}</b>: 
   <tt>obj_aff</tt>, via <b>S</b>(1,2), then <b>R</b>(45&deg;)
-</div>
+</div></td>
 <td>
 <div class="cpt_fr" style="width:240px;">
 <img src="./img/demo/obj_aff_sr.png" id="fig:obj-aff-sr"
   alt="S*R affine object."><br>
 <b>{*@fig:obj-aff-sr}</b>: 
   <tt>obj_aff</tt>, via <b>R</b>(45&deg;), then <b>S</b>(1,2)
-</div>
+</div></td></tr>
 </table>
 </div>
 
@@ -583,7 +583,7 @@ That's the set-up, now for how the demo does what it does. At any given time, yo
 -->
 <table>
 <tr>
-  <td class="fill">&nbsp;
+  <td class="fill">&nbsp;</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -614,7 +614,7 @@ That's the set-up, now for how the demo does what it does. At any given time, yo
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**). Or a no-op (**I**). However, there is a little hitch here. This would work nice in theory, but in *practice*, it won't work well because the fixed point matrix multiplications will result in unacceptable round-off errors very very quickly. Fortunately, all these transformations have the convenient property that
 <!--
@@ -622,7 +622,7 @@ where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**)
 -->
 <table>
 <tr>
-  <td class="fill">&nbsp;
+  <td class="fill">&nbsp;</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -650,7 +650,7 @@ where **D** is either a small rotation (**R**), scaling (**S**) or shear (**H**)
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 That is to say, multiple small transformations work as one big one. All you have to do is keep track of the current chosen transformation (the variable `aff_state`, in `get_aff_state()`), modify the state variable (`aff_value`), then calculate full transformation matrix (`get_aff_new()`) and apply that (with `obj_aff_postmul()`). When a different transformation type is chosen, the current matrix is saved, the state value is reset and the whole thing continues with that state until yet another is picked. The majority of the code is for keeping track of these changes; it's not pretty, but it gets the job done.
 
@@ -820,7 +820,7 @@ Three equations with three unknowns, means it is solvable. I won't post the enti
 -->
 <table id="eq:aff-ex">
 <tr>
-  <td class="eqnrcell">({!@eq:aff-ex})
+  <td class="eqnrcell">({!@eq:aff-ex})</td>
   <td class="eqcell">
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <mstyle displaystyle="true" scriptlevel="0">
@@ -870,7 +870,7 @@ Three equations with three unknowns, means it is solvable. I won't post the enti
     </mrow>
   </mstyle>
 </math>
-</table>
+</td></tr></table>
 
 The right-hand side here has three separate vectors, two of which are part of the input, a scaling flag for the double-size mode, and the inverted affine matrix. Yes, I did say inverted. This is here because the translations to position the object correctly mostly take place in screen-space. The whole term using it is merely **r**<sub>q</sub>, the transformed difference between anchor and center in texture space, which you need for the final correction.
 

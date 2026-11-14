@@ -22,17 +22,17 @@ Apart from setting the bits in `REG_IE`, you also need to set a bit in other reg
   REG_IE @ 0400:0200 and REG_IF @ 0400:0202
 </caption>
 <tr class="bits">
-  <td>F E<td>D<td>C<td>B A 9 8<td>7<td>6 5 4 3<td>2<td>1<td>0
+  <td>F E</td><td>D</td><td>C</td><td>B A 9 8</td><td>7</td><td>6 5 4 3</td><td>2</td><td>1</td><td>0</td></tr>
 <tr class="bf">
-  <td>-
-  <td class="rclr7">C
-  <td class="rclr6">K
-  <td class="rclr5">Dma
-  <td class="rclr4">Com
-  <td class="rclr3">Tm
-  <td class="rclr2">Vct
-  <td class="rclr1">Hbl
-  <td class="rclr0">Vbl
+  <td>-</td>
+  <td class="rclr7">C</td>
+  <td class="rclr6">K</td>
+  <td class="rclr5">Dma</td>
+  <td class="rclr4">Com</td>
+  <td class="rclr3">Tm</td>
+  <td class="rclr2">Vct</td>
+  <td class="rclr1">Hbl</td>
+  <td class="rclr0">Vbl</td></tr>
 </table>
 <br>
 
@@ -40,56 +40,56 @@ Apart from setting the bits in `REG_IE`, you also need to set a bit in other reg
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td> 0 <td class="rclr0">Vbl
-  <td>IRQ_VBLANK
+  <td> 0</td> <td class="rclr0">Vbl</td>
+  <td>IRQ_VBLANK</td>
   <td><b>VBlank</b> interrupt. Also requires 
-    <code>REG_DISPSTAT</code>{3}
+    <code>REG_DISPSTAT</code>{3}</td></tr>
 <tr class="bg1">
-  <td> 1 <td class="rclr1">Hbl
-  <td>IRQ_HBLANK
+  <td> 1</td> <td class="rclr1">Hbl</td>
+  <td>IRQ_HBLANK</td>
   <td><b>HBlank</b> interrupt. Also requires 
     <code>REG_DISPSTAT</code>{4} Occurs <i>after</i> the HDraw, so that 
-    things done here take effect in the next line. 
+    things done here take effect in the next line.</td></tr> 
 <tr class="bg0">
-  <td> 2 <td class="rclr2">Vct
-  <td>IRQ_VCOUNT
+  <td> 2</td> <td class="rclr2">Vct</td>
+  <td>IRQ_VCOUNT</td>
   <td><b>VCount</b> interrupt. Also requires 
     <code>REG_DISPSTAT</code>{5}. The high byte of 
     <code>REG_DISPSTAT</code> gives the VCount at which to raise the 
-    interrupt. Occurs at the <i>beginning</i> of a scanline.
+    interrupt. Occurs at the <i>beginning</i> of a scanline.</td></tr>
 <tr class="bg1">
-  <td>3-6<td class="rclr3">Tm
-  <td>IRQ_TIMER<i>x</i>
+  <td>3-6</td><td class="rclr3">Tm</td>
+  <td>IRQ_TIMER<i>x</i></td>
   <td><b>Timer</b> interrupt, 1 bit per timer. Also requires 
     <code>REG_TMxCNT</code>{6}. The interrupt will be raised 
-    when the timer overflows.
+    when the timer overflows.</td></tr>
 <tr class="bg0">
-  <td> 7 <td class="rclr4">Com
-  <td>IRQ_COM
+  <td> 7</td> <td class="rclr4">Com</td>
+  <td>IRQ_COM</td>
   <td><b>Serial communication</b> interrupt. Apparently, also requires 
     <code>REG_SCCNT</code>{E}. To be raised when the transfer
     is complete. Or so I'm told, I really don't know squat about 
-    serial communication. 
+    serial communication.</td></tr> 
 <tr class="bg1">
-  <td>8-B<td class="rclr5">Dma
-  <td>IRQ_DMA<i>x</i>
+  <td>8-B</td><td class="rclr5">Dma</td>
+  <td>IRQ_DMA<i>x</i></td>
   <td><b>DMA</b> interrupt, 1 bit per channel. Also requires 
     <code>REG_DMAxCNT</code>{1E}. Interrupt will be raised 
-    when the full transfer is complete.
+    when the full transfer is complete.</td></tr>
 <tr class="bg0">
-  <td>C <td class="rclr6">K
-  <td>IRQ_KEYPAD
+  <td>C</td> <td class="rclr6">K</td>
+  <td>IRQ_KEYPAD</td>
   <td><b>Keypad</b> interrupt. Also requires 
     <code>REG_KEYCNT</code>{E}. Raised when any or all or the keys 
-    specified in <code>REG_KEYCNT</code> are down.
+    specified in <code>REG_KEYCNT</code> are down.</td></tr>
 <tr class="bg1">
-  <td> D <td class="rclr7">C
-  <td>IRQ_GAMEPAK
+  <td> D</td> <td class="rclr7">C</td>
+  <td>IRQ_GAMEPAK</td>
   <td><b>Cartridge</b> interrupt. Raised when the cart is removed from 
-    the GBA.
+    the GBA.</td></tr>
 </tbody>
 </table>
 </div>

@@ -116,7 +116,7 @@ Just about everything you will ever need in terms of key-handling can be done wi
         <td>keys to check for raising a key interrupt.</td>
       </tr>
       <tr class="bg1">
-        <td>E<td class="rclr0">I</td>
+        <td>E</td><td class="rclr0">I</td>
         <td>KCNT_IRQ</td>
         <td>Enables keypad interrupt</td>
       </tr>

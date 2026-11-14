@@ -202,22 +202,22 @@ For those who aren't as familiar with pointers as you should (boy, are you gonna
 <table class="table-data" width="90%">
 <col align="right">
 <tr>
-  <th width=130>code	<th>type	<th>description
+  <th width=130>code</th>	<th>type</th>	<th>description</th></tr>
 <tr>
-  <td><code>MEM_IO+0x0000</code>
-  <td>Address
-  <td>MEM_IO=<code>0x04000000</code>, so this is address 0400:0000
+  <td><code>MEM_IO+0x0000</code></td>
+  <td>Address</td>
+  <td>MEM_IO=<code>0x04000000</code>, so this is address 0400:0000</td></tr>
 <tr>
-  <td><code>(vu32*)0x04000000</code>
-  <td>pointer
+  <td><code>(vu32*)0x04000000</code></td>
+  <td>pointer</td>
   <td>A pointer to an unsigned int of the volatile persuasion
-    (ignore this last part for now)
+    (ignore this last part for now)</td></tr>
 <tr>
-  <td><code>*(vu32*)0x04000000</code>
-  <td>&lsquo;variable&rsquo;
+  <td><code>*(vu32*)0x04000000</code></td>
+  <td>&lsquo;variable&rsquo;</td>
   <td>By <dfn>dereferencing</dfn> the pointer (the &lsquo;*&rsquo; 
     unary operator), we access the contents of the pointer. Id est, 	
-	the whole thing becomes usable as a variable.
+	the whole thing becomes usable as a variable.</td></tr>
 </table>
 </div>
 
@@ -601,17 +601,17 @@ But, like always, there's no such thing as a free lunch. What happens in a multi
 <div class="cpt" style="width:192px;">
   <img src="./img/hardware/efa.jpg" id="fig:efa" alt="" width=192><br>
   <b>{*@fig:efa}</b>: efa flash card.
-</div>
+</div></td>
 <td>
 <div class="cpt" style="width:192px;">
   <img src="./img/hardware/sc.jpg" id="fig:sc" alt="" width=192><br>
   <b>{*@fig:sc}</b>: SuperCard, compact flash version.
-</div>
+</div></td>
 <td>
 <div class="cpt" style="width:224px;">
   <img src="./img/hardware/xboo.jpg" id="fig:xboo" alt="" width=224><br>
   <b>{*@fig:xboo}</b>: xboo multiboot cable.
-</div>
+</div></td></tr>
 </tbody>
 </table>
 </div>

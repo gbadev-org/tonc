@@ -35,11 +35,11 @@ What we're going to try to do is re-create a scene from the SNES Mario Kart (see
 <div class="lblock">
   <table cellpadding=2 cellspacing=0>
     <col span=2 align="left" valign="top">
-      <tr><th>D-pad	<td>Looking
-      <tr><th>A/B		<td>Back/forward
-      <tr><th>L/R		<td>Strafing
-      <tr><th>Select+A/B	<td>Float up/down
-      <tr><th>Start	<td>Menu
+      <tr><th>D-pad</th>	<td>Looking</td></tr>
+      <tr><th>A/B</th>		<td>Back/forward</td></tr>
+      <tr><th>L/R</th>		<td>Strafing</td></tr>
+      <tr><th>Select+A/B</th>	<td>Float up/down</td></tr>
+      <tr><th>Start</th>	<td>Menu</td></tr>
   </table>
 </div>
 
@@ -63,7 +63,7 @@ Before you can do anything, though, you need to know _exactly_ what we're going 
 
 <table id="eq:crd-transf">
   <tr>
-    <td class="eqnrcell">(!@eq:crd-transf)
+    <td class="eqnrcell">(!@eq:crd-transf)</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -107,7 +107,7 @@ Before you can do anything, though, you need to know _exactly_ what we're going 
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 where
@@ -115,17 +115,17 @@ where
 <div class="lblock">
   <table cellpadding=0>
     <tr>
-      <td><b>x</b><sub>i</sub>
-      <td>the coordinate vector in system <i>S</i><sub>i</sub>;
+      <td><b>x</b><sub>i</sub></td>
+      <td>the coordinate vector in system <i>S</i><sub>i</sub>;</td></tr>
     <tr>
-      <td><b>x</b><sub>j</sub>
-      <td>the coordinate vector in system <i>S</i><sub>j</sub>;
+      <td><b>x</b><sub>j</sub></td>
+      <td>the coordinate vector in system <i>S</i><sub>j</sub>;</td></tr>
     <tr>
-      <td><b>a</b><sub>ji</sub>
-      <td>the origin of system <i>S</i><sub>j</sub>, expressed in coordinates of system <i>S</i><sub>i</sub>;
+      <td><b>a</b><sub>ji</sub></td>
+      <td>the origin of system <i>S</i><sub>j</sub>, expressed in coordinates of system <i>S</i><sub>i</sub>;</td></tr>
     <tr>
-      <td><b>M</b><sub>ij</sub>
-      <td>the transformation matrix, which is basically the matrix formed by the principle vectors of <i>S</i><sub>j</sub>, in terms of <i>S</i><sub>i</sub>.
+      <td><b>M</b><sub>ij</sub></td>
+      <td>the transformation matrix, which is basically the matrix formed by the principle vectors of <i>S</i><sub>j</sub>, in terms of <i>S</i><sub>i</sub>.</td></tr>
   </table>
 </div>
 
@@ -149,7 +149,7 @@ The transformation to the camera system is probably the major hurdle in the whol
 
 <table id="eq:w2c">
 <tr>
-   <td class="eqnrcell">({!@eq:w2c})
+   <td class="eqnrcell">({!@eq:w2c})</td>
    <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -187,7 +187,7 @@ The transformation to the camera system is probably the major hurdle in the whol
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 As you can expect, the origin of camera space is the camera position, **a**<sub>cw</sub>. The camera matrix **C** is formed by the principle axes of camera space, which are **u, v** and **w** for the local x-, y- and z-axes, respectively. This means that the camera matrix is **C** = \[**u v w**\].
@@ -546,7 +546,7 @@ But now the next problem arises: do we do pitch first, or yaw? That really depen
           </mrow>
         </mstyle>
       </math>
-    </td>
+    </td></tr>
 </table>
 
 Aside from being correct, this matrix has two nice properties. Firstly, the column vectors are of unit length. Secondly, the component vectors are perpendicular. This means that **C** is an <dfn>orthogonal matrix</dfn>, which has the very nice feature that **C**<sup>−1</sup> = **C**<sup>T</sup>. This makes the world→camera transformation a relatively simple operation.
@@ -602,7 +602,7 @@ To create the illusion of depth we need a <dfn>perspective view</dfn>. For this,
         </mrow>
       </mstyle>
     </math>
-    </td>
+    </td></tr>
 </table>
 
 Here λ is a simple scaling factor, the value of which can be determined in a variety of ways, depending of the information available at the point in your derivations. For example, since _z_<sub>p</sub> = −*D*, by definition, we have λ = −*z*<sub>c</sub> / _D_. Later we'll see another expression. The interesting thing about this expression is that λ is proportional to the distance in camera space, which in turn tells you how much the camera position is to be scaled _down_, or zoomed. This is useful, since the scaling parameters of the affine matrix scales down as well. Also, the distance _D_ attenuates the scaling, which means that it acts as a <dfn>focus length</dfn>. Note that when _z_<sub>c</sub> = −*D*, the scale is one, meaning that the objects at this distance appear in their normal size.
@@ -625,7 +625,7 @@ Another point is the notion of the <dfn>field of view</dfn> (FOV). This is the h
 
 <table id="eq:fov-cam">
   <tr>
-    <td class="eqnrcell">({!@eq:fov-cam})
+    <td class="eqnrcell">({!@eq:fov-cam})</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -650,7 +650,7 @@ Another point is the notion of the <dfn>field of view</dfn> (FOV). This is the h
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 I am told that a commonly used FOV is about 90°, which would require *D* = ½*W*. With *D* = 128 you get close enough to this requirement, with the added benefit that it's a power of 2, but that, of course, is an implementation detail. _However_, it seems that *D* = 256 is more common, so we'll use that instead.
@@ -667,7 +667,7 @@ The last step is the one from the projection plane onto the screen. This step is
 
 <table id="eq:p2s">
   <tr>
-    <td class="eqnrcell">({!@eq:p2s})
+    <td class="eqnrcell">({!@eq:p2s})</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -709,7 +709,7 @@ The last step is the one from the projection plane onto the screen. This step is
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 The scaling matrix reverses the sign of the y-axis. We could have avoided the extra matrix if we had rotated the camera frame by another 180°, in which case **v** would have pointed down and **w** would have pointed forward. But I didn't, so we'll have to live with it here. Also, since the origin of the screen in camera space, is **a**<sub>sp</sub> = (_L, T, −D_), the screen position is **x**<sub>s</sub> = (_x_<sub>s</sub>, *y*<sub>s</sub>, 0), in other words _z_<sub>s</sub> is always zero. If you want to check whether everything is OK, see if the corners of the viewport give the right screen coordinates.
@@ -803,7 +803,7 @@ And that's basically it, phew. Since it took three pages to get here, I'll repea
         </mrow>
       </mstyle>
     </math>
-  </td>
+  </td></tr>
 </table>
 
 where
@@ -811,32 +811,32 @@ where
 <div class="lblock">
   <table cellpadding=0>
     <tr>
-      <td width="8%"><b>x</b><sub>w</sub>
-      <td>coordinates in world space;
+      <td width="8%"><b>x</b><sub>w</sub></td>
+      <td>coordinates in world space;</td></tr>
     <tr>
-      <td><b>x</b><sub>p</sub>
+      <td><b>x</b><sub>p</sub></td>
       <td> coordinates on the projection plane, <b>x</b><sub>p</sub>=
-      (<i>x</i><sub>p</sub>, <i>y</i><sub>p</sub>, &minus;<i>D</i>);
+      (<i>x</i><sub>p</sub>, <i>y</i><sub>p</sub>, &minus;<i>D</i>);</td></tr>
     <tr>
-      <td><b>x</b><sub>s</sub>
+      <td><b>x</b><sub>s</sub></td>
       <td>coordinates on the screen, <b>x</b><sub>s</sub>=
-      (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>, 0);
+      (<i>x</i><sub>s</sub>, <i>y</i><sub>s</sub>, 0);</td></tr>
     <tr>
-      <td><b>a</b><sub>cw</sub>
-      <td>the location of the camera in world space;
+      <td><b>a</b><sub>cw</sub></td>
+      <td>the location of the camera in world space;</td></tr>
     <tr>
-      <td><b>a</b><sub>sp</sub>
+      <td><b>a</b><sub>sp</sub></td>
       <td>the location of the screen origin in camera space space,
-      <b>a</b><sub>sp</sub>&nbsp;=&nbsp;(<i>L, T, &minus;D</i>);
+      <b>a</b><sub>sp</sub>&nbsp;=&nbsp;(<i>L, T, &minus;D</i>);</td></tr>
     <tr>
-      <td><b>C</b>
+      <td><b>C</b></td>
       <td>the camera matrix, as function of pitch &theta; and yaw &phi;:
       <b>C</b> =
-      <b>R</b><sub>y</sub>(&phi;)· <b>R</b><sub>x</sub>(&theta;);
+      <b>R</b><sub>y</sub>(&phi;)· <b>R</b><sub>x</sub>(&theta;);</td></tr>
     <tr>
-      <td>&lambda;
+      <td>&lambda;</td>
       <td>the scaling factor. Its value can be determined by the
-      boundary conditions.
+      boundary conditions.</td></tr>
   </table>
 </div>
 
@@ -846,17 +846,17 @@ Remember these equations and terms, for I will refer to them often. The break be
 - The viewport and viewing frustum are in camera space, meaning that their boundaries are too. This means that
 
   <table>
-    <tr><td><i>R</i> &gt; 0 &gt; <i>L</i> <td>(horizontal)
-    <tr><td><i>T</i> &gt; 0 &gt; <i>B</i> <td>(vertical)
-    <tr><td>0 &gt; &minus;<i>N</i> &gt; &minus;<i>F</i> <td>(depth)
+    <tr><td><i>R</i> &gt; 0 &gt; <i>L</i></td> <td>(horizontal)</td></tr>
+    <tr><td><i>T</i> &gt; 0 &gt; <i>B</i></td> <td>(vertical)</td></tr>
+    <tr><td>0 &gt; &minus;<i>N</i> &gt; &minus;<i>F</i></td> <td>(depth)</td></tr>
   </table>
 - If we use the GBA screen size as a basis (*W* = 240, *H* = 160), and *D* = 256, reasonable values for the viewing frustum boundaries are the following, but you can pick others if you want.
 
   <table>
     <col span=1>
-      <tr><td><i>L</i> = &minus;120  <td><i>R</i> = &minus;120
-      <tr><td><i>T</i> =  80   <td><i>B</i> = &minus;80
-      <tr><td><i>N</i> =  24   <td><i>F</i> = 1024
+      <tr><td><i>L</i> = &minus;120</td>  <td><i>R</i> = &minus;120</td></tr>
+      <tr><td><i>T</i> =  80</td>   <td><i>B</i> = &minus;80</td></tr>
+      <tr><td><i>N</i> =  24</td>   <td><i>F</i> = 1024</td></tr>
   </table>
 
 ## Horizon and backdrop {#sec-horz}
@@ -869,7 +869,7 @@ Roughly put, the horizon is where z = −∞. If you have lines on the floor, 
 
 <table id="eq:horz-line">
 <tr>
-  <td class="eqnrcell">({!@eq:horz-line}a)
+  <td class="eqnrcell">({!@eq:horz-line}a)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -969,14 +969,14 @@ Roughly put, the horizon is where z = −∞. If you have lines on the floor, 
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 And if we were to take our horizon at infinity, them λ = −∞, which would reduce @eq:horz-line to
 
 <table>
 <tr>
-  <td class="eqnrcell">({!@eq:horz-line}b)
+  <td class="eqnrcell">({!@eq:horz-line}b)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1020,14 +1020,14 @@ And if we were to take our horizon at infinity, them λ = −∞, which would 
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 However, you need to think about whether you want to use this simplified equation. At very large λ, the gaps in displayed map points are so large that you're effectively showing noise, which can be very ugly indeed. A better way would be making use of the far clipping plane at _z_<sub>c</sub> = −*F*. In that case, λ = *F/D* and we can use @eq:horz-line to calculate the horizon, which will be something like
 
 <table>
 <tr>
-  <td class="eqnrcell">({!@eq:horz-line}c)
+  <td class="eqnrcell">({!@eq:horz-line}c)</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1083,7 +1083,7 @@ However, you need to think about whether you want to use this simplified equatio
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 As expected, if *F* = −∞ then {@eq:horz-line}c reduces to {@eq:horz-line}b. Regardless of whether you chose a finite of infinite _z_<sub>c</sub>, the horizon will be at scanline _y_<sub>s,h</sub> = *T − y*<sub>p,h</sub>.
@@ -1120,7 +1120,7 @@ Horizontally, there are several issues to be aware of. The first is the width of
 
 <table id="eq:fov">
 <tr>
-  <td class="eqnrcell">({!@eq:fov})
+  <td class="eqnrcell">({!@eq:fov})</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1230,7 +1230,7 @@ Horizontally, there are several issues to be aware of. The first is the width of
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 That last approximation stems from the first couple of terms of the [Taylor series](https://en.wikipedia.org/wiki/Taylor's_theorem) of the arctangent. Interestingly enough, even _R_ ≈ _D_ seems somewhat adequate. Anyway, filling in *W* = 240 and *D* = 256 gives *P* = 1720, which isn't a very convenient map size, is it? Now, it is possible to create a map of any size and update VRAM if we go outside the screenblock's boundaries (commercial games do it all the time), but doing so would distract for the subject at hand, so you know what? We're going to bend the rules a bit and just force *P* = 1024.
@@ -1241,7 +1241,7 @@ So, we just define a perimeter value and with it backdrop map-width ourselves. I
 
 <table id="eq:bd-pos">
 <tr>
-  <td class="eqnrcell">({!@eq:bd-pos})
+  <td class="eqnrcell">({!@eq:bd-pos})</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1292,7 +1292,7 @@ So, we just define a perimeter value and with it backdrop map-width ourselves. I
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 ## The floor {#sec-flr}
@@ -1303,7 +1303,7 @@ So, we just define a perimeter value and with it backdrop map-width ourselves. I
 
 <table id="eq:m7-set">
 <tr>
-  <td class="eqnrcell">({!@eq:m7-set})
+  <td class="eqnrcell">({!@eq:m7-set})</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1402,14 +1402,14 @@ So, we just define a perimeter value and with it backdrop map-width ourselves. I
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 The first two equations are just {@eq:m7-main} again, I just them list for completeness. The last equation is the relation between screen point **q** and map point **p** for an affine map, an equation that should be familiar by now. Now, remember that our map lies on the floor, in other words **p** = (_x_<sub>w</sub>, *z*<sub>w</sub>). The 2D screen point **q** is, of course, similar to the 3D screen vector of **x**<sub>s</sub>. The only thing that you have to remember is that when writing to `REG_BGxY`, the left of the current scanline is taken as the origin, so that effectively **q** = (_x_<sub>s</sub>, 0), which in turn means that _p_<sub>b</sub> and _p_<sub>d</sub> are of no consequence. The values of the other elements of **P** are simply the _x_- and _z_-components of the scaled camera x-axis, λ**u**. If you use these values, you will see that eventually you will end up with an expression that can best be summed up by:
 
 <table id="eq:m7-ofs">
 <tr>
-  <td class="eqnrcell">({!@eq:m7-ofs})
+  <td class="eqnrcell">({!@eq:m7-ofs})</td>
   <td class="eqcell">
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1448,7 +1448,7 @@ The first two equations are just {@eq:m7-main} again, I just them list for compl
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 where
@@ -1529,7 +1529,7 @@ Everything you need for the displacement is neatly packed into this one equation
 <table id="eq:m7-sum">
 <col span=2 align="right">
 <tr>
-  <td rowspan=5 class="eqnrcell">({!@eq:m7-sum})
+  <td rowspan=5 class="eqnrcell">({!@eq:m7-sum})</td>
   <td>
     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
       <mstyle displaystyle="true" scriptlevel="0">
@@ -1727,7 +1727,7 @@ Everything you need for the displacement is neatly packed into this one equation
           </mtable>
         </mrow>
       </mstyle>
-    </math>
+    </math></td></tr>
 </table>
 
 Note that if we take the top at 0 and no pitch (_T_=0 and θ=0) we have exactly the same result as in the first mode 7 chapter, and if we look straight down (θ=90°), the whole thing reduces to a simple scaling/rotation around point (−*L, T*), which is exactly it should be. {\*@eq:m7-sum} is the general equation for mode 7; for the implementation, you can often make a number of shortcuts that speed up calculation, but well get to that [later](#eq-aff-calc).
@@ -1831,7 +1831,7 @@ The first part is just another application of {@eq:m7-main} again, only in rever
 
 <table id="eq:obj-w2s">
   <tr>
-    <td class="eqnrcell">({!@eq:obj-w2s})
+    <td class="eqnrcell">({!@eq:obj-w2s})</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -1921,7 +1921,7 @@ The first part is just another application of {@eq:m7-main} again, only in rever
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 The only real unknown here is λ, which we can calculate by using the fact that _z_<sub>p</sub> = −*D*. Now let the distance between camera and sprite be **r** = **x**<sub>w</sub> − **a**<sub>cw</sub>; using **C** = \[**u v w**\], we find
@@ -2006,7 +2006,7 @@ Finding the screen position of **x**<sub>w</sub> is trivial after that. And now 
 
 <table id="eq:anchor">
   <tr>
-    <td class="eqnrcell">({!@eq:anchor})
+    <td class="eqnrcell">({!@eq:anchor})</td>
     <td class="eqcell">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mstyle displaystyle="true" scriptlevel="0">
@@ -2053,7 +2053,7 @@ Finding the screen position of **x**<sub>w</sub> is trivial after that. And now 
             </mtable>
           </mrow>
         </mstyle>
-      </math>
+      </math></td></tr>
 </table>
 
 Now the task is to link the data we have to this equation. The screen anchor **q**<sub>0</sub> is just **x**<sub>s</sub>. The texture anchor **p**<sub>0</sub> is the pixel in texture space you want to keep fixed and is yours to choose. For the kart-sprite, it makes sense to put it near the bottom of the kart, as is depicted in @fig:img-anchor. ‘Vector’ **s** is given by the size of the object, which in this case is (32, 32) and because I'm choosing to always use double-size objects here, _m_=1. The **P**-matrix is just a scaling by λ, unless you want to add other things as well. All that remains then is just to fill it in the numbers.
@@ -3067,17 +3067,17 @@ The ‘level’ (that is, level to the ground) is probably the most common for c
       <tr>
         <td>Global frame</td> 
         <td><code>m7_translate_global()</code></td>
-        <td><b>dx</b> = <b>I</b> · <b>r</b> = <b>r</b>
+        <td><b>dx</b> = <b>I</b> · <b>r</b> = <b>r</b></td>
       </tr>
       <tr>
         <td>Local (camera) frame</td> 
         <td><code>m7_translate_local()</code></td>
-        <td><b>dx</b> = <b>C</b>(&theta;, &phi;) · <b>r</b>
+        <td><b>dx</b> = <b>C</b>(&theta;, &phi;) · <b>r</b></td>
       </tr>
       <tr>
         <td>Level: local but parallel to ground</td> 
         <td><code>m7_translate_level()</code></td>
-        <td><b>dx</b> = <b>R</b><sub>y</sub>(&phi;) · <b>r</b>
+        <td><b>dx</b> = <b>R</b><sub>y</sub>(&phi;) · <b>r</b></td>
       </tr>
     </tbody>
   </table>

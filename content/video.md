@@ -22,7 +22,7 @@ Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#G
   <div class="cpt" style="width:192px;">
   <img src="./img/gba_draw.png" id="fig:gba-draw" alt=""><br>
   <b>{*@fig:gba-draw}</b>: vdraw, vblank and hblank periods.
-  </div>
+  </div></td>
 
   <td>
 	<table id="tbl:disp-timing" class="table-data">
@@ -32,22 +32,22 @@ Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#G
 	<col>
 	<col span=2 align="right">
 	<tr align="center">
-	  <th>subject	<th>length		<th>cycles
+	  <th>subject</th>	<th>length</th>		<th>cycles</th></tr>
 	<tr>
-	  <td>pixel		<td>     1		<td>     4
+	  <td>pixel</td>		<td>     1</td>		<td>     4</td></tr>
 	<tr>
-	  <td>HDraw		<td>   240px	<td>   960
+	  <td>HDraw</td>		<td>   240px</td>	<td>   960</td></tr>
 	<tr>
-	  <td>HBlank	<td>    68px	<td>   272
+	  <td>HBlank</td>	<td>    68px</td>	<td>   272</td></tr>
 	<tr>
-	  <td>scanline	<td>Hdraw+Hbl	<td>  1232
+	  <td>scanline</td>	<td>Hdraw+Hbl</td>	<td>  1232</td></tr>
 	<tr>
-	  <td>VDraw 	<td>160*scanline<td>197120
+	  <td>VDraw</td> 	<td>160*scanline</td><td>197120</td></tr>
 	<tr>
-	  <td>VBlank	<td>68*scanline	<td> 83776
+	  <td>VBlank</td>	<td>68*scanline</td>	<td> 83776</td></tr>
 	<tr>
-	  <td>refresh	<td>VDraw+Vbl	<td>280896
-	</table>
+	  <td>refresh</td>	<td>VDraw+Vbl</td>	<td>280896</td></tr>
+	</table></td></tr>
 </table>
 
 ## Colors and palettes {#sec-colors}
@@ -93,53 +93,53 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
   REG_DISPCNT @ 0400:0000h
 </caption>
 <tr class="bits">
-	<td>F<td>E<td>D<td>C<td>B<td>A<td>9<td>8
-	<td>7<td>6<td>5<td>4<td class="rof">3<td>2 1 0
+	<td>F</td><td>E</td><td>D</td><td>C</td><td>B</td><td>A</td><td>9</td><td>8</td>
+	<td>7</td><td>6</td><td>5</td><td>4</td><td class="rof">3</td><td>2 1 0</td></tr>
 <tr class="bf">
-	<td class="rclr4">OW
-	<td class="rclr4">W1
-	<td class="rclr4">W0
-	<td class="rclr1">Obj
-	<td class="rclr1">BG3
-	<td class="rclr1">BG2
-	<td class="rclr1">BG1
-	<td class="rclr1">BG0
-	<td class="rclr6">FB
-	<td class="rclr2">OM
-	<td class="rclr5">HB
-	<td class="rclr3">PS
-	<td class="rclr7">GB
-	<td class="rclr0">Mode
+	<td class="rclr4">OW</td>
+	<td class="rclr4">W1</td>
+	<td class="rclr4">W0</td>
+	<td class="rclr1">Obj</td>
+	<td class="rclr1">BG3</td>
+	<td class="rclr1">BG2</td>
+	<td class="rclr1">BG1</td>
+	<td class="rclr1">BG0</td>
+	<td class="rclr6">FB</td>
+	<td class="rclr2">OM</td>
+	<td class="rclr5">HB</td>
+	<td class="rclr3">PS</td>
+	<td class="rclr7">GB</td>
+	<td class="rclr0">Mode</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>0-2 <td class="rclr0">Mode
-  <td>DCNT_MODEx. <i>DCNT_MODE#</i>
-  <td>Sets video mode. 0, 1, 2 are tiled modes; 3, 4, 5 are bitmap modes.
+  <td>0-2</td> <td class="rclr0">Mode</td>
+  <td>DCNT_MODEx. <i>DCNT_MODE#</i></td>
+  <td>Sets video mode. 0, 1, 2 are tiled modes; 3, 4, 5 are bitmap modes.</td></tr>
 <tr class="bg1">
-  <td class="rof">3   <td class="rclr7">GB
-  <td>DCNT_GB
-  <td>Is set if cartridge is a GBC game. Read-only.
+  <td class="rof">3</td>   <td class="rclr7">GB</td>
+  <td>DCNT_GB</td>
+  <td>Is set if cartridge is a GBC game. Read-only.</td></tr>
 <tr class="bg0">
-  <td>4   <td class="rclr3">PS
-  <td>DCNT_PAGE
+  <td>4</td>   <td class="rclr3">PS</td>
+  <td>DCNT_PAGE</td>
   <td>Page select. Modes 4 and 5 can use page flipping for smoother 
     animation. This bit selects the displayed page (and allowing the 
-    other one to be drawn on without artifacts).
+    other one to be drawn on without artifacts).</td></tr>
 <tr class="bg1">
-  <td>5   <td class="rclr5">HB
-  <td>DCNT_OAM_HBL
+  <td>5</td>   <td class="rclr5">HB</td>
+  <td>DCNT_OAM_HBL</td>
   <td>Allows access to OAM in an HBlank. OAM is normally locked in VDraw.
-    Will reduce the amount of sprite pixels rendered per line.
+    Will reduce the amount of sprite pixels rendered per line.</td></tr>
 <tr class="bg0">
-  <td>6   <td class="rclr2">OM
-  <td>DCNT_OBJ_1D
+  <td>6</td>   <td class="rclr2">OM</td>
+  <td>DCNT_OBJ_1D</td>
   <td>Object mapping mode. Tile memory can be seen as a 32x32 
     matrix of tiles. When sprites are composed of multiple tiles 
     high, this bit tells whether the next row of tiles lies 
@@ -147,21 +147,21 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
     structure (2D mapping, <code>OM</code>=0), or right next to 
     it, so that memory is arranged as an array of sprites (1D 
     mapping <code>OM</code>=1). More on this in the 
-    <a href="regobj.html">sprite</a> chapter.
+    <a href="regobj.html">sprite</a> chapter.</td></tr>
 <tr class="bg1">
-  <td>7   <td class="rclr6">FB
-  <td>DCNT_BLANK
-  <td>Force a screen blank.
+  <td>7</td>   <td class="rclr6">FB</td>
+  <td>DCNT_BLANK</td>
+  <td>Force a screen blank.</td></tr>
 <tr class="bg0">
-  <td>8-C  <td class="rclr1">BG0-BG3, Obj
-  <td>DCNT_BGx, DCNT_OBJ. <i>DCNT_LAYER#</i>
-  <td>Enables rendering of the corresponding background and sprites.
+  <td>8-C</td>  <td class="rclr1">BG0-BG3, Obj</td>
+  <td>DCNT_BGx, DCNT_OBJ. <i>DCNT_LAYER#</i></td>
+  <td>Enables rendering of the corresponding background and sprites.</td></tr>
 <tr class="bg1">
-  <td>D-F <td class="rclr4">W0-OW
-  <td>DCNT_WINx, DCNT_WINOBJ
+  <td>D-F</td> <td class="rclr4">W0-OW</td>
+  <td>DCNT_WINx, DCNT_WINOBJ</td>
   <td>Enables the use of windows 0, 1 and Object window, respectively.
     Windows can be used to mask out certain areas (like the 
-    lamp did in Zelda:LTTP).
+    lamp did in Zelda:LTTP).</td></tr>
 </tbody>
 </table>
 </div>
@@ -176,58 +176,58 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
   REG_DISPSTAT @ 0400:0004h
 </caption>
 <tr class="bits">
-  <td>F E D C B A 9 8
-  <td>7 6<td>5<td>4<td>3<td class="rof">2<td class="rof">1<td class="rof">0
+  <td>F E D C B A 9 8</td>
+  <td>7 6</td><td>5</td><td>4</td><td>3</td><td class="rof">2</td><td class="rof">1</td><td class="rof">0</td></tr>
 <tr class="bf">
-  <td class="rclr3">VcT
-  <td>-
-  <td class="rclr2">VcI
-  <td class="rclr1">HbI
-  <td class="rclr0">VbI
-  <td class="rclr2">VcS
-  <td class="rclr1">HbS
-  <td class="rclr0">VbS
+  <td class="rclr3">VcT</td>
+  <td>-</td>
+  <td class="rclr2">VcI</td>
+  <td class="rclr1">HbI</td>
+  <td class="rclr0">VbI</td>
+  <td class="rclr2">VcS</td>
+  <td class="rclr1">HbS</td>
+  <td class="rclr0">VbS</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="15%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>0<td class="rclr0">VbS
-  <td>DSTAT_IN_VBL
-  <td>VBlank status, read only. Will be set inside VBlank, clear in VDraw.
+  <td>0</td><td class="rclr0">VbS</td>
+  <td>DSTAT_IN_VBL</td>
+  <td>VBlank status, read only. Will be set inside VBlank, clear in VDraw.</td></tr>
 <tr class="bg1">
-  <td>1 <td class="rclr1">HbS
-  <td>DSTAT_IN_HBL
-  <td>HBlank status, read only. Will be set inside HBlank.
+  <td>1</td> <td class="rclr1">HbS</td>
+  <td>DSTAT_IN_HBL</td>
+  <td>HBlank status, read only. Will be set inside HBlank.</td></tr>
 <tr class="bg0">
-  <td>2 <td class="rclr2">VcS
-  <td>DSTAT_IN_VCT
+  <td>2</td> <td class="rclr2">VcS</td>
+  <td>DSTAT_IN_VCT</td>
   <td>VCount trigger status. Set if the current scanline matches the 
     scanline trigger ( <code>REG_VCOUNT</code> == 
-    <code>REG_DISPSTAT</code>{8-F} )
+    <code>REG_DISPSTAT</code>{8-F} )</td></tr>
 <tr class="bg1">
-  <td>3 <td class="rclr0">VbI
-  <td>DSTAT_VBL_IRQ
+  <td>3</td> <td class="rclr0">VbI</td>
+  <td>DSTAT_VBL_IRQ</td>
   <td>VBlank interrupt request. If set, an interrupt will be fired at 
-    VBlank.
+    VBlank.</td></tr>
 <tr class="bg0">
-  <td>4 <td class="rclr1">HbI
-  <td>DSTAT_HBL_IRQ
-  <td>HBlank interrupt request. 
+  <td>4</td> <td class="rclr1">HbI</td>
+  <td>DSTAT_HBL_IRQ</td>
+  <td>HBlank interrupt request.</td></tr> 
 <tr class="bg1">
-  <td>5 <td class="rclr2">VcI
-  <td>DSTAT_VCT_IRQ
+  <td>5</td> <td class="rclr2">VcI</td>
+  <td>DSTAT_VCT_IRQ</td>
   <td>VCount interrupt request. Fires interrupt if current scanline 
-    matches trigger value.
+    matches trigger value.</td></tr>
 <tr class="bg0">
-  <td>8-F <td class="rclr3">VcT
-  <td><i>DSTAT_VCT#</i>
+  <td>8-F</td> <td class="rclr3">VcT</td>
+  <td><i>DSTAT_VCT#</i></td>
   <td>VCount trigger value. If the current scanline is at this value, 
-    bit 2 is set and an interrupt is fired if requested.
+    bit 2 is set and an interrupt is fired if requested.</td></tr>
 </tbody>
 </table>
 </div><br>
@@ -238,21 +238,21 @@ Now the other two registers I mentioned, `REG_DISPSTAT` and `REG_VCOUNT`. The la
   REG_VCOUNT @ 0400:0006h (read-only)
 </caption>
 <tr class="bits">
-	<td>F E D C B A 9 8
-	<td class="rof">7 6 5 4 3 2 1 0
+	<td>F E D C B A 9 8</td>
+	<td class="rof">7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-  <td>-
-  <td class="rclr0">Vc
+  <td>-</td>
+  <td class="rclr0">Vc</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
-<tr align="left"><th>bits<th>name<th>description
+<tr align="left"><th>bits</th><th>name</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">
-  <td>0-7 <td class="rclr0">Vc
-  <td>Vertical count. Range is [0,227]
+  <td>0-7</td> <td class="rclr0">Vc</td>
+  <td>Vertical count. Range is [0,227]</td></tr>
 </tbody>
 </table>
 </div>

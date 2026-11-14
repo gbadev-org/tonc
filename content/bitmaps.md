@@ -62,13 +62,13 @@ The bitmap modes have the following characteristics:
   characteristics
 </caption>
 <tr>
-  <th>mode<th>width<th>height<th>bpp<th>size     <th>page-flip
+  <th>mode</th><th>width</th><th>height</th><th>bpp</th><th>size</th>     <th>page-flip</th></tr>
 <tr>
-  <td>3   <td>240  <td>160   <td>16 <td>1× 12C00h <td>No
+  <td>3</td>   <td>240</td>  <td>160</td>   <td>16</td> <td>1× 12C00h</td> <td>No</td></tr>
 <tr>
-  <td>4   <td>240  <td>160   <td>8  <td>2× 9600h <td>Yes
+  <td>4</td>   <td>240</td>  <td>160</td>   <td>8</td>  <td>2× 9600h</td> <td>Yes</td></tr>
 <tr>
-  <td>5   <td>160  <td>128   <td>16 <td>2× A000h <td>Yes
+  <td>5</td>   <td>160</td>  <td>128</td>   <td>16</td> <td>2× A000h</td> <td>Yes</td></tr>
 </table>
 </div>
 
@@ -609,15 +609,15 @@ There are many command-line interfaces available for graphics conversion, but to
 </caption>
 <tbody align="center">
 <tr>
-  <th>big u32     <td colspan=4> 0x01020304
+  <th>big u32</th>     <td colspan=4> 0x01020304</td></tr>
 <tr>
-  <th>big u16     <td colspan=2> 0x0102 <td colspan=2> 0x0304
+  <th>big u16</th>     <td colspan=2> 0x0102</td> <td colspan=2> 0x0304</td></tr>
 <tr>
-  <th>u8          <th> 0x01 <th> 0x02   <th> 0x03 <th> 0x04
+  <th>u8</th>          <th> 0x01</th> <th> 0x02</th>   <th> 0x03</th> <th> 0x04</th></tr>
 <tr>
-  <th>little u16  <td colspan=2> 0x0201 <td colspan=2> 0x0403
+  <th>little u16</th>  <td colspan=2> 0x0201</td> <td colspan=2> 0x0403</td></tr>
 <tr>
-  <th>little u32  <td colspan=4> 0x04030201
+  <th>little u32</th>  <td colspan=4> 0x04030201</td></tr>
 </tbody>
 </table>
 </div>
@@ -1021,19 +1021,19 @@ int main()
   <div class="cpt" style="width:240px">
   <img src="./img/demo/bm_modes_3.png" alt="mode3 screen">
   <b>{*@fig:bm-modes}a</b>: <tt>bm_modes</tt> in mode 3.
-  </div>
+  </div></td>
 <td>
   <div class="cpt" style="width:240px">
   <img src="./img/demo/bm_modes_4.png" alt="mode4 screen">
   <b>{*@fig:bm-modes}b</b>: <tt>bm_modes</tt> in mode 4.
-  </div>
+  </div></td></tr>
 <tr>
 <td>
   <div class="cpt" style="width:240px">
 <img src="./img/demo/bm_modes_5.png" alt="mode5 screen">
   <b>{*@fig:bm-modes}c</b>: <tt>bm_modes</tt> in mode 5.
-  </div>
-<td>&nbsp;
+  </div></td>
+<td>&nbsp;</td></tr>
 </table>
 </div>
 

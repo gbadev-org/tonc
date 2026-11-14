@@ -20,27 +20,27 @@ Suppose both the tileset and map used 8-bit entries, the sizes are 16×(16×16) 
   <div class="cpt" style="width:512px">
   <img src="./img/bgs/brin3-full.png" alt="Brinstar map">
   <b>{*@fig:map}a</b>: image on screen.
-  </div>
+  </div></td></tr>
 <tr>
 <td colspan=2>
   The tile mapping process. Using the tileset of 
   {@fig:map}b, and the tile map of 
   {@fig:map}c, the end-result is 
-  {@fig:map}a. 
+  {@fig:map}a.</td></tr> 
 <tr>
 <td>
   <div class="cpt" style="width:48px">
   <img src="./img/bgs/brin3-meta-2x.png" height=264
     alt="(meta)tileset for the map"><br>
   <b>{*@fig:map}b</b>: the tile set.
-  </div>		
+  </div></td>		
 <td>
   <div class="cpt" style="width:528px">
   <img src="./img/bgs/brin3-map-2x.png" width=528
 	alt="Superimposed tile-map"><br>
   <b>{*@fig:map}c</b>: the tile map (with the proper 
     tiles as a backdrop).
-  </div>
+  </div></td></tr>
 </tbody>
 </table></div>
 
@@ -67,18 +67,18 @@ Both the tiles and tilemaps are stored in VRAM, which is divided into <dfn>charb
 <colgroup span=3 style="background-color:var(--table-background-color-custom);"></colgroup>
 
 <tbody align="left"><tr>
-  <th>Memory
-  <th colspan=3> 0600:0000 <th colspan=3> 0600:4000
-  <th colspan=3> 0600:8000 <th colspan=3> 0600:C000
+  <th>Memory</th>
+  <th colspan=3> 0600:0000</th> <th colspan=3> 0600:4000</th>
+  <th colspan=3> 0600:8000</th> <th colspan=3> 0600:C000</th></tr>
 </tbody>
 <tbody align="center"><tr>
-  <th>charblock
-  <td colspan=3> 0 <td colspan=3> 1 <td colspan=3> 2 <td colspan=3> 3 
+  <th>charblock</th>
+  <td colspan=3> 0</td> <td colspan=3> 1</td> <td colspan=3> 2</td> <td colspan=3> 3</td></tr> 
 </tbody>
 <tbody><tr>
-  <th>screenblock
-  <td>0 <td>&hellip; <td>7		<td>8 <td>&hellip; <td>15
-  <td>16 <td>&hellip; <td> 23	<td>24 <td>&hellip; <td>31
+  <th>screenblock</th>
+  <td>0</td> <td>&hellip;</td> <td>7</td>		<td>8</td> <td>&hellip;</td> <td>15</td>
+  <td>16</td> <td>&hellip;</td> <td> 23</td>	<td>24</td> <td>&hellip;</td> <td>31</td></tr>
 </tbody>
 </table>
 </div>
@@ -122,13 +122,13 @@ Just like sprites, there are two types of tiled backgrounds: regular and affine;
 </caption>
 <tbody align="center">
 <tr>
-  <th>mode	<th>BG0	<th>BG1	<th>BG2	<th>BG3
+  <th>mode</th>	<th>BG0</th>	<th>BG1</th>	<th>BG2</th>	<th>BG3</th></tr>
 <tr>
-  <td>0     <td>reg	<td>reg	<td>reg	<td>reg
+  <td>0</td>     <td>reg</td>	<td>reg</td>	<td>reg</td>	<td>reg</td></tr>
 <tr>
-  <td>1     <td>reg	<td>reg	<td>aff	<td> -
+  <td>1</td>     <td>reg</td>	<td>reg</td>	<td>aff</td>	<td> -</td></tr>
 <tr>
-  <td>2     <td>-	<td>-	<td>aff	<td>aff
+  <td>2</td>     <td>-</td>	<td>-</td>	<td>aff</td>	<td>aff</td></tr>
 </tbody>
 </table>
 </div>
@@ -146,10 +146,10 @@ Each of these is a 16-bit register. `REG_BG0CNT` can be found at `0400:0008`, wi
     addresses
 </caption>
 <col span=2 align="right">
-  <tr><th>Register      <th>length  <th>address
-  <tr><th>REG_BGxCNT    <td>2       <td>0400:0008h + 2·<i>x</i>
-  <tr><th>REG_BGxHOFS   <td>2       <td>0400:0010h + 4·<i>x</i>
-  <tr><th>REG_BGxVOFS   <td>2       <td>0400:0012h + 4·<i>x</i>
+  <tr><th>Register</th>      <th>length</th>  <th>address</th></tr>
+  <tr><th>REG_BGxCNT</th>    <td>2</td>       <td>0400:0008h + 2·<i>x</i></td></tr>
+  <tr><th>REG_BGxHOFS</th>   <td>2</td>       <td>0400:0010h + 4·<i>x</i></td></tr>
+  <tr><th>REG_BGxVOFS</th>   <td>2</td>       <td>0400:0012h + 4·<i>x</i></td></tr>
 </table>
 </div>
 
@@ -161,60 +161,60 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
   REG_BGxCNT @ 0400:0008 + 2<i>x</i>
 </caption>
 <tr class="bits">
-	<td>F E<td>D<td> C B A 9 8
-	<td>7<td>6<td>5 4<td>3 2<td>1 0
+	<td>F E</td><td>D</td><td> C B A 9 8</td>
+	<td>7</td><td>6</td><td>5 4</td><td>3 2</td><td>1 0</td></tr>
 <tr class="bf">
-	<td class="rclr2">Sz
-	<td class="rclr6">Wr
-	<td class="rclr1">SBB
-	<td class="rclr3">CM
-	<td class="rclr5">Mos
-	<td>-
-	<td class="rclr0">CBB
-	<td class="rclr4">Pr
+	<td class="rclr2">Sz</td>
+	<td class="rclr6">Wr</td>
+	<td class="rclr1">SBB</td>
+	<td class="rclr3">CM</td>
+	<td class="rclr5">Mos</td>
+	<td>-</td>
+	<td class="rclr0">CBB</td>
+	<td class="rclr4">Pr</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width="12%">
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-1<td class="rclr4">Pr
-  <td><i>BG_PRIO#</i>
-  <td><b>Priority</b>. Determines drawing order of backgrounds.
+  <td>0-1</td><td class="rclr4">Pr</td>
+  <td><i>BG_PRIO#</i></td>
+  <td><b>Priority</b>. Determines drawing order of backgrounds.</td></tr>
 <tr class="bg1">	
-  <td>2-3<td class="rclr0">CBB
-  <td><i>BG_CBB#</i>
+  <td>2-3</td><td class="rclr0">CBB</td>
+  <td><i>BG_CBB#</i></td>
   <td><b>Character Base Block</b>. Sets the charblock that serves as 
-    the base for character/tile indexing. Values: 0-3.
+    the base for character/tile indexing. Values: 0-3.</td></tr>
 <tr class="bg0">	
-  <td> 6 <td class="rclr5">Mos
-  <td>BG_MOSAIC
-  <td><b>Mosaic</b> flag. Enables mosaic effect.
+  <td> 6</td> <td class="rclr5">Mos</td>
+  <td>BG_MOSAIC</td>
+  <td><b>Mosaic</b> flag. Enables mosaic effect.</td></tr>
 <tr class="bg1">	
-  <td> 7 <td class="rclr3">CM
-  <td>BG_4BPP, BG_8BPP
+  <td> 7</td> <td class="rclr3">CM</td>
+  <td>BG_4BPP, BG_8BPP</td>
   <td><b>Color Mode</b>. 16 colors (4bpp) if cleared; 
-    256 colors (8bpp) if set. 
+    256 colors (8bpp) if set.</td></tr> 
 <tr class="bg0">	
-  <td>8-C<td class="rclr1">SBB
-  <td><i>BG_SBB#</i>
+  <td>8-C</td><td class="rclr1">SBB</td>
+  <td><i>BG_SBB#</i></td>
   <td><b>Screen Base Block</b>. Sets the screenblock that serves as 
-    the base for screen-entry/map indexing. Values: 0-31.
+    the base for screen-entry/map indexing. Values: 0-31.</td></tr>
 <tr class="bg1">	
-  <td> D <td class="rclr6">Wr
-  <td>BG_WRAP
+  <td> D</td> <td class="rclr6">Wr</td>
+  <td>BG_WRAP</td>
   <td><b>Affine Wrapping</b> flag. If set, affine background wrap 
     around at their edges. Has no effect on regular backgrounds as 
-    they wrap around by default.
+    they wrap around by default.</td></tr>
 <tr class="bg0">	
-  <td>E-F<td class="rclr2">Sz
-  <td><i>BG_SIZE#</i>, <i class="mini">see below</i>
+  <td>E-F</td><td class="rclr2">Sz</td>
+  <td><i>BG_SIZE#</i>, <i class="mini">see below</i></td>
   <td><b>Background Size</b>. Regular and affine backgrounds have 
       different sizes available to them. The sizes, in tiles and in 
-      pixels, can be found in {@tbl:bg-size}.
+      pixels, can be found in {@tbl:bg-size}.</td></tr>
 </tbody>
 </table>
 </div>
@@ -227,11 +227,11 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
   </caption>
   <col><col class="def">
   <tbody align="center">
-    <tr><th>Sz-flag	<th>define    <th>(tiles)<th>(pixels)
-    <tr><td> 00   <td><code>BG_REG_32x32</code> <td> 32×32 <td> 256×256 
-    <tr><td> 01   <td><code>BG_REG_64x32</code> <td> 64×32 <td> 512×256 
-    <tr><td> 10   <td><code>BG_REG_32x64</code> <td> 32×64 <td> 256×512 
-    <tr><td> 11   <td><code>BG_REG_64x64</code> <td> 64×64 <td> 512×512 
+    <tr><th>Sz-flag</th>	<th>define</th>    <th>(tiles)</th><th>(pixels)</th></tr>
+    <tr><td> 00</td>   <td><code>BG_REG_32x32</code></td> <td> 32×32</td> <td> 256×256</td></tr> 
+    <tr><td> 01</td>   <td><code>BG_REG_64x32</code></td> <td> 64×32</td> <td> 512×256</td></tr> 
+    <tr><td> 10</td>   <td><code>BG_REG_32x64</code></td> <td> 32×64</td> <td> 256×512</td></tr> 
+    <tr><td> 11</td>   <td><code>BG_REG_64x64</code></td> <td> 64×64</td> <td> 512×512</td></tr> 
   </tbody>
   </table>
 </div>
@@ -242,11 +242,11 @@ The description of `REG_BGxCNT` can be found below. Most of it is pretty standar
   </caption>
   <col><col class="def">
   <tbody align="center">
-    <tr><th>Sz-flag	<th>define    <th>(tiles) <th>(pixels)
-    <tr><td> 00   <td><code>BG_AFF_16x16</code>  <td> 16×16  <td> 128×128 
-    <tr><td> 01   <td><code>BG_AFF_32x32</code>  <td> 32×32  <td> 256×256 
-    <tr><td> 10   <td><code>BG_AFF_64x64</code>  <td> 64×64  <td> 512×512 
-    <tr><td> 11   <td><code>BG_AFF_128x128</code><td>128×128 <td>1024×1024
+    <tr><th>Sz-flag</th>	<th>define</th>    <th>(tiles)</th> <th>(pixels)</th></tr>
+    <tr><td> 00</td>   <td><code>BG_AFF_16x16</code></td>  <td> 16×16</td>  <td> 128×128</td></tr> 
+    <tr><td> 01</td>   <td><code>BG_AFF_32x32</code></td>  <td> 32×32</td>  <td> 256×256</td></tr> 
+    <tr><td> 10</td>   <td><code>BG_AFF_64x64</code></td>  <td> 64×64</td>  <td> 512×512</td></tr> 
+    <tr><td> 11</td>   <td><code>BG_AFF_128x128</code></td><td>128×128</td> <td>1024×1024</td></tr>
   </tbody>
   </table>
 </div>
@@ -270,7 +270,7 @@ So, if you increase the scrolling values, you move the screen to the right, whic
 
 <table id="eq:bgr-dx">
 <tr>
-  <td class="eqnrcell">({!@eq:bgr-dx})
+  <td class="eqnrcell">({!@eq:bgr-dx})</td>
   <td class="eqcell">
   <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
     <mstyle displaystyle="true" scriptlevel="0">
@@ -307,7 +307,7 @@ So, if you increase the scrolling values, you move the screen to the right, whic
         </mtable>
       </mrow>
     </mstyle>
-  </math>
+  </math></td></tr>
 </table>
 
 :::warning Direction of offset registers
@@ -382,33 +382,33 @@ For regular tilemaps, each screen entry is 16-bits long. Besides the tile index,
   Screen entry format for regular backgrounds
 </caption>
 <tr class="bits">
-	<td>F E D C<td>B<td>A<td>9 8 7 6 5 4 3 2 1 0
+	<td>F E D C</td><td>B</td><td>A</td><td>9 8 7 6 5 4 3 2 1 0</td></tr>
 <tr class="bf">
-	<td class="rclr1">PB
-	<td class="rclr2">VF
-	<td class="rclr2">HF
-	<td class="rclr0">TID
+	<td class="rclr1">PB</td>
+	<td class="rclr2">VF</td>
+	<td class="rclr2">HF</td>
+	<td class="rclr0">TID</td></tr>
 </table>
 
 <table class="table-reg-vert">
   <col class="bits" width=40>
   <col class="bf" width="8%">
   <col class="def" width=12%>
-<tr align="left"><th>bits<th>name<th>define<th>description
+<tr align="left"><th>bits</th><th>name</th><th>define</th><th>description</th></tr>
 <tbody valign="top">
 <tr class="bg0">	
-  <td>0-9<td class="rclr0">TID
-  <td><i>SE_ID#</i>
-  <td><b>Tile-index</b> of the SE.
+  <td>0-9</td><td class="rclr0">TID</td>
+  <td><i>SE_ID#</i></td>
+  <td><b>Tile-index</b> of the SE.</td></tr>
 <tr class="bg1">	
-  <td>A-B<td class="rclr2">HF, VF
-  <td>SE_HFLIP, SE_VFLIP. <i>SE_FLIP#</i>
-  <td><b>Horizontal/vertical flipping</b> flags. 
+  <td>A-B</td><td class="rclr2">HF, VF</td>
+  <td>SE_HFLIP, SE_VFLIP. <i>SE_FLIP#</i></td>
+  <td><b>Horizontal/vertical flipping</b> flags.</td></tr> 
 <tr class="bg0">	
-  <td>C-F<td class="rclr1">PB
-  <td><i>SE_PALBANK#</i>
+  <td>C-F</td><td class="rclr1">PB</td>
+  <td><i>SE_PALBANK#</i></td>
   <td><b>Palette bank</b> to use when in 16-color mode. Has no effect 
-    for 256-color bgs (<code>REG_BGxCNT{6}</code> is set).
+    for 256-color bgs (<code>REG_BGxCNT{6}</code> is set).</td></tr>
 </tbody>
 </table>
 </div>
@@ -429,26 +429,26 @@ Within each screenblock the equation works, but the bigger backgrounds don't sim
   regular backgrounds.
  </caption>
 <col span=4 align="center">
-<tr><th>32×32<th>64×32<th>32×64<th>64×64
+<tr><th>32×32</th><th>64×32</th><th>32×64</th><th>64×64</th></tr>
 <tr>
 <td>
   <table border=frame cellpadding= 8 cellspacing=0>
-    <tr><td bgcolor=red><b>0</b>
-  </table>
+    <tr><td bgcolor=red><b>0</b></td></tr>
+  </table></td>
 <td>
   <table border=frame cellpadding= 8 cellspacing=0>
-    <tr><td bgcolor=red><b>0</b><td bgcolor= green><b>1</b>
-  </table>
+    <tr><td bgcolor=red><b>0</b></td><td bgcolor= green><b>1</b></td></tr>
+  </table></td>
 <td>
   <table border=frame cellpadding= 8 cellspacing=0>
-    <tr><td bgcolor=red><b>0</b>
-    <tr><td bgcolor=blue><b>1</b>
-  </table>
+    <tr><td bgcolor=red><b>0</b></td></tr>
+    <tr><td bgcolor=blue><b>1</b></td></tr>
+  </table></td>
 <td>
   <table border=frame cellpadding= 8 cellspacing=0>
-    <tr><td bgcolor=red><b>0</b><td bgcolor= green><b>1</b>
-    <tr><td bgcolor=blue><b>2</b><td bgcolor= gray><b>3</b>
-  </table>
+    <tr><td bgcolor=red><b>0</b></td><td bgcolor= green><b>1</b></td></tr>
+    <tr><td bgcolor=blue><b>2</b></td><td bgcolor= gray><b>3</b></td></tr>
+  </table></td></tr>
 </table>
 </div>
 
@@ -505,11 +505,11 @@ There are two additional things you need to be aware of when using tiles for til
 </caption>
 <tbody align="center">
 <tr>
-  <th>memory offset<th>000h<th>020h <th>040h<th>060h <th>080h<th>100h <th>...
+  <th>memory offset</th><th>000h</th><th>020h</th> <th>040h</th><th>060h</th> <th>080h</th><th>100h</th> <th>...</th></tr>
 <tr>
-  <th>4bpp tile <td>0      <td>1  <td>2    <td>3  <td>4    <td>5 <td>...
+  <th>4bpp tile</th> <td>0</td>      <td>1</td>  <td>2</td>    <td>3</td>  <td>4</td>    <td>5</td> <td>...</td></tr>
 <tr>
-  <th>8bpp tile <td colspan=2>0   <td colspan=2>1 <td colspan=2>2<td>...
+  <th>8bpp tile</th> <td colspan=2>0</td>   <td colspan=2>1</td> <td colspan=2>2</td><td>...</td></tr>
 </tbody>
 </table>
 </div>
@@ -569,7 +569,7 @@ In this cause, however, I haven't used any editor at all. Some of the graphics c
     <img src="./img/demo/brin_demo_pal.png" 
       alt=""><br>
     <b>{*@fig:brin}a</b>: <i>brin_demo</i> palette.
-	</div>
+	</div></td>
   <td rowspan=2>
 
 ```c
@@ -592,12 +592,12 @@ const unsigned short brinMap[2048]=
     0x3001,0x3002,0x3005,0x3006,0x3007,0x3008,
     // ... etc
 ```
-<tr>
+</td></tr><tr>
   <td valign="bottom">
     <div class="cpt">
     <img src="./img/demo/brin_demo_tiles.png" alt=""><br>
     <b>{*@fig:brin}b</b>: <i>brin_demo</i> tileset.
-    </div>
+    </div></td></tr>
 </table>
 </div>
 
@@ -665,14 +665,14 @@ int main()
 		alt=""><br>
 	  <b>{*@fig:brin-demo}a</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(192, 64).
-	</div>
+	</div></td>
   <td>
 	<div class="cpt" style="width:240px;">
 	  <img src="./img/demo/brin_demo0.png"
 		alt=""><br>
 	  <b>{*@fig:brin-demo}b</b>: <i>brin_demo</i> 
 	    at <b>dx</b>=(0, 0).
-	</div>
+	</div></td></tr>
 </table>
 </div>
 
@@ -929,13 +929,13 @@ There is, however, one point of concern: on hardware, you won't see the tiles th
   <img src="./img/demo/cbb_demo_vba.png" alt="cbb_demo on VBA"><br>
   <b>{*@fig:cbb-demo}a</b>: <i>cbb_demo</i> on 
   obsolete emulators (such as VBA and Boycott Adv).
-  </div>
+  </div></td>
 <td>
   <div class="cpt" style="width:240px">
   <img src="./img/demo/cbb_demo_hw.png" alt="cbb_demo on hardware"><br>
   <b>{*@fig:cbb-demo}b</b>: <i>cbb_demo</i> on 
     hardware. Spot the differences!
-  </div>
+  </div></td></tr>
 </table>
 </div>
 
@@ -978,12 +978,12 @@ int main()
     <div class="cpt" style="width:112px;">
       <img src="./img/demo/hello.png" alt=""><br>
       <b>{*@fig:hello}a</b>: <i>hello</i> demo.
-    </div>
+    </div></td>
   <td>
     <div class="cpt" style="width:256px;">
       <img src="./img/demo/hello_tiles.png" alt=""><br>
       <b>{*@fig:hello}b</b>: tileset of the <i>hello</i> demo.
-    </div>
+    </div></td></tr>
 </tbody>
 </table>
 </div>

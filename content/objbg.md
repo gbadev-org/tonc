@@ -38,7 +38,7 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
     alt="Example of both sprites and background"
     width=192><br>
   <b>{*@fig:tile-gfx}a</b>: 2 sprites on a background.
-  </div>
+  </div></td>
 <td rowspan=2>
   <div class="cpt" style="width:384px">
   <img src="./img/tile_gfx_map.png"
@@ -47,7 +47,7 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
     sprites. One tile per SE for 
     bgs, and the top-left tile for sprites. Default tiles (with 
 	index 0 are omitted for clarity's sake.
-  </div>
+  </div></td></tr>
 <tr>
 <td>
   <div class="cpt" style="width:200px">
@@ -56,7 +56,7 @@ What belongs to the mapping step as well is the [affine transformation matrix](a
   <b>{*@fig:tile-gfx}b</b>: background (above) and
     sprite (below) tiles. 
   <!--Note the 'interesting' division of the sprite tiles.-->
-  </div>
+  </div></td></tr>
 </table>
 </div>
 
@@ -90,7 +90,7 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
     alt="8 bpp tiles as bitmap">
   <b>{*@fig:tile-as}b</b>: 8bpp tiles as bitmap.
   </div>
-</td>
+</td></tr>
 <tr>
 <td colspan=2>
   <div class="cpt" style="width:384px">
@@ -100,7 +100,7 @@ As with all bitmaps, it is the programmer's responsibility (that means you!) tha
     {@fig:tile-as}a, interpreted as 4bpp data. 
     If you see something like this (and you will), you now know why.
   </div>
-</td>
+</td></tr>
 </table>
 </div>
 
@@ -173,28 +173,28 @@ This is a short list of various attributes of sprites and backgrounds. It's alri
 <div class="cblock">
 <table id="tbl:sum" class="table-data" width="70%">
 <col span=3 valign="top">
-<tr><th width="30%">Subject		<th>Backgrounds		<th>Sprites
-<tr><td>Number		<td>4 (2 affine)	<td>128	(32 affine)
+<tr><th width="30%">Subject</th>		<th>Backgrounds</th>		<th>Sprites</th></tr>
+<tr><td>Number</td>		<td>4 (2 affine)</td>	<td>128	(32 affine)</td></tr>
 <tr>
-  <td>Max size
-  <td><b>reg</b>: 512x512<br><b>aff</b>: 1024x1024		<td>64x64
-<tr><td>Control			<td><code>REG_BGxCNT</code>		<td>OAM
-<tr><td>Base tile block		<td>0-3						<td>4
+  <td>Max size</td>
+  <td><b>reg</b>: 512x512<br><b>aff</b>: 1024x1024</td>		<td>64x64</td></tr>
+<tr><td>Control</td>			<td><code>REG_BGxCNT</code></td>		<td>OAM</td></tr>
+<tr><td>Base tile block</td>		<td>0-3</td>						<td>4</td></tr>
 <tr>
-  <td>Available tiles <i>id</i>s
-  <td><b>reg</b>: 0-1023 <br><b>aff</b>: 0-255
-  <td><b>modes 0-2</b>: 0-1023 <br><b>modes 3-5</b>: 512-1023
+  <td>Available tiles <i>id</i>s</td>
+  <td><b>reg</b>: 0-1023 <br><b>aff</b>: 0-255</td>
+  <td><b>modes 0-2</b>: 0-1023 <br><b>modes 3-5</b>: 512-1023</td></tr>
 <tr>
-  <td>Tile memory offsets
+  <td>Tile memory offsets</td>
   <td>Per tile size: <br><b>4bpp</b>: start= base + <i>id</i>*32
-  <br><b>8bpp</b>: start= base + <i>id</i>*64
-  <td>Always per 4bpp tile size: <br>start= base + <i>id</i>*32
+  <br><b>8bpp</b>: start= base + <i>id</i>*64</td>
+  <td>Always per 4bpp tile size: <br>start= base + <i>id</i>*32</td></tr>
 <tr>
-  <td>Mapping
+  <td>Mapping</td>
   <td><b>reg</b>: the full map is divided into map-blocks of 
     32&times;32 tegels. (banked map)<br>
     <b>aff</b>: one matrix of tegels, just like a normal bitmap (flat 
-    map)
+    map)</td>
   <td>If a sprite is <i>m &times; n</i> tiles in size:<br>
     <b>1D mapping</b>: the <i>m*n</i> successive tiles are used, 
     starting at 
@@ -202,12 +202,12 @@ This is a short list of various attributes of sprites and backgrounds. It's alri
     <b>2D mapping</b>: tile-blocks are 32&times;32 matrices; the 
     used tiles 
     are the <i>n</i> columns of the <i>m</i> rows of the matrix, 
-    starting at <i>id</i>.
+    starting at <i>id</i>.</td></tr>
 <tr>
-  <td>Flipping
-  <td>Each tile can be flipped individually
-  <td>Flips the whole sprite
-<tr><td>Palette		<td><code>0500:0000h</code>	<td><code>0500:0200h</code>
+  <td>Flipping</td>
+  <td>Each tile can be flipped individually</td>
+  <td>Flips the whole sprite</td></tr>
+<tr><td>Palette</td>		<td><code>0500:0000h</code></td>	<td><code>0500:0200h</code></td></tr>
 </table>
 </div>
 
@@ -218,28 +218,28 @@ Well, since you are a programmer you should know the answer: plenty. If you disa
 <div class="cblock">
 <table id="tbl:name" class="table-data" width="70%">
 <col span=3 valign="top">
-<tr><th>Subject		<th>Traditional		<th>Tonc
+<tr><th>Subject</th>		<th>Traditional</th>		<th>Tonc</th></tr>
 <tr>
-  <td>Sprite and bg image data
-  <td>tiles
-  <td>tiles
+  <td>Sprite and bg image data</td>
+  <td>tiles</td>
+  <td>tiles</td></tr>
 <tr>
-  <td>Tile-map entries
-  <td>tiles  (can you feel the confusion?)
-  <td>screenblock entries / SE
+  <td>Tile-map entries</td>
+  <td>tiles  (can you feel the confusion?)</td>
+  <td>screenblock entries / SE</td></tr>
 <tr>
-  <td>Matrix for transformations
-  <td>Rot/Scale matrix
-  <td>affine matrix / <b>P</b>
-<tr><td>Sprite types		<td>?? vs Rot/Scale	<td> regular vs affine
-<tr><td>Background types	<td>text vs rot	<td> regular vs affine
+  <td>Matrix for transformations</td>
+  <td>Rot/Scale matrix</td>
+  <td>affine matrix / <b>P</b></td></tr>
+<tr><td>Sprite types</td>		<td>?? vs Rot/Scale</td>	<td> regular vs affine</td></tr>
+<tr><td>Background types</td>	<td>text vs rot</td>	<td> regular vs affine</td></tr>
 <tr>
-  <td>Depository for sprite tiles (<code>0601:0000</code>)
+  <td>Depository for sprite tiles (<code>0601:0000</code>)</td>
   <td><code>OAMData</code> (i.e., not the <i>real</i> OAM, which is
-    at <code>0700:0000</code>)
-  <td><code>tile_mem_obj</code>
-<tr><td>OAM (<code>0700:0000</code>)
-  <td><code>OAMData</code> or <code>OAMMem</code>
-  <td><code>oam_mem</code>
+    at <code>0700:0000</code>)</td>
+  <td><code>tile_mem_obj</code></td></tr>
+<tr><td>OAM (<code>0700:0000</code>)</td>
+  <td><code>OAMData</code> or <code>OAMMem</code></td>
+  <td><code>oam_mem</code></td></tr>
 </table>
 </div>
