@@ -1454,7 +1454,7 @@ Anyway, the N- and S-cycles have to do with memory fetches: if the transfer of t
         </table>
       </td>
       <td style="border: 1px solid var(--bg);">
-        <table id="tbl:waits"class="table-data">
+        <table id="tbl:waits" class="table-data">
           <caption align="bottom">
             <b>{*@tbl:waits}</b>: Section default timing details. See also <a href="https://problemkaputt.de/gbatek.htm#gbamemorymap">GBATEK memory map</a>.
           </caption>

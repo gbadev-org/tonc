@@ -438,9 +438,7 @@ B_m & = & \frac{2}{T}\int_{0}^{T} f(t)\sin(m{\omega}t) dt
     </mrow>
   </mstyle>
 </math>
-  </tbody>
   </table>
-</table>
 
 <div class="cpt_fr" style="width:212px;">
 <img src="./img/sqrwave.png" id="fig:sqrwave" alt="sharp transitions between flat crest and flat trough"><br>
@@ -540,9 +538,7 @@ A_m = \frac{2}{\pi} \cdot \frac{\sin({\pi}mh/T)}{m} = \frac{2T}{h} \cdot \frac{\
     </mrow>
   </mstyle>
 </math>
-  </tbody>
   </table>
-</table>
 
 *A*<sub>m</sub> is a <dfn>sinc</dfn> function: sin(*x*)/*x*. For high *m* it approaches zero (as it should, since higher terms should be relatively less important), but also interesting is that of the higher terms some will also *vanish* because of the sine. This will happen whenever *m* is a multiple of *T/h*.
 
@@ -1393,7 +1389,6 @@ R(F, c) & = & 2^{11} - \frac{2^{17}}{f(F, c)}
   </mstyle>
 </math>
   </table>
-</table>
 
 And now for the magic. And you *are* expected to understand this.
 

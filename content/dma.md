@@ -268,13 +268,13 @@ It doesn't really matter what you use actually, as long as you can find the edge
 The end result will show something like {@fig:dma-demo}. It's the Brinstar background (again) inside the window, and a striped bg outside. The text indicates the position and radius of the window, which can be moved with the D-pad and scaled by A and B.
 
 <pre><code class="language-c hljs">
-#include <stdio.h>
-#include <tonc.h>
+#include &lt;stdio.h>
+#include &lt;tonc.h>
 
 #include "brin.h"
 
 // From tonc_math.h
-//#define IN_RANGE(x, min, max) ( (x) >= (min) && (x) < (max) )
+//#define IN_RANGE(x, min, max) ( (x) >= (min) &amp;&amp; (x) &lt; (max) )
 
 
 // The source array
@@ -302,7 +302,7 @@ void win_circle(u16 winh[], int x0, int y0, int rr)
     {
         // Side octs
         tmp  = clamp(x0+y, 0, SCREEN_WIDTH);
-        tmp += clamp(x0-y, 0, SCREEN_WIDTH)<<8;
+        tmp += clamp(x0-y, 0, SCREEN_WIDTH)&lt;&lt;8;
         
         if(IN_RANGE(y0-x, 0, SCREEN_HEIGHT))       // o4, o7
             winh[y0-x]= tmp;
@@ -313,7 +313,7 @@ void win_circle(u16 winh[], int x0, int y0, int rr)
         if(d >= 0)      
         {
             tmp  = clamp(x0+x, 0, SCREEN_WIDTH);
-            tmp += clamp(x0-x, 0, SCREEN_WIDTH)<<8;
+            tmp += clamp(x0-x, 0, SCREEN_WIDTH)&lt;&lt;8;
             
             if(IN_RANGE(y0-y, 0, SCREEN_HEIGHT))   // o5, o6
                 winh[y0-y]= tmp;
@@ -379,14 +379,14 @@ int main()
         x0 += key_tri_horz();       // move left/right
         y0 += key_tri_vert();       // move up/down
 
-        if(rr<0)
+        if(rr&lt;0)
             rr= 0;
 
         // Fill circle array
         <span class="bold">win_circle(g_winh, x0, y0, rr);</span>
     
         // Init win-circle HDMA
-        <span class="bold">DMA_TRANSFER(&REG_WIN0H, &g_winh[1], 1, 3, DMA_HDMA);</span>
+        <span class="bold">DMA_TRANSFER(&amp;REG_WIN0H, &amp;g_winh[1], 1, 3, DMA_HDMA);</span>
 
         tte_printf("#{es;P}(%d,%d) | %d", x0, y0, rr);
     }

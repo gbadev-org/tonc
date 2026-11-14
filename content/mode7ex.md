@@ -844,12 +844,14 @@ Remember these equations and terms, for I will refer to them often. The break be
 
 - World system _S_<sub>w</sub> = {**i**,**j**,**k**} and camera system _S_<sub>c</sub> = {**u**, **v**, **w**} are right-handed Cartesian coordinate systems. As expected, the columns of camera matrix **C** are the principle axes of _S_<sub>c</sub>: **C** = \[**u v w**\];
 - The viewport and viewing frustum are in camera space, meaning that their boundaries are too. This means that
+
   <table>
     <tr><td><i>R</i> &gt; 0 &gt; <i>L</i> <td>(horizontal)
     <tr><td><i>T</i> &gt; 0 &gt; <i>B</i> <td>(vertical)
     <tr><td>0 &gt; &minus;<i>N</i> &gt; &minus;<i>F</i> <td>(depth)
   </table>
 - If we use the GBA screen size as a basis (*W* = 240, *H* = 160), and *D* = 256, reasonable values for the viewing frustum boundaries are the following, but you can pick others if you want.
+
   <table>
     <col span=1>
       <tr><td><i>L</i> = &minus;120  <td><i>R</i> = &minus;120

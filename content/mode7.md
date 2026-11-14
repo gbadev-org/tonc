@@ -328,7 +328,6 @@ While the steps described above are indeed the full procedure, there are still a
       </mstyle>
     </math>
   </table>
-</table>
 
 And yes, the minus sign is correct for a counter-clockwise rotation (**R** is defined as a clockwise rotation). Also remember that the GBA uses the following relation between screen point **q** and background point **p**:
 

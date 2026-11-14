@@ -173,7 +173,7 @@ As I said, there are three basic 2d transformations, though you can always descr
         <mn>1</mn>
         <mrow>
             <mi>a</mi><mi>d</mi><mo>-</mo><mi>b</mi><mi>c</mi>
-        <mrow>
+        </mrow>
     </mfrac>
         <mrow>
         <mo>[</mo>
@@ -654,7 +654,7 @@ Tonclib contains a number of functions for manipulating the affine parameters of
         </tr>
         <tr>
             <td>void <i>foo</i>_identity(FOO_AFFINE *oaff);</td>
-            <td><math><mi>P</mi><mo>=</mo><mi>I</mi></td>
+            <td><math><mi>P</mi><mo>=</mo><mi>I</mi></math></td>
         </tr>
         <tr>
             <td>void <i>foo</i>_postmul(FOO_AFFINE *dst, const FOO_AFFINE *src);</td>
