@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # load both the context and the book representations from stdin
     context, book = json.load(sys.stdin)
 
-    for chapter in book['sections']:
+    for chapter in book['items']:
         run(chapter)
 
     print(json.dumps(book))
