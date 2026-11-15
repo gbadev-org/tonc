@@ -8,8 +8,8 @@
 
 - [www.devkitpro.org](https://devkitpro.org/). Home of **devkitARM**, the toolchain of choice for GBA development. And NDS and more. Updated regularly and you can find a **libgba** and sample code here too.
 - [www.gbadev.org](http://www.gbadev.org). GBA development hub. Tools, documents, tutorials can all be found here. A visit to the [forum](http://forum.gbadev.org) is highly recommended if you're just starting, whether you have problems or not. If you do have a problem, chances are you're not the first and that it has been solved before here. Just remember the [rules of posting](http://www.albinoblacksheep.com/flash/posting.php) before you start a topic.
-- [Nocash](http://nocash.emubase.de/). Martin Korth's site. You can find the immensely complete (though Spartan) [GBATEK](https://problemkaputt.de/gbatek.htm) reference document and the [No\$gba](http://nocash.emubase.de/gba.htm) emulator, both of which are insanely great.
-- [vba.ngemu.com](http://vba.ngemu.com), The **VisualBoy Advance** emulator. Not as accurate as no\$gba when it comes to timings, but still very, very good, and has a more friendly interface and all kinds of cool viewers for tiles, maps, IO registers and the like.
+- [Nocash](https://problemkaputt.de/). Martin Korth's site. You can find the immensely complete (though Spartan) [GBATEK](https://problemkaputt.de/gbatek.htm) reference document and the [No\$gba](https://problemkaputt.de/gba.htm) emulator, both of which are insanely great.
+- [mgba.io](https://mgba.io/), The **mGBA** emulator. Highly accurate, with viewers for tiles, maps, IO registers and the like, debug logging and a GDB server. See [Installing a GBA emulator](setup.html#sec-emu) for other options.
 
 ### Alternative dev environments {#ssec-altdev}
 
