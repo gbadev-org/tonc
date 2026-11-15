@@ -524,7 +524,7 @@ INLINE OBJ_ATTR *obj_set_attr(OBJ_ATTR *obj, u16 a0, u16 a1, u16 a2)
     return obj;
 }
 
-//! Set the position of \a obj
+//! Set the position of an obj
 INLINE void obj_set_pos(OBJ_ATTR *obj, int x, int y)
 {
     BF_SET(obj->attr0, y, ATTR0_Y);
