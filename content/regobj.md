@@ -260,7 +260,7 @@ The first attribute controls a great deal, but the most important parts are for 
   <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i></td>
   <td><b>Sprite shape</b>. This and the sprite's size 
     (<code>attr1{E-F}</code>) determines the sprite's real size, see 
-    <a href="#tbl-obj-size">table 8.4</a>.</td></tr>
+    <a href="#tbl-obj-size">table 8.3</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -268,7 +268,7 @@ The first attribute controls a great deal, but the most important parts are for 
 Two extra notes on attribute 0. First, `attr0` contains the ***y*** coordinate; `attr1` contains the ***x*** coordinate. For some reason I keep messing these two up; if you find your sprite is moving left when it should be moving up, this may be why. Second, the affine and gfx modes aren't always named as such. In particular, `attr0{9}` is simply referred to as *the* double-size flag, even though it only works in that capacity if bit 8 is set too. If it isn't, then it hides the sprite. I think that it's actually taken out of the object rendering stage entirely leaving more time for the others, but I'm not 100% sure of that.
 
 <div class="lblock">
-<table id="tbl:obj-size"
+<table id="tbl-obj-size"
   class="reg" border=1 cellpadding=2 cellspacing=0>
 <caption align="bottom">
   <b>{*@tbl:obj-size}</b>: GBA sprite sizes
