@@ -260,7 +260,7 @@ The first attribute controls a great deal, but the most important parts are for 
   <td>ATTR0_SQUARE, ATTR0_WIDE, ATTR0_TALL. <i>ATTR0_SHAPE#</i></td>
   <td><b>Sprite shape</b>. This and the sprite's size 
     (<code>attr1{E-F}</code>) determines the sprite's real size, see 
-    <a href="#tbl-obj-size">table 8.4</a>.</td></tr>
+    <a href="#tbl:obj-size">{@tbl:obj-size}</a>.</td></tr>
 </tbody>
 </table>
 </div>
