@@ -612,7 +612,7 @@ Now on to using these data. Remember the essential steps here:
 
 If you do it correctly, you should have something showing on screen. If not, go to the tile/map/memory viewers of your emulator; they'll usually give you a good idea where the problem is. A common one is having a mismatch between the CBB and SBB in `REG_BGxCNT` and where you put the data, which most likely would leave you with an empty map or empty tileset.
 
-The full code of *brin_demo* is given below. The three calls to `memcpy()` load up the palette, tileset and tilemap. For some reason, probably related to where the NES and 8-bit Game Boy put screenblocks in video memory, it's become conventional to place the maps in the last screenblocks on GBA as well. In this case, that's 30 rather than 31 because we need two blocks for a 64×32t map. For the scrolling part, I'm using two variables to store and update the positions because the scrolling registers are write-only. I'm starting at (192, 64) here because that's what I used for the scrolling picture of {@fig:map-ofs} earlier.
+The full code of *brin_demo* is given below. The calls to `memcpy16()` and `memcpy32()` load up the palette, tileset and tilemap. For some reason, probably related to where the NES and 8-bit Game Boy put screenblocks in video memory, it's become conventional to place the maps in the last screenblocks on GBA as well. In this case, that's 30 rather than 31 because we need two blocks for a 64×32t map. For the scrolling part, I'm using two variables to store and update the positions because the scrolling registers are write-only. I'm starting at (192, 64) here because that's what I used for the scrolling picture of {@fig:map-ofs} earlier.
 
 <div id="cd-brin-demo">
 
@@ -626,11 +626,11 @@ The full code of *brin_demo* is given below. The three calls to `memcpy()` load 
 int main()
 {
     // Load palette
-    memcpy(pal_bg_mem, brinPal, brinPalLen);
+    memcpy16(pal_bg_mem, brinPal, brinPalLen / sizeof(u16));
     // Load tiles into CBB 0
-    memcpy(&tile_mem[0][0], brinTiles, brinTilesLen);
+    memcpy32(&tile_mem[0][0], brinTiles, brinTilesLen / sizeof(u32));
     // Load map into SBB 30
-    memcpy(&se_mem[30][0], brinMap, brinMapLen);
+    memcpy32(&se_mem[30][0], brinMap, brinMapLen / sizeof(u32));
 
     // set up BG0 for a 4bpp 64x32t map, using
     //   using charblock 0 and screenblock 31
@@ -1023,7 +1023,7 @@ I intend to use libtonc in a number of later demos. In particular, the memory ma
 
 :::tip Better copy and fill routines: memcpy16/32 and memset16/32
 
-Now that I am using libtonc as a library for its text routines, I might as well use it for its copy and fill routines as well. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
+Now that I am using libtonc as a library for its text routines, I might as well use it for its fill routines as well, next to the copy routines you've already seen. Their names are `memcpy16()` and `memcpy32()` for copies and `memset16()` and `memset32()` for fill routines. The 16 and 32 denote their preferred datatypes: halfwords and words, respectively. Their arguments are similar to the conventional `memcpy()` and `memset()`, with the exception that the size is the number of items to be copied, rather than in bytes.
 
 ```c
 void memset16(void *dest, u16 hw, uint hwcount);

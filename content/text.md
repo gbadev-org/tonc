@@ -1155,7 +1155,7 @@ The next demo will clock five different ways of copying data, in this case a mod
 
 - **u16 array**. Copy in 16-bit (halfword) chunks. Probably the one you'll see most in other tutorials, but not here. With reason, as we'll see in a minute.
 - **u32 array**. Copy in 32-bit (word) chunks.
-- **`memcpy()`**. The standard C copy routine, the one I'm using in the earlier demos. Well, nowadays I am.
+- **`memcpy()`**. The standard C copy routine. It isn't safe for VRAM (see [this section](bitmaps.html#ssec-data-memcpy)), but it's included here for comparison.
 - **`memcpy32()`**. Home grown assembly, explained in detail [here](asm.html#sec-cpy). Basically does what `CpuFastSet()` does, only without the restriction that the number of words must be a multiple of 8.
 - **`dma_memcpy()`**. Copy via 32-bit DMA.
 
@@ -1197,9 +1197,13 @@ void test_1(u32 *dst, const u32 *src, u32 len)
     gtimes[1]= profile_stop();
 }
 
-// copy via memcpy
+// copy via memcpy.
 void test_2(void *dst, const void *src, u32 len)
 {
+    // Note that this is unsafe. memcpy() is allowed to copy the data in 8-bit
+    // units, which VRAM doesn't allow. Using memcpy() to copy data to VRAM may
+    // work as long as everything is aligned, but it shouldn't be used in
+    // general. Use memcpy16(), memcpy32(), or DMA copy functions instead.
     profile_start();
     memcpy(dst, src, len);
     gtimes[2]= profile_stop();

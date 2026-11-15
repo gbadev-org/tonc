@@ -652,8 +652,8 @@ int main()
 {
     // (1) Places the tiles of a 4bpp boxed metroid sprite 
     //   into LOW obj memory (cbb == 4)
-    memcpy(&tile_mem[4][0], metr_boxTiles, metr_boxTilesLen);
-    memcpy(pal_obj_mem, metrPal, metrPalLen);
+    memcpy32(&tile_mem[4][0], metr_boxTiles, metr_boxTilesLen / sizeof(u32));
+    memcpy16(pal_obj_mem, metrPal, metrPalLen / sizeof(u16));
 
     // (2) Initialize all sprites
     oam_init(obj_buffer, 128);
