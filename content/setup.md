@@ -197,11 +197,14 @@ The steps are as follows:
 
 You can of course run all these commands in the terminal yourself without a makefile, provided the dkP tools are in your `PATH`.
 
-Let's try it with the example named *first* - this is the easiest one to compile because it doesn't depend on any libraries.
+Let's try it with the example named *first* - this is the easiest one to compile because it doesn't depend on any libraries. We'll work on a copy of *first.c* in a new folder, because leftover build files in the example's own folder would stop its makefile from working.
 
 
 ```sh
-cd libtonc-examples/basic/first/source
+# Copy first.c to a new folder
+mkdir first-manual
+cp libtonc-examples/basic/first/source/first.c first-manual/
+cd first-manual
 
 # Compile first.c to first.o
 arm-none-eabi-gcc -mthumb -c first.c
