@@ -135,7 +135,8 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
 <tr class="bg1">
   <td>5</td>   <td class="rclr5">HB</td>
   <td>DCNT_OAM_HBL</td>
-  <td>Allows access to OAM in an HBlank. OAM is normally locked in VDraw.
+  <td>HBlank interval free. Stops the PPU from accessing OAM and object
+    VRAM during HBlank, so the CPU can access them then without delays.
     Will reduce the amount of sprite pixels rendered per line.</td></tr>
 <tr class="bg0">
   <td>6</td>   <td class="rclr2">OM</td>

@@ -386,7 +386,7 @@ There is *no* attribute 3. Although the `OBJ_ATTR` struct does *have* a fourth h
 
 ### OAM double buffering {#ssec-oam-buffer}
 
-You *could* write all your sprite data directly to the OAM at `0700:0000h`, but that might not always be the best move. If it's done during VDraw there's the possibility of tearing. Even worse, you might change the sprite's tile-index in mid-render so that the top is in one animation frame and the bottom is in another. Not a pretty sight. Actually, this isn't something to worry about because you *can't* update OAM during VDraw; it's locked then. What's often done is creating a separate buffer of OAM entries (also known as the <dfn>object shadow</dfn>) that can be modified at any time, and then copy that to the real OAM during VBlank. Here's my take on this.
+You *could* write all your sprite data directly to the OAM at `0700:0000h`, but that might not always be the best move. If it's done during VDraw there's the possibility of tearing. Even worse, you might change the sprite's tile-index in mid-render so that the top is in one animation frame and the bottom is in another. Not a pretty sight. What's often done is creating a separate buffer of OAM entries (also known as the <dfn>object shadow</dfn>) that can be modified at any time, and then copy that to the real OAM during VBlank. Here's my take on this.
 
 ```c
 OBJ_ATTR obj_buffer[128];
