@@ -63,7 +63,9 @@ At the time of writing, the most suitable emulator for GBA development is [<dfn>
 
 Other emulators which you might want to use are: [NanoBoyAdvance](https://github.com/nba-emu/NanoBoyAdvance) and [SkyEmu](https://github.com/skylersaleh/SkyEmu), which are both _cycle accurate_ and effectively the closest you can get to playing on real hardware without actually doing so.
 
-Finally [no$gba](https://problemkaputt.github.io/gba.htm) (debug version) is a somewhat older and less accurate Windows-only GBA emulator, but has some unique debugging features you won't find elsewhere. Namely a visual debugger, performance profiler, CPU usage meters, and memory access checking which can catch buffer overflows and such. If you can get it working, it's an invaluable tool!
+Finally, [Mesen2](https://www.mesen.ca/) is an accurate, cross-platform emulator with powerful low-level debugging tools: a visual debugger, event viewer, performance profiler, and memory access checking which can catch buffer overflows and such. It can also load the ELF files produced by modern toolchains. For stepping through C or C++ source code, though, mGBA's GDB server is the better fit.
+
+The older, Windows-only [no$gba](https://problemkaputt.github.io/gba.htm) (debug version) has similar debugging features. It's less accurate and can't load newer ELF files, but it runs well on very low-end machines.
 
 
 ## Installing devkitARM {#sec-dkp}
