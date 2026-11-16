@@ -310,8 +310,8 @@ int main()
     COLOR clr;
     int frame=0;
 
-    memcpy(vid_mem, gba_picBitmap, gba_picBitmapLen);
-    memcpy(pal_bg_mem, gba_picPal, gba_picPalLen);
+    memcpy32(vid_mem, gba_picBitmap, gba_picBitmapLen / sizeof(u32));
+    memcpy16(pal_bg_mem, gba_picPal, gba_picPalLen / sizeof(u16));
 
     REG_DISPCNT= DCNT_MODE4 | DCNT_BG2;
 

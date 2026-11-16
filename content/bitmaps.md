@@ -419,11 +419,11 @@ The code is relatively straightforward. `vid_page` is the pointer that always po
 
 What follows is the code (sans data) for the *pageflip* demo. The actual part concerned with page flipping is very small. In fact, the actual flip is merely a call to `vid_flip()` once every 60 frames = 1 second (point 3). We'll also have to set the video mode to something that actually has pages to flip, which in this case is mode 4.
 
-What we'll have to do as well is load the data that will be displayed on these two pages. I'm using the standard C routine `memcpy()` for the copy, because that's the standard way of copying things in C. While it's faster than manual loops, it does come with a [few snares](#ssec-data-memcpy) that you need to be aware of before using it everywhere. Tonclib comes with faster and safer routines, but we'll get to those when it's time.
+What we'll have to do as well is load the data that will be displayed on these two pages. I'm using tonclib's `memcpy32()` for the copy. You may be tempted to use the standard C routine `memcpy()` instead, but it [isn't safe for VRAM](#ssec-data-memcpy).
 
 Loading a bitmap is very simple in theory, but the bitmap(s) I'm using are only 144×16 in size, while the VRAM page's pitch is 240 pixels wide. This means that we'll have to copy each scanline separately, which is done at point (1). Note that I'm copying `frontBitmap` to `vid_mem_front` and `backBitmap` to `vid_mem_back`, because those are the starting locations of the two pages.
 
-Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `frontPal`, but instead of using `memcpy()` to copy it to the background palette memory, I'm using a `u32` array because … well, just because I guess.
+Since these are mode 4 bitmaps, they'll also need a palette. Both palettes use `frontPal`, but instead of using `memcpy16()` to copy it to the background palette memory, I'm using a `u32` array because … well, just because I guess.
 
 Lastly, you can pause and unpause the demo by holding the Start Button.
 
@@ -442,11 +442,11 @@ void load_gfx()
     // I'll have to load them one scanlline at a time
     for(ii=0; ii<16; ii++)
     {
-        memcpy(&vid_mem_front[ii*120], &frontBitmap[ii*144/4], 144);
-        memcpy(&vid_mem_back[ii*120], &backBitmap[ii*144/4], 144);
+        memcpy32(&vid_mem_front[ii*120], &frontBitmap[ii*144/4], 144/4);
+        memcpy32(&vid_mem_back[ii*120], &backBitmap[ii*144/4], 144/4);
     }
 
-    // (2) You don't have to do everything with memcpy.
+    // (2) You don't have to do everything with memcpy32.
     // In fact, for small blocks it might be better if you didn't.
     // Just mind your types, though. No sense in copying from a 32-bit 
     // array to a 16-bit one.
@@ -952,16 +952,16 @@ The rules for `struct` alignment have changed since devkitARM r19. Instead of be
 
 There are many different ways of copying data on this platform. Arrays, `struct` copies, standard copiers like `memcpy()`, and GBA specific routines like `CpuFastSet()` and DMA. All of these have their own strengths and weaknesses. All of them can be affected by misalignment and the no-byte-write rule. I discuss some of them in the [txt_se2](text.html#ssec-demo-se2) demo.
 
-I've chosen to use `memcpy()` in the early demos for a number of reasons. The main one is that it is part of the standard C library, meaning that C programmers should already be familiar with it. Secondly, it is somewhat optimized (see the txt_se2 demo for details). However, there are two potential pitfalls with the routine. The first is data alignment (yes, *that* again). If *either* the source *or* the destination is not word-aligned, you're in trouble. Secondly, if the number of bytes is too small, you're in trouble too.
-
-Both of these have to do with the basic function of `memcpy()`, namely to be a fast *byte* copier. But as you know, you can't copy single bytes to VRAM directly. Fortunately, it has an optimised mode that uses an unrolled word-copy loop if two conditions are satisfied:
+You might expect to use `memcpy()` for copying to VRAM. It is part of the standard C library, so C programmers should already be familiar with it, and it is somewhat optimized (see the txt_se2 demo for details). However, it is **not** safe for VRAM. At heart, `memcpy()` is a fast *byte* copier, and as you know, you can't copy single bytes to VRAM directly. It does have an optimised mode that uses an unrolled word-copy loop, but only if two conditions are satisfied:
 
 1.  When both source and destinations are word aligned.
 2.  When you are copying more than 16 bytes.
 
-This is usually the case so I figured it'd be safe enough for the demos. There are also look-alikes in libtonc that do the same thing only better, namely `memcpy16()` and `memcpy32()`, but these are in assembly so I thought I wouldn't lay them on you so soon. Highly recommended for later though.
+Even then, nothing guarantees it: `memcpy()` is allowed to copy in 8-bit units, and a different version of the C library may well do so. Code that copies to VRAM with `memcpy()` can seem to work for a long time, then break on a misaligned array or a small copy.
 
-On a related subject, there is also `memset()` for memory fills. Be careful with that one, because that will *only* work with bytes. Tonclib also includes 16- and 32-bit versions of this routine, but also in assembly.
+That's why the demos use tonclib's `memcpy16()` and `memcpy32()` instead. These always copy in halfwords and words, respectively, and are written in assembly for speed. Note that their size argument is the number of halfwords or words to copy, not bytes, which is why the byte sizes of the data are divided by `sizeof(u16)` or `sizeof(u32)`. `memcpy32()` also needs both source and destination to be word aligned.
+
+On a related subject, there is also `memset()` for memory fills. Be careful with that one, because that will *only* work with bytes. Tonclib also includes 16- and 32-bit versions of this routine: `memset16()` and `memset32()`.
 
 The last thing I want to discuss is the `sizeof()` operator. In other tutorials you will see this being used to find the size in bytes of arrays, which is then used in `memcpy()`. It's a good procedure but will not always work. First, `sizeof()` actually gives the size of the *variable*, which need not always be the array itself. For example, if you use it on a pointer to the array, it'll give the size of the pointer and *not* of the array. The compiler never complains, but you might when hardly anything is copied. Secondly, `sizeof()` is an *operator*, not a function. It is resolved at compile-time, so it needs to be able to find the size at that time as well. To do this, either the declaration (in the header) should indicate the size, or the array definition (in the source file) should be visible.
 
@@ -991,8 +991,8 @@ int main()
 
     // Copy the data and palette to the right
     // addresses
-    memcpy(vid_mem, modesBitmap, modesBitmapLen);
-    memcpy(pal_bg_mem, modesPal, modesPalLen);
+    memcpy32(vid_mem, modesBitmap, modesBitmapLen / sizeof(u32));
+    memcpy16(pal_bg_mem, modesPal, modesPalLen / sizeof(u16));
 
     while(1)
     {
