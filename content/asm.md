@@ -22,11 +22,25 @@ With that information, you should be able to do a lot of stuff, or at least know
 
 - The rather large official ARM7TDMI Technical manual: [DDI0210B.pdf](https://documentation-service.arm.com/static/5f4786a179ff4c392c0ff819?token=).
 - GBATEK's ARM CPU reference: [ARM + Thumb](https://problemkaputt.de/gbatek.htm#armcpureference).
-- Official ARM quick-references (PDF): [ARM + Thumb](https://documentation-service.arm.com/static/5ed66080ca06a95ce53f932d?token=)
+- Official ARM quick-references (PDF): [ARM + Thumb](https://documentation-service.arm.com/static/5ed66080ca06a95ce53f932d?token=). (note: uses [UAL syntax](#ual-note))
 - Re-eject's quick-references (PDF): [GAS](http://www.coranac.com/files/gba/re-ejected-gasref.pdf) / [ARM](http://www.coranac.com/files/gba/re-ejected-armref.pdf) / [Thumb](http://www.coranac.com/files/gba/re-ejected-thumbref2.pdf). (note: minor syntax discrepancies at times)
 - GNU Assembler manual: [GAS](http://sourceware.org/binutils/docs/as/index.html).
 
 If you want more ARM/Thumb guides, you'll have to find them yourself.
+
+<div id="ual-note"></div>
+
+:::note Divided and unified assembly syntax
+
+ARM assembly comes in two dialects. This chapter uses the older *divided* syntax, which has separate rules for ARM and Thumb code. Newer documents, including ARM's own quick reference, use the <dfn>Unified Assembler Language</dfn> (UAL), which has one syntax for both. Most GBA assembly you'll find is written in divided syntax, but compilers and disassemblers produce UAL, so it helps to recognize both. The main differences are:
+
+- **Condition and size suffixes swap places.** Divided syntax puts the condition first (`ldrneb`), UAL puts it last (`ldrbne`).
+- **Flag-setting Thumb instructions need an `s`.** In divided Thumb code, `mov r0, #1` and `add r0, r1` set the status flags implicitly. In UAL you have to write `movs r0, #1` and `adds r0, r0, r1`.
+- **Some instructions have new names.** `swi` is called `svc` in UAL, and disassemblers show `stmfd sp!, {…}` and `ldmfd sp!, {…}` as `push` and `pop`.
+
+GAS uses divided syntax by default. Putting `.syntax unified` at the top of a file switches it to UAL. Nowadays GCC puts that line at the top of the assembly it generates with `-S` as well, so its output will look slightly different from the examples in this chapter.
+
+:::
 
 ## General assembly {#sec-asm}
 
