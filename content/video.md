@@ -10,9 +10,11 @@ Whereas sound and joypad functionality have to make do with only a few measly re
 
 ## Draw and blank periods {#sec-blanks}
 
-As said, the entire GBA screen is refreshed every 60th of a second, but there's more to it than that. After a scanline has been drawn (the HDraw period, 240 pixels), there is a pause (HBlank, 68 pixels) before it starts drawing the next scanline. Likewise, after the 160 scanlines (VDraw) is a 68 scanline blank (VBlank) before it starts over again. To avoid tearing, positional data is usually updated at the VBlank. This is why most games run at 60 or 30 fps. (FYI, syncing at the VBlank is also why we in PAL countries often had slower games: PAL TVs run (ran) at 50Hz, hence only 50 fps instead of 60, hence a 17% slower game if nobody bothered to account for it. Few companies ever did <kbd>:(</kbd> ).
+As said, the entire GBA screen is refreshed every 60th of a second, but there's more to it than that. The hardware component responsible for pushing pixels to the screen is known as the Picture Processing Unit (PPU). After a scanline has been drawn (the HDraw period, 240 pixels), there is a pause (HBlank, 68 pixels) before it starts drawing the next scanline. Likewise, after the 160 scanlines (VDraw) is a 68 scanline blank (VBlank) before it starts over again.
 
-Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#Graphics%20Hardware%20Overview) and [GBATEK](https://problemkaputt.de/gbatek.htm#lcddimensionsandtimings) give you some interesting details about the timings of the display. A full screen refresh takes exactly 280896 cycles, divided by the clock speed gives a framerate of 59.73. From the Draw/Blank periods given above you can see that there are 4 cycles per pixel, and 1232 cycles per scanline. You can find a summary of timing details in table 4.1.
+It's important to note that the PPU and CPU operate in parallel, which means if your code performs any graphical updates during VDraw you can end up with [tearing artifacts](https://en.wikipedia.org/wiki/Screen_tearing). To avoid this, data such as sprite and BG positions are usually updated at the VBlank. This is why most games run at 60 or 30 fps. (FYI, syncing at the VBlank is also why we in PAL countries often had slower games: PAL TVs run (ran) at 50Hz, hence only 50 fps instead of 60, hence a 17% slower game if nobody bothered to account for it. Few companies ever did <kbd>:(</kbd> ).
+
+Both the [CowBite Spec](http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm#Graphics%20Hardware%20Overview) and [GBATEK](https://problemkaputt.de/gbatek.htm#lcddimensionsandtimings) give you some interesting details about the PPU timings. A full screen refresh takes exactly 280896 CPU cycles, divided by the clock speed gives a framerate of 59.73. From the Draw/Blank periods given above you can see that there are 4 cycles per pixel, and 1232 cycles per scanline. You can find a summary of timing details in table 4.1.
 
 <br>  
 
@@ -135,7 +137,8 @@ The REG_DISPCNT register is the primary control of the screen. The bit-layout of
 <tr class="bg1">
   <td>5</td>   <td class="rclr5">HB</td>
   <td>DCNT_OAM_HBL</td>
-  <td>Allows access to OAM in an HBlank. OAM is normally locked in VDraw.
+  <td>HBlank interval free. Stops the PPU from accessing OAM and object
+    VRAM during HBlank, so the CPU can access them then without delays.
     Will reduce the amount of sprite pixels rendered per line.</td></tr>
 <tr class="bg0">
   <td>6</td>   <td class="rclr2">OM</td>
