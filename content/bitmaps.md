@@ -406,14 +406,16 @@ The second page of the GBA is located at location `0600:A000h`. If you look at t
 u16 *vid_flip()
 {
     // toggle the write_buffer's page
-    vid_page= (u16*)((u32)vid_page ^ VID_FLIP);
+    vid_page= (u16*)((u32)vid_page ^ VRAM_PAGE_SIZE);
     REG_DISPCNT ^= DCNT_PAGE;            // update control register
     return vid_page;
 }
 ```
 </div>
 
-The code is relatively straightforward. `vid_page` is the pointer that always points to the write-page. I had to pull a little casting trickery to get the `XOR` to work (C doesn't like it when you try it on pointers). On the GBA, the steps for page flipping are perfectly xorrable operations. Sure, you *could* just put the equivalent in an `if-else` block, but where's the fun in that :P?
+The code is relatively straightforward. `vid_page` is the pointer that always points to the write-page, which is the page that is *not* being displayed. Tonclib declares it and starts it at the back page, `vid_mem_back`, because the front page is the one displayed at first.
+
+On the GBA, the steps for page flipping are perfectly xorrable operations. The two pages are `VRAM_PAGE_SIZE` (`A000h`) bytes apart, and the address of the front page (`0600:0000h`) has none of those bits set. So XORing the page address with `VRAM_PAGE_SIZE` adds the offset if it isn't there and removes it if it is. I had to pull a little casting trickery to get the `XOR` to work (C doesn't like it when you try it on pointers). The register works the same way: XORing `REG_DISPCNT` with `DCNT_PAGE` toggles the page bit and leaves all the other bits alone. Sure, you *could* just put the equivalent in an `if-else` block, but where's the fun in that :P?
 
 ### Page flipping demo {#ssec-page-demo}
 
