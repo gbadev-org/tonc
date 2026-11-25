@@ -88,7 +88,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>System ROM</th>
         <td><code>0000:0000</code></td>
         <td><code>0000:03FF</code></td>
-        <td>16 KB</td>
+        <td>16 KiB</td>
         <td>32 bit</td>
         <td>Bios memory. You can execute it, but not read it (i.o.w, touch, don't look)</td>
       </tr>
@@ -96,7 +96,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>EWRAM</th>
         <td><code>0200:0000h</code></td>
         <td><code>0203:FFFFh</code></td>
-        <td>256 KB</td>
+        <td>256 KiB</td>
         <td>16 bit</td>
         <td>External work RAM. Is available for your code and data. If you're using a multiboot cable, this is where the downloaded code goes and execution starts (normally execution starts at ROM). Due to the 16-bit port, you want this section's code to be Thumb code.</td>
       </tr>
@@ -104,7 +104,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>IWRAM</th>
         <td><code>0300:0000h</code></td>
         <td><code>0300:7FFFh</code></td>
-        <td>32 KB</td>
+        <td>32 KiB</td>
         <td>32 bit</td>
         <td>This is also available for code and data. The 32-bit bus and the fact it's embedded in the CPU make this the fastest memory section. The 32-bit bus means that ARM instructions can be loaded at once, so put your ARM code here.</td>
       </tr>
@@ -112,7 +112,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>IO RAM</th>
         <td><code>0400:0000h</code></td>
         <td><code>0400:03FFh</code></td>
-        <td>1 KB</td>
+        <td>1 KiB</td>
         <td>32 bit</td>
         <td>Memory-mapped IO registers. These have nothing to do with the CPU registers you use in assembly so the name can be a bit confusing. Don't blame me for that. This section is where you control graphics, sound, buttons and other features.</td>
       </tr>
@@ -120,7 +120,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>PAL RAM</th>
         <td><code>0500:0000h</code></td>
         <td><code>0500:03FFh</code></td>
-        <td>1 KB</td>
+        <td>1 KiB</td>
         <td>16 bit</td>
         <td>Memory for two palettes contaning 256 entries of 15-bit colors each. The first is for backgrounds, the second for sprites.</td>
       </tr>
@@ -128,7 +128,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>VRAM</th>
         <td><code>0600:0000h</code></td>
         <td><code>0601:7FFFh</code></td>
-        <td>96 KB</td>
+        <td>96 KiB</td>
         <td>16 bit</td>
         <td>Video RAM. This is where the data used for backgrounds and sprites are stored. The interpretation of this data depends on a number of things, including video mode and background and sprite settings.</td>
       </tr>
@@ -136,7 +136,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <th>OAM</th>
         <td><code>0700:0000h</code></td>
         <td><code>0700:03FFh</code></td>
-        <td>1 KB</td>
+        <td>1 KiB</td>
         <td>32 bit</td>
         <td>Object Attribute Memory. This is where you control the sprites.</td>
       </tr>
@@ -154,7 +154,7 @@ This section lists the various memory areas. It's basically a summary of the [GB
         <td>var</td>
         <td>var</td>
         <td>8 bit</td>
-        <td>This is where saved data is stored. Cart RAM can be in the form of SRAM, Flash ROM or EEPROM. Programatically they all do the same thing: store data. The total size is variable, but 64 KB is a good indication.</td>
+        <td>This is where saved data is stored. Cart RAM can be in the form of SRAM, Flash ROM or EEPROM. Programatically they all do the same thing: store data. The total size is variable, but 64 KiB is a good indication.</td>
       </tr>
     </tbody>
   </table>
