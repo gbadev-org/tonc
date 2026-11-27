@@ -164,7 +164,7 @@ void dma_copy(int ch, void* src, void* dest, uint count, u32 mode)
 }
 ```
 
-This will work, but it's not a nice way of doing things. If your switch-cases differ by a single number, you can usually replace it by a simpe lookup. There are a number of ways of fixing this, but the easiest is by mapping a struct array over the DMA registers, similar to what I did for tile memory. After that, you can just select the channel with the channel variable and simply fill in the addresses and flags.
+This will work, but it's not a nice way of doing things. If your switch-cases differ by a single number, you can usually replace it with a simple lookup. There are a number of ways of fixing this, but the easiest is by mapping a struct array over the DMA registers, similar to what I did for tile memory. After that, you can just select the channel with the channel variable and simply fill in the addresses and flags.
 
 ```c
 typedef struct DMA_REC
